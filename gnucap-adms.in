@@ -1,0 +1,54 @@
+#!/bin/bash
+
+usage="type $0 some.va to generate some.cc and some.h. \n
+\n
+to get a shared object type \n
+make some.o CXXFLAGS=\"--shared\ -fPIC\" CPPFLAGS=$(gnucap-conf --cppflags)\ LDFLAGS=\ \n
+mv some.o some.so"
+
+function check_gnucap {
+	[ -z `which gnucap-conf` ] &&  echo "need gnucap-conf" && exit 1 
+}
+
+function check_adms {
+	[ -z `which admsXml` ] &&  echo "need admsXml" && exit 1 
+}
+
+check_gnucap
+
+prefix=@prefix@
+adms_dbg_xml=no
+compile=no
+quiet=no
+verbose=no
+
+for arg in $*; do
+	case $arg in
+		*.va)
+			check_adms
+			admsXml -I@includedir@/@PACKAGE@ -e@datarootdir@/gnucap-adms/gnucap_{0,1,2}.xml $arg -o ${arg%.va}
+			if [ $compile = yes ]; then
+				cmd="@CXX@ -I@includedir@/@PACKAGE@ $(gnucap-conf --cppflags) -shared -fPIC ${arg%.va}.cc -o ${arg%.va}.so"
+				[ $quiet = no ] && echo compiling ${arg%.va}.so
+				[ $verbose = no ] || echo $cmd
+				$cmd
+			fi
+			;;
+		--compile|-c)
+			compile=yes
+			;;
+		--verbose|-v)
+			verbose=yes
+			;;
+		--quiet|-q)
+			quiet=yes
+			;;
+		--debug|-d)
+			adms_dbg_xml=yes
+			;;
+		--help|*)
+			echo -e $usage
+			;;
+	esac
+done
+
