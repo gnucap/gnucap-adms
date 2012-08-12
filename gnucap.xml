@@ -869,7 +869,9 @@ $(DEV_NAME)::$(DEV_NAME)()
    _model(NULL),
    _nodes(),
 	_states_q1(NULL)
- //  _states_1(NULL)
+<admst:for-each select="instance">,
+    _%(name)(0)
+</admst:for-each>
 {
 	std::fill_n(m_entries, %(count(jacobian)), 0);
 	std::fill_n(m_entries_old, %(count(jacobian)), 0);
@@ -894,6 +896,9 @@ $(DEV_NAME)::$(DEV_NAME)(const $(DEV_NAME)&amp; p)
 	_model(p._model),
 	_nodes(),
 	_states_q1(NULL)
+<admst:for-each select="instance">,
+    _%(name)(0)
+</admst:for-each>
 //   _states_1(NULL)
    /// _num_ddts(p._num_ddts), static...
    /// _num_states(p._num_states) static...
