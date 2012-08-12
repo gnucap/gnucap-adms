@@ -21,14 +21,20 @@ adms_dbg_xml=no
 compile=no
 quiet=no
 verbose=no
+gnucap_libdir=$(gnucap-conf --libdir)
 
 for arg in $*; do
 	case $arg in
 		*.va)
 			check_adms
-			admsXml -I@includedir@/@PACKAGE@ -e@datarootdir@/gnucap-adms/gnucap_{0,1,2}.xml $arg -o ${arg%.va}
+			cmd="admsXml -I@includedir@/@PACKAGE@ -e@datarootdir@/gnucap-adms/gnucap_{0,1,2}.xml \
+			   $arg -o ${arg%.va}"
+			[ $verbose = no ] || echo $cmd
+			$cmd
+
 			if [ $compile = yes ]; then
-				cmd="@CXX@ -I@includedir@/@PACKAGE@ $(gnucap-conf --cppflags) -shared -fPIC ${arg%.va}.cc -o ${arg%.va}.so"
+				cmd="@CXX@ -I@includedir@/@PACKAGE@ $(gnucap-conf --cppflags) -shared -fPIC \
+				    ${arg%.va}.cc $gnucap_libdir/e_adms.so -o ${arg%.va}.so"
 				[ $quiet = no ] && echo compiling ${arg%.va}.so
 				[ $verbose = no ] || echo $cmd
 				$cmd
