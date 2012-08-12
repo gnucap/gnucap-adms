@@ -1060,9 +1060,10 @@ void $(DEV_NAME)::expand()
 	</admst:join> };
 			_%(name)->set_parameters("%(name)", this, NULL, 0/*value*/, 0, NULL, %(count(terminal)), nodes);
 
+			PARAMETER&lt;double&gt;tmp; USE(tmp);
   <admst:for-each select="parameterset">
-			_%(../name)-&gt;set_param_by_name(&quot;%(parameter)&quot;,
-			<admst:apply-templates select="value/tree" match="e0"/>);
+			tmp = <admst:apply-templates select="value/tree" match="e0"/>;
+			_%(../name)-&gt;set_param_by_name(&quot;%(parameter)&quot;, tmp.string());
   </admst:for-each>
 		}
 </admst:for-each>
