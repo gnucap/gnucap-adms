@@ -1330,7 +1330,10 @@ void $(DEV_NAME)::tr_advance()
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::tr_regress()
 {
-  ADMS_BASE::tr_regress();
+	ADMS_BASE::tr_regress();
+  <admst:if test="[$has_sckt!=0]">
+	assert(subckt()); subckt()->tr_regress();
+  </admst:if>
 }
 // -------------------------------------------------------------------------- //
 bool $(DEV_NAME)::tr_needs_eval()const
