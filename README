@@ -1,3 +1,56 @@
+gnucap-adms package
+Copyright: 2012 Felix Salfelder <felix@salfelder.org>
+License: GPL3+
+
+This package helps compiling verilog-a models to gnucap devices.
+
+synopsis:
+    gnucap-adms [options] file.va
+    
+    generates c++ code distributed over file.cc file.h file_top.hxx ...
+    containing a gnucap device
+ 
+-v  verbose output
+-c  compile shared object (file.so)
+-t  compile with -DDO_TRACE
+-g  compile with -g
+-o  compile optimized and NDEBUG
+-d  debug admsXml
+
+installation prerequisites:
+ - patched admsXml 2.3.0, available at
+   git://tool.em.cs.uni-frankfurt.de/git/adms
+ - gnucap-uf or gnucap 0.36+dev, available at
+   git://tool.em.cs.uni-frankfurt.de/git/gnucap
+   or (debian package)
+   git://tool.em.cs.uni-frankfurt.de/git/gnucap_deb
+
+configuration:
+ --enable-local install plugins to $HOME/.gnucap/lib (in case you have no write
+                access to gnucap_libdir)
+                you then will have to invoke gnucap like
+                LD_LIBRARY_PATH=$HOME/.gnucap/lib
+                in order to load the plugins
+
+features:
+ - simple user interface
+ - works with gnucap and gnucap-uf
+ - sparse matrix allocation
+ - initial conditions (experimental)
+ - temperature discipline (experimental)
+ - subdevices (incomplete, but works)
+ - under active development
+
+bugs:
+ - should use Makefile for translate/compile rules
+ - only "I" etc. on left hand side supported
+ - ... lots. lets fix the serious ones first
+
+remarks:
+ - some details don't work with gnucap 0.36, cf. examples
+
+TODO: cleanup
+=== notes from old implementation ===
 This adms-script generate (analog) gnucap-models from verilog
 
 To use:
