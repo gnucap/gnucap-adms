@@ -215,31 +215,31 @@ inline void _used(double)  {}
 
 class $(DEV_NAME);
 class $(MODEL_NAME) : public MODEL_CARD {
-  private:
-    static map&lt;string, PARA_BASE $(MODEL_NAME)::*&gt; param_dict;
-protected:
-	explicit $(MODEL_NAME)(const $(MODEL_NAME)&amp; p);	// for clone
-public:
-	explicit $(MODEL_NAME)(const $(DEV_NAME)* p);	// for dispatcher
-~$(MODEL_NAME)();
-public: // override virtual
-	MODEL_CARD* clone()const {return new $(MODEL_NAME)(*this);}
+	private:
+		static map&lt;string, PARA_BASE $(MODEL_NAME)::*&gt; param_dict;
+	protected:
+		explicit $(MODEL_NAME)(const $(MODEL_NAME)&amp; p);	// for clone
+	public:
+		explicit $(MODEL_NAME)(const $(DEV_NAME)* p);	// for dispatcher
+		~$(MODEL_NAME)();
+	public: // override virtual
+		MODEL_CARD* clone()const {return new $(MODEL_NAME)(*this);}
 
-	void precalc_first();
+		void precalc_first();
 
-public: // type
-	void set_dev_type(const std::string&amp; nt);
-	std::string dev_type()const	{ return _key;}
+	public: // type
+		void set_dev_type(const std::string&amp; nt);
+		std::string dev_type()const	{ return _key;}
 
-public: // parameters
-	int param_count() const;
-	bool param_is_printable(int i) const;
-	std::string param_name(int i) const;
-	std::string param_name(int i, int j)const;
-	std::string param_value(int i) const;
-	void set_param_by_index(int, std::string&amp;, int);
-	void set_param_by_name(std::string Name, std::string Value);
-	bool IsParamGiven(const char *name) const;
+	public: // parameters
+		int param_count() const;
+		bool param_is_printable(int i) const;
+		std::string param_name(int i) const;
+		std::string param_name(int i, int j)const;
+		std::string param_value(int i) const;
+		void set_param_by_index(int, std::string&amp;, int);
+		void set_param_by_name(std::string Name, std::string Value);
+		bool IsParamGiven(const char *name) const;
 
 	public:	// verilog - parameters
 
