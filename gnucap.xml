@@ -591,7 +591,10 @@ inline voltage_t _BP(ENode p, ENode n) { return volts_limited(_n[p],_n[n]);}
 		trace2(&quot;$(DEV_NAME)::_DDT&quot;, uic_now(stateno), _sim-&gt;uic_now());
 		if(uic_now(stateno)){
 			_states[0][qcap] = qq;
+#ifdef HAVE_KEEPCOEFF
 			return ( qq + _states[1][stateno*2] ) * OPT::keepcoeff;
+#endif
+			incomplete(); // this won't work
 		}
 </admst:if>
 		_states[0][stateno*2] = qq;
@@ -1583,9 +1586,11 @@ bool $(DEV_NAME)::do_tr()
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::keep_ic()
 {
+#ifdef HAVE_KEEPCOEFF
   <admst:if test="[$has_sckt!=0]">
 	subckt()-&gt;keep_ic();
   </admst:if>
+#endif
 
 	//double x =  dn_diff(_n[OUT1].v0(),_n[OUT2].v0() );
 	$(COMMON_NAME)* c = prechecked_cast&lt; $(COMMON_NAME)*&gt;(mutable_common());
@@ -1770,7 +1775,9 @@ void $(DEV_NAME)::tr_accept()
 	if(_sim-&gt;uic_now()){
 		std::fill_n(it0, (int)_num_total_nodes, 0);
 #define NOJAC
-#define _DDT( qq, stateno) (( _states[0][stateno*2] - _states[1][stateno*2] ) * OPT::keepcoeff)
+#ifdef HAVE_KEEPCOEFF
+# define _DDT( qq, stateno) (( _states[0][stateno*2] - _states[1][stateno*2] ) * OPT::keepcoeff)
+#endif
 #		include &quot;$(filename)_tr.hxx&quot;
 #undef NOJAC
 #undef _DDT
@@ -2074,7 +2081,9 @@ void $(DEV_NAME)::tr_eval()
 	double keep_%(adms/id(.))=1;
 	if(uic_now(_ddt_%(adms/id(.)))){
 		trace1(&quot; $(DEV_NAME)::tr_eval keeping &quot;, c-&gt;ic_state_%(adms/id(.)));
+#ifdef HAVE_KEEPCOEFF
 		keep_%(adms/id(.)) = OPT::keepcoeff;
+#endif
 	} else {
 		trace3(&quot; $(DEV_NAME)::tr_eval not keeping &quot;, c-&gt;ic_state_%(adms/id(.)),
 		    _sim-&gt;uic_now(), uic_now(_ddt_%(adms/id(.))) );
@@ -8066,13 +8075,16 @@ and name!='initializeInstance')]">
 		double etr = eac * CKTag0;
 		double ceq;
 
+#ifdef HAVE_KEEPCOEFF
 		if(uic_now( _ddt_$pddt ) /* HACK. argh.*/){
 			ceq = eac * BR($Pp, $Pn);
 
 			keep_$pddt=1;	
 			eac = $ep;
 			etr = - eac * OPT::keepcoeff;
-		} else {
+		} else
+#endif
+		{
 			ceq = etr * BR($Pp, $Pn);
 		}
 
