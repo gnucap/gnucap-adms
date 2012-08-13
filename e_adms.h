@@ -25,6 +25,7 @@
 #include "l_denoise.h"
 #include "e_subckt.h"
 /*--------------------------------------------------------------------------*/
+// gnucap-uf transition
 #ifndef USE
 # define USE(x)
 #endif
@@ -36,6 +37,9 @@ typedef double voltage_t;
 typedef double current_t;
 typedef double charge_t;
 typedef double conductance_t;
+#endif
+#ifndef HAVE_METHOD
+enum METHOD {mTRAPGEAR, mEULER, mTRAP, mGEAR, mTRAPEULER};
 #endif
 /*--------------------------------------------------------------------------*/
 /*--------------------------------------------------------------------------*/
@@ -212,7 +216,7 @@ inline void ADMS_BASE::tr_load_source_point(node_t& no1,
 inline void ADMS_BASE::ac_load_source_point(node_t& no1, COMPLEX new_value)
 {itested();
 	if (no1.m_() != 0) {itested();
-		no1.iac() += mfactor() * new_value;
+		no1->iac() += mfactor() * new_value;
 	}else{itested();
 	}
 }
