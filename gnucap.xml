@@ -813,6 +813,7 @@ map&lt;string, PARA_BASE $(MODEL_NAME)::*&gt; $(MODEL_NAME)::param_dict
 // -------------------------------------------------------------------------- //
 void $(MODEL_NAME)::set_param_by_name(string Name, string Value)
 {
+#ifdef HAVE_PARA_BASE
 	PARA_BASE $(MODEL_NAME)::* x = (param_dict[Name]);
 	if(x) {
 		PARA_BASE* p = &(this->*x);
@@ -820,6 +821,10 @@ void $(MODEL_NAME)::set_param_by_name(string Name, string Value)
 		return;
 	}
 	throw Exception_No_Match(Name);
+#else
+	// fall back to linear search
+	MODEL_CARD::set_param_by_name(Name,Value);
+#endif
 }
 // -------------------------------------------------------------------------- //
 bool $(MODEL_NAME)::IsParamGiven(const char* ) const
