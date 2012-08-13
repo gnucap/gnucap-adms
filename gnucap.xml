@@ -1417,11 +1417,6 @@ bool $(DEV_NAME)::do_tr()
 		tr_eval(); // if needed??
 		q_load();
 
-	} else if(_sim-&gt;more_uic_now() &amp;&amp; is_constant() ) {
-		assert(_time[0] == 0.);
-
-		tr_eval_kept();
-
 	} else {
 		if (_sim-&gt;analysis_is_tran_static()) 		mode = MODETRANOP;
 		else if (_sim-&gt;analysis_is_tran_restore()) 	mode = MODETRAN;
