@@ -63,12 +63,12 @@ class ADMS_BASE : public COMPONENT {
 
 		virtual void	   store_values()=0;
 		//void   reject_values()		{ _y0 = _y1;}
-	public:
-
+	public: // type
 		bool	   skip_dev_type(CS&);
-
-	public: 
+		string dev_type()const {return common()->modelname();}
+		void set_dev_type(const std::string& nt) {unreachable();}
 		virtual bool	   print_type_in_spice()const {return false;}
+	public: 
 		virtual void	   precalc_last();
 		virtual void	   tr_begin();
 		virtual void	   tr_restore();

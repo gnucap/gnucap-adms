@@ -431,10 +431,6 @@ class $(DEV_NAME) : public ADMS_BASE
 			return port_names[i];
 		}
 
-	public: // type
-		void set_dev_type(const std::string&amp; nt);
-		std::string dev_type()const	{return _modelname;}
-
 	private: // parameters
 		void set_param_by_name(std::string Name, std::string Value);
 
