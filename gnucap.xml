@@ -258,9 +258,6 @@ class $(MODEL_NAME) : public MODEL_CARD {
 	public: // override virtual
 		MODEL_CARD* clone()const {return new $(MODEL_NAME)(*this);}
 	public:
-		void set_dev_type(const std::string&amp; nt);
-
-
 		void precalc_first();
 
 	public: // type
@@ -487,9 +484,9 @@ class $(DEV_NAME) : public ADMS_BASE
 	private: // analog functions from va
 	<admst:apply-templates select="/module" match="analogfunctionH"/>
 
-			n_GND=-1,
 	protected: // node stuff
 		enum ENode {
+			n_GND=-1,
   <admst:join select="node[discipline/name='electrical' and grounded='no']" separator=",">
     <admst:value-of select="name"/>  
     <admst:text format="\n\t\t\t$node_prefix%s=%(position(.)-1)"/>
