@@ -74,9 +74,9 @@
 <!-- noise -->
 <admst:value-to select="/simulator/package_name" value="fucap"/>
 <admst:value-to select="/simulator/package_tarname" value="fucap"/>
-<admst:value-to select="/simulator/package_version" value="0.0.0.1"/>
-<admst:value-to select="/simulator/package_string" value="fucap 0.0.0.1"/>
-<admst:value-to select="/simulator/package_bugreport" value="felix@em.cs"/>
+<admst:value-to select="/simulator/package_version" value="0.0.1"/>
+<admst:value-to select="/simulator/package_string" value="fucap 0.0.1"/>
+<admst:value-to select="/simulator/package_bugreport" value="felix@salfelder.org"/>
 <admst:for-each select="/module[extern='no']">
   <admst:variable name="has_sckt" select="%(count(instance))"/>
 
