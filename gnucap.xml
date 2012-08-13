@@ -356,12 +356,6 @@ public:
 	</admst:if>
 </admst:for-each>
 
-<admst:if test="[$(_num_states)!=0]">
-	private: // from storage
-		double tr_c_to_g(double c, double g)const;
-		bool uic_now(unsigned stateno=-1)const;
-
-</admst:if>
 class $(DEV_NAME) : public ADMS_BASE
 {
 	private:
@@ -657,7 +651,11 @@ inline voltage_t _BP(ENode p, ENode n) { return volts_limited(_n[p],_n[n]);}
 		<admst:for-each select="contribution[is_ic_contribution(.)/[name='x']/value='yes']">
 		// PARAMETER&lt;double&gt; ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode);
 		</admst:for-each>
-
+<admst:if test="[$(_num_states)!=0]">
+	private: // from storage
+		double tr_c_to_g(double c, double g)const;
+		bool uic_now(unsigned stateno=-1)const;
+</admst:if>
 }; // DEV
 // ------------------------------------------------------------------------ //
 // ------------------------------------------------------------------------ //
