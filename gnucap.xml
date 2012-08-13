@@ -861,7 +861,6 @@ std::string $(MODEL_NAME)::param_name(int i, int j)const
 	return(&quot;&quot;);
 }
 // -------------------------------------------------------------------------- //
-#if 0 //?
 std::string $(MODEL_NAME)::param_value(int i) const
 {
 	switch(i)
@@ -873,7 +872,6 @@ std::string $(MODEL_NAME)::param_value(int i) const
 	}
 	return(&quot;&quot;);
 }
-#endif
 // -------------------------------------------------------------------------- //
 void $(MODEL_NAME)::set_param_by_index(int i, std::string&amp; value, int offset)
 {
