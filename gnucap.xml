@@ -360,7 +360,6 @@ class $(DEV_NAME) : public ADMS_BASE
 {
 	private:
 		std::string _modelname;
-		const $(MODEL_NAME)* _model;
 		node_t _nodes[ %(count(node[grounded='no'])) ];
 
 	private:
@@ -952,12 +951,8 @@ void $(MODEL_NAME)::precalc_first()
 // -------------------------------------------------------------------------- //
 void $(MODEL_NAME)::set_dev_type(const std::string&amp; new_type)
 {
-	std::string s = short_label();
-	char* p = new char[s.length()+1]; //BUG//memory leak
-	s.copy(p, std::string::npos);
-	p[s.length()] = '\\0';
+	trace1("$(MODEL_NAME)::set_dev_type", new_type);
 
-	trace0(&quot;$(MODEL_NAME)::set_dev_type overwriting dev_type&quot;);
 	_key = new_type;
 	if (OPT::case_insensitive)
 		notstd::to_lower(&amp;_key);
@@ -965,7 +960,6 @@ void $(MODEL_NAME)::set_dev_type(const std::string&amp; new_type)
 // ********************************* $(DEV_NAME) ********************************* //
 $(DEV_NAME)::$(DEV_NAME)()
   :ADMS_BASE(),
-   _modelname(&quot;&quot;),
    _nodes(),
 	_states_q1(NULL)
 <admst:for-each select="instance">,
@@ -983,16 +977,16 @@ $(DEV_NAME)::$(DEV_NAME)()
 	}
 
 
-        for (int ii=0; ii&lt;OPT::_keep_time_steps; ++ii){
-          // not here!
-          _states[ii] = NULL;
-        }
+	for (int ii=0; ii&lt;OPT::_keep_time_steps; ++ii){
+		// not here!
+		_states[ii] = NULL;
+	}
 }
 // -------------------------------------------------------------------------- //
-$(DEV_NAME)::$(DEV_NAME)(const $(DEV_NAME)&amp; p)
-  :ADMS_BASE(p),
-	_nodes(),
-	_states_q1(NULL)
+$(DEV_NAME)::$(DEV_NAME)(const $(DEV_NAME)&amp; p) :
+    ADMS_BASE(p),
+    _nodes(),
+    _states_q1(NULL)
 <admst:for-each select="instance">,
     _%(name)(0)
 </admst:for-each>
@@ -1064,18 +1058,19 @@ void $(DEV_NAME)::set_param_by_name(std::string Name, std::string value)
 // -------------------------------------------------------------------------- //
 void $(COMMON_NAME)::expand(const COMPONENT* d)
 {
-  trace2(&quot;$(DEV_NAME)::expand&quot;, _modelname,OPT::_keep_time_steps);
+	trace2(&quot;$(COMMON_NAME)::expand&quot;, modelname(), OPT::_keep_time_steps);
 
-  COMMON_COMPONENT::expand(d);
+	COMMON_COMPONENT::expand(d);
 	attach_model(d);
-  const $(MODEL_NAME)* m = dynamic_cast&lt;const $(MODEL_NAME)*&gt;(model());
-  if (!m) {
+	const $(MODEL_NAME)* m = dynamic_cast&lt;const $(MODEL_NAME)*&gt;(model());
+	if (!m) {
 		throw Exception_Model_Type_Mismatch(d-&gt;long_label(), modelname(), &quot;$(module)&quot;);
-  }
+	}
 }
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::expand()
 {
+	trace2("$(DEV_NAME)::expand()", long_label(), common()->modelname());
 	ADMS_BASE::expand();
 	
 	const $(COMMON_NAME)* c = static_cast&lt;const $(COMMON_NAME)*&gt;(common());
@@ -1083,14 +1078,6 @@ void $(DEV_NAME)::expand()
 	const $(MODEL_NAME)* m = prechecked_cast&lt;const $(MODEL_NAME)*&gt;(c-&gt;model());
 	USE(m);
 	trace2(&quot;$(DEV_NAME)::expand&quot;, c-&gt;modelname() ,OPT::_keep_time_steps);
-
-  // attach model?! FIXME
-  _model = dynamic_cast&lt;const $(MODEL_NAME)*&gt;(find_model(_modelname));
-  if (!_model)
-    throw Exception_Model_Type_Mismatch(long_label(), _modelname, DEVICE_TYPE);
-
-    // something like this.
-    // attach_model(_model);
 
 	if (!subckt()) {
 		new_subckt();
@@ -1198,7 +1185,6 @@ void $(DEV_NAME)::precalc_last()
   <admst:if test="[$has_sckt!=0]">
 	if(subckt()) subckt()-&gt;precalc_last();
   </admst:if>
-	assert(_model);
   <admst:for-each select="contribution[is_ic_contribution(.)/[name='x']/value='yes']">
 	ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode).e_val(0,scope());
   </admst:for-each>

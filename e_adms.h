@@ -65,8 +65,7 @@ class ADMS_BASE : public COMPONENT {
 		//void   reject_values()		{ _y0 = _y1;}
 	public: // type
 		bool	   skip_dev_type(CS&);
-		string dev_type()const {return common()->modelname();}
-		void set_dev_type(const std::string& nt) {unreachable();}
+		string dev_type()const {return common()->modelname();} // from BASE_SUBCKT
 		virtual bool	   print_type_in_spice()const {return false;}
 	public: 
 		virtual void	   precalc_last();
