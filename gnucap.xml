@@ -814,14 +814,12 @@ map&lt;string, PARA_BASE $(MODEL_NAME)::*&gt; $(MODEL_NAME)::param_dict
 void $(MODEL_NAME)::set_param_by_name(string Name, string Value)
 {
 	PARA_BASE $(MODEL_NAME)::* x = (param_dict[Name]);
-
-  if(x) {
-    PARA_BASE* p = &(this->*x);
-    *p = Value;
-    return;
-  }
-
-  throw Exception_No_Match(Name);
+	if(x) {
+		PARA_BASE* p = &(this->*x);
+		*p = Value;
+		return;
+	}
+	throw Exception_No_Match(Name);
 }
 // -------------------------------------------------------------------------- //
 bool $(MODEL_NAME)::IsParamGiven(const char* ) const
