@@ -10,10 +10,7 @@ V1 nin 0 pulse iv=1 pv=0 rise=200u
 
 load ./rc.so
 
-paramset myrc rc;
-	.c=3n;
-	.r=200k;
-endparamset
+paramset myrc rc; .c=3n; .r=200k; endparamset
 
 myrc rc1 (nin,nout1,0);
 spice
