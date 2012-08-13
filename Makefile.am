@@ -19,6 +19,8 @@ ADMS_ES=$(i:%=-e $(srcdir)/gnucap_%.xml)
 %.cc %_tr.hxx %_top.hxx %_ac.hxx: %.va $(ADMS_GC_XML)
 	admsXml $< $(ADMS_ES) -o $*
 
+.PPRECIOUS: %.cc %.h %.hxx
+
 clean:
 	rm -f *.cc *.h *.o *~ *.c gnucap.xml *.hxx *.so gnucap_*.xml
 
