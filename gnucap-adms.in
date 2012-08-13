@@ -21,20 +21,25 @@ adms_dbg_xml=no
 compile=no
 quiet=no
 verbose=no
-gnucap_libdir=$(gnucap-conf --libdir)
+gnucap_libdir=@gnucap_libdir@
+ES=$(echo "-e@datarootdir@/gnucap-adms/gnucap_"{0,1,2}.xml)
+RPATH=-Wl,-rpath,@libdir@
+trace=
+opt=0
+ndebug=
+gdb=
 
 for arg in $*; do
 	case $arg in
 		*.va)
 			check_adms
-			cmd="admsXml -I@includedir@/@PACKAGE@ -e@datarootdir@/gnucap-adms/gnucap_{0,1,2}.xml \
-			   $arg -o ${arg%.va}"
+			cmd="admsXml -I@includedir@/@PACKAGE@ $ES $arg -o ${arg%.va}"
 			[ $verbose = no ] || echo $cmd
 			$cmd
 
 			if [ $compile = yes ]; then
-				cmd="@CXX@ -I@includedir@/@PACKAGE@ $(gnucap-conf --cppflags) -shared -fPIC \
-				    ${arg%.va}.cc $gnucap_libdir/e_adms.so -o ${arg%.va}.so"
+				cmd="@CXX@ $ndebug $trace $gdb -O$opt -I@includedir@/@PACKAGE@ $(gnucap-conf --cppflags) -shared -fPIC \
+				    ${arg%.va}.cc -L@libdir@ -le_adms -o ${arg%.va}.so $RPATH"
 				[ $quiet = no ] && echo compiling ${arg%.va}.so
 				[ $verbose = no ] || echo $cmd
 				$cmd
@@ -45,6 +50,16 @@ for arg in $*; do
 			;;
 		--verbose|-v)
 			verbose=yes
+			;;
+		--trace|-t)
+			trace=-DDO_TRACE
+			;;
+		--gdb|-g)
+			gdb=-g
+			;;
+		--opt|-o)
+			ndebug=-DNDEBUG
+			opt=$(expr $opt + 1)
 			;;
 		--quiet|-q)
 			quiet=yes
