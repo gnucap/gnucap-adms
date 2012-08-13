@@ -61,6 +61,8 @@
 <admst:variable name="eq"/>
 <admst:variable name="epq"/>
 <admst:variable name="keep_ic" select="no"/>
+<admst:variable name="ddtp" select="1."/>
+<admst:variable name="pddt" select="-1"/>
 <admst:variable name="eval_kept" select="no"/>
 <admst:variable name="globalanalogfunction"/>
 
@@ -110,6 +112,10 @@
 <!-- list of pointers for all ic (initial conditions) -->
 <!-- bugs: a) already has empty or may be null element, so count(list)=1 -->
 <!--       b) admst:for-each on this list works, but gives many warnings -->
+<admst:new datatype="list" arguments="function">
+	<admst:variable name="ddt_ic_list" select="" />
+</admst:new>
+
 <!--          thats why this list used only to filter contributions list -->
 
 <admst:new datatype="list" arguments="contribution">
@@ -129,6 +135,20 @@
 
 <!-- to select all contributions in list use: -->
 <!-- <admst:for-each select="contribution[is_ic_contribution(.)/[name='x']/value='yes']"> -->
+
+<!-- ic probe names for ic ddt-->
+<admst:variable name="ddt_p"/>
+<admst:variable name="ddt_n"/>
+<admst:template match="ic_probe_names">
+  <admst:if test="[../datatypename='contribution']">
+    <admst:variable name="ddt_p" select="%(../lhs/branch/pnode)" />
+    <admst:variable name="ddt_n" select="%(../lhs/branch/nnode)" />
+  </admst:if>
+  <admst:if test="[./arguments[position(.)=1]/datatypename='probe']">
+    <admst:variable name="ddt_p" select="%(./arguments[position(.)=1]/branch/pnode)" />
+    <admst:variable name="ddt_n" select="%(./arguments[position(.)=1]/branch/nnode)" />
+  </admst:if>
+</admst:template>
 
 <!-- *********************************************************************************** -->
 <!-- *********************************** my utils ************************************** -->
@@ -200,7 +220,7 @@
 #define MAX_NET_NODES %(count(node[grounded='no' and location='external']))
 #define INTERNAL_NODES %(count(node[grounded='no' and location='internal']))
 
-
+ 
 <admst:text format="static std::string port_names[] = {"/>
 <admst:join select="node[grounded='no' and location='external']" separator=", ">
    	<admst:value-of select="name"/>
@@ -214,6 +234,15 @@
 inline void _used(double)  {}
 
 
+<admst:for-each select="assignment"> 
+  <admst:apply-templates select="rhs/tree" match="ddtcollect"/>
+</admst:for-each>
+<admst:for-each select="contribution"> 
+  <admst:apply-templates select="rhs/tree" match="ddtcollect"/>
+</admst:for-each>
+
+// counted ddts %(count($ddts))
+<admst:variable name="_num_states" select="%(count($ddts))"/>
 
 class $(DEV_NAME);
 class $(MODEL_NAME) : public MODEL_CARD {
@@ -284,6 +313,7 @@ public:
 	std::string _level;
 	PARAM_LIST  _params; // ???
 };
+<!-- fixme: use probe name macro... -->
 
 /* ========================================================= */
 <!-- create list for initial conditions, for now. only very specific patterns are supported -->
@@ -291,6 +321,7 @@ public:
 <admst:for-each select="contribution">
 	<!-- catch I(a,b) <+ ddt(V(a,b))  -->
 	<admst:if test="[./rhs/tree/datatypename='function']">
+					<admst:push into="$(ddt_ic_list)" select="./rhs/tree" onduplicate="ignore"/>
 		<admst:if test="[./rhs/tree/name='ddt']">
 			<admst:if test="[./rhs/tree/arguments[position(.)=1]/datatypename='probe']">
 				<admst:if test="[./rhs/tree/arguments[position(.)=1]/branch/pnode=./lhs/branch/pnode and ./rhs/tree/arguments[position(.)=1]/branch/nnode=./lhs/branch/nnode]">
@@ -313,6 +344,7 @@ public:
  select=./lhs/branch/pnode
 </admst:new>
 -->
+							<admst:push into="$(ddt_ic_list)" select="./rhs/tree/arg2" onduplicate="ignore"/>
 
 						<admst:if test="[./rhs/tree/arg2/arguments[position(.)=1]/branch/pnode=./lhs/branch/pnode
 							          and ./rhs/tree/arg2/arguments[position(.)=1]/branch/nnode=./lhs/branch/nnode]">
@@ -322,10 +354,17 @@ public:
 					</admst:if>
 				</admst:if>
 			</admst:if>
+
 		</admst:if>
 	</admst:if>
 </admst:for-each>
 
+<admst:if test="[$(_num_states)!=0]">
+	private: // from storage
+		double tr_c_to_g(double c, double g)const;
+		bool uic_now(unsigned stateno=-1)const;
+
+</admst:if>
 class $(DEV_NAME) : public ADMS_BASE
 {
 	private:
@@ -392,7 +431,7 @@ class $(DEV_NAME) : public ADMS_BASE
 
 	public: //misc
 		void keep_ic();
-		bool has_memory(){return _num_states;}
+		bool has_memory(){return $_num_states;}
 
 	public: // ports
 		std::string port_name(uint_t i)const {
@@ -542,12 +581,10 @@ inline voltage_t _BP(ENode p, ENode n) { return volts_limited(_n[p],_n[n]);}
 		<admst:for-each select="$(ddts)">
 		_ddt_%(adms/id(.)), // %(.)
 		</admst:for-each>
-
-		<admst:variable name="_num_states" select="$numddt"/>
-		_num_states = %(count($ddts))
+		_num_states = %(count($ddts)) // $(_num_states)
 	};
 
-	unsigned num_ddt(){return $numddt;}
+	//	unsigned num_ddt(){return $(_num_states);}
 
 	double* _states[OPT::_keep_time_steps]; // for each step: q0,i0, q1,i1, q2,i2, etc.
 	double* _states_q1;	// for step t1:  q0, q1, q2, q3, etc.
@@ -557,10 +594,17 @@ inline voltage_t _BP(ENode p, ENode n) { return volts_limited(_n[p],_n[n]);}
 // odd states: _i
 
 	double _DDT(double qq, unsigned stateno){
-		_states[0][stateno*2] = qq;
-		int qcap = stateno*2;
-
+		unsigned qcap = stateno*2;
 		trace3(&quot;$(DEV_NAME)::_DDT&quot;, qcap, _sim-&gt;_mode, _sim-&gt;_phase);
+<admst:if test="[$(_num_states)!=0]">
+		trace2(&quot;$(DEV_NAME)::_DDT&quot;, uic_now(stateno), _sim-&gt;uic_now());
+		if(uic_now(stateno)){
+			_states[0][qcap] = qq;
+			return ( qq + _states[1][stateno*2] ) * OPT::keepcoeff;
+		}
+</admst:if>
+		_states[0][stateno*2] = qq;
+
 		if (_sim-&gt;analysis_is_ac()) {
 			incomplete(); // shouldnt call DDT at all!
 			return 0;
@@ -614,7 +658,7 @@ inline voltage_t _BP(ENode p, ENode n) { return volts_limited(_n[p],_n[n]);}
 	public:
 		// initial conditions
 		<admst:for-each select="contribution[is_ic_contribution(.)/[name='x']/value='yes']">
-		PARAMETER&lt;double&gt; ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode);
+		// PARAMETER&lt;double&gt; ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode);
 		</admst:for-each>
 
 }; // DEV
@@ -649,17 +693,20 @@ class $(COMMON_NAME) : public COMMON_COMPONENT
 	</admst:for-each>
 
 <admst:if test="[$(_num_states)!=0]">
+	public: // storage related
+
 		void set_states(double*x){
 		unsigned i=0;
 		<admst:for-each select="$(ddts)">
+			trace1(&quot;$(COMMON_NAME)::set_states ic_state_%(adms/id(.))&quot;, x[i]);
 			ic_state_%(adms/id(.)) = x[i++];
 		</admst:for-each>
 		}
 	
 		// PARAMETER&lt;vector&lt;PARAMETER&lt;double &gt; &gt; &gt; state_ic;
-		<admst:for-each select="$(ddts)">
-			PARAMETER&lt;double&gt; ic_state_%(adms/id(.)); // %(.)
-		</admst:for-each>
+  <admst:for-each select="$(ddts)">
+		PARAMETER&lt;double&gt; ic_state_%(adms/id(.)); // %(.)
+  </admst:for-each>
 </admst:if>
 
 	public:
@@ -881,8 +928,7 @@ void $(MODEL_NAME)::set_param_by_name(string Name, string Value)
 // -------------------------------------------------------------------------- //
 void $(COMMON_NAME)::precalc_first(const CARD_LIST* par_scope)
 {
-
-
+	USE(par_scope);
 	<admst:for-each select="variable[input='yes' and scope='global_instance']">
 		<admst:apply-templates select="default/tree" match="stringify_expression"/>
 		<admst:choose>
@@ -894,6 +940,9 @@ void $(COMMON_NAME)::precalc_first(const CARD_LIST* par_scope)
 			</admst:when>
 		</admst:choose>
 	</admst:for-each>
+  <admst:for-each select="$(ddts)">
+	ic_state_%(adms/id(.)).e_val(NOT_INPUT,par_scope);
+  </admst:for-each>
 }
 // -------------------------------------------------------------------------- //
 void $(MODEL_NAME)::precalc_first()
@@ -966,9 +1015,6 @@ $(DEV_NAME)::$(DEV_NAME)(const $(DEV_NAME)&amp; p)
 <admst:for-each select="instance">,
     _%(name)(0)
 </admst:for-each>
-  <admst:join select="contribution[is_ic_contribution(.)/[name='x']/value='yes']" separator=",">
-	,ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode)(p.ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode))
-  </admst:join>
 {
 	std::fill_n(m_entries, %(count(jacobian)), 0);
 	std::fill_n(m_entries_old, %(count(jacobian)), 0);
@@ -986,9 +1032,26 @@ $(DEV_NAME)::$(DEV_NAME)(const $(DEV_NAME)&amp; p)
 		_states[ii] = NULL;
 }
 // -------------------------------------------------------------------------- //
+<admst:if test="[$(_num_states)!=0]">
+bool $(DEV_NAME)::uic_now(unsigned stateno)const{
+	if(!_sim-&gt;uic_now()) return 0;
+	const $(COMMON_NAME)* c = static_cast&lt;const $(COMMON_NAME)*&gt;(common());
+
+	incomplete();
+	switch(stateno){
+<admst:for-each select="$(ddts)">
+		case _ddt_%(adms/id(.)):
+			return c-&gt;ic_state_%(adms/id(.)).has_good_value();
+</admst:for-each>
+		default:
+			assert(0); return(0);
+	}
+}
+</admst:if>
+// -------------------------------------------------------------------------- //
 $(DEV_NAME)::~$(DEV_NAME)()
 {
-#if ($_num_states)
+<admst:if test="[$(_num_states)!=0]">
 	if (_states[0]) {
 		trace1(&quot;cleaning up states&quot;, long_label());
 		for (int ii=0; ii&lt;OPT::_keep_time_steps; ++ii) {
@@ -1007,8 +1070,7 @@ $(DEV_NAME)::~$(DEV_NAME)()
       assert(!_states[ii]);
 	assert(!_states_q1);
 	}
-
-#endif
+</admst:if>
 }
 // ---------------- all analog functions from verilog-module here: ---------- //
 
@@ -1016,15 +1078,6 @@ $(DEV_NAME)::~$(DEV_NAME)()
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::set_param_by_name(std::string Name, std::string value)
 {
-	USE(value);
-	if(false){}
-<admst:for-each select="contribution[is_ic_contribution(.)/[name='x']/value='yes']">
-	else if( Umatch(Name,&quot;ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode)&quot;) ) {
-		ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode) = value; return;
-	} else if( Umatch(Name,&quot;ic_%(./lhs/branch/nnode)_%(./lhs/branch/pnode)&quot;) ) {
-		ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode) = &quot;-(&quot;+ value +&quot;)&quot;; return;
-	}
-</admst:for-each>
 	COMPONENT::set_param_by_name(Name,value);
 }
 // -------------------------------------------------------------------------- //
@@ -1045,13 +1098,13 @@ void $(COMMON_NAME)::expand(const COMPONENT* d)
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::expand()
 {
-	trace2(&quot;$(DEV_NAME)::expand&quot;, _modelname,OPT::_keep_time_steps);
 	ADMS_BASE::expand();
 	
 	const $(COMMON_NAME)* c = static_cast&lt;const $(COMMON_NAME)*&gt;(common());
 	assert(c);
 	const $(MODEL_NAME)* m = prechecked_cast&lt;const $(MODEL_NAME)*&gt;(c-&gt;model());
 	USE(m);
+	trace2(&quot;$(DEV_NAME)::expand&quot;, c-&gt;modelname() ,OPT::_keep_time_steps);
 
   // attach model?! FIXME
   _model = dynamic_cast&lt;const $(MODEL_NAME)*&gt;(find_model(_modelname));
@@ -1070,7 +1123,7 @@ void $(DEV_NAME)::expand()
   guesstopology();
   // allocate state vectors
 
-#if ($_num_states)
+<admst:if test="[$(_num_states)!=0]">
   if (!_states[0]) {
     // initialise in tr_begin() ?
     for (int ii=0; ii&lt;OPT::_keep_time_steps; ++ii)  // &gt;
@@ -1091,8 +1144,7 @@ void $(DEV_NAME)::expand()
 //    assert(_states_1);
 	assert(_states_q1);
   }
-#endif
-
+</admst:if>
 
 	std::fill_n(it1, (int)_num_total_nodes, 0);
 
@@ -1167,11 +1219,11 @@ void $(DEV_NAME)::precalc_last()
 	ADMS_BASE::precalc_last();
   <admst:if test="[$has_sckt!=0]">
 	if(subckt()) subckt()-&gt;precalc_last();
-	</admst:if>
+  </admst:if>
 	assert(_model);
-<admst:for-each select="contribution[is_ic_contribution(.)/[name='x']/value='yes']">
+  <admst:for-each select="contribution[is_ic_contribution(.)/[name='x']/value='yes']">
 	ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode).e_val(0,scope());
-</admst:for-each>
+  </admst:for-each>
 	assert(!is_constant());
 }
 // -------------------------------------------------------------------------- //
@@ -1270,10 +1322,9 @@ void $(DEV_NAME)::tr_begin()
 {
   <admst:if test="[$has_sckt!=0]">
 	subckt()-&gt;tr_begin();
-	</admst:if>
-	const COMMON_COMPONENT* c = prechecked_cast&lt;const COMMON_COMPONENT*&gt;(common());
+  </admst:if>
+	const $(COMMON_NAME)* c = prechecked_cast&lt;const $(COMMON_NAME)*&gt;(common());
 	assert(c); USE(c);
-	
 	const $(MODEL_NAME)* m = prechecked_cast&lt;const $(MODEL_NAME)*&gt;(c-&gt;model());
 	assert(m);
 	USE(m);
@@ -1286,12 +1337,21 @@ void $(DEV_NAME)::tr_begin()
 	<admst:apply-templates select="analog" match="analog:initial_step"/>
 	// /initial step
 
-        assert($_num_states == _num_states);
-        for(int ii=0; ii&lt;OPT::_keep_time_steps; ii++){
-          trace1(&quot;$(DEV_NAME)::tr_begin&quot;, ii);
-          std::fill_n(_states[ii], ($_num_states)*2, 0);
-        }
-		std::fill_n(_states_q1, ($_num_states), 0);
+	assert($_num_states == _num_states);
+	for(int ii=0; ii&lt;OPT::_keep_time_steps; ii++){
+		std::fill_n(_states[ii], ($_num_states)*2, 0);
+	}
+	std::fill_n(_states_q1, ($_num_states), 0);
+
+<admst:if test="[$_num_states!=0]">
+	unsigned k = 0;
+  <admst:for-each select="$(ddts)">
+	if(c-&gt;ic_state_%(adms/id(.)).has_good_value()){
+		trace1(&quot;$(DEV_NAME)::tr_begin&quot;, c-&gt;ic_state_%(adms/id(.)));
+		_states[1][2*k++] = c-&gt;ic_state_%(adms/id(.));
+	}
+  </admst:for-each>
+</admst:if>
 
 	// like d_vs.
 	// &lt;admst:text format=&quot;\\n\\tfor(int i=0; i&lt;_num_total_nodes; i++)&quot;/&gt;
@@ -1341,17 +1401,16 @@ void $(DEV_NAME)::dc_advance()
 
 	ADMS_BASE::dc_advance();
 
-#if ($_num_states)
+<admst:if test="[$_num_states!=0]">
 	for (int t = 1;  t &lt; OPT::_keep_time_steps;  ++t) {
 		//  notstd::copy_n(_states[0], 2*(unsigned)_num_states, _states[i]);
 		//_i[t] = _i[0]; &lt;= what STORAGE does
 
 		for( unsigned i=0; i&lt;_num_states; ++i){
-			_states[t][2*i+1]=_states[0][2*i+1];
+			_states[t][2*i+1] = _states[0][2*i+1];
 		}
-
 	}
-#endif
+</admst:if>
 	// ??
 	//		for( unsigned i=0; i&lt;_num_states; ++i){
 	//			_states_1[2*i+1]=_states[0][2*i+1];
@@ -1475,31 +1534,13 @@ bool $(DEV_NAME)::do_tr()
 	assert(OPT::_keep_time_steps &lt;= 8);
 	assert(_dt == NOT_VALID || conchk(_dt, _time[0] - _time[1]));
 
-	int mode;
 	if (_sim-&gt;analysis_is_tran_dynamic())
 	{
 		trace1(&quot;$(DEV_NAME)::do_tr tran dynamic&quot;, long_label());
-		if ((_time[1] == 0) &amp;&amp; _sim-&gt;is_first_iteration()) mode = MODETRAN | MODEINITTRAN;
-		else mode = MODETRAN | MODEINITFLOAT;
-
 		tr_eval(); // if needed??
 		q_load();
 
 	} else {
-		if (_sim-&gt;analysis_is_tran_static()) 		mode = MODETRANOP;
-		else if (_sim-&gt;analysis_is_tran_restore()) 	mode = MODETRAN;
-		else if (_sim-&gt;command_is_dc()) 			mode = MODEDCTRANCURVE;
-		else if (_sim-&gt;command_is_op()) 			mode = MODEDCOP;
-		else {unreachable();mode = 0;}
-
-		if (_sim-&gt;uic_now()) {
-			mode |= MODEINITFIX;
-			mode |= MODEUIC;
-		}else{
-			if (_sim-&gt;is_initial_step()) mode |= MODEINITJCT;
-			else mode |= MODEINITFLOAT;
-		}
-
 		tr_eval(); // if needed??
 		q_load();
 	}
@@ -1577,10 +1618,12 @@ void $(DEV_NAME)::keep_ic()
 		trace2(&quot;$(DEV_NAME)::keep_ic&quot;, long_label(), _states[0][i*2] );
 		s[i]=_states[0][i*2];
 
+	tr_eval();
+	store_values();
+
 	}
 	c-&gt;set_states(s);
 </admst:if>
-
 	trace1(&quot;$(DEV_NAME)::keep_ic&quot;, long_label() );
 	notstd::copy_n(it0, (int)_num_total_nodes , i_kept);
 }
@@ -1588,16 +1631,13 @@ void $(DEV_NAME)::keep_ic()
 void $(DEV_NAME)::store_values()
 {
   trace1(&quot;$(DEV_NAME)::store_values&quot;, long_label());
-
-
   // notstd::copy_n(_states[0],(unsigned) 2*_num_states, _states_1);
 
-#if ($_num_states)
-
-  for( unsigned i=0; i&lt;_num_states; ++i){
-        _states_q1[i]=_states[0][2*i];
-		  }
-#endif
+<admst:if test="[($_num_states!='0')]">
+	for( unsigned i=0; i&lt;_num_states; ++i){
+		_states_q1[i]=_states[0][2*i];
+	}
+</admst:if>
 
   // ELEMENT does y[0] -&gt; y_1
 }
@@ -1707,7 +1747,7 @@ TIME_PAIR $(DEV_NAME)::tr_review()
 		trace3(&quot;$(DEV_NAME)::tr_review _ddt_%(adms/id(.))&quot;, timestep,
 		   _states[0][ _ddt_%(adms/id(.)) ],
 		   _states[0][ _ddt_%(adms/id(.)) + 1 ]
-	      	);
+	  );
 	}
 	</admst:for-each>
     //-----
@@ -1723,11 +1763,20 @@ TIME_PAIR $(DEV_NAME)::tr_review()
 	return  _time_by;
 }
 // -------------------------------------------------------------------------- //
+<admst:template match="commonmodel">
+	const $(COMMON_NAME)* c = prechecked_cast&lt;const $(COMMON_NAME)*&gt;(common());
+	USE(c); assert(c);
+	const $(MODEL_NAME)* m = prechecked_cast&lt;const $(MODEL_NAME)*&gt;(c-&gt;model());
+	USE(m); assert(m);
+</admst:template>
+// -------------------------------------------------------------------------- //
 void $(DEV_NAME)::tr_accept()
 {
   <admst:if test="[$has_sckt!=0]">
 	subckt()-&gt;tr_accept();
   </admst:if>
+  <admst:apply-templates select="." match="commonmodel"/>
+
   trace0(&quot;$(DEV_NAME)::tr_accept&quot;);
   if (_sim-&gt;analysis_is_dcop() || _sim-&gt;analysis_is_ac()) {
     assert(_dt == NOT_VALID || conchk(_dt, _time[0] - _time[1]));
@@ -1735,6 +1784,18 @@ void $(DEV_NAME)::tr_accept()
     // mode = MODEINITSMSIG;
     // huh??    load(mode);
   } else { itested(); }
+
+	// hmmm
+	if(_sim-&gt;uic_now()){
+		std::fill_n(it0, (int)_num_total_nodes, 0);
+#define NOJAC
+#define _DDT( qq, stateno) (( _states[0][stateno*2] - _states[1][stateno*2] ) * OPT::keepcoeff)
+#		include &quot;$(filename)_tr.hxx&quot;
+#undef NOJAC
+#undef _DDT
+	}
+
+	
 }
 // -------------------------------------------------------------------------- //
 double $(DEV_NAME)::tr_probe_num(const std::string&amp; x)const
@@ -1923,16 +1984,11 @@ void $(DEV_NAME)::pzLoad(COMPLEX s)
 bool $(DEV_NAME)::conv_check()const
 {
 <admst:if test="[($_num_states!='0')]">
-	//nst
-</admst:if>
-#if ($_num_states) // FIXME
-<admst:if test="[not( count($ddts)=0) ]">
 	for (unsigned ii = 0; ii &lt; _num_states; ++ii) {
 		if (! conchk(_states[0][2*ii], _states_q1[ii]))
 			return false;
 	}
 </admst:if>
-#endif
 
 	for(unsigned i=0; converged() &amp;&amp; i&lt;_num_total_nodes; i++) {
 		bool conv = conchk(it0[i], it1[i]);
@@ -1964,15 +2020,57 @@ void $(DEV_NAME)::ac_eval()
 	const $(MODEL_NAME)* m = prechecked_cast&lt;const $(MODEL_NAME)*&gt;(c-&gt;model());
 	USE(m); assert(m);
 
-	double CKTag0=0; USE(CKTag0); //BUG
+	double CKTag0 = 0.; USE(CKTag0); // BUG (necessary?)
+	double ddtone = 1.; USE(ddtone); // not necessary in the end?
+
+<admst:for-each select="$(ddts)">
+	double keep_%(adms/id(.))=1;
+</admst:for-each>
 	{
+	// fixme: remerge _tr.hxx?
 		#include &quot;$(filename)_ac.hxx&quot;
 	}
 }
+// -------------------------------------------------------------------------- //
+<admst:if test="[$(_num_states)!=0]">
+// ripped from storage...
+double $(DEV_NAME)::tr_c_to_g(double c, double g)const
+{
+//if(_sim-&gt;uic_now() &amp;&amp; have_ic()){
+//		return 1; // ./OPT::shortckt;
+//	}
 
+	if (_sim-&gt;analysis_is_static()) {
+		assert(_time[0] == 0.);
+		return 0.;
+	}else if (_sim-&gt;analysis_is_restore()) {itested();
+		assert(_time[0] &gt; 0);
+		return g;
+		// no change, fake
+	}else{
+		assert(_sim-&gt;analysis_is_tran_dynamic());
+		METHOD method;
+		if (_time[1] == 0) {
+		  method = mEULER; // Bogus current in previous step.  Force Euler.
+		}else{
+		  method = _method_a;
+		}
+		g = c / _dt;
+		switch (method) {
+			case mTRAPGEAR: incomplete();
+			case mGEAR:	 g *= 3./2.;	break;
+			case mTRAPEULER: incomplete();
+			case mEULER: /* g *= 1 */	break;
+			case mTRAP:	 g *= 2;	break;
+		}
+		return g;
+	}
+}
+</admst:if>
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::tr_eval()
 {
+	trace0(&quot;$(DEV_NAME)::tr_eval&quot;);
 	std::fill_n(it0, (int)_num_total_nodes, 0);
 	std::fill_n(m_entries, %(count(jacobian)), 0);
 
@@ -1983,12 +2081,29 @@ void $(DEV_NAME)::tr_eval()
 	const $(MODEL_NAME)* m = prechecked_cast&lt;const $(MODEL_NAME)*&gt;(c-&gt;model());
 	USE(m); assert(m);
 
-	double CKTag0; USE(CKTag0); // BUG?
-	assert( _dt != 0 ); // untested, tag0 = 0.0
-	if (_time[1] != 0 &amp;&amp; _method_a == mTRAP) CKTag0 = 2 / _dt; // mTRAP
-	else CKTag0 = 1 / _dt; // mEULER
-	trace2(&quot;$(DEV_NAME)::tr_eval()&quot;, long_label(), CKTag0);
+<admst:if test="[$(_num_states)!=0]">
+	double CKTag0 = tr_c_to_g(1., 1.);
 
+	//if(_sim-&gt;uic_now() &amp;&amp; have_ic()){
+
+	//	ddtone = 1./OPT::shortckt;
+	//}else{
+	//	ddtone = 1.;
+	//}
+<admst:for-each select="$(ddts)">
+
+	double keep_%(adms/id(.))=1;
+	if(uic_now(_ddt_%(adms/id(.)))){
+		trace1(&quot; $(DEV_NAME)::tr_eval keeping &quot;, c-&gt;ic_state_%(adms/id(.)));
+		keep_%(adms/id(.)) = OPT::keepcoeff;
+	} else {
+		trace3(&quot; $(DEV_NAME)::tr_eval not keeping &quot;, c-&gt;ic_state_%(adms/id(.)),
+		    _sim-&gt;uic_now(), uic_now(_ddt_%(adms/id(.))) );
+	}
+</admst:for-each>
+
+</admst:if>
+	
 	{
 		#include &quot;$(filename)_tr.hxx&quot;
 	}
@@ -2000,9 +2115,6 @@ void $(DEV_NAME)::tr_eval()
 // -------------------------------------------------------------------------- //
 $(COMMON_NAME)::$(COMMON_NAME)(const $(COMMON_NAME)&amp; p) :
     COMMON_COMPONENT(p)
-<admst:for-each select="contribution[is_ic_contribution(.)/[name='x']/value='yes']">,
-    ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode)(p.ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode))
-</admst:for-each>
 <admst:for-each select="$(ddts)">,
     ic_state_%(adms/id(.))(p.ic_state_%(adms/id(.)))
 </admst:for-each>
@@ -2014,9 +2126,6 @@ $(COMMON_NAME)::$(COMMON_NAME)(const $(COMMON_NAME)&amp; p) :
 // -------------------------------------------------------------------------- //
 $(COMMON_NAME)::$(COMMON_NAME)(int c) :
     COMMON_COMPONENT(c)
-<admst:for-each select="contribution[is_ic_contribution(.)/[name='x']/value='yes']">,
-    ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode)(NOT_INPUT)
-</admst:for-each>
 <admst:for-each select="$(ddts)">,
     ic_state_%(adms/id(.))(NOT_INPUT)
 </admst:for-each>
@@ -2034,10 +2143,10 @@ bool $(COMMON_NAME)::operator==(const COMMON_COMPONENT&amp; x)const
 {
 	const $(COMMON_NAME)* p = dynamic_cast&lt;const $(COMMON_NAME)*&gt;(&amp;x);
 	return (p
-  <admst:for-each select="contribution[is_ic_contribution(.)/[name='x']/value='yes']">
-		&amp;&amp; ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode) == p-&gt;ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode)
-  </admst:for-each>
-		&amp;&amp; COMMON_COMPONENT::operator==(x));
+<admst:for-each select="$(ddts)">
+	    &amp;&amp; ic_state_%(adms/id(.)) == p-&gt;ic_state_%(adms/id(.))
+</admst:for-each>
+	    &amp;&amp; COMMON_COMPONENT::operator==(x));
 }
 // -------------------------------------------------------------------------- //
 #if 0
@@ -2055,9 +2164,20 @@ map&lt;string, PARA_BASE $(COMMON_NAME)::*&gt; $(COMMON_NAME)::param_dict
 void $(COMMON_NAME)::set_param_by_name(std::string name, std::string value)
 {
 	USE(value);
-<admst:for-each select="contribution[is_ic_contribution(.)/[name='x']/value='yes']">
-	if( Umatch(name,&quot;ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode)&quot;) ) {ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode)=value;return;}
+
+<admst:for-each select="$ddt_ic_list[.!='']">
+	// %(.), %(adms/id(.))
+	<admst:apply-templates select="." match="ic_probe_names"/>
+
+	if( Umatch(name,&quot;ic_$(ddt_p)_$(ddt_n)&quot;) ) {
+		ic_state_%(adms/id(.)) = value;return;
+	}
+	if( Umatch(name,&quot;ic_$(ddt_n)_$(ddt_p)&quot;) ) {
+		ic_state_%(adms/id(.)) = &quot;-(&quot;+value+&quot;)&quot;;return;
+	}
+
 </admst:for-each>
+
 
 #if 0
 	PARA_BASE $(COMMON_NAME)::* x = (param_dict[Name]);
@@ -2074,7 +2194,7 @@ void $(COMMON_NAME)::set_param_by_name(std::string name, std::string value)
 // -------------------------------------------------------------------------- //
 
   </admst:for-each>
-</admst:open>
+</admst:open> <!-- cc -->
 
 <!-- *********************************************************************************** -->
 <!-- *********************************** constant text ********************************* -->
@@ -2697,7 +2817,7 @@ inline double d_doh(double x)          {return  exp(x)/(exp(x) + 1); }
 
 <!-- ----------------------------------------------------------------- -->
 <admst:template match="function">
-  <admst:message test="[/dbg_xml='yes']" format="*(ngspvers)function*\n"/>
+  <admst:message format="* check: old function template?\n"/>
   <admst:choose>
     <admst:when test="[name='ddt']">
       <admst:for-each select="arguments[position(.)=1]">
@@ -2716,10 +2836,10 @@ inline double d_doh(double x)          {return  exp(x)/(exp(x) + 1); }
         </admst:if>
         <admst:choose>
           <admst:when test="[parametertype='model']">
-            <admst:value-to select="/simulator/tmp" value="m->$(var_prefix)%(name).has_hard_value()"/>
+            <admst:value-to select="/simulator/tmp" value="m->$(var_prefix)%(name).has_good_value()"/>
           </admst:when>
           <admst:when test="[parametertype='instance']">
-						<admst:value-to select="/simulator/tmp" value="/*instance*/$(var_prefix)%(name).has_hard_value()"/>
+						<admst:value-to select="/simulator/tmp" value="/*instance*/$(var_prefix)%(name).has_good_value()"/>
           </admst:when>
           <admst:otherwise>
             <admst:error format="$given(%s): should not be reached\n"/>
@@ -5094,11 +5214,11 @@ and name!='initializeInstance')]">
         <admst:choose>
           <admst:when test="[parametertype='model']">
             <admst:value-of select="name"/>
-            <admst:value-to select="/simulator/tmp" value="m->$var_prefix)%s.has_hard_value())"/>
+            <admst:value-to select="/simulator/tmp" value="m->$var_prefix)%s.has_good_value())"/>
           </admst:when>
           <admst:when test="[parametertype='instance']">
             <admst:value-of select="name"/>
-            <admst:value-to select="/simulator/tmp" value="$(var_prefix)%s.has_hard_value()"/>
+            <admst:value-to select="/simulator/tmp" value="$(var_prefix)%s.has_good_value()"/>
           </admst:when>
           <admst:otherwise>
             <admst:error format="$given(%s): should not be reached\n"/>
@@ -6386,7 +6506,7 @@ and name!='initializeInstance')]">
 
   <admst:choose>
     <admst:when test="[.=$pprobe]">
-      <admst:variable name="ep" select="1. /*pprobe*/ "/>
+			<admst:variable name="ep" select=" /*pprobe*/ $(ddtp) "/>
     </admst:when>
     <admst:otherwise>
       <admst:variable name="ep" select="0. /*pprobe*/"/>
@@ -6396,7 +6516,7 @@ and name!='initializeInstance')]">
   <admst:if test="$qprobe">
   <admst:choose>
     <admst:when test="[.=$qprobe]">
-      <admst:variable name="eq" select="1. /*qprobe*/ "/>
+			<admst:variable name="eq" select=" /*qprobe*/$(ddtp) "/>
     </admst:when>
     <admst:otherwise>
       <admst:variable name="eq" select="0. /*qprobe*/ "/>
@@ -7085,13 +7205,24 @@ and name!='initializeInstance')]">
       <!-- --------------i
       <admst:text  format="//before  DDT: ep $ep\n"/>
       <admst:variable name="xp"/>
-      <admst:apply-templates select="." match="DDT"/> ------ -->
+			<admst:apply-templates select="." match="DDT"/> ------ -->
 
+			/* function ddt %(.)*/
+
+			<admst:variable name="ddtp" select="keep_%(adms/id(.))"/>
+			<admst:variable name="pddt" select="%(adms/id(.))"/>
       <admst:apply-templates select="arguments[1]" match="ddx"/>
+			<admst:variable name="ddtp" select="1."/>
       <admst:variable name="x" select="$e"/>
       <admst:variable name="xp" select="$ep"/>
       <admst:variable name="xq" select="$eq"/>
-      <admst:variable name="xpq" select="$epq"/>
+			<admst:variable name="xpq" select="$epq"/>
+#if 0
+			* x $x
+			* xp $xp 
+			* xq $xq
+			* xpq $xpq
+#endif
       <admst:variable name="e" select="_DDT($x, _ddt_%(adms/id(.)) ) "/>
 
       <!-- <admst:apply-templates select="." match="DDT"/>  -->
@@ -7822,8 +7953,8 @@ and name!='initializeInstance')]">
 
   <admst:if test="[is_ic_contribution(.)/[name='x']/value='yes']">
     <admst:text format="// can be used by uic\n"/>
-	if( _sim-&gt;uic_now() ) {
-		trace1(&quot;ADMS uic, %(.)&quot;, ic_%(lhs/branch/pnode)_%(lhs/branch/nnode)  );
+		if( false /*removed in favor of more general approach */&amp;&amp; _sim-&gt;uic_now() ) {
+		// trace1(&quot;ADMS uic, %(.)&quot;, ic_%(lhs/branch/pnode)_%(lhs/branch/nnode)  );
 		// TODO:
 		// implement voltage source between %(lhs/branch/pnode), %(lhs/branch/nnode)
 		// with value of common-&gt;ic_%(lhs/branch/pnode)_%(lhs/branch/nnode) here,
@@ -7850,14 +7981,7 @@ and name!='initializeInstance')]">
     <admst:apply-templates select="." match="ddx:function:computation"/>
   </admst:if>
 
-    <admst:choose>
-      <admst:when test="lhs/branch/nnode[grounded='no']">
-      <admst:apply-templates select="." match="residual2"/>
-    </admst:when>
-    <admst:otherwise>
-      <admst:apply-templates select="." match="residual1"/>
-    </admst:otherwise>
-  </admst:choose>
+  <admst:apply-templates select="." match="residual_"/>
 
   <admst:for-each select="rhs/probe">
     <admst:text format="\t// Rhs/probe: %(.)\n"/>
@@ -7900,7 +8024,7 @@ and name!='initializeInstance')]">
   <admst:variable name="Pp" select="%(lhs/branch/pnode/name)"/>
   <admst:variable name="Pn" select="%(lhs/branch/nnode/name)"/>
 	{ // ic_vs
-		double vic = ic_$(Pp)_$(Pn);
+	double vic = 0; // old: ic_$(Pp)_$(Pn);
 		assert(is_number(vic));
 		assert( is_number(it0[$(node_prefix)$(Pp)] ));
 		assert( is_number(it0[$(node_prefix)$(Pn)] ));
@@ -7917,7 +8041,7 @@ and name!='initializeInstance')]">
 
 </admst:template>
 <!-- ----------------------  residuals ------------------ -->
-<admst:template match="residual2">
+<admst:template match="residual_">
   <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)residual2*\n"/>
   <admst:variable name="Pp" select="%(lhs/branch/pnode/name)"/>
   <admst:variable name="Pn" select="%(lhs/branch/nnode/name)"/>
@@ -7926,7 +8050,9 @@ and name!='initializeInstance')]">
 		double vx = %(e(rhs/tree));
 		assert(is_number(vx));
 		it0[$(node_prefix)$(Pp)] -= vx;
+	<admst:if test="lhs/branch/nnode[grounded='no']">
 		it0[$(node_prefix)$(Pn)] += vx;
+	</admst:if>
 	}
 
 </admst:template>
@@ -7953,11 +8079,22 @@ and name!='initializeInstance')]">
 
   <admst:choose>
 
-    <admst:when test="..[dynamic='yes']">
-	{ // jacobian4($(Sp), $(Sn), $(Pp), $(Pn), $(ep)) - dynamic
-		double eac = $ep; 
+		<admst:when test="..[dynamic='yes']">
+#ifndef NOJAC
+	{ // jacobian4($(Sp), $(Sn), $(Pp), $(Pn)) - dynamic
+		double eac = $ep;
 		double etr = eac * CKTag0;
-		double ceq = etr * BR($Pp, $Pn);
+		double ceq;
+
+		if(uic_now( _ddt_$pddt ) /* HACK. argh.*/){
+			ceq = eac * BR($Pp, $Pn);
+
+			keep_$pddt=1;	
+			eac = $ep;
+			etr = - eac * OPT::keepcoeff;
+		} else {
+			ceq = etr * BR($Pp, $Pn);
+		}
 
 <admst:if test="../../lhs/branch/pnode[grounded='no']">
 		it0[$(node_prefix)$Sp] += ceq;
@@ -7977,6 +8114,8 @@ and name!='initializeInstance')]">
 		_write_d$(eval_mode)($Sp, $Pn, -e$(eval_mode)); // 4
 </admst:if>
 	}
+#endif
+
     </admst:when>
 
     <admst:otherwise>
