@@ -1778,6 +1778,9 @@ void $(DEV_NAME)::tr_accept()
 #ifdef HAVE_KEEPCOEFF
 # define _DDT( qq, stateno) (( _states[0][stateno*2] - _states[1][stateno*2] ) * OPT::keepcoeff)
 #endif
+<admst:for-each select="$(ddts)">
+		double keep_%(adms/id(.))=1;
+</admst:for-each>
 #		include &quot;$(filename)_tr.hxx&quot;
 #undef NOJAC
 #undef _DDT
