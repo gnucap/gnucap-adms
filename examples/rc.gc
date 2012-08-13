@@ -1,0 +1,28 @@
+spice
+
+.param vdd 1.7
+
+V1 nin 0 pulse iv=1 pv=0 rise=200u
+*sin(frequency=1k, amplitude=1, offset=1)
+.list
+
+.verilog
+
+load ./rc.so
+
+paramset myrc rc;
+	.c=3n;
+	.r=200k;
+endparamset
+
+myrc rc1 (nin,nout1,0);
+spice
+
+.print tran v(nodes) v(rc1.int1) r(rc1) r(rc1.r1) c(rc1.c1)
+.print dc v(nodes) v(rc1.int1)
+
+.nodelist
+.dc trace=v
+.tran .05m 1m
+
+.end
