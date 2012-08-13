@@ -2,11 +2,11 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([FULL-PACKAGE-NAME], [VERSION], [BUG-REPORT-ADDRESS])
+AC_INIT([gnucap-adms], [0.0.1], [felix@salfelder.org])
 AC_CONFIG_SRCDIR([discipline.h])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE(gnucap-adms, 2012-08-11)
+AM_INIT_AUTOMAKE
 LT_INIT()
 
 # Checks for programs.
