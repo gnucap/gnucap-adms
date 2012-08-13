@@ -1071,10 +1071,7 @@ void $(COMMON_NAME)::expand(const COMPONENT* d)
 {
   trace2(&quot;$(DEV_NAME)::expand&quot;, _modelname,OPT::_keep_time_steps);
 
-  if (!subckt()) {
-    new_subckt();
-  }
-  ADMS_BASE::expand(d);
+  COMMON_COMPONENT::expand(d);
 	attach_model(d);
   const $(MODEL_NAME)* m = dynamic_cast&lt;const $(MODEL_NAME)*&gt;(model());
   if (!m) {
@@ -1500,7 +1497,7 @@ void $(DEV_NAME)::tr_eval_kept()
 {
 #if 0
 <!-- <admst:apply-templates select="analog/code[datatypename='block']/item" match="tr_eval_kept" required="yes"/> -->
-#endif
+#endif // 0
 }
 // -------------------------------------------------------------------------- //
 // MODEINITFLOAT = normal iteration
@@ -1789,14 +1786,12 @@ double $(DEV_NAME)::tr_probe_num(const std::string&amp; x)const
 	static std::string state_names[_num_states];
 	static std::string contr_names[_num_total_nodes];
 
+  <admst:apply-templates select="." match="commonmodel"/>
+
 	// init states &amp; node names
 	for(int i=0; i&lt;_num_states; i++)
 	{
 		std::stringstream ss;
-	const COMMON_COMPONENT* c = prechecked_cast&lt;const COMMON_COMPONENT*&gt;(common());
-	USE(c); assert(c);
-	const $(MODEL_NAME)* m = prechecked_cast&lt;const $(MODEL_NAME)*&gt;(c-&gt;model());
-	USE(m); assert(m);
 
 		ss &lt;&lt; i;
 		state_names[i] = &quot;state&quot; + ss.str();
@@ -2173,7 +2168,7 @@ void $(COMMON_NAME)::set_param_by_name(std::string name, std::string value)
     *p = Value;
 		return;
 	}
-	#endif
+#endif
 	throw Exception_No_Match(name);
 }
 // -------------------------------------------------------------------------- //
@@ -7209,6 +7204,7 @@ and name!='initializeInstance')]">
 			* xq $xq
 			* xpq $xpq
 #endif
+
       <admst:variable name="e" select="_DDT($x, _ddt_%(adms/id(.)) ) "/>
 
       <!-- <admst:apply-templates select="." match="DDT"/>  -->
