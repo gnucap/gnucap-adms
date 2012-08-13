@@ -14,6 +14,7 @@ e_adms_la_SOURCES = e_adms.cc
 	python split.py
 
 i=0 1 2
+ADMS_GC_XML=$(i:%=gnucap_%.xml)
 ADMS_ES=$(i:%=-e $(srcdir)/gnucap_%.xml)
 %.cc %_tr.hxx %_top.hxx %_ac.hxx: %.va $(ADMS_GC_XML)
 	admsXml $< $(ADMS_ES) -o $*
