@@ -1517,11 +1517,21 @@ void $(DEV_NAME)::keep_ic()
 	subckt()-&gt;keep_ic();
   </admst:if>
 
-  //double x =  dn_diff(_n[OUT1].v0(),_n[OUT2].v0() ); // == tr_involts() ??
-	const COMMON_COMPONENT* c = asserted_cast&lt;const COMMON_COMPONENT*&gt;(common());
+	//double x =  dn_diff(_n[OUT1].v0(),_n[OUT2].v0() );
+	$(COMMON_NAME)* c = asserted_cast&lt; $(COMMON_NAME)*&gt;(mutable_common());
 	USE(c);
 	const $(MODEL_NAME)* m = asserted_cast&lt;const $(MODEL_NAME)*&gt;(model());
 	USE(m);
+
+<admst:if test="[not($_num_states=0)]">
+	double s[_num_states];
+	for (unsigned i=0; i&lt;_num_states; i++){
+		trace2(&quot;$(DEV_NAME)::keep_ic&quot;, long_label(), _states[0][i*2] );
+		s[i]=_states[0][i*2];
+
+	}
+	c-&gt;set_states(s);
+</admst:if>
 
 	trace1(&quot;$(DEV_NAME)::keep_ic&quot;, long_label() );
 	notstd::copy_n(it0, (int)_num_total_nodes , i_kept);
