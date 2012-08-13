@@ -216,7 +216,9 @@ inline void _used(double)  {}
 class $(DEV_NAME);
 class $(MODEL_NAME) : public MODEL_CARD {
 	private:
+#ifdef HAVE_PARA_BASE
 		static map&lt;string, PARA_BASE $(MODEL_NAME)::*&gt; param_dict;
+#endif
 	protected:
 		explicit $(MODEL_NAME)(const $(MODEL_NAME)&amp; p);	// for clone
 	public:
@@ -799,6 +801,7 @@ void $(MODEL_NAME)::set_param_by_index(int i, std::string&amp; value, int offset
 	}
 }
 // -------------------------------------------------------------------------- //
+#ifdef HAVE_PARA_BASE
 map&lt;string, PARA_BASE $(MODEL_NAME)::*&gt; $(MODEL_NAME)::param_dict
 <admst:if test="[count(variable[input='yes'])!=0]">
   = boost::assign::map_list_of
@@ -806,7 +809,7 @@ map&lt;string, PARA_BASE $(MODEL_NAME)::*&gt; $(MODEL_NAME)::param_dict
   (&quot;%(name)&quot;, (PARA_BASE $(MODEL_NAME)::*)  (&amp;$(MODEL_NAME)::%(name)))
 </admst:join>
 </admst:if>;
-
+#endif
 // -------------------------------------------------------------------------- //
 void $(MODEL_NAME)::set_param_by_name(string Name, string Value)
 {
