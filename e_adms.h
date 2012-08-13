@@ -367,9 +367,19 @@ inline void ADMS_BASE::tr_iwant_matrix()
 #define _write_ptr(S1, S2, value) \
 	m_entries[m_## S1 ## _ ## S2 ]+=value;
 
+#define _write_pac(S1, S2, value) \
+	m_entries[m_ ## S1 ## _ ## S2]+=value;	
+
+#define _write_dtr(S1, S2, value) \
+	m_entries[m_ ## S1 ## _ ## S2]+=value;	
+
 #define _write_JS(S1, S2, value) \
 	m_entries[m_ ## S1 ## _ ## S2]+=value;	
+
 #define _write_JD(S1, S2, value) \
+	m_entries_old[m_ ## S1 ## _ ## S2]+=value;
+
+#define _write_dac(S1, S2, value) \
 	m_entries_old[m_ ## S1 ## _ ## S2]+=value;
 /*--------------------------------------------------------------------------*/
 #define _circuit_gdev                (OPT::gmin)
