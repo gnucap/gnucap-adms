@@ -451,10 +451,11 @@ class $(DEV_NAME) : public ADMS_BASE
 	private: // analog functions from va
 	<admst:apply-templates select="/module" match="analogfunctionH"/>
 
+			n_GND=-1,
 	protected: // node stuff
 		enum ENode {
   <admst:join select="node[discipline/name='electrical' and grounded='no']" separator=",">
-    <admst:value-of select="name"/>
+    <admst:value-of select="name"/>  
     <admst:text format="\n\t\t\t$node_prefix%s=%(position(.)-1)"/>
     <admst:text test="[position(.)=count(.)]" format=", _num_enodes=%(count(.))"/>
   </admst:join>
@@ -481,19 +482,24 @@ class $(DEV_NAME) : public ADMS_BASE
 
 // raw value
 #define NR(p) _NR($(node_prefix) ## p)
-		double _NR(int p){ return _n[p].v0(); }
+inline double _NR(int p){ return _n[p].v0(); } 
+
 #define BR(p,n) _BR($(node_prefix) ## p, $(node_prefix) ## n)
-		double _BR(int p, int n) { return volts_limited(_n[p],_n[n]);}
+inline double _BR(int p, int n) {
+	if (n==-1)
+		return _n[p].v0();
+	return volts_limited(_n[p],_n[n]);
+}
 
 // discipline wrapped value
 #define NP(p) _NP($(node_prefix) ## p)
-		voltage_t _NP(ENode p){ return min(1000.,max(-1000., _n[p].v0()) ); }
-	double _NP(TNode p){
-		assert(is_number(_n[p].v0()));
-		return _n[p].v0() + P_CELSIUS0;
-	}
+inline voltage_t _NP(ENode p){ return min(1000.,max(-1000., _n[p].v0()) ); } 
+inline double _NP(TNode p){
+	assert(is_number(_n[p].v0()));
+	return _n[p].v0() + P_CELSIUS0;
+} 
 #define BP(p,n) _BP($(node_prefix) ## p, $(node_prefix) ## n)
-		voltage_t _BP(ENode p, ENode n) { return volts_limited(_n[p],_n[n]);}
+inline voltage_t _BP(ENode p, ENode n) { return volts_limited(_n[p],_n[n]);}
 
 #define _N(n) _n[$(node_prefix) ## n]
 
@@ -613,11 +619,15 @@ class $(DEV_NAME) : public ADMS_BASE
 		<admst:for-each select="contribution[is_ic_contribution(.)/[name='x']/value='yes']">
 		PARAMETER&lt;double&gt; ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode);
 		</admst:for-each>
+
 }; // DEV
 // ------------------------------------------------------------------------ //
 // ------------------------------------------------------------------------ //
 class $(COMMON_NAME) : public COMMON_COMPONENT
 {
+	friend class $(DEV_NAME);
+  private:
+//    static map&lt;string, PARA_BASE $(COMMON_NAME)::*&gt; param_dict;
 public:
 	explicit $(COMMON_NAME)(const $(COMMON_NAME)&amp; p);
 	explicit $(COMMON_NAME)(int c=0);
@@ -634,11 +644,24 @@ public:
 	//std::string param_value(int)const;
 	//int param_count()const {return (8 + COMMON_COMPONENT::param_count());}
 <!-- -->
-public:
-	// initial conditions
+	public: // initial conditions
 	<admst:for-each select="contribution[is_ic_contribution(.)/[name='x']/value='yes']">
-	PARAMETER&lt;double&gt; ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode);
+		PARAMETER&lt;double&gt; ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode);
 	</admst:for-each>
+
+	public: // states ...
+		void set_states(double*x){
+		unsigned i=0;
+		<admst:for-each select="$(ddts)">
+			ic_state_%(adms/id(.)) = x[i++];
+		</admst:for-each>
+		}
+	
+		// PARAMETER&lt;vector&lt;PARAMETER&lt;double &gt; &gt; &gt; state_ic;
+		<admst:for-each select="$(ddts)">
+			PARAMETER&lt;double&gt; ic_state_%(adms/id(.)); // %(.)
+		</admst:for-each>
+
 };
 
 //inline double $(DEV_NAME)::BP2( $(DEV_NAME)::ENodes p,  $(DEV_NAME)::ENodes n  ) const{
@@ -835,7 +858,7 @@ bool $(MODEL_NAME)::IsParamGiven(const char* ) const
 void $(MODEL_NAME)::precalc_first()
 {
 	MODEL_CARD::precalc_first();
-
+// -------------------------------------------------------------------------- //
 	const CARD_LIST* par_scope = scope();
 	assert(par_scope);
 	MODEL_CARD::precalc_first();
@@ -905,9 +928,6 @@ $(DEV_NAME)::$(DEV_NAME)(const $(DEV_NAME)&amp; p)
 <admst:for-each select="instance">,
     _%(name)(0)
 </admst:for-each>
-//   _states_1(NULL)
-   /// _num_ddts(p._num_ddts), static...
-   /// _num_states(p._num_states) static...
   <admst:join select="contribution[is_ic_contribution(.)/[name='x']/value='yes']" separator=",">
 	,ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode)(p.ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode))
   </admst:join>
@@ -972,8 +992,8 @@ void $(DEV_NAME)::set_param_by_name(std::string Name, std::string value)
 	} else if( Umatch(Name,&quot;ic_%(./lhs/branch/nnode)_%(./lhs/branch/pnode)&quot;) ) {
 		ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode) = &quot;-(&quot;+ value +&quot;)&quot;; return;
 	}
-  </admst:for-each>
-	throw Exception_No_Match(Name);
+</admst:for-each>
+	COMPONENT::set_param_by_name(Name,value);
 }
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::expand()
@@ -1498,21 +1518,13 @@ void $(DEV_NAME)::keep_ic()
   </admst:if>
 
   //double x =  dn_diff(_n[OUT1].v0(),_n[OUT2].v0() ); // == tr_involts() ??
-  const COMMON_COMPONENT* c = asserted_cast&lt;const COMMON_COMPONENT*&gt;(common());
-  USE(c);
-  const $(MODEL_NAME)* m = asserted_cast&lt;const $(MODEL_NAME)*&gt;(model());
-  USE(m);
+	const COMMON_COMPONENT* c = asserted_cast&lt;const COMMON_COMPONENT*&gt;(common());
+	USE(c);
+	const $(MODEL_NAME)* m = asserted_cast&lt;const $(MODEL_NAME)*&gt;(model());
+	USE(m);
 
-  trace1(&quot;$(DEV_NAME)::keep_ic&quot;, long_label() );
-
-	<!--
-	<admst:apply-templates select="analog/code" match="analog:evaluate" required="yes"/>
-	-->
-
-  // notstd::copy_n(m_entries, %(count(jacobian)) , m_entries_kept);
-  // notstd::copy_n(_states_1 , %(count(jacobian)) , _states_kept); // FIXME
-  notstd::copy_n(it0, (int)_num_total_nodes , i_kept);
-
+	trace1(&quot;$(DEV_NAME)::keep_ic&quot;, long_label() );
+	notstd::copy_n(it0, (int)_num_total_nodes , i_kept);
 }
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::store_values()
@@ -1918,19 +1930,25 @@ void $(DEV_NAME)::tr_eval()
 }
 
 // -------------------------------------------------------------------------- //
-$(COMMON_NAME)::$(COMMON_NAME)(const $(COMMON_NAME)&amp; p)
-	:COMMON_COMPONENT(p)
-  <admst:for-each select="contribution[is_ic_contribution(.)/[name='x']/value='yes']">,
-	ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode)(p.ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode))
-  </admst:for-each>
+$(COMMON_NAME)::$(COMMON_NAME)(const $(COMMON_NAME)&amp; p) :
+    COMMON_COMPONENT(p)
+<admst:for-each select="contribution[is_ic_contribution(.)/[name='x']/value='yes']">,
+    ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode)(p.ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode))
+</admst:for-each>
+<admst:for-each select="$(ddts)">,
+    ic_state_%(adms/id(.))(p.ic_state_%(adms/id(.)))
+</admst:for-each>
 {
 }
 // -------------------------------------------------------------------------- //
-$(COMMON_NAME)::$(COMMON_NAME)(int c)
-	:COMMON_COMPONENT(c)
-  <admst:for-each select="contribution[is_ic_contribution(.)/[name='x']/value='yes']">,
-	ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode)(0.0)
-  </admst:for-each>
+$(COMMON_NAME)::$(COMMON_NAME)(int c) :
+    COMMON_COMPONENT(c)
+<admst:for-each select="contribution[is_ic_contribution(.)/[name='x']/value='yes']">,
+    ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode)(NOT_INPUT)
+</admst:for-each>
+<admst:for-each select="$(ddts)">,
+    ic_state_%(adms/id(.))(NOT_INPUT)
+</admst:for-each>
 {
 }
 // -------------------------------------------------------------------------- //
@@ -1948,12 +1966,34 @@ bool $(COMMON_NAME)::operator==(const COMMON_COMPONENT&amp; x)const
 		&amp;&amp; COMMON_COMPONENT::operator==(x));
 }
 // -------------------------------------------------------------------------- //
+#if 0
+map&lt;string, PARA_BASE $(COMMON_NAME)::*&gt; $(COMMON_NAME)::param_dict
+<admst:if test="[$(_num_states)!=0]">
+  = boost::assign::map_list_of
+	<admst:join select="$(ddts)" separator="">
+		(&quot;_ddt_%(adms/id(.))&quot;, (PARA_BASE $(COMMON_NAME)::*) 
+		(&amp;$(COMMON_NAME)::_ddt_%(adms/id(.)))) // %(.)
+	</admst:join>
+</admst:if>
+;A
+#endif
+// -------------------------------------------------------------------------- //
 void $(COMMON_NAME)::set_param_by_name(std::string name, std::string value)
 {
 	USE(value);
 <admst:for-each select="contribution[is_ic_contribution(.)/[name='x']/value='yes']">
 	if( Umatch(name,&quot;ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode)&quot;) ) {ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode)=value;return;}
 </admst:for-each>
+
+#if 0
+	PARA_BASE $(COMMON_NAME)::* x = (param_dict[Name]);
+
+  if(x) {
+    PARA_BASE* p = &amp;(this-&gt;*x);
+    *p = Value;
+		return;
+	}
+	#endif
 	throw Exception_No_Match(name);
 }
 // -------------------------------------------------------------------------- //
@@ -7757,19 +7797,19 @@ and name!='initializeInstance')]">
 
     <admst:apply-templates select="../tree" match="%(adms/datatypename)"/>
 
-    <admst:if test="branch/pnode[grounded='no']">
-      <admst:if test="../../lhs/branch/pnode[grounded='no']">
-          <admst:if test="branch/nnode[grounded='no']">
-              <admst:apply-templates test="../../lhs/branch/nnode[grounded='no']"  select="." match="jacobian4"/>
-              <admst:apply-templates test="../../lhs/branch/nnode[grounded='yes']" select="." match="jacobian2p"/>
-          </admst:if>
-          <admst:if test="branch/nnode[grounded='yes']">
-              <admst:apply-templates test="../../lhs/branch/nnode[grounded='no']" select="." match="jacobian2s"/>
-              <admst:apply-templates test="../../lhs/branch/nnode[grounded='yes']" select="." match="jacobian1"/>
-          </admst:if>
+    <admst:if test="branch/pnode[grounded='no']"> <!-- Pp != GND, but why?-->
+      <admst:if test="../../lhs/branch/pnode[grounded='no']"> <!-- Sp != GND, but why? -->
+        <admst:apply-templates select="." match="jacobian_"/>
       </admst:if>
     </admst:if>
-  </admst:for-each>
+
+	  <admst:if test="branch/pnode[grounded!='no']">
+      <admst:warning format="untested: excluding Pp == GND"/>
+    </admst:if>
+	  <admst:if test="[../../lhs/branch/pnode[grounded!='no']]">
+      <admst:warning format="untested: excluding Sp == GND"/>
+    </admst:if>
+	</admst:for-each>
 
   <admst:if test="rhs[not(nilled(function[class='builtin']))]">
 	}
@@ -7831,41 +7871,9 @@ and name!='initializeInstance')]">
 
 </admst:template>
 
-<!-- ----------------------  jacobians ------------------ -->
-<admst:template match="jacobian1">
-  <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)jacobian1*\n"/>
-  <admst:variable name="Sp" select="%(../../lhs/branch/pnode/name)"/>
-  <admst:variable name="Pp" select="%(branch/pnode/name)"/>
-
-  <admst:choose>
-    <admst:when test="..[dynamic='yes']">
-	{ // jacobian1($(Sp), $(Pp), $(ep)) - dynamic
-		double ep = $ep;
-		double geq = ep * CKTag0;
-		double ceq = geq * NR($Pp);
-		it0[n_$Sp] += ceq; // recheck, if it really (-) * (-)
-
-		<admst:text test="[$eval_mode='tr']" format="\t\t_write_ptr($Sp, $Pp, geq);\n"/>
-		<admst:text test="[$eval_mode='ac']" format="\t\t_write_JD($Sp, $Pp, ep);\n"/>
-	}
-
-    </admst:when>
-
-    <admst:otherwise>
-	{ // jacobian1($(Sp), $(Pp), $(ep)) - static
-		double ep = $ep;
-		it0[n_$Sp] += ep * NR($Pp); // recheck, if it really (-) * (-)
-
-		<admst:text test="[$eval_mode='tr']" format="\t\t_write_ptr($Sp, $Pp, ep);\n"/>
-		<admst:text test="[$eval_mode='ac']" format="\t\t_write_JS($Sp, $Pp, ep);\n"/>
-	}
-    </admst:otherwise>
-
-  </admst:choose>
-</admst:template>
-
-<admst:template match="jacobian4">
-  <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)jacobian4*\n"/>
+<!-- ----------------------  jacobian stamp ------------------ -->
+<admst:template match="jacobian_">
+  <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)jacobian_*\n"/>
   <admst:variable name="Sp" select="%(../../lhs/branch/pnode/name)"/>
   <admst:variable name="Sn" select="%(../../lhs/branch/nnode/name)"/>
   <admst:variable name="Pp" select="%(branch/pnode/name)"/>
@@ -7875,20 +7883,27 @@ and name!='initializeInstance')]">
 
     <admst:when test="..[dynamic='yes']">
 	{ // jacobian4($(Sp), $(Sn), $(Pp), $(Pn), $(ep)) - dynamic
-		double ep = $ep;
-		double geq = ep * CKTag0;
-		double ceq = geq * BR($Pp,$Pn);
-		it0[$(node_prefix)$Sp] += ceq;
-		it0[$(node_prefix)$Sn] -= ceq;
+		double eac = $ep; 
+		double etr = eac * CKTag0;
+		double ceq = etr * BR($Pp, $Pn);
 
-		<admst:text test="[$eval_mode='tr']" format="\t\t_write_ptr($Sp, $Pp, geq);\n"/>
-		<admst:text test="[$eval_mode='tr']" format="\t\t_write_ptr($Sn, $Pn, geq);\n"/>
-		<admst:text test="[$eval_mode='tr']" format="\t\t_write_ptr($Sp, $Pn, -geq);\n"/>
-		<admst:text test="[$eval_mode='tr']" format="\t\t_write_ptr($Sn, $Pp, -geq);\n"/>
-		<admst:text test="[$eval_mode='ac']" format="\t\t_write_JD($Sp, $Pp, ep);\n"/>
-		<admst:text test="[$eval_mode='ac']" format="\t\t_write_JD($Sn, $Pn, ep);\n"/>
-		<admst:text test="[$eval_mode='ac']" format="\t\t_write_JD($Sp, $Pn, -ep);\n"/>
-		<admst:text test="[$eval_mode='ac']" format="\t\t_write_JD($Sn, $Pp, -ep);\n"/>
+<admst:if test="../../lhs/branch/pnode[grounded='no']">
+		it0[$(node_prefix)$Sp] += ceq;
+</admst:if>
+<admst:if test="../../lhs/branch/nnode[grounded='no']">
+		it0[$(node_prefix)$Sn] -= ceq;
+</admst:if>
+
+		_write_d$(eval_mode)($Sp, $Pp, e$(eval_mode)); // 1
+<admst:if test="../../lhs/branch/nnode[grounded='no']">
+	<admst:if test="branch/nnode[grounded='no']">
+		_write_d$(eval_mode)($Sn, $Pn, e$(eval_mode)); // 2
+	</admst:if>
+		_write_d$(eval_mode)($Sn, $Pp, -e$(eval_mode)); // 3
+</admst:if>
+<admst:if test="branch/nnode[grounded='no']">
+		_write_d$(eval_mode)($Sp, $Pn, -e$(eval_mode)); // 4
+</admst:if>
 	}
     </admst:when>
 
@@ -7896,92 +7911,20 @@ and name!='initializeInstance')]">
 	{ // jacobian4($(Sp), $(Sn), $(Pp), $(Pn), $(ep)) - static
 		double ep = $ep;
 		it0[$(node_prefix)$Sp] += ep*BR($Pp,$Pn);
+<admst:if test="../../lhs/branch/nnode[grounded='no']">
 		it0[$(node_prefix)$Sn] -= ep*BR($Pp,$Pn);
+</admst:if>
 
-		<admst:text test="[$eval_mode='tr']" format="\t\t_write_ptr($Sp, $Pp, ep);\n"/>
-		<admst:text test="[$eval_mode='tr']" format="\t\t_write_ptr($Sn, $Pn, ep);\n"/>
-		<admst:text test="[$eval_mode='tr']" format="\t\t_write_ptr($Sp, $Pn, -ep);\n"/>
-		<admst:text test="[$eval_mode='tr']" format="\t\t_write_ptr($Sn, $Pp, -ep);\n"/>
-		<admst:text test="[$eval_mode='ac']" format="\t\t_write_JS($Sp, $Pp, ep);\n"/>
-		<admst:text test="[$eval_mode='ac']" format="\t\t_write_JS($Sn, $Pn, ep);\n"/>
-		<admst:text test="[$eval_mode='ac']" format="\t\t_write_JS($Sp, $Pn, -ep);\n"/>
-		<admst:text test="[$eval_mode='ac']" format="\t\t_write_JS($Sn, $Pp, -ep);\n"/>
-	}
-    </admst:otherwise>
-
-  </admst:choose>
-</admst:template>
-
-<admst:template match="jacobian2p">
-  <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)jacobian2p*\n"/>
-  <admst:variable name="Sp" select="%(../../lhs/branch/pnode/name)"/>
-  <admst:variable name="Pp" select="%(branch/pnode/name)"/>
-  <admst:variable name="Pn" select="%(branch/nnode/name)"/>
-
-  <admst:choose>
-
-    <admst:when test="..[dynamic='yes']">
-	{ // jacobian2p($(Sp), $(Pp), $(Pn), $(ep)) - dynamic
-		double ep = $ep;
-		double geq = ep * CKTag0;
-		double ceq = geq * BR($Pp,$Pn);
-		it0[n_$Sp] += ceq;
-
-		<admst:text test="[$eval_mode='tr']" format="\t\t_write_ptr($Sp, $Pp, geq);\n"/>
-		<admst:text test="[$eval_mode='tr']" format="\t\t_write_ptr($Sp, $Pn, -geq);\n"/>
-		<admst:text test="[$eval_mode='ac']" format="\t\t_write_JD($Sp, $Pp, ep);\n"/>
-		<admst:text test="[$eval_mode='ac']" format="\t\t_write_JD($Sp, $Pn, -ep);\n"/>
-	}
-    </admst:when>
-
-    <admst:otherwise>
-	{ // jacobian2p($(Sp), $(Pp), $(Pn), $(ep)) - static
-		double ep = $ep;
-		it0[n_$Sp] += ep*BR($Pp,$Pn);
-
-		<admst:text test="[$eval_mode='tr']" format="\t\t_write_ptr($Sp, $Pp, ep);\n"/>
-		<admst:text test="[$eval_mode='tr']" format="\t\t_write_ptr($Sp, $Pn, -ep);\n"/>
-		<admst:text test="[$eval_mode='ac']" format="\t\t_write_JS($Sp, $Pp, ep);\n"/>
-		<admst:text test="[$eval_mode='ac']" format="\t\t_write_JS($Sp, $Pn, -ep);\n"/>
-	}
-    </admst:otherwise>
-
-  </admst:choose>
-</admst:template>
-
-<admst:template match="jacobian2s">
-<admst:message test="[/dbg_xml='yes']" format="*(tr_eval)jacobian2s*\n"/>
-  <admst:variable name="Sp" select="%(../../lhs/branch/pnode/name)"/>
-  <admst:variable name="Sn" select="%(../../lhs/branch/nnode/name)"/>
-  <admst:variable name="Pp" select="%(branch/pnode/name)"/>
-
-  <admst:choose>
-
-    <admst:when test="..[dynamic='yes']">
-	{ // jacobian2s($(Sp), $(Sn), $(Pp), $(ep)) - dynamic
-		double ep = $ep;
-		double geq = ep * CKTag0;
-		double ceq = geq * NR($Pp);
-		it0[$(node_prefix)$Sp] += ceq;
-		it0[$(node_prefix)$Sn] -= ceq;
-
-		<admst:text test="[$eval_mode='tr']" format="\t\t_write_ptr($Sp, $Pp, geq);\n"/>
-		<admst:text test="[$eval_mode='tr']" format="\t\t_write_ptr($Sn, $Pp, -geq);\n"/>
-		<admst:text test="[$eval_mode='ac']" format="\t\t_write_JD($Sp, $Pp, ep);\n"/>
-		<admst:text test="[$eval_mode='ac']" format="\t\t_write_JD($Sn, $Pp, -ep);\n"/>
-	}
-    </admst:when>
-
-    <admst:otherwise>
-	{ // jacobian2s($(Sp), $(Sn), $(Pp), $(ep)) - static
-		double ep = $ep;
-		it0[$(node_prefix)$Sp] += ep*NR($Pp);
-		it0[$(node_prefix)$Sn] -= ep*NR($Pp);
-
-		<admst:text test="[$eval_mode='tr']" format="\t\t_write_ptr($Sp, $Pp, ep);\n"/>
-		<admst:text test="[$eval_mode='tr']" format="\t\t_write_ptr($Sn, $Pp, -ep);\n"/>
-		<admst:text test="[$eval_mode='ac']" format="\t\t_write_JS($Sp, $Pp, ep);\n"/>
-		<admst:text test="[$eval_mode='ac']" format="\t\t_write_JS($Sn, $Pp, -ep);\n"/>
+		_write_p$(eval_mode)($Sp, $Pp, ep); // 1
+<admst:if test="../../lhs/branch/nnode[grounded='no']">
+	<admst:if test="branch/nnode[grounded='no']">
+		_write_p$(eval_mode)($Sn, $Pn, ep); // 2
+	</admst:if>
+		_write_p$(eval_mode)($Sn, $Pp, -ep); // 3
+</admst:if>
+<admst:if test="branch/nnode[grounded='no']">
+		_write_p$(eval_mode)($Sp, $Pn, -ep); // 4
+</admst:if>
 	}
     </admst:otherwise>
 
