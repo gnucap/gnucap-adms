@@ -808,7 +808,7 @@ $(MODEL_NAME)::$(MODEL_NAME)(const $(DEV_NAME)* p) :
   <!-- output='yes' - no matter, parametertype=instance or module - no matter also -->
   <admst:for-each select="variable[input='yes']">
   <admst:apply-templates select="default/tree" match="stringify_expression"/>
-    %(name)(%s),
+    $(var_prefix)%(name)(%s),
   </admst:for-each>
     _key(&quot;dev_$(module)&quot;),
     _level(),
@@ -816,21 +816,10 @@ $(MODEL_NAME)::$(MODEL_NAME)(const $(DEV_NAME)* p) :
 {
 }
 // -------------------------------------------------------------------------- //
-$(MODEL_NAME)::$(MODEL_NAME)(const $(MODEL_NAME)&amp; p)
-  :MODEL_CARD(p),
-<admst:for-each select="variable[input='yes' and scope!='global_instance']">
-   $(var_prefix)%(name)(p.$(var_prefix)%(name)),
-</admst:for-each>
-   _key(p._key),
-   _level(p._level),
-   _params(p._params)
-{
-}
-// -------------------------------------------------------------------------- //
 $(MODEL_NAME)::$(MODEL_NAME)(const $(MODEL_NAME)&amp; p) :
     MODEL_CARD(p),
   <admst:for-each select="variable[input='yes']">
-    %(name)(p.%(name)),
+    $(var_prefix)%(name)(p.$(var_prefix)%(name)),
   </admst:for-each>
     _key(p._key),
     _level(p._level),
