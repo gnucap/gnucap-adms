@@ -48,6 +48,8 @@ bugs:
 
 remarks:
  - some details don't work with gnucap 0.36, cf. examples
+ - indentation in gnucap.xml (two spaces) has been taken over from "adms-mot",
+   the generated code should be approximately BSD KNF style.
 
 TODO: cleanup
 === notes from old implementation ===

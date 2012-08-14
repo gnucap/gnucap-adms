@@ -291,19 +291,19 @@ class $(MODEL_NAME) : public MODEL_CARD {
 
 	public:  // verilog - variables (all with scope 'global_model' i.e. have 'ask' field)
 
-	<admst:for-each select="variable[input='no' and scope='global_model']">
-	  <admst:choose>
-		<admst:when test="[type='real']">
-		  <admst:text format="\tdouble $(var_prefix)%(.);\n"/>
-		</admst:when>
-		<admst:when test="[type='integer']">
-		  <admst:text format="\tint $(var_prefix)%(.);\n"/>
-		</admst:when>
-		<admst:otherwise>
-		  <admst:text format="\n\tstd::string $(var_prefix)%(.);\n"/>
-		</admst:otherwise>
-	  </admst:choose>
-	</admst:for-each>
+  <admst:for-each select="variable[input='no' and scope='global_model']">
+    <admst:choose>
+    <admst:when test="[type='real']">
+      <admst:text format="\tdouble $(var_prefix)%(.);\n"/>
+    </admst:when>
+    <admst:when test="[type='integer']">
+      <admst:text format="\tint $(var_prefix)%(.);\n"/>
+    </admst:when>
+    <admst:otherwise>
+      <admst:text format="\n\tstd::string $(var_prefix)%(.);\n"/>
+    </admst:otherwise>
+    </admst:choose>
+  </admst:for-each>
 
 public:
 	std::string _key;
@@ -316,44 +316,44 @@ public:
 <!-- create list for initial conditions, for now. only very specific patterns are supported -->
 <!-- maybe can be cleared with: <admst:variable select="adms_ic_list" value="" /> -->
 <admst:for-each select="contribution">
-	<!-- catch I(a,b) <+ ddt(V(a,b))  -->
-	<admst:if test="[./rhs/tree/datatypename='function']">
-					<admst:push into="$(ddt_ic_list)" select="./rhs/tree" onduplicate="ignore"/>
-		<admst:if test="[./rhs/tree/name='ddt']">
-			<admst:if test="[./rhs/tree/arguments[position(.)=1]/datatypename='probe']">
-				<admst:if test="[./rhs/tree/arguments[position(.)=1]/branch/pnode=./lhs/branch/pnode and ./rhs/tree/arguments[position(.)=1]/branch/nnode=./lhs/branch/nnode]">
-					<admst:push into="$(adms_ic_list)" select="." onduplicate="ignore"/>
-				</admst:if>
-			</admst:if>
-		</admst:if>
-	</admst:if>
-	<!-- catch I(a,b) <+ c*ddt(V(a,b))  -->
-	<admst:if test="[./rhs/tree/datatypename='mapply_binary']">
-		<admst:if test="[./rhs/tree/name='multtime']">
-			<admst:if test="[./rhs/tree/arg1/datatypename='variable' and ./rhs/tree/arg2/datatypename='function' ]">
-				<admst:message format="datatypename %(./rhs/tree/arg1/datatypename) : %(./rhs/tree/arg2/datatypename)  expr %(./rhs/tree/name)  \n"/>
-				<admst:if test="[./rhs/tree/arg2/name='ddt']">
-					<admst:if test="[./rhs/tree/arg2/arguments[position(.)=1]/datatypename='probe']">
+  <!-- catch I(a,b) <+ ddt(V(a,b))  -->
+  <admst:if test="[./rhs/tree/datatypename='function']">
+          <admst:push into="$(ddt_ic_list)" select="./rhs/tree" onduplicate="ignore"/>
+    <admst:if test="[./rhs/tree/name='ddt']">
+      <admst:if test="[./rhs/tree/arguments[position(.)=1]/datatypename='probe']">
+        <admst:if test="[./rhs/tree/arguments[position(.)=1]/branch/pnode=./lhs/branch/pnode and ./rhs/tree/arguments[position(.)=1]/branch/nnode=./lhs/branch/nnode]">
+          <admst:push into="$(adms_ic_list)" select="." onduplicate="ignore"/>
+        </admst:if>
+      </admst:if>
+    </admst:if>
+  </admst:if>
+  <!-- catch I(a,b) <+ c*ddt(V(a,b))  -->
+  <admst:if test="[./rhs/tree/datatypename='mapply_binary']">
+    <admst:if test="[./rhs/tree/name='multtime']">
+      <admst:if test="[./rhs/tree/arg1/datatypename='variable' and ./rhs/tree/arg2/datatypename='function' ]">
+        <admst:message format="datatypename %(./rhs/tree/arg1/datatypename) : %(./rhs/tree/arg2/datatypename)  expr %(./rhs/tree/name)  \n"/>
+        <admst:if test="[./rhs/tree/arg2/name='ddt']">
+          <admst:if test="[./rhs/tree/arg2/arguments[position(.)=1]/datatypename='probe']">
 
 <!-- hmm, how to store probes??
 <admst:new datatype="probe" arguments="foobar">
-	<admst:variable name="probeA" />
+  <admst:variable name="probeA" />
  select=./lhs/branch/pnode
 </admst:new>
 -->
-							<admst:push into="$(ddt_ic_list)" select="./rhs/tree/arg2" onduplicate="ignore"/>
+              <admst:push into="$(ddt_ic_list)" select="./rhs/tree/arg2" onduplicate="ignore"/>
 
-						<admst:if test="[./rhs/tree/arg2/arguments[position(.)=1]/branch/pnode=./lhs/branch/pnode
-							          and ./rhs/tree/arg2/arguments[position(.)=1]/branch/nnode=./lhs/branch/nnode]">
-							<admst:push into="$(adms_ic_list)" select="." onduplicate="ignore"/>
-							<admst:message format="ic candidate %(.)\n"/>
-						</admst:if>
-					</admst:if>
-				</admst:if>
-			</admst:if>
+            <admst:if test="[./rhs/tree/arg2/arguments[position(.)=1]/branch/pnode=./lhs/branch/pnode
+                        and ./rhs/tree/arg2/arguments[position(.)=1]/branch/nnode=./lhs/branch/nnode]">
+              <admst:push into="$(adms_ic_list)" select="." onduplicate="ignore"/>
+              <admst:message format="ic candidate %(.)\n"/>
+            </admst:if>
+          </admst:if>
+        </admst:if>
+      </admst:if>
 
-		</admst:if>
-	</admst:if>
+    </admst:if>
+  </admst:if>
 </admst:for-each>
 
 class $(DEV_NAME) : public ADMS_BASE
@@ -532,21 +532,21 @@ inline voltage_t _BP(ENode p, ENode n) { return volts_limited(_n[p],_n[n]);}
 
 		enum EMatrixEntries {
 
-		<admst:variable name="local_var" select="II"/>
-		<admst:for-each select="jacobian">
-			<admst:value-of select="column/name"/>
-			<admst:value-of select="row/name"/>
-			<admst:text format="m_%s_%s=%(position(.)-1)"/>
+    <admst:variable name="local_var" select="II"/>
+    <admst:for-each select="jacobian">
+      <admst:value-of select="column/name"/>
+      <admst:value-of select="row/name"/>
+      <admst:text format="m_%s_%s=%(position(.)-1)"/>
 
-			<admst:variable name="local_var" select="$(local_var)I"/>
-			<admst:if test="[position(.)!=count(.)]">
-				<admst:text format=", "/>
-				<admst:if test="[$(local_var)='IIIIIII']">
-					<admst:variable name="local_var" select="I"/>
-					<admst:text format="\n\t\t\t"/>
-				</admst:if>
-			</admst:if>
-		</admst:for-each>
+      <admst:variable name="local_var" select="$(local_var)I"/>
+      <admst:if test="[position(.)!=count(.)]">
+        <admst:text format=", "/>
+        <admst:if test="[$(local_var)='IIIIIII']">
+          <admst:variable name="local_var" select="I"/>
+          <admst:text format="\n\t\t\t"/>
+        </admst:if>
+      </admst:if>
+    </admst:for-each>
 		};
 
 	bool m_required[%(count(jacobian))];	// true if matrix entry is not constant zero for current set of parameters (s. guesstop)
@@ -557,16 +557,16 @@ inline voltage_t _BP(ENode p, ENode n) { return volts_limited(_n[p],_n[n]);}
 	double m_entries_kept[%(count(jacobian))]; // keep_ic, uic etc.
 
 	enum EStates {
-		<admst:variable name="numddt" select="0"/>
-		<admst:for-each select="assignment">
-			<admst:apply-templates select="rhs/tree" match="ddtcollect"/>
-		</admst:for-each>
-		<admst:for-each select="contribution">
-			<admst:apply-templates select="rhs/tree" match="ddtcollect"/>
-		</admst:for-each>
-		<admst:for-each select="$(ddts)">
+    <admst:variable name="numddt" select="0"/>
+    <admst:for-each select="assignment">
+      <admst:apply-templates select="rhs/tree" match="ddtcollect"/>
+    </admst:for-each>
+    <admst:for-each select="contribution">
+      <admst:apply-templates select="rhs/tree" match="ddtcollect"/>
+    </admst:for-each>
+    <admst:for-each select="$(ddts)">
 		_ddt_%(adms/id(.)), // %(.)
-		</admst:for-each>
+    </admst:for-each>
 		_num_states = %(count($ddts)) // $(_num_states)
 	};
 
@@ -681,9 +681,9 @@ class $(COMMON_NAME) : public COMMON_COMPONENT
 	//int param_count()const {return (8 + COMMON_COMPONENT::param_count());}
 <!-- -->
 	public: // initial conditions
-	<admst:for-each select="contribution[is_ic_contribution(.)/[name='x']/value='yes']">
+  <admst:for-each select="contribution[is_ic_contribution(.)/[name='x']/value='yes']">
 		PARAMETER&lt;double&gt; ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode);
-	</admst:for-each>
+  </admst:for-each>
 
 <admst:if test="[$(_num_states)!=0]">
 	public: // storage related
@@ -842,9 +842,9 @@ std::string $(MODEL_NAME)::param_name(int i)const
 {
 	switch(i)
 	{
-		<admst:for-each select="variable[input='yes']">
+    <admst:for-each select="variable[input='yes']">
 		case %(position(.)-1): return(&quot;%(name)&quot;);
-		</admst:for-each>
+    </admst:for-each>
 		default: return(&quot;&quot;);
 	}
 	return(&quot;&quot;);
@@ -860,9 +860,9 @@ std::string $(MODEL_NAME)::param_value(int i) const
 {
 	switch(i)
 	{
-		<admst:for-each select="variable[input='yes']">
+    <admst:for-each select="variable[input='yes']">
 		case %(position(.)-1): return($(var_prefix)%(name).string());
-		</admst:for-each>
+    </admst:for-each>
 		default: return(&quot;&quot;);
 	}
 	return(&quot;&quot;);
@@ -873,9 +873,9 @@ void $(MODEL_NAME)::set_param_by_index(int i, std::string&amp; value, int offset
 	USE(value);
 	switch(i)
 	{
-		<admst:for-each select="variable[input='yes' and scope!='global_instance']">
+    <admst:for-each select="variable[input='yes' and scope!='global_instance']">
 		case %(position(.)-1): $(var_prefix)%(name)=value; break;
-		</admst:for-each>
+    </admst:for-each>
 		default: throw Exception_Too_Many(i, %(count(variable[input='yes'])), offset); break;
 	}
 }
@@ -909,17 +909,17 @@ void $(MODEL_NAME)::set_param_by_name(string Name, string Value)
 void $(COMMON_NAME)::precalc_first(const CARD_LIST* par_scope)
 {
 	USE(par_scope);
-	<admst:for-each select="variable[input='yes' and scope='global_instance']">
-		<admst:apply-templates select="default/tree" match="stringify_expression"/>
-		<admst:choose>
-			<admst:when test="[type='real']">
-				<admst:text format="\te_val(&amp;($(var_prefix)%(name)), (double)%s, par_scope);\n"/>
-			</admst:when>
-			<admst:when test="[type='integer']">
-				<admst:text format="\te_val(&amp;($(var_prefix)%(name)), (int)%s, par_scope);\n"/>
-			</admst:when>
-		</admst:choose>
-	</admst:for-each>
+  <admst:for-each select="variable[input='yes' and scope='global_instance']">
+    <admst:apply-templates select="default/tree" match="stringify_expression"/>
+    <admst:choose>
+      <admst:when test="[type='real']">
+        <admst:text format="\te_val(&amp;($(var_prefix)%(name)), (double)%s, par_scope);\n"/>
+      </admst:when>
+      <admst:when test="[type='integer']">
+        <admst:text format="\te_val(&amp;($(var_prefix)%(name)), (int)%s, par_scope);\n"/>
+      </admst:when>
+    </admst:choose>
+  </admst:for-each>
   <admst:for-each select="$(ddts)">
 	ic_state_%(adms/id(.)).e_val(NOT_INPUT,par_scope);
   </admst:for-each>
@@ -932,21 +932,21 @@ void $(MODEL_NAME)::precalc_first()
 	const CARD_LIST* par_scope = scope();
 	assert(par_scope);
 	MODEL_CARD::precalc_first();
-	<admst:for-each select="variable[input='yes' and scope!='global_instance']">
-		<admst:apply-templates select="default/tree" match="stringify_expression"/>
-		<admst:choose>
-			<admst:when test="[type='real']">
-				<admst:text format="\te_val(&amp;(this-&gt;$(var_prefix)%(name)), (double)%s, par_scope);\n"/>
-			</admst:when>
-			<admst:when test="[type='integer']">
-				<admst:text format="\te_val(&amp;(this-&gt;$(var_prefix)%(name)), (int)%s, par_scope);\n"/>
-			</admst:when>
-		</admst:choose>
-	</admst:for-each>
+  <admst:for-each select="variable[input='yes' and scope!='global_instance']">
+    <admst:apply-templates select="default/tree" match="stringify_expression"/>
+    <admst:choose>
+      <admst:when test="[type='real']">
+        <admst:text format="\te_val(&amp;(this-&gt;$(var_prefix)%(name)), (double)%s, par_scope);\n"/>
+      </admst:when>
+      <admst:when test="[type='integer']">
+        <admst:text format="\te_val(&amp;(this-&gt;$(var_prefix)%(name)), (int)%s, par_scope);\n"/>
+      </admst:when>
+    </admst:choose>
+  </admst:for-each>
 
 	// @(initial_model) block
 	$(MODEL_NAME) *m = this; USE(m);
-	 <admst:apply-templates select="analog" match="analog:initial_model" required="yes"/>
+   <admst:apply-templates select="analog" match="analog:initial_model" required="yes"/>
 }
 // -------------------------------------------------------------------------- //
 void $(MODEL_NAME)::set_dev_type(const std::string&amp; new_type)
@@ -1217,68 +1217,68 @@ void $(DEV_NAME)::tr_iwant_matrix()
 	// done by component: subckt()-&gt;tr_iwant_matrix();
   </admst:if>
   <admst:for-each select="jacobian">
-		<admst:variable  name="myF_par1" select="%(row/name)"/>
-		<admst:variable  name="myF_par2" select="%(column/name)"/>
-		<admst:apply-templates select=".." match="utils_compare_nodes_position"/>
-		<!-- if bigger check if 'smaller' exists -->
-		<admst:if test="[$myF_ret1='bigger']">
-			<admst:variable  name="local_ifelse" select="else"/>
-			<admst:if test="(../jacobian[row/name=$myF_par2 and column/name=$myF_par1])">
-				<admst:variable  name="local_ifelse" select="if"/>
-			</admst:if>
-			<admst:if test="[$local_ifelse='else']">
-				<admst:variable  name="myF_ret1" select="smaller"/>
-				// COUNTER DOESNT EXIST
-			</admst:if>
-		</admst:if>
-		<!-- TODO if there are only node1:node1 jacobian (without any other combinations),
-		     it will not call iwant matrix
-		-->
-		<admst:if test="[$myF_ret1='smaller']">
-			<!-- only if 1st node has smaller position than 2nd -->
-			<admst:text format="\n\tif( m_required[m_$(myF_par1)_$(myF_par2)]"/>
-			<admst:text format=" || m_required[m_$(myF_par2)_$(myF_par1)]"
-				test="../jacobian[row/name=$myF_par2 and column/name=$myF_par1]"/>
-			<admst:text format=" || m_required[m_$(myF_par1)_$(myF_par1)]"
-				test="../jacobian[row/name=$myF_par1 and column/name=$myF_par1]"/>
-			<admst:text format=" || m_required[m_$(myF_par2)_$(myF_par2)]"
-				test="../jacobian[row/name=$myF_par2 and column/name=$myF_par2]"/>
-			<admst:text format=" ) \n\t\ttr_call_iwants(_N($(myF_par1)).m_(), _N($(myF_par2)).m_());\n"/>
-		</admst:if>
-	</admst:for-each>
+    <admst:variable  name="myF_par1" select="%(row/name)"/>
+    <admst:variable  name="myF_par2" select="%(column/name)"/>
+    <admst:apply-templates select=".." match="utils_compare_nodes_position"/>
+    <!-- if bigger check if 'smaller' exists -->
+    <admst:if test="[$myF_ret1='bigger']">
+      <admst:variable  name="local_ifelse" select="else"/>
+      <admst:if test="(../jacobian[row/name=$myF_par2 and column/name=$myF_par1])">
+        <admst:variable  name="local_ifelse" select="if"/>
+      </admst:if>
+      <admst:if test="[$local_ifelse='else']">
+        <admst:variable  name="myF_ret1" select="smaller"/>
+        // COUNTER DOESNT EXIST
+      </admst:if>
+    </admst:if>
+    <!-- TODO if there are only node1:node1 jacobian (without any other combinations),
+         it will not call iwant matrix
+    -->
+    <admst:if test="[$myF_ret1='smaller']">
+      <!-- only if 1st node has smaller position than 2nd -->
+      <admst:text format="\n\tif( m_required[m_$(myF_par1)_$(myF_par2)]"/>
+      <admst:text format=" || m_required[m_$(myF_par2)_$(myF_par1)]"
+        test="../jacobian[row/name=$myF_par2 and column/name=$myF_par1]"/>
+      <admst:text format=" || m_required[m_$(myF_par1)_$(myF_par1)]"
+        test="../jacobian[row/name=$myF_par1 and column/name=$myF_par1]"/>
+      <admst:text format=" || m_required[m_$(myF_par2)_$(myF_par2)]"
+        test="../jacobian[row/name=$myF_par2 and column/name=$myF_par2]"/>
+      <admst:text format=" ) \n\t\ttr_call_iwants(_N($(myF_par1)).m_(), _N($(myF_par2)).m_());\n"/>
+    </admst:if>
+  </admst:for-each>
 	//tr_iwant_matrix_extended();
 }
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::ac_iwant_matrix()
 {
-	<admst:for-each select="jacobian">
-		<admst:variable  name="myF_par1" select="%(row/name)"/>
-		<admst:variable  name="myF_par2" select="%(column/name)"/>
-		<admst:apply-templates select=".." match="utils_compare_nodes_position"/>
-		<!-- if bigger check if 'smaller' exists -->
-		<admst:if test="[$myF_ret1='bigger']">
-			<admst:variable  name="local_ifelse" select="else"/>
-			<admst:if test="(../jacobian[row/name=$myF_par2 and column/name=$myF_par1])">
-				<admst:variable  name="local_ifelse" select="if"/>
-			</admst:if>
-			<admst:if test="[$local_ifelse='else']">
-				<admst:variable  name="myF_ret1" select="smaller"/>
-				// COUNTER DOESNT EXIST
-			</admst:if>
-		</admst:if>
-		<!-- TODO if only equal exists (without any other combinations), it will not call iwant matrix -->
-		<admst:if test="[$myF_ret1='smaller']">
-			<!-- only if 1st node has smaller position than 2nd -->
-			<admst:text format="\n\tif( m_required[m_$(myF_par1)_$(myF_par2)]"/>
-			<admst:text format=" || m_required[m_$(myF_par2)_$(myF_par1)]"
-				test="../jacobian[row/name=$myF_par2 and column/name=$myF_par1]"/>
-			<admst:text format=" || m_required[m_$(myF_par1)_$(myF_par1)]"
-				test="../jacobian[row/name=$myF_par1 and column/name=$myF_par1]"/>
-			<admst:text format=" || m_required[m_$(myF_par2)_$(myF_par2)]"
-				test="../jacobian[row/name=$myF_par2 and column/name=$myF_par2]"/>
-			<admst:text format=" ) \n\t\t_sim->_acx.iwant(_N($(myF_par1)).m_(), _N($(myF_par2)).m_());\n"/>
-		</admst:if>
-	</admst:for-each>
+  <admst:for-each select="jacobian">
+    <admst:variable  name="myF_par1" select="%(row/name)"/>
+    <admst:variable  name="myF_par2" select="%(column/name)"/>
+    <admst:apply-templates select=".." match="utils_compare_nodes_position"/>
+    <!-- if bigger check if 'smaller' exists -->
+    <admst:if test="[$myF_ret1='bigger']">
+      <admst:variable  name="local_ifelse" select="else"/>
+      <admst:if test="(../jacobian[row/name=$myF_par2 and column/name=$myF_par1])">
+        <admst:variable  name="local_ifelse" select="if"/>
+      </admst:if>
+      <admst:if test="[$local_ifelse='else']">
+        <admst:variable  name="myF_ret1" select="smaller"/>
+        // COUNTER DOESNT EXIST
+      </admst:if>
+    </admst:if>
+    <!-- TODO if only equal exists (without any other combinations), it will not call iwant matrix -->
+    <admst:if test="[$myF_ret1='smaller']">
+      <!-- only if 1st node has smaller position than 2nd -->
+      <admst:text format="\n\tif( m_required[m_$(myF_par1)_$(myF_par2)]"/>
+      <admst:text format=" || m_required[m_$(myF_par2)_$(myF_par1)]"
+        test="../jacobian[row/name=$myF_par2 and column/name=$myF_par1]"/>
+      <admst:text format=" || m_required[m_$(myF_par1)_$(myF_par1)]"
+        test="../jacobian[row/name=$myF_par1 and column/name=$myF_par1]"/>
+      <admst:text format=" || m_required[m_$(myF_par2)_$(myF_par2)]"
+        test="../jacobian[row/name=$myF_par2 and column/name=$myF_par2]"/>
+      <admst:text format=" ) \n\t\t_sim->_acx.iwant(_N($(myF_par1)).m_(), _N($(myF_par2)).m_());\n"/>
+    </admst:if>
+  </admst:for-each>
 	//ac_iwant_matrix_extended();
 }
 // -------------------------------------------------------------------------- //
@@ -1846,22 +1846,22 @@ void $(DEV_NAME)::ac_load()
 {
   <admst:if test="[$has_sckt!=0]">
 	subckt()-&gt;ac_load();
-	</admst:if>
+  </admst:if>
 	for(int i=0; i&lt;_num_total_nodes; i++)
 		ac_load_source_point(_n[i], COMPLEX(it0[i], it1[i]));
 
-	<admst:for-each select="jacobian">
-	<admst:value-of select="column/name"/>
-	<admst:value-of select="row/name"/>
-	<admst:value-of select="column/name"/>
-	<admst:value-of select="row/name"/>
-	<admst:value-of select="column/name"/>
-	<admst:value-of select="row/name"/>
-	<admst:value-of select="column/name"/>
-	<admst:value-of select="row/name"/>
+  <admst:for-each select="jacobian">
+  <admst:value-of select="column/name"/>
+  <admst:value-of select="row/name"/>
+  <admst:value-of select="column/name"/>
+  <admst:value-of select="row/name"/>
+  <admst:value-of select="column/name"/>
+  <admst:value-of select="row/name"/>
+  <admst:value-of select="column/name"/>
+  <admst:value-of select="row/name"/>
 	if( m_required[m_%s_%s] )
 		ac_load_point(_N(%s), _N(%s), COMPLEX(m_entries[m_%s_%s], m_entries_old[m_%s_%s] * _sim-&gt;_jomega.imag()));
-	</admst:for-each>
+  </admst:for-each>
 }
 
 // -------------------------------------------------------------------------- //
@@ -1915,35 +1915,35 @@ void $(DEV_NAME)::acLoad()
 void $(DEV_NAME)::pzLoad(COMPLEX s)
 {
 <admst:for-each select="jacobian[static='yes']">
-	<admst:value-of select="column/name"/>
-	<admst:value-of select="row/name"/>
-	<admst:value-of select="column/name"/>
-	<admst:value-of select="row/name"/>
-	<admst:value-of select="column/name"/>
-	<admst:value-of select="row/name"/>
-	<admst:text format="\n\tif(m_required[m_%s_%s]) m_entries[m_%s_%s] += m_ac_static[m_%s_%s] * s.real(); // static"/>
+  <admst:value-of select="column/name"/>
+  <admst:value-of select="row/name"/>
+  <admst:value-of select="column/name"/>
+  <admst:value-of select="row/name"/>
+  <admst:value-of select="column/name"/>
+  <admst:value-of select="row/name"/>
+  <admst:text format="\n\tif(m_required[m_%s_%s]) m_entries[m_%s_%s] += m_ac_static[m_%s_%s] * s.real(); // static"/>
 </admst:for-each>
 
 <admst:text format="\n"/>
 <admst:for-each select="jacobian[dynamic='yes']">
-	<admst:value-of select="column/name"/>
-	<admst:value-of select="row/name"/>
-	<admst:value-of select="column/name"/>
-	<admst:value-of select="row/name"/>
-	<admst:value-of select="column/name"/>
-	<admst:value-of select="row/name"/>
-	<admst:text format="\n\tif(m_required[m_%s_%s]) m_entries[m_%s_%s] += m_ac_dynamic[m_%s_%s] * s.real(); //dynamic"/>
+  <admst:value-of select="column/name"/>
+  <admst:value-of select="row/name"/>
+  <admst:value-of select="column/name"/>
+  <admst:value-of select="row/name"/>
+  <admst:value-of select="column/name"/>
+  <admst:value-of select="row/name"/>
+  <admst:text format="\n\tif(m_required[m_%s_%s]) m_entries[m_%s_%s] += m_ac_dynamic[m_%s_%s] * s.real(); //dynamic"/>
 </admst:for-each>
 
 <admst:text format="\n"/>
 <admst:for-each select="jacobian[dynamic='yes']">
-	<admst:value-of select="column/name"/>
-	<admst:value-of select="row/name"/>
-	<admst:value-of select="column/name"/>
-	<admst:value-of select="row/name"/>
-	<admst:value-of select="column/name"/>
-	<admst:value-of select="row/name"/>
-	<admst:text format="\n\tif(m_required[m_%s_%s]) m_entries_old[m_%s_%s] += m_ac_dynamic[m_%s_%s] * s.imag(); //dynamic"/>
+  <admst:value-of select="column/name"/>
+  <admst:value-of select="row/name"/>
+  <admst:value-of select="column/name"/>
+  <admst:value-of select="row/name"/>
+  <admst:value-of select="column/name"/>
+  <admst:value-of select="row/name"/>
+  <admst:text format="\n\tif(m_required[m_%s_%s]) m_entries_old[m_%s_%s] += m_ac_dynamic[m_%s_%s] * s.imag(); //dynamic"/>
 </admst:for-each>
 }
 #endif
@@ -2810,7 +2810,7 @@ inline double d_doh(double x)          {return  exp(x)/(exp(x) + 1); }
             <admst:value-to select="/simulator/tmp" value="m->$(var_prefix)%(name).has_good_value()"/>
           </admst:when>
           <admst:when test="[parametertype='instance']">
-						<admst:value-to select="/simulator/tmp" value="/*instance*/$(var_prefix)%(name).has_good_value()"/>
+            <admst:value-to select="/simulator/tmp" value="/*instance*/$(var_prefix)%(name).has_good_value()"/>
           </admst:when>
           <admst:otherwise>
             <admst:error format="$given(%s): should not be reached\n"/>
@@ -4054,16 +4054,16 @@ inline double d_doh(double x)          {return  exp(x)/(exp(x) + 1); }
     <admst:value-to select="/simulator/tmp" value="m-&gt;$(var_prefix)%s"/>
   </admst:if>
   <admst:if test="[input='yes' and parametertype='instance']">
-		<admst:value-to select="/simulator/tmp" value="/*instance*/&gt;$(var_prefix)%s"/>
+    <admst:value-to select="/simulator/tmp" value="/*instance*/&gt;$(var_prefix)%s"/>
   </admst:if>
   <admst:if test="[input='no' and scope='global_model']">
     <admst:value-to select="/simulator/tmp" value="m-&gt;$(var_prefix)%s"/>
   </admst:if>
   <admst:if test="[input='no' and scope='global_instance']">
-		<admst:value-to select="/simulator/tmp" value="/*gli*/$(var_prefix)%s"/>
+    <admst:value-to select="/simulator/tmp" value="/*gli*/$(var_prefix)%s"/>
   </admst:if>
   <admst:if test="[parametertype!='analogfunction' and scope='local']">
-		<admst:value-to select="/simulator/tmp" value="/*else*/%s"/>
+    <admst:value-to select="/simulator/tmp" value="/*else*/%s"/>
   </admst:if>
 </admst:template>
 
@@ -6424,7 +6424,7 @@ and name!='initializeInstance')]">
       <admst:variable name="e" select="m-&gt;$(var_prefix)%(name)"/>
     </admst:when>
     <admst:when test="[input='yes' and parametertype='instance']">
-			<admst:variable name="e" select="$(instancevar)$(var_prefix)%(name)"/>
+      <admst:variable name="e" select="$(instancevar)$(var_prefix)%(name)"/>
     </admst:when>
     <admst:when test="[input='no' and scope='global_model']">
       <admst:variable name="e" select="m-&gt;$(var_prefix)%(name)"/>
@@ -6477,7 +6477,7 @@ and name!='initializeInstance')]">
 
   <admst:choose>
     <admst:when test="[.=$pprobe]">
-			<admst:variable name="ep" select=" /*pprobe*/ $(ddtp) "/>
+      <admst:variable name="ep" select=" /*pprobe*/ $(ddtp) "/>
     </admst:when>
     <admst:otherwise>
       <admst:variable name="ep" select="0. /*pprobe*/"/>
@@ -6487,7 +6487,7 @@ and name!='initializeInstance')]">
   <admst:if test="$qprobe">
   <admst:choose>
     <admst:when test="[.=$qprobe]">
-			<admst:variable name="eq" select=" /*qprobe*/$(ddtp) "/>
+      <admst:variable name="eq" select=" /*qprobe*/$(ddtp) "/>
     </admst:when>
     <admst:otherwise>
       <admst:variable name="eq" select="0. /*qprobe*/ "/>
@@ -7176,18 +7176,18 @@ and name!='initializeInstance')]">
       <!-- --------------i
       <admst:text  format="//before  DDT: ep $ep\n"/>
       <admst:variable name="xp"/>
-			<admst:apply-templates select="." match="DDT"/> ------ -->
+      <admst:apply-templates select="." match="DDT"/> ------ -->
 
 			/* function ddt %(.)*/
 
-			<admst:variable name="ddtp" select="keep_%(adms/id(.))"/>
-			<admst:variable name="pddt" select="%(adms/id(.))"/>
+      <admst:variable name="ddtp" select="keep_%(adms/id(.))"/>
+      <admst:variable name="pddt" select="%(adms/id(.))"/>
       <admst:apply-templates select="arguments[1]" match="ddx"/>
-			<admst:variable name="ddtp" select="1."/>
+      <admst:variable name="ddtp" select="1."/>
       <admst:variable name="x" select="$e"/>
       <admst:variable name="xp" select="$ep"/>
       <admst:variable name="xq" select="$eq"/>
-			<admst:variable name="xpq" select="$epq"/>
+      <admst:variable name="xpq" select="$epq"/>
 #if 0
 			* x $x
 			* xp $xp 
