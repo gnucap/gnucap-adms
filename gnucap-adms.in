@@ -28,6 +28,7 @@ trace=
 opt=0
 ndebug=
 gdb=
+cppflags=-I@includedir@/@PACKAGE@ 
 
 for arg in $*; do
 	case $arg in
@@ -38,12 +39,19 @@ for arg in $*; do
 			$cmd
 
 			if [ $compile = yes ]; then
-				cmd="@CXX@ $ndebug $trace $gdb -O$opt -I@includedir@/@PACKAGE@ $(gnucap-conf --cppflags) -shared -fPIC \
+				cmd="@CXX@ $ndebug $trace $gdb -O$opt $cppflags $(gnucap-conf --cppflags) -shared -fPIC \
 				    ${arg%.va}.cc -L@libdir@ -le_adms -o ${arg%.va}.so $RPATH"
 				[ $quiet = no ] && echo compiling ${arg%.va}.so
 				[ $verbose = no ] || echo $cmd
 				$cmd
 			fi
+			;;
+		*.cc)
+			cmd="@CXX@ $ndebug $trace $gdb -O$opt $cppflags $(gnucap-conf --cppflags) -shared -fPIC \
+				$arg -L@libdir@ -le_adms -o ${arg%.cc}.so $RPATH"
+			[ $quiet = no ] && echo compiling ${arg%.cc}.so
+			[ $verbose = no ] || echo $cmd
+			$cmd
 			;;
 		--compile|-c)
 			compile=yes
@@ -67,8 +75,13 @@ for arg in $*; do
 		--debug|-d)
 			adms_dbg_xml=yes
 			;;
+		--cppflags)
+			echo $cppflags
+			exit 0
+			;;
 		--help|*)
 			echo -e $usage
+			exit 0
 			;;
 	esac
 done
