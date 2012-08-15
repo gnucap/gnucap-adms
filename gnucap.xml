@@ -493,13 +493,13 @@ class $(DEV_NAME) : public ADMS_BASE
   </admst:for-each>
   <admst:text format=" _num_total_nodes=%(count(node[discipline/name='thermal' and grounded='no']))+_num_enodes"/>
 		};
-  <admst:if test="[count(node[discipline/name='agedata' and grounded='no'])!=0]">
+  <admst:if test="[count(node[discipline/name='degradational' and grounded='no'])!=0]">
 		enum ANode {
-    <admst:for-each select="node[discipline/name='agedata' and grounded='no']" separator=",">
+    <admst:for-each select="node[discipline/name='degradational' and grounded='no']" separator=",">
       <admst:value-of select="name"/>
         <admst:text format="\n\t\t\t$node_prefix%s=%(position(.)-1), // %(location), %(direction)"/>
       </admst:for-each>
-    <admst:text format="\n\t\t\t_num_agedata_nodes=%(count(node[discipline/name='agedata' and grounded='no']))"/>
+    <admst:text format="\n\t\t\t_num_adp_nodes=%(count(node[discipline/name='degradational' and grounded='no']))"/>
 		};
   </admst:if>
 
@@ -518,11 +518,19 @@ inline double _BR(int p, int n) {
 
 // discipline wrapped value
 #define NP(p) _NP($(node_prefix) ## p)
-inline voltage_t _NP(ENode p){ return min(1000.,max(-1000., _n[p].v0()) ); } 
+inline voltage_t _NP(ENode p){
+	return min(1000.,max(-1000., _n[p].v0()) );
+}
 inline double _NP(TNode p){
 	assert(is_number(_n[p].v0()));
 	return _n[p].v0() + P_CELSIUS0;
-} 
+}
+<admst:if test="[count(node[discipline/name='degradational' and grounded='no'])!=0]">
+inline double _NP(ANode p){
+	assert(is_number(_n[p].v0()));
+	_n[p].v0();
+}
+</admst:if>
 #define BP(p,n) _BP($(node_prefix) ## p, $(node_prefix) ## n)
 inline voltage_t _BP(ENode p, ENode n) { return volts_limited(_n[p],_n[n]);}
 
@@ -1158,9 +1166,9 @@ void $(DEV_NAME)::expand()
 		}
 <admst:for-each select="instance">
 		if (!_%(name)) {
-			const CARD* p = device_dispatcher[&quot;%(module)&quot;];
-			assert(p);
-			_%(name) = dynamic_cast&lt;COMPONENT*&gt;(p-&gt;clone());
+			const CARD* p = LANGUAGE::find_proto(&quot;%(module)&quot;, this);
+			if(!p) throw Exception("cannot find '%(module)'. Load module first?");
+			_%(name) = dynamic_cast&lt;COMPONENT*&gt;(p-&gt;clone_instance());
 			assert(_%(name));
 			subckt()-&gt;push_front(_%(name));
 		}
