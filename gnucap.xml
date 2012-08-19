@@ -32,6 +32,7 @@
 <admst:variable name="instancevar" select="c->"/>
 <admst:variable name="modelvar" select="m->"/>
 <admst:variable name="node_prefix" select="n_"/>
+<admst:variable name="cont_prefix" select="c_"/>
 <admst:variable name="state_prefix" select="ddt_"/>
 <admst:variable name="ddt_type" select="x_"/>
 
@@ -216,18 +217,6 @@
 #define DEVICE_TYPE &quot;dev_$(module)&quot;
 #define MODEL_TYPE &quot;$(module)&quot;
 
-#define MIN_NET_NODES 0
-#define MAX_NET_NODES %(count(node[grounded='no' and location='external']))
-#define INTERNAL_NODES %(count(node[grounded='no' and location='internal']))
-
- 
-<admst:text format="static std::string port_names[] = {"/>
-<admst:join select="node[grounded='no' and location='external']" separator=", ">
-   	<admst:value-of select="name"/>
-   	<admst:text format="&quot;%s&quot;"/>
-</admst:join>
-<admst:text format="};\n"/>
-
 #define CONSTCtoK (273.15) // also in gnucap/constans.h P_CELSIUS0
 
 #define EXIT_IF_ISNAN(var) assert(is_number(var));
@@ -243,6 +232,8 @@ inline void _used(double)  {}
 
 // counted ddts %(count($ddts))
 <admst:variable name="_num_states" select="%(count($ddts))"/>
+// there are nodes that work different... hmmm
+<admst:variable name="_num_stamp_nodes" select="%(count(node[grounded='no' and discipline/name!='degradational']))"/>
 
 class $(DEV_NAME);
 class $(MODEL_NAME) : public MODEL_CARD {
@@ -375,11 +366,12 @@ class $(DEV_NAME) : public ADMS_BASE
 		char id_letter()const	{untested();return SPICE_LETTER[0];}
 		bool print_type_in_spice()const {return true;}
 		std::string value_name()const {return VALUE_NAME;}
-		uint_t max_nodes()const {return MAX_NET_NODES;}
-		uint_t min_nodes()const {return MIN_NET_NODES;}
+		uint_t max_nodes()const {return %(count(node[grounded='no' and location='external']));}
+		uint_t min_nodes()const {return 0;}
 		uint_t matrix_nodes()const {return %(count(node[grounded='no']));}
+		// uint_t matrix_nodes()const {return net_nodes() + int_nodes();}
 		uint_t net_nodes()const {return _net_nodes;}
-		uint_t int_nodes()const {return INTERNAL_NODES;}
+		uint_t int_nodes()const {return %(count(node[grounded='no' and location='internal']));}
 		CARD* clone()const {return new $(DEV_NAME)(*this);}
 
 		void precalc_first();
@@ -428,9 +420,24 @@ class $(DEV_NAME) : public ADMS_BASE
 
 	public: // ports
 		std::string port_name(uint_t i)const {
+			assert(i &lt; max_nodes());
+			return node_name(i);
+		}
+	protected: //nodes
+		std::string node_name(uint_t i)const {
+			static std::string names[] = {
+<admst:join select="node[grounded='no' and location='external']" separator=", ">
+   	<admst:value-of select="name"/>
+   	<admst:text format="\t\t\t\t&quot;%s&quot;"/>
+</admst:join>
+<admst:for-each select="node[grounded='no' and location='internal']">
+   	<admst:value-of select="name"/>
+   	<admst:text format=",\n\t\t\t\t&quot;%s&quot;"/>
+</admst:for-each>
+			};
 			itested();
-			assert(i &lt; MAX_NET_NODES);
-			return port_names[i];
+			assert(i &lt; max_nodes()+int_nodes());
+			return names[i];
 		}
 
 	private: // parameters
@@ -476,28 +483,43 @@ class $(DEV_NAME) : public ADMS_BASE
 	private: // analog functions from va
 	<admst:apply-templates select="/module" match="analogfunctionH"/>
 
-	protected: // node stuff
+	private: // node numbers
+		// stick to gnucap node ordering (external first)
+		enum __Node {
+  <admst:join select="node[grounded='no' and location='external']" separator=",">
+    <admst:text format="\n\t\t\t__%(name)=%(position(.)-1)"/>
+  </admst:join>
+  <admst:for-each select="node[grounded='no' and location='internal']">,
+			__%(name) /* %(location) %(direction) %(discipline) */
+  </admst:for-each>,
+			_num_nodes
+		};
+		// map nodenames to itl slots
+		// some disciplines dont have itls
+		enum __CNode {
+  <admst:join select="node[grounded='no' and discipline/name!='degradational' and location='external']" separator=",">
+    <admst:text format="\n\t\t\t$(cont_prefix)%(name)=%(position(.)-1)"/>
+  </admst:join>
+  <admst:for-each select="node[grounded='no' and discipline/name!='degradational' and location='internal']">,
+			$(cont_prefix)%(name) /* %(location) %(direction) %(discipline) */
+  </admst:for-each>
+		};
+	protected: // nodes sorted according to discipline
 		enum ENode {
 			n_GND=-1,
   <admst:join select="node[discipline/name='electrical' and grounded='no']" separator=",">
-    <admst:value-of select="name"/>  
-    <admst:text format="\n\t\t\t$node_prefix%s=%(position(.)-1)"/>
-    <admst:text test="[position(.)=count(.)]" format=", _num_enodes=%(count(.))"/>
+    <admst:text format="\n\t\t\t$node_prefix%(name)=__%(name)"/>
   </admst:join>
 		};
 		enum TNode {
   <admst:for-each select="node[discipline/name='thermal' and grounded='no']" separator=",">
-    <admst:value-of select="name"/>
-    <admst:text format="\n\t\t\t$node_prefix%s=%(position(.)-1)+_num_enodes,"/>
-
+    <admst:text format="\n\t\t\t$node_prefix%(name)=__%(name),"/>
   </admst:for-each>
-  <admst:text format=" _num_total_nodes=%(count(node[discipline/name='thermal' and grounded='no']))+_num_enodes"/>
 		};
   <admst:if test="[count(node[discipline/name='degradational' and grounded='no'])!=0]">
 		enum ANode {
     <admst:for-each select="node[discipline/name='degradational' and grounded='no']" separator=",">
-      <admst:value-of select="name"/>
-        <admst:text format="\n\t\t\t$node_prefix%s=%(position(.)-1), // %(location), %(direction)"/>
+        <admst:text format="\n\t\t\t$node_prefix%(name)=__%(name),"/>
       </admst:for-each>
     <admst:text format="\n\t\t\t_num_adp_nodes=%(count(node[discipline/name='degradational' and grounded='no']))"/>
 		};
@@ -537,9 +559,9 @@ inline voltage_t _BP(ENode p, ENode n) { return volts_limited(_n[p],_n[n]);}
 #define _N(n) _n[$(node_prefix) ## n]
 
 	private:
-		double it0[_num_total_nodes];
-		double it1[_num_total_nodes];
-		double i_kept[_num_total_nodes];
+		double it0[$_num_stamp_nodes];
+		double it1[$_num_stamp_nodes];
+		double i_kept[$_num_stamp_nodes];
 
 		enum EMatrixEntries {
 
@@ -993,10 +1015,12 @@ $(DEV_NAME)::$(DEV_NAME)()
 	attach_common(&amp;Default_$(COMMON_NAME));
 
 	_n = _nodes;
-	for (unsigned ii = 0; ii &lt; matrix_nodes(); ++ii){
-		assert(!(_n[ii].n_()));
-	}
-
+	uint_t i = 0;
+<admst:for-each select="node[grounded='no']" separator=";">
+	// %(name) %(discipline) %(location)
+  <admst:text test="[discipline/name='degradational']" format="\n\t_n[i].set_adp();"/>
+	assert(!(_n[i++].n_()));
+</admst:for-each>
 
 	for (int ii=0; ii&lt;OPT::_keep_time_steps; ++ii){
 		// not here!
@@ -1021,11 +1045,14 @@ $(DEV_NAME)::$(DEV_NAME)(const $(DEV_NAME)&amp; p) :
 	}
 
 	_n = _nodes;
-	for (unsigned ii = 0; ii &lt; matrix_nodes(); ++ii)
+	for (unsigned ii = 0; ii &lt; int_nodes() + max_nodes(); ++ii){
 		_n[ii] = p._n[ii];
+		trace3("$(DEV_NAME)::$(DEV_NAME)", ii, _n[ii].is_adp(), p._n[ii].is_adp());
+	}
 
-	for (int ii=0; ii&lt;OPT::_keep_time_steps; ++ii)
+	for (int ii=0; ii&lt;OPT::_keep_time_steps; ++ii){
 		_states[ii] = NULL;
+	}
 }
 // -------------------------------------------------------------------------- //
 <admst:if test="[$(_num_states)!=0]">
@@ -1138,22 +1165,20 @@ void $(DEV_NAME)::expand()
 	if (_sim->is_first_expand()) {
 		precalc_first();
 		precalc_last();
-		std::string node_names[] = {
-         	<admst:join select="node[grounded='no']" separator=", ">
-					<admst:value-of select="name"/>
-					<admst:text format="&quot;%s&quot;"/>
-          	</admst:join>
-        	<admst:text format=" };\n"/>
-		trace4(&quot;DEV_ADMS::expand nodes&quot;,  net_nodes() , max_nodes() , matrix_nodes(), int_nodes());
+		trace4("$(DEV_NAME)::expand nodes", net_nodes(), max_nodes(), matrix_nodes(), int_nodes());
+<admst:for-each select="node[grounded='no']" separator=";">
+		// %(name) %(discipline) %(location)
+</admst:for-each>
+
 		for(unsigned ii = net_nodes(); ii &lt; matrix_nodes(); ++ii) {
-			if( !_n[ii].n_() ) {
+			if( !_n[ii].n_() && !_n[ii].is_adp()) {
 				if( ii &lt; max_nodes() ) {
-					trace1(&quot;node between _net_nodes and max_node(): set to ground: &quot;, ii);
+					trace1("$(DEV_NAME)::expand node between _net_nodes and max_nodes(): set to ground", ii);
 					_n[ii].set_to_ground(this);
 				}
 				else {
-					trace1(&quot;node between max_nodes() and matrix_nodes(): alloc new: &quot;, ii);
-					_n[ii].new_model_node(node_names[ii], this);
+					trace1("$(DEV_NAME)::expand node between max_nodes() and matrix_nodes(): alloc new", ii);
+					_n[ii].new_model_node(node_name(ii), this);
 				}
 			}
 		}
@@ -1161,23 +1186,40 @@ void $(DEV_NAME)::expand()
 		assert(max_nodes() != 0);
 		for (unsigned ii = 0; ii &lt; matrix_nodes(); ++ii)
 		{
-			trace1(&quot;DEV_ADMS::expand matrix node check&quot;, ii);
-			assert(_n[ii].n_());
+			trace2("$(DEV_NAME)::expand matrix node check", ii, _n[ii].is_adp());
+			assert(_n[ii].n_() || _n[ii].is_adp() );
 		}
 <admst:for-each select="instance">
 		if (!_%(name)) {
+			trace1("$(DEV_NAME)::expand, instanciating", hp(_%(name)));
+			// FIXME: recycle u_lang or move to e_adms.cc
 			const CARD* p = LANGUAGE::find_proto(&quot;%(module)&quot;, this);
 			if(!p) throw Exception("cannot find '%(module)'. Load module first?");
 			_%(name) = dynamic_cast&lt;COMPONENT*&gt;(p-&gt;clone_instance());
+			trace2("$(DEV_NAME)::expand", long_label(), _%(name)->has_common());
+			if(_%(name)->has_common()){
+				trace2("$(DEV_NAME)::expand", long_label(),_%(name)->mutable_common()->model());
+
+				if(dynamic_cast&lt;const MODEL_CARD*&gt;(p)){
+					untested();
+					trace2("$(DEV_NAME)::expand attaching submodel", _%(name)->common()->modelname(), _%(name)->mutable_common()->model());
+					_%(name)->set_dev_type("%(module)");
+					_%(name)->mutable_common()->attach_model(_%(name));
+
+				}
+			}
+
 			assert(_%(name));
 			subckt()-&gt;push_front(_%(name));
 		}
 		{
 			node_t nodes[] = {
   <admst:join select="terminal" separator=",">
-			_n[n_%(nodefrominstantiator) /*%(nodefrommodule)*/]
-	</admst:join> };
-			_%(name)->set_parameters("%(name)", this, NULL, 0/*value*/, 0, NULL, %(count(terminal)), nodes);
+				_n[n_%(nodefrominstantiator) /*%(nodefrommodule)*/]
+  </admst:join> };
+			trace2("expand", long_label(),_%(name)->mutable_common()->model());
+			_%(name)->set_parameters("%(name)", this, _%(name)->mutable_common(), 0/*value*/, 0, NULL, %(count(terminal)), nodes);
+			trace2("expand", long_label(),_%(name)->mutable_common()->model());
 
 			PARAMETER&lt;double&gt;tmp; USE(tmp);
   <admst:for-each select="parameterset">
@@ -1189,6 +1231,11 @@ void $(DEV_NAME)::expand()
 	}
 	else
 	untested();
+  <admst:if test="[$has_sckt!=0]">
+	assert(subckt());
+	trace0("$(DEV_NAME)::expand: expanding netlist");
+	subckt()->expand();
+  </admst:if>
 }
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::precalc_first()
@@ -1196,7 +1243,7 @@ void $(DEV_NAME)::precalc_first()
 	ADMS_BASE::precalc_first();
   <admst:if test="[$has_sckt!=0]">
 	if(subckt()) subckt()-&gt;precalc_first();
-	</admst:if>
+  </admst:if>
 // 	&lt;admst:for-each select=&quot;variable[input='yes']&quot;&gt;
 // 	 %(name).e_val(0,scope());
 // 	&lt;/admst:for-each&gt;
@@ -1346,8 +1393,8 @@ void $(DEV_NAME)::tr_begin()
 </admst:if>
 
 	// like d_vs.
-	// &lt;admst:text format=&quot;\\n\\tfor(int i=0; i&lt;_num_total_nodes; i++)&quot;/&gt;
-	for(int i=0; i&lt;_num_total_nodes; i++)
+	// &lt;admst:text format=&quot;\\n\\tfor(int i=0; i&lt;$_num_stamp_nodes; i++)&quot;/&gt;
+	for(int i=0; i&lt;$_num_stamp_nodes; i++)
 		it0[i] = it1[i]=0;
 
         //     in storag:
@@ -1358,7 +1405,7 @@ void $(DEV_NAME)::tr_begin()
 	internal_precalc();
 
 	// load static ??
-        //&lt;admst:text format=&quot;\\n\\tfor(int i=0; i&lt;_num_total_nodes; i++)&quot;/&gt;
+        //&lt;admst:text format=&quot;\\n\\tfor(int i=0; i&lt;$_num_stamp_nodes; i++)&quot;/&gt;
         //	tr_load_source_point(_n[i], &amp;(it0[i]), &amp;(it1[i]));
         //
 
@@ -1478,22 +1525,22 @@ bool $(DEV_NAME)::tr_needs_eval()const
 	}
 
 	// check the node voltages, reference to ground
-	for (unsigned ii=0; ii&lt;matrix_nodes(); ++ii){
-		// probably simpler: if (!conchk(_sim-&gt;_n[ii].vt1(), _n[ii].v0(), 0, OPT::reltol*OPT::bypasstol))
-		if (!conchk(_sim-&gt;_vt1[_n[ii].m_()], _n[ii].v0(), 0, OPT::reltol*OPT::bypasstol)) {
-			trace1(&quot;$(DEV_NAME)::tr_needs_eval node&quot;, ii);
-			return true;
-		}
+	//for (unsigned ii=0; ii&lt;matrix_nodes(); ++ii)
+<admst:for-each select="node[grounded='no' and discipline/name!='degradational']">
+	// probably simpler: if (!conchk(_sim->_n[ii].vt1(), _n[ii].v0(), 0, OPT::reltol*OPT::bypasstol))
+	if (!conchk(_sim->_vt1[_n[$node_prefix%(name)].m_()], _n[$node_prefix%(name)].v0(), 0, OPT::reltol*OPT::bypasstol)) {
+		return true;
 	}
+</admst:for-each>
 
 	// check the node voltages, reference to each other
 	for (unsigned ii=0; ii&lt;matrix_nodes(); ++ii){
 		for (unsigned jj=0; jj&lt;ii; ++jj) {
 			// node_t has no vt1... if (!conchk( ( _n[ii].vt1()  - _n[jj].vt1() ),
-			// assert(  _n[ii].vt1() = _sim-&gt;_vt1[_n[ii].m_()] );
-			if (!conchk((_sim-&gt;_vt1[_n[ii].m_()] - _sim-&gt;_vt1[_n[jj].m_()]),
+			// assert(  _n[ii].vt1() = _sim->_vt1[_n[ii].m_()] );
+			if (!conchk((_sim->_vt1[_n[ii].m_()] - _sim->_vt1[_n[jj].m_()]),
 			(_n[ii].v0() - _n[jj].v0()), 0, OPT::reltol*OPT::bypasstol)) {
-				trace2(&quot;$(DEV_NAME)::tr_needs_eval&quot;, ii, jj);
+				trace2("$(DEV_NAME)::tr_needs_eval", ii, jj);
 				return true;
 			}
 		}
@@ -1553,7 +1600,7 @@ bool $(DEV_NAME)::do_tr()
 	}
 </admst:if>
 
-	for(int i=0; converged() &amp;&amp; i&lt;_num_total_nodes; i++)
+	for(int i=0; converged() &amp;&amp; i&lt;$_num_stamp_nodes; i++)
 	{
 		assert(is_number(it0[i]));
 		bool conv= conchk(it0[i], it1[i]);
@@ -1574,7 +1621,7 @@ bool $(DEV_NAME)::do_tr()
 	}
 
 	bool needs_load = !converged();
-	for (int i = 0; !needs_load &amp;&amp; i &lt; _num_total_nodes; i++) {
+	for (int i = 0; !needs_load &amp;&amp; i &lt; $_num_stamp_nodes; i++) {
 		if (m_required[i]){
 			needs_load = !conchk(it0[i], it1[i], 0, OPT::reltol*OPT::loadtol);
 		}
@@ -1617,7 +1664,7 @@ void $(DEV_NAME)::keep_ic()
 	c-&gt;set_states(s);
 </admst:if>
 	trace1(&quot;$(DEV_NAME)::keep_ic&quot;, long_label() );
-	notstd::copy_n(it0, (int)_num_total_nodes , i_kept);
+	notstd::copy_n(it0, $_num_stamp_nodes , i_kept);
 }
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::store_values()
@@ -1656,9 +1703,9 @@ void $(DEV_NAME)::tr_load()
 	</admst:if>
 	trace0(&quot;$(DEV_NAME)::tr_load&quot;);
           /// BUG: only dynamic!
-	for(int i=0; i&lt;_num_total_nodes; i++){
+	for(int i=0; i&lt;$_num_stamp_nodes; i++){
 		trace3(&quot;$(DEV_NAME)::tr_load&quot;, i,  (it0[i]),  (it1[i]));
-    tr_load_source_point(_n[i], &amp;(it0[i]), &amp;(it1[i]));
+		tr_load_source_point(_n[i], &(it0[i]), &amp;(it1[i]));
 
 		trace3(&quot;tr_load done&quot;, &quot;i&quot;,     (it0[i]),  (it1[i]));
 	}
@@ -1781,7 +1828,7 @@ void $(DEV_NAME)::tr_accept()
 
 	// hmmm
 	if(_sim-&gt;uic_now()){
-		std::fill_n(it0, (int)_num_total_nodes, 0);
+		std::fill_n(it0, (int)$_num_stamp_nodes, 0);
 #define NOJAC
 #ifdef HAVE_KEEPCOEFF
 # define _DDT( qq, stateno) (( _states[0][stateno*2] - _states[1][stateno*2] ) * OPT::keepcoeff)
@@ -1800,7 +1847,7 @@ void $(DEV_NAME)::tr_accept()
 double $(DEV_NAME)::tr_probe_num(const std::string&amp; x)const
 {
 	static std::string state_names[_num_states];
-	static std::string contr_names[_num_total_nodes];
+	static std::string contr_names[$_num_stamp_nodes];
 
   <admst:apply-templates select="." match="commonmodel"/>
 
@@ -1812,7 +1859,7 @@ double $(DEV_NAME)::tr_probe_num(const std::string&amp; x)const
 		ss &lt;&lt; i;
 		state_names[i] = &quot;state&quot; + ss.str();
 	}
-	for(int i=0; i&lt;_num_total_nodes; i++)
+	for(int i=0; i&lt;$_num_stamp_nodes; i++)
 	{
 		std::stringstream ss;
 		ss &lt;&lt; i;
@@ -1827,7 +1874,7 @@ double $(DEV_NAME)::tr_probe_num(const std::string&amp; x)const
 		if (Umatch(x, state_names[ii] + ' '))
 			return _states[0][ii];
 	// node probes
-	for(int i=0; i&lt;_num_total_nodes; i++)
+	for(int i=0; i&lt;$_num_stamp_nodes; i++)
 		if( Umatch(x, contr_names[i] + ' ') )
 			return it0[i];
 
@@ -1855,8 +1902,8 @@ void $(DEV_NAME)::do_ac()
   assert(OPT::_keep_time_steps &lt;= 8);
   assert(_dt == NOT_VALID || conchk(_dt, _time[0] - _time[1]));
 
-  std::fill_n(it0, (int)_num_total_nodes, 0);
-  std::fill_n(it1, (int)_num_total_nodes, 0);
+  std::fill_n(it0, (int)$_num_stamp_nodes, 0);
+  std::fill_n(it1, (int)$_num_stamp_nodes, 0);
 
   std::fill_n(m_entries, %(count(jacobian)), 0);
   std::fill_n(m_entries_old, %(count(jacobian)), 0);
@@ -1875,7 +1922,7 @@ void $(DEV_NAME)::ac_load()
   <admst:if test="[$has_sckt!=0]">
 	subckt()-&gt;ac_load();
   </admst:if>
-	for(int i=0; i&lt;_num_total_nodes; i++)
+	for(int i=0; i&lt;$_num_stamp_nodes; i++)
 		ac_load_source_point(_n[i], COMPLEX(it0[i], it1[i]));
 
   <admst:for-each select="jacobian">
@@ -1987,7 +2034,7 @@ bool $(DEV_NAME)::conv_check()const
 	}
 </admst:if>
 
-	for(unsigned i=0; converged() &amp;&amp; i&lt;_num_total_nodes; i++) {
+	for(unsigned i=0; converged() &amp;&amp; i&lt;$_num_stamp_nodes; i++) {
 		bool conv = conchk(it0[i], it1[i]);
 		if (!conv) return false;
 	}
@@ -2008,7 +2055,7 @@ bool $(DEV_NAME)::conv_check()const
 void $(DEV_NAME)::ac_eval()
 {
 	trace0(&quot;$(DEV_NAME)::ac_eval&quot;);
-	std::fill_n(it0, (int)_num_total_nodes, 0);
+	std::fill_n(it0, (int)$_num_stamp_nodes, 0);
 	std::fill_n(m_entries, %(count(jacobian)), 0);
 	std::fill_n(m_entries_old, %(count(jacobian)), 0);
 
@@ -2068,7 +2115,7 @@ double $(DEV_NAME)::tr_c_to_g(double c, double g)const
 void $(DEV_NAME)::tr_eval()
 {
 	trace1("$(DEV_NAME)::tr_eval", _sim->analysis_is_static());
-	std::fill_n(it0, (int)_num_total_nodes, 0);
+	std::fill_n(it0, (int)$_num_total_nodes, 0);
 	std::fill_n(m_entries, %(count(jacobian)), 0);
 
 <admst:apply-templates select="analog/code[datatypename='block']/variable" match="generate_c:declare_variable"/>
@@ -8300,9 +8347,9 @@ and name!='initializeInstance')]">
     <admst:otherwise>
 	{ // jacobian4($(Sp), $(Sn), $(Pp), $(Pn), $(ep)) - static
 		double ep = $ep;
-		it0[$(node_prefix)$Sp] += ep*BR($Pp,$Pn);
+		it0[$(cont_prefix)$Sp] += ep*BR($Pp,$Pn);
 <admst:if test="../../lhs/branch/nnode[grounded='no']">
-		it0[$(node_prefix)$Sn] -= ep*BR($Pp,$Pn);
+		it0[$(cont_prefix)$Sn] -= ep*BR($Pp,$Pn);
 </admst:if>
 
 		_write_p$(eval_mode)($Sp, $Pp, ep); // 1
