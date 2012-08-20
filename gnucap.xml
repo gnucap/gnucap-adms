@@ -414,7 +414,11 @@ class $(DEV_NAME) : public ADMS_BASE
 		XPROBE  ac_probe_ext(const std::string&amp;)const {itested(); return XPROBE(NOT_VALID, mtNONE);}
 		uint_t tail_size()const {return TAIL_SIZE;}
 
-	public: //misc
+	public: // tt
+		void tt_advance();
+		void tt_begin();
+
+	public: // misc
 		void keep_ic();
 		bool has_memory(){return $_num_states;}
 
@@ -1441,6 +1445,7 @@ void $(DEV_NAME)::dc_advance()
 	ADMS_BASE::dc_advance();
 
 <admst:if test="[$_num_states!=0]">
+	// storage-like
 	for (int t = 1;  t &lt; OPT::_keep_time_steps;  ++t) {
 		//  notstd::copy_n(_states[0], 2*(unsigned)_num_states, _states[i]);
 		//_i[t] = _i[0]; &lt;= what STORAGE does
@@ -1456,6 +1461,38 @@ void $(DEV_NAME)::dc_advance()
 	//		}
 	//
 
+}
+// -------------------------------------------------------------------------- //
+void $(DEV_NAME)::tt_advance()
+{
+	trace3("$(DEV_NAME)::tt_advance", short_label(), _sim->_time0, _sim->_dt0);
+	if (_time[0] > _sim->_time0) {untested();
+		for (int i=0; i&lt;OPT::_keep_time_steps-1; ++i) {
+			_time[i] = _time[i+1];
+			//_y[i] = _y[i+1];
+			for( unsigned j=0; j&lt;_num_states; ++j){
+				_states[i][2*j+1] = _states[i+1][2*j+1];
+			}
+		}
+		_time[OPT::_keep_time_steps-1] = 0.;
+		// _y[OPT::_keep_time_steps-1] = FPOLY1(0., 0., 0.);
+	}
+
+	for (int i=OPT::_keep_time_steps-1; i>=0; --i) {
+		// FIXME: copy all timesteps to 0
+		_time[i] = 0.;
+		//    assert(_time[i] &lt; _time[i-1] || _time[i] == 0.);
+	}
+	_dt=0;
+}
+/*--------------------------------------------------------------------------*/
+void $(DEV_NAME)::tt_begin()
+{
+	trace1("$(DEV_NAME)::tt_begin", _sim->_Time0);
+	ADMS_BASE::tt_begin();
+  <admst:if test="[$has_sckt!=0]">
+	subckt()-&gt;tt_begin();
+  </admst:if>
 }
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::tr_restore()
@@ -1525,26 +1562,25 @@ bool $(DEV_NAME)::tr_needs_eval()const
 	}
 
 	// check the node voltages, reference to ground
-	//for (unsigned ii=0; ii&lt;matrix_nodes(); ++ii)
 <admst:for-each select="node[grounded='no' and discipline/name!='degradational']">
-	// probably simpler: if (!conchk(_sim->_n[ii].vt1(), _n[ii].v0(), 0, OPT::reltol*OPT::bypasstol))
+	// probably simpler: if (!conchk(_sim->_n[ii]->vt1(), _n[ii]->v0(), 0, OPT::reltol*OPT::bypasstol))
 	if (!conchk(_sim->_vt1[_n[$node_prefix%(name)].m_()], _n[$node_prefix%(name)].v0(), 0, OPT::reltol*OPT::bypasstol)) {
 		return true;
 	}
+  <admst:variable name="name1" select="%(name)"/>
+  <admst:variable name="upper" select="no"/>
+  <admst:for-each select="../node[grounded='no' and discipline/name!='degradational']">
+    <admst:if test="[$upper='yes']">
+	// relative check %(name) $(name1) FIXME: iterate over branches?!
+	if (!conchk((_sim->_vt1[_n[$node_prefix%(name)].m_()] - _sim->_vt1[_n[$node_prefix$(name1)].m_()]),
+	(_n[$node_prefix%(name)].v0() - _n[$node_prefix$(name1)].v0()), 0, OPT::reltol*OPT::bypasstol)) {
+		return true;
+	}
+    </admst:if>
+    <admst:variable name="upper" select="yes" test="[name=$(name1)]"/>
+  </admst:for-each>
 </admst:for-each>
 
-	// check the node voltages, reference to each other
-	for (unsigned ii=0; ii&lt;matrix_nodes(); ++ii){
-		for (unsigned jj=0; jj&lt;ii; ++jj) {
-			// node_t has no vt1... if (!conchk( ( _n[ii].vt1()  - _n[jj].vt1() ),
-			// assert(  _n[ii].vt1() = _sim->_vt1[_n[ii].m_()] );
-			if (!conchk((_sim->_vt1[_n[ii].m_()] - _sim->_vt1[_n[jj].m_()]),
-			(_n[ii].v0() - _n[jj].v0()), 0, OPT::reltol*OPT::bypasstol)) {
-				trace2("$(DEV_NAME)::tr_needs_eval", ii, jj);
-				return true;
-			}
-		}
-	}
 	trace0(&quot;$(DEV_NAME)::tr_needs_eval: no&quot;);
 	return false;
 }
@@ -1707,7 +1743,7 @@ void $(DEV_NAME)::tr_load()
 		trace3(&quot;$(DEV_NAME)::tr_load&quot;, i,  (it0[i]),  (it1[i]));
 		tr_load_source_point(_n[i], &(it0[i]), &amp;(it1[i]));
 
-		trace3(&quot;tr_load done&quot;, &quot;i&quot;,     (it0[i]),  (it1[i]));
+		trace3("$(DEV_NAME)::tr_load done&quot;, &quot;i&quot;,     (it0[i]),  (it1[i]));
 	}
 
           /// BUG: only load dynamic nodes! ?
@@ -1814,7 +1850,7 @@ TIME_PAIR $(DEV_NAME)::tr_review()
 void $(DEV_NAME)::tr_accept()
 {
   <admst:if test="[$has_sckt!=0]">
-	subckt()-&gt;tr_accept();
+	subckt()->tr_accept();
   </admst:if>
   <admst:apply-templates select="." match="commonmodel"/>
 
@@ -1846,6 +1882,8 @@ void $(DEV_NAME)::tr_accept()
 // -------------------------------------------------------------------------- //
 double $(DEV_NAME)::tr_probe_num(const std::string&amp; x)const
 {
+	trace3("$(DEV_NAME)::tr_probe_num", _dt, _time[0], _time[1]);
+	assert(_dt == NOT_VALID || conchk(_dt, _time[0] - _time[1]));
 	static std::string state_names[_num_states];
 	static std::string contr_names[$_num_stamp_nodes];
 
@@ -1865,9 +1903,6 @@ double $(DEV_NAME)::tr_probe_num(const std::string&amp; x)const
 		ss &lt;&lt; i;
 		contr_names[i] = &quot;cont&quot; + ss.str();
 	}
-
-	assert(_dt == NOT_VALID || conchk(_dt, _time[0] - _time[1]));
-
 
 	// states probes
 	for (int ii=0; ii&lt;_num_states; ++ii)
