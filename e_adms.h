@@ -20,6 +20,7 @@
  */
 #ifndef E_ADMS_H
 #define E_ADMS_H
+#include "u_lang.h"
 #include "e_node.h"
 #include "m_cpoly.h"
 #include "l_denoise.h"
@@ -163,6 +164,19 @@ class ADMS_BASE : public COMPONENT {
 	public: // from storag
 		double   tr_c_to_g(double c, double g)const;
 };
+/*--------------------------------------------------------------------------*/
+void COMPONENT::set_port_by_index(uint_t num, std::string& ext_name)
+{
+	if (num <= max_nodes()) {
+
+		trace3("COMPONENT::set_port_by_index ", short_label(), ext_name, num);
+		_n[num].new_node(ext_name, this);
+		_net_nodes = max(_net_nodes, num+1);
+
+	}else{untested();
+		throw Exception_Too_Many(num, max_nodes(), 0/*offset*/);
+	}
+}
 /*--------------------------------------------------------------------------*/
 template <class T>
 inline T ADMS_BASE::dampdiff(T* v0, const T& v1)

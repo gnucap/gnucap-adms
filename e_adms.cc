@@ -83,7 +83,7 @@ void ADMS_BASE::precalc_last()
 /*--------------------------------------------------------------------------*/
 void ADMS_BASE::tr_begin()
 {
-	trace0(("ADMS_BASE::tr_begin for " + short_label()).c_str());
+	trace1("ADMS_BASE::tr_begin for", short_label());
 	_time[0] = 0.;
 	_dt = NOT_VALID;
 
@@ -134,13 +134,14 @@ void ADMS_BASE::dc_advance() // from elt.
 	bool ass = true;;
 
 	for (int i=OPT::_keep_time_steps-1; i>=0; --i) {
-		trace2(( "ADMS_BASE::dc_advance " + long_label()).c_str(), i, _time[i]);
+		trace3("ADMS_BASE::dc_advance", long_label(), i, _time[i]);
 		ass &= _time[i] == 0.;
+		assert(ass);
 	}
+	if(!ass) error(bDANGER, "//BUG// %s simtime: %f here: %f\n", long_label().c_str(), _sim->_time0, _time[0]);
 	assert(ass);
 
 	_dt = NOT_VALID;
-
 
 	//from storag
 	// for (int i = 1;  i < OPT::_keep_time_steps;  ++i) {
@@ -271,9 +272,7 @@ double ADMS_BASE::tr_review_check_and_convert(double timestep)
 	return time_future;
 }
 /*--------------------------------------------------------------------------*/
-/*
- * ripped from e_storag.h
- */
+ // * ripped from e_storag.h
 /*--------------------------------------------------------------------------*/
 /* table for selecting local integraton method
  * Determines which one wins in a conflict.
