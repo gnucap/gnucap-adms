@@ -1680,11 +1680,13 @@ void $(DEV_NAME)::tr_load()
 	  <admst:value-of select="row/name"/>
 	  <admst:value-of select="column/name"/>
 	  <admst:value-of select="row/name"/>
-		if( !m_required[m_%s_%s] &amp;&amp; (m_entries[m_%s_%s]!=0) ) printf(&quot;*** m_%s_%s\\n&quot;);
+	  if( !m_required[m_%s_%s] &amp;&amp; (m_entries[m_%s_%s]!=0) ){
+		  error(bWARNING, "*** m_%s_%s\\n");
+	  }
 
   </admst:for-each>
 
-  _loaditer = _sim-&gt;iteration_tag();
+  _loaditer = _sim->iteration_tag();
 }
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::tr_unload()
