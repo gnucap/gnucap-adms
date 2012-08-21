@@ -1115,7 +1115,9 @@ void $(DEV_NAME)::expand()
 	std::fill_n(it1, (int)_num_total_nodes, 0);
 
 	// fix up internal nodes
-	if (_sim-&gt;is_first_expand()) {
+	if (_sim->is_first_expand()) {
+		precalc_first();
+		precalc_last();
 		std::string node_names[] = {
          	<admst:join select="node[grounded='no']" separator=", ">
 					<admst:value-of select="name"/>
