@@ -2044,7 +2044,7 @@ double $(DEV_NAME)::tr_c_to_g(double c, double g)const
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::tr_eval()
 {
-	trace0(&quot;$(DEV_NAME)::tr_eval&quot;);
+	trace1("$(DEV_NAME)::tr_eval", _sim->analysis_is_static());
 	std::fill_n(it0, (int)_num_total_nodes, 0);
 	std::fill_n(m_entries, %(count(jacobian)), 0);
 
