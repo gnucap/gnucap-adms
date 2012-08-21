@@ -581,7 +581,7 @@ inline voltage_t _BP(ENode p, ENode n) { return volts_limited(_n[p],_n[n]);}
 
 	double _DDT(double qq, unsigned stateno){
 		unsigned qcap = stateno*2;
-		trace3(&quot;$(DEV_NAME)::_DDT&quot;, qcap, _sim-&gt;_mode, _sim-&gt;_phase);
+		trace3("$(DEV_NAME)::_DDT", qcap, _sim->_mode, _sim->_phase);
 <admst:if test="[$(_num_states)!=0]">
 		trace2(&quot;$(DEV_NAME)::_DDT&quot;, uic_now(stateno), _sim-&gt;uic_now());
 		if(uic_now(stateno)){
@@ -594,7 +594,7 @@ inline voltage_t _BP(ENode p, ENode n) { return volts_limited(_n[p],_n[n]);}
 </admst:if>
 		_states[0][stateno*2] = qq;
 
-		if (_sim-&gt;analysis_is_ac()) {
+		if (_sim->analysis_is_ac()) {
 			incomplete(); // shouldnt call DDT at all!
 			return 0;
 		}
@@ -619,22 +619,19 @@ inline voltage_t _BP(ENode p, ENode n) { return volts_limited(_n[p],_n[n]);}
 			i[ii] = FPOLY1(NOT_VALID, _states[ii][qcap+1], 0.0);// not necessary for ii==0
 		}
 
-		trace0(&quot;calling differentiate&quot;);
+		trace0("calling differentiate");
 		i[0] = differentiate(&amp;q[0], &amp;i[0], _time, method);
-		trace6(&quot;differentiate&quot;, _time[0], method, q[0].f0, q[1].f0, i[0].f0, _time[0]-_time[1]);
-		trace1(&quot;differentiate&quot;, ( q[0].f0 - q[1].f0 ) / ( _time[0]-_time[1]));
+		trace6("differentiate", _time[0], method, q[0].f0, q[1].f0, i[0].f0, _time[0]-_time[1]);
+		trace1("differentiate", ( q[0].f0 - q[1].f0 ) / ( _time[0]-_time[1]));
 		assert(i[0].f0 == i[0].f0);
 		assert(i[0].f1 == i[0].f1);
 
 		_states[0][qcap+1] = i[0].f0;
 
-		if( _sim-&gt;analysis_is_static() ) {
-			assert(i[0].f0 == 0.0);
-			return(0);
-		} else {
-			itested();
-		}
 		assert(is_number(i[0].f0));
+		if( _sim->analysis_is_static() ) {
+			assert(i[0].f0 == 0.0);
+		}
 
 		return i[0].f0;
 	}
