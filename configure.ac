@@ -18,7 +18,7 @@ AC_PROG_LIBTOOL
 # Checks for libraries.
 
 # Checks for header files.
-CPPFLAGS+=$(gnucap-conf --cppflags)
+GC_CPPFLAGS+=$(gnucap-conf --cppflags)
 
 # Checks for typedefs, structures, and compiler characteristics.
 
@@ -49,6 +49,7 @@ fi
 libdir=${prefix}/lib/gnucap-adms
 
 AC_SUBST([gnucap_libdir])
+AC_SUBST([GC_CPPFLAGS])
 
 # Checks for library functions.
 

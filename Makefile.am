@@ -11,6 +11,8 @@ lib_LTLIBRARIES = libe_adms.la
 libe_adms_la_LDFLAGS = -module -shared
 libe_adms_la_SOURCES = e_adms.cc
 
+AM_CPPFLAGS=$(GC_CPPFLAGS)
+
 plugin_LTLIBRARIES =
 
 %_0.xml %_1.xml %_2.xml: %.xml

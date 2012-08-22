@@ -28,7 +28,7 @@ trace=
 opt=0
 ndebug=
 gdb=
-cppflags=-I@includedir@/@PACKAGE@
+cppflags="-I@includedir@/@PACKAGE@ $CPPFLAGS"
 ldflags="-L@libdir@ -Wl,-rpath,@libdir@ -le_adms"
 
 for arg in $*; do
