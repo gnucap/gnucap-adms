@@ -7930,22 +7930,6 @@ and name!='initializeInstance')]">
   <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)contribution:nonoise*\n"/>
   <admst:text format="// contribution: %(.) \n"/>
 
-  <admst:if test="[is_ic_contribution(.)/[name='x']/value='yes']">
-    <admst:text format="// can be used by uic\n"/>
-		if( false /*removed in favor of more general approach */&amp;&amp; _sim-&gt;uic_now() ) {
-		// trace1(&quot;ADMS uic, %(.)&quot;, ic_%(lhs/branch/pnode)_%(lhs/branch/nnode)  );
-		// TODO:
-		// implement voltage source between %(lhs/branch/pnode), %(lhs/branch/nnode)
-		// with value of common-&gt;ic_%(lhs/branch/pnode)_%(lhs/branch/nnode) here,
-		// taking into account that any of nodes can be grounded
-
-		// code from d_cap.cc:
-		// _i[0] = FPOLY1( CPOLY1( 0., -_y[0].x  / (OPT::shortckt),         1/(OPT::shortckt)  ) );
-    <admst:apply-templates select="." match="ic_vs"/>
-		// where y[0].x is already set to initial condition
-	} else {
-  </admst:if>
-
   <admst:if test="rhs[not(nilled(function[class='builtin']))]">
 	{ // %(.) 7804
 
@@ -7964,13 +7948,17 @@ and name!='initializeInstance')]">
 
   <admst:for-each select="rhs/probe">
     <admst:text format="\t// Rhs/probe: %(.)\n"/>
+    <admst:text format="\t// dynamic: %(../dynamic)\n"/>
     <admst:variable name="probepnode" select="%(branch/pnode)"/>
     <admst:variable name="probennode" select="%(branch/nnode)"/>
     <admst:variable name="probepnodename" select="%($probepnode/name)"/>
     <admst:variable name="probennodename" select="%($probennode/name)"/>
     <admst:variable name="pprobe" select="%(.)"/>
 
-    <admst:apply-templates select="../tree" match="%(adms/datatypename)"/>
+	 <admst:apply-templates select="../tree" match="%(adms/datatypename)"/>
+
+	 // e: $e
+	 // ep: $ep
 
     <admst:if test="branch/pnode[grounded='no']"> <!-- Pp != GND, but why?-->
       <admst:if test="../../lhs/branch/pnode[grounded='no']"> <!-- Sp != GND, but why? -->
@@ -7990,10 +7978,6 @@ and name!='initializeInstance')]">
 	}
   </admst:if>
 
-  <admst:if test="[is_ic_contribution(.)/[name='x']/value='yes']">
-	}// no uic_now
-
-  </admst:if>
   <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)contribution:nonoise<-*\n"/>
 </admst:template>
 
