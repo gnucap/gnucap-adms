@@ -233,6 +233,7 @@ inline void _used(double)  {}
 // counted ddts %(count($ddts))
 <admst:variable name="_num_states" select="%(count($ddts))"/>
 // there are nodes that work different... hmmm
+// BUG: number of stamp nodes is topology dependent!
 <admst:variable name="_num_stamp_nodes" select="%(count(node[grounded='no' and discipline/name!='degradational']))"/>
 
 class $(DEV_NAME);
@@ -1181,7 +1182,7 @@ void $(DEV_NAME)::expand()
   }
 </admst:if>
 
-	std::fill_n(it1, (int)_num_total_nodes, 0);
+	std::fill_n(it1, $_num_stamp_nodes, 0);
 
 	// fix up internal nodes
 	if (_sim->is_first_expand()) {
@@ -2202,7 +2203,7 @@ double $(DEV_NAME)::tr_c_to_g(double c, double g)const
 void $(DEV_NAME)::tr_eval()
 {
 	trace1("$(DEV_NAME)::tr_eval", _sim->analysis_is_static());
-	std::fill_n(it0, (int)$_num_total_nodes, 0);
+	std::fill_n(it0, $_num_stamp_nodes, 0);
 	std::fill_n(m_entries, %(count(jacobian)), 0);
 
 <admst:apply-templates select="analog/code[datatypename='block']/variable" match="generate_c:declare_variable"/>
