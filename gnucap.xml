@@ -574,8 +574,8 @@ inline double _NP(TNode p){
 }
 <admst:if test="[count(node[discipline/name='degradational' and grounded='no'])!=0]">
 inline double _NP(ANode p){
-	assert(is_number(_n[p].v0()));
-	return _n[p].v0();
+	assert(is_number(_n[p].tt()));
+	return _n[p].tt();
 }
 </admst:if>
 #define BP(p,n) _BP($(node_prefix) ## p, $(node_prefix) ## n)
@@ -1290,8 +1290,10 @@ void $(COMMON_NAME)::precalc_last(const CARD_LIST* scope)
 	ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode).e_val(0,scope);
   </admst:for-each>
 
-  <admst:apply-templates select="." match="commonmodel"/>
+  <admst:apply-templates select="." match="model"/>
+#if 0 // hmm wrong place
   <admst:apply-templates select="analog" match="analog:initial_instance" required="yes"/>
+#endif
 }
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::internal_precalc()
@@ -1888,6 +1890,13 @@ TIME_PAIR $(DEV_NAME)::tr_review()
 
 	return  _time_by;
 }
+// -------------------------------------------------------------------------- //
+<admst:template match="model">
+	const $(COMMON_NAME)* c = prechecked_cast&lt;const $(COMMON_NAME)*&gt;(this);
+	USE(c); assert(c);
+	const $(MODEL_NAME)* m = prechecked_cast&lt;const $(MODEL_NAME)*&gt;(c-&gt;model());
+	USE(m); assert(m);
+</admst:template>
 // -------------------------------------------------------------------------- //
 <admst:template match="commonmodel">
 	const $(COMMON_NAME)* c = prechecked_cast&lt;const $(COMMON_NAME)*&gt;(common());
