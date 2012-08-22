@@ -581,7 +581,7 @@ inline voltage_t _BP(ENode p, ENode n) { return volts_limited(_n[p],_n[n]);}
 
 	double _DDT(double qq, unsigned stateno){
 		unsigned qcap = stateno*2;
-		trace3("$(DEV_NAME)::_DDT", qcap, _sim->_mode, _sim->_phase);
+		trace4("$(DEV_NAME)::_DDT", stateno, qq, _sim->_mode, _sim->_phase);
 <admst:if test="[$(_num_states)!=0]">
 		trace2(&quot;$(DEV_NAME)::_DDT&quot;, uic_now(stateno), _sim-&gt;uic_now());
 		if(uic_now(stateno)){
@@ -1584,14 +1584,12 @@ void $(DEV_NAME)::keep_ic()
 	USE(m); assert(m);
 
 <admst:if test="[not($_num_states=0)]">
+	tr_eval();
+	store_values();
 	double s[_num_states];
 	for (unsigned i=0; i&lt;_num_states; i++){
 		trace2(&quot;$(DEV_NAME)::keep_ic&quot;, long_label(), _states[0][i*2] );
 		s[i]=_states[0][i*2];
-
-	tr_eval();
-	store_values();
-
 	}
 	c-&gt;set_states(s);
 </admst:if>
