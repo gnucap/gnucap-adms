@@ -416,6 +416,8 @@ class $(DEV_NAME) : public ADMS_BASE
 
 	public: // tt
 		void tt_advance();
+		void stress_apply();
+		void tt_accept();
 		void tt_begin();
 		void tr_stress_last(); // tt_stress??
 
@@ -572,7 +574,7 @@ inline double _NP(TNode p){
 <admst:if test="[count(node[discipline/name='degradational' and grounded='no'])!=0]">
 inline double _NP(ANode p){
 	assert(is_number(_n[p].v0()));
-	_n[p].v0();
+	return _n[p].v0();
 }
 </admst:if>
 #define BP(p,n) _BP($(node_prefix) ## p, $(node_prefix) ## n)
@@ -1193,14 +1195,15 @@ void $(DEV_NAME)::expand()
 		for(unsigned ii = net_nodes(); ii &lt; matrix_nodes(); ++ii) {
 			if( !_n[ii].n_() && !_n[ii].is_adp()) {
 				if( ii &lt; max_nodes() ) {
-					trace1("$(DEV_NAME)::expand node between _net_nodes and max_nodes(): set to ground", ii);
+					trace2("$(DEV_NAME)::expand node between _net_nodes and max_nodes(): set to ground", ii, node_name(ii));
 					_n[ii].set_to_ground(this);
 				} else {
-					trace1("$(DEV_NAME)::expand node between max_nodes() and matrix_nodes(): alloc new", ii);
+					trace2("$(DEV_NAME)::expand node between max_nodes() and matrix_nodes(): alloc new", ii, node_name(ii));
 					_n[ii].new_model_node(node_name(ii), this);
 				}
 			} else if (_n[ii].is_adp() && ! _n[ii].a_()){
 				// no external adp nodes, so no unconnected ones.
+				untested();
 				_n[ii].new_model_adp_node(node_name(ii), this);
 			}
 		}
@@ -1387,7 +1390,7 @@ void $(DEV_NAME)::ac_iwant_matrix()
 void $(DEV_NAME)::tr_begin()
 {
   <admst:if test="[$has_sckt!=0]">
-	subckt()-&gt;tr_begin();
+	subckt()->tr_begin();
   </admst:if>
 	const $(COMMON_NAME)* c = prechecked_cast&lt;const $(COMMON_NAME)*&gt;(common());
 	assert(c); USE(c);
@@ -1486,6 +1489,20 @@ void $(DEV_NAME)::dc_advance()
 
 }
 // -------------------------------------------------------------------------- //
+void $(DEV_NAME)::tt_accept()
+{
+  <admst:if test="[$has_sckt!=0]">
+	subckt()->tt_accept();
+  </admst:if>
+}
+// -------------------------------------------------------------------------- //
+void $(DEV_NAME)::stress_apply()
+{
+  <admst:if test="[$has_sckt!=0]">
+	subckt()->stress_apply();
+  </admst:if>
+}
+// -------------------------------------------------------------------------- //
 void $(DEV_NAME)::tt_advance()
 {
   <admst:if test="[$has_sckt!=0]">
@@ -1541,7 +1558,7 @@ void $(DEV_NAME)::tr_restore()
 void $(DEV_NAME)::tr_advance()
 {
   <admst:if test="[$has_sckt!=0]">
-	subckt()-&gt;tr_advance();
+	subckt()->tr_advance();
   </admst:if>
   trace3(&quot;DEV_LAMP::tr_advance&quot;, _sim-&gt;_time0, _time[0], _time[1]);
   ADMS_BASE::tr_advance(); // does time.
@@ -1584,7 +1601,7 @@ bool $(DEV_NAME)::tr_needs_eval()const
 {
 	trace3(&quot;$(DEV_NAME)::tr_needs_eval&quot;, converged(), is_q_for_eval(), _sim-&gt;is_advance_iteration());
   <admst:if test="[$has_sckt!=0]">
-	if( subckt()-&gt;tr_needs_eval()){
+	if( subckt()->tr_needs_eval()){
 		return true;
 	}
   </admst:if>
