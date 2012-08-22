@@ -1281,7 +1281,6 @@ void $(DEV_NAME)::precalc_last()
   <admst:if test="[$has_sckt!=0]">
 	if(subckt()) subckt()-&gt;precalc_last();
   </admst:if>
-	assert(!is_constant());
 }
 // -------------------------------------------------------------------------- //
 void $(COMMON_NAME)::precalc_last(const CARD_LIST* scope)
@@ -1290,8 +1289,6 @@ void $(COMMON_NAME)::precalc_last(const CARD_LIST* scope)
   <admst:for-each select="contribution[is_ic_contribution(.)/[name='x']/value='yes']">
 	ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode).e_val(0,scope);
   </admst:for-each>
-	assert(!is_constant());
-
 
   <admst:apply-templates select="." match="commonmodel"/>
   <admst:apply-templates select="analog" match="analog:initial_instance" required="yes"/>
@@ -1309,7 +1306,6 @@ void $(DEV_NAME)::internal_precalc()
 
 	set_converged();
 	untested();
-	// assert(!is_constant());
 }
 // -------------------------------------------------------------------------- //
 #define tr_call_iwants(m_1, m_2) _sim-&gt;_aa.iwant(m_1, m_2); _sim-&gt;_lu.iwant(m_1, m_2)
