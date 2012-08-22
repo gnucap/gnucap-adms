@@ -8,17 +8,16 @@
 `include "discipline.h"
 
 module cap(p,n);
-   inout p,n;
-   electrical p,n;
+	inout p,n;
+	electrical p,n;
 
-   parameter real c=1e-6 from [0:inf);
-                  `P(info="Capaciance [Coulomb]");
-   real i1 `P(ask="yes");
-   
-   analog begin
-      begin
-			i1 = c*ddt(V(p,n));
-         I(p,n) <+ i1;
-      end 
-   end
+	parameter real c=1e-6 from [0:inf)
+	     `P(info="Capaciance [Coulomb]");
+	real i1 `P(ask="yes");
+	analog begin
+		begin
+			i1 = 0; // BUG. see adms.implicit.xml l.156
+			I(p,n) <+ c*ddt(V(p,n));
+		end
+	end
 endmodule
