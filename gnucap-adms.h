@@ -19,7 +19,7 @@ extern module rcd_exp(p, n, e);
 	inout p, n;
 	output e;
 	electrical p, n;
-	agedata e;
+	degradational e;
 
 	parameter real re1=1e3 from [0:inf);
 	parameter real re0=1e3 from (-inf:inf);

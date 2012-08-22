@@ -16,9 +16,6 @@ discipline logic
   domain discrete;
 enddiscipline
 
-discipline agedata
-	domain continuous;
-enddiscipline
 /*
 * Default absolute tolerances may be overridden by setting the
 * appropriate _ABSTOL prior to including this file
@@ -241,5 +238,20 @@ enddiscipline
 discipline rotational_omega
   potential Angular_Velocity;
   flow Angular_Force;
+enddiscipline
+// Aging stuff
+nature Damage
+  units = "1";
+  access = State;
+  abstol = 0.;
+endnature
+nature Stress
+  units = "1";
+  access = Level;
+  abstol = 0.;
+endnature
+discipline degradational
+  potential Damage;
+  flow Stress;
 enddiscipline
 `endif
