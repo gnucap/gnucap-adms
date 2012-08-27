@@ -79,8 +79,6 @@ void ADMS_BASE::precalc_last()
 	 * by the mutual pseudo-element.
 	 * Assigning the values here becomes unnecessary, but harmless.
 	 */
-
-
 }
 /*--------------------------------------------------------------------------*/
 void ADMS_BASE::tr_begin()
@@ -273,42 +271,7 @@ double ADMS_BASE::tr_review_check_and_convert(double timestep)
 	return time_future;
 }
 /*--------------------------------------------------------------------------*/
-void ADMS_BASE::tt_next()
-{
-	// das tut das hier?
-	// untested0(("tt_next for " + short_label()).c_str());
-	trace2(("ADMS_BASE::tt_next for " + short_label()).c_str(), _sim->_time0, _sim->_dt0);
-	if (_time[0] > _sim->_time0) {itested();
-		for (int i=0  ; i<OPT::_keep_time_steps-1; ++i) {itested();
-			_time[i] = _time[i+1];
-			// _y[i] = _y[i+1]; FIXME
-		}
-		_time[OPT::_keep_time_steps-1] = 0.;
-		// _y[OPT::_keep_time_steps-1]    = FPOLY1(0., 0., 0.);
-	}else if (_time[0] == _sim->_time0) {
-
-	}else{
-
-	}
-
-	//assert(_time[0] == _sim->_time0);
-	if (_time[0] != _sim->_time0) {itested();
-		trace1("ADMS_BASE::tt_next timedelta ", _time[0] - _sim->_time0 );
-		trace2( ( "HACK? " + short_label() + ": ADMS_BASE::tt_next, time mismatch, setting back to 0 " ).c_str(),
-				_sim->_time0, _time[0] );
-	}else{
-		trace2(("tt_next for " + short_label()).c_str(), _time[0], _sim->_time0);
-	}
-
-	for (int i=OPT::_keep_time_steps-1; i>=0; --i) {
-		// FIXME: copy all timesteps to 0
-		_time[i]=0.0;
-		//    assert(_time[i] < _time[i-1] || _time[i] == 0.);
-	}
-}
-/*--------------------------------------------------------------------------*/
-/*--------------------------------------------------------------------------
- *------------------------------------------------------------------
+/*
  * ripped from e_storag.h
  */
 /*--------------------------------------------------------------------------*/

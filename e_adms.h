@@ -24,6 +24,7 @@
 #include "m_cpoly.h"
 #include "l_denoise.h"
 #include "e_subckt.h"
+#include <algorithm>
 /*--------------------------------------------------------------------------*/
 using namespace std;
 /*--------------------------------------------------------------------------*/
@@ -67,14 +68,14 @@ class ADMS_BASE : public COMPONENT {
 		bool	   skip_dev_type(CS&);
 		string dev_type()const {return common()->modelname();} // from BASE_SUBCKT
 		virtual bool	   print_type_in_spice()const {return false;}
-	public: 
-		virtual void	   precalc_last();
-		virtual void	   tr_begin();
-		virtual void	   tr_restore();
-		virtual void	   dc_advance();
-		virtual void	   tr_advance();
-		virtual void	   tr_regress();
-		virtual bool	   tr_needs_eval()const;
+	public:
+		virtual void precalc_last();
+		virtual void tr_begin();
+		virtual void tr_restore();
+		virtual void dc_advance();
+		virtual void tr_advance();
+		virtual void tr_regress();
+		virtual bool tr_needs_eval()const;
 		virtual bool do_tr() { unreachable(); return false; }
 			
 		TIME_PAIR tr_review();
@@ -115,9 +116,9 @@ class ADMS_BASE : public COMPONENT {
 		bool	   has_ac_eval()const;
 		bool	   using_tr_eval()const;
 		bool	   using_ac_eval()const;
-
-	protected: // in .cc
-		void	   tr_iwant_matrix();
+	
+	public:
+		void tr_iwant_matrix();
 
 	public:
 		double   tr_review_trunc_error(const FPOLY1* q);
@@ -126,8 +127,6 @@ class ADMS_BASE : public COMPONENT {
 		double   tr_outvolts()const	{return dn_diff(_n[OUT1].v0(), _n[OUT2].v0());}
 		double   tr_outvolts_limited()const{return volts_limited(_n[OUT1],_n[OUT2]);}
 		COMPLEX  ac_outvolts()const	{return _n[OUT1].vac() - _n[OUT2].vac();}
-
-		virtual void tt_next() ;// !const
 
 		int param_count()const {return (0 + COMPONENT::param_count());}
 	protected:
@@ -546,5 +545,4 @@ inline string toLower(string s){
 	transform (s.begin(), s.end(), s.begin(), ::tolower);
 	return s;
 }
-
 #endif
