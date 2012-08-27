@@ -249,6 +249,7 @@ class $(MODEL_NAME) : public MODEL_CARD {
 	private:
 #ifdef HAVE_PARA_BASE
 		static map&lt;string, PARA_BASE $(MODEL_NAME)::*&gt; param_dict;
+		static map&lt;string, PARA_BASE $(MODEL_NAME)::*&gt; param_dict_low;
 #endif
 	protected:
 		explicit $(MODEL_NAME)(const $(MODEL_NAME)&amp; p);	// for clone
@@ -774,6 +775,7 @@ class $(COMMON_NAME) : public COMMON_COMPONENT
 #include &lt;limits&gt;
 #include &lt;map&gt;
 #include &lt;boost/assign.hpp&gt;
+#include &lt;boost/algorithm/string.hpp>
 
 #include &quot;$(filename).h&quot;
 #include &quot;e_adms.h&quot;
@@ -886,12 +888,23 @@ map&lt;string, PARA_BASE $(MODEL_NAME)::*&gt; $(MODEL_NAME)::param_dict
   (&quot;%(name)&quot;, (PARA_BASE $(MODEL_NAME)::*)  (&amp;$(MODEL_NAME)::$(var_prefix)%(name)))
 </admst:join>
 </admst:if>;
+
+map&lt;string, PARA_BASE $(MODEL_NAME)::*&gt; $(MODEL_NAME)::param_dict_low
+<admst:if test="[count(variable[input='yes' and scope!='global_instance'])!=0]">
+  = boost::assign::map_list_of
+<admst:join select="variable[input='yes' and scope!='global_instance']" separator="">
+    (toLower("%(name)"), (PARA_BASE $(MODEL_NAME)::*)
+        (&amp;$(MODEL_NAME)::$(var_prefix)%(name)))
+</admst:join>
+</admst:if>;
 #endif
 // -------------------------------------------------------------------------- //
 void $(MODEL_NAME)::set_param_by_name(string Name, string Value)
 {
 #ifdef HAVE_PARA_BASE
-	PARA_BASE $(MODEL_NAME)::* x = (param_dict[Name]);
+	PARA_BASE $(MODEL_NAME)::* x = (OPT::case_insensitive)?
+		(param_dict_low[toLower(Name)]) : (param_dict[Name]);
+	trace3("$(MODEL_NAME)::set_param_by_name", Name, OPT::case_insensitive, x);
 	if(x) {
 		PARA_BASE* p = &(this->*x);
 		*p = Value;

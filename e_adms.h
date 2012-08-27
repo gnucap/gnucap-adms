@@ -542,6 +542,9 @@ inline void ADMS_BASE::tr_iwant_matrix()
 // coulombs of an electron
 #define ELECTRON_CHARGE 1.602176462e-19
 
-
+inline string toLower(string s){
+	transform (s.begin(), s.end(), s.begin(), ::tolower);
+	return s;
+}
 
 #endif
