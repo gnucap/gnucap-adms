@@ -28,7 +28,8 @@ trace=
 opt=0
 ndebug=
 gdb=
-cppflags=-I@includedir@/@PACKAGE@ 
+cppflags=-I@includedir@/@PACKAGE@
+ldflags="-L@libdir@ -Wl,-rpath,@libdir@ -le_adms"
 
 for arg in $*; do
 	case $arg in
@@ -74,6 +75,10 @@ for arg in $*; do
 			;;
 		--debug|-d)
 			adms_dbg_xml=yes
+			;;
+		--ldflags)
+			echo $ldflags
+			exit 0
 			;;
 		--cppflags)
 			echo $cppflags
