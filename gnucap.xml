@@ -4828,15 +4828,14 @@ inline double d_doh(double x)          {return  exp(x)/(exp(x) + 1); }
 <admst:template match="analogfunctionH">
   <admst:for-each select="/module/analogfunction">
     <admst:variable name="function" select="%(name)"/>
-    <admst:apply-templates select="." match="v2c:converttype"/>
-$function (
+\t\t
+    <admst:apply-templates select="." match="v2c:converttype"/> $function (
     <admst:join select="variable[input='yes']" separator=", ">
       <admst:apply-templates select="." match="v2c:converttype"/>
       <admst:text format=" %(name)"/>
     </admst:join>);
-
-    <admst:apply-templates select="." match="v2c:converttype"/>
-d_$(function) (
+\t\t
+    <admst:apply-templates select="." match="v2c:converttype"/> d_$(function) (
     <admst:join select="variable[input='yes']" separator=", ">
       <admst:apply-templates select="." match="v2c:converttype"/><admst:text format=" %(name)"/>
     </admst:join>, <admst:join select="variable[input='yes']" separator=", ">
@@ -4855,7 +4854,7 @@ $(DEV_NAME)::$function (
       <admst:apply-templates select="." match="v2c:converttype"/><admst:text format=" %(name)"/>
     </admst:join>)
 {
-    <admst:text format="double $function; "/>
+    <admst:text format="\tdouble $function; "/>
     <admst:for-each select="variable[input='no' and output='no']">
       <admst:apply-templates select="." match="v2c:converttype"/>
       <admst:text format=" %(name);\n"/>
@@ -4895,7 +4894,7 @@ double $(DEV_NAME)::d_$(function) (
     <admst:apply-templates select="tree" match="af:print:derivate">
     <admst:text format="%(returned('x')/value)"/>
     </admst:apply-templates>
-return
+return 
     <admst:join select="$globalanalogfunction/variable[input='yes']" separator="+">
       <admst:text format="$(function)_%(name)*d_%(name)"/>
     </admst:join>;
