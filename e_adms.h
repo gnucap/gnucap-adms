@@ -119,9 +119,6 @@ class ADMS_BASE : public COMPONENT {
 		bool	   using_ac_eval()const;
 	
 	public:
-		void tr_iwant_matrix();
-
-	public:
 		double   tr_review_trunc_error(const FPOLY1* q);
 		double   tr_review_check_and_convert(double timestep);
 
@@ -364,18 +361,6 @@ inline double ADMS_BASE::tr_c_to_g(double c, double g)const
 	}
 }
 /*--------------------------------------------------------------------------*/
-inline void ADMS_BASE::tr_iwant_matrix()
-{
-  if (is_device()) {
-    trace2("ADMS_BASE::tr_iwant_matrix", long_label(), matrix_nodes());
-    if (subckt()) {
-      subckt()->tr_iwant_matrix();
-    }else{ // untested();
-    }
-  }else{
-  }
-}
-/*--------------------------------------------------------------------------*/
 #define _write_ptr(S1, S2, value) \
 	m_entries[m_## S1 ## _ ## S2 ]+=value;
 
@@ -559,4 +544,6 @@ inline string toLower(string s){
 	transform (s.begin(), s.end(), s.begin(), ::tolower);
 	return s;
 }
+
+// -------------------------------------------------------------------------- //
 #endif

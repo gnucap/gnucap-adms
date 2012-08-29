@@ -574,6 +574,7 @@ inline double _NP(TNode p){
 }
 <admst:if test="[count(node[discipline/name='degradational' and grounded='no'])!=0]">
 inline double _NP(ANode p){
+	trace1("NP(ANode)", _n[p].m_());
 	assert(is_number(_n[p].tt()));
 	return _n[p].tt();
 }
@@ -1310,16 +1311,20 @@ void $(DEV_NAME)::internal_precalc()
 	untested();
 }
 // -------------------------------------------------------------------------- //
-#define tr_call_iwants(m_1, m_2) _sim-&gt;_aa.iwant(m_1, m_2); _sim-&gt;_lu.iwant(m_1, m_2)
+#define tr_call_iwants(m_1, m_2) _sim->_aa.iwant(_n[m_1].m_(), _n[m_2].m_()); _sim->_lu.iwant(_n[m_1].m_(), _n[m_2].m_())
 // -------------------------------------------------------------------------- //
+
 void $(DEV_NAME)::tr_iwant_matrix()
 {
+	trace0("$(DEV_NAME)::tr_iwant_matrix()");
 	assert(is_device());
-	trace0(&quot;$(DEV_NAME)::tr_iwant_matrix()&quot;);
-	ADMS_BASE::tr_iwant_matrix();
   <admst:if test="[$has_sckt!=0]">
-	// done by component: subckt()-&gt;tr_iwant_matrix();
+	if (subckt()) {
+      subckt()->tr_iwant_matrix();
+	}else{ // untested();
+	}
   </admst:if>
+  //	ADMS_BASE::tr_iwant_matrix();
   <admst:for-each select="jacobian">
     <admst:variable  name="myF_par1" select="%(row/name)"/>
     <admst:variable  name="myF_par2" select="%(column/name)"/>
@@ -1346,8 +1351,15 @@ void $(DEV_NAME)::tr_iwant_matrix()
       <admst:text format=" || m_required[m_$(myF_par1)_$(myF_par1)]"
         test="../jacobian[row/name=$myF_par1 and column/name=$myF_par1]"/>
       <admst:text format=" || m_required[m_$(myF_par2)_$(myF_par2)]"
-        test="../jacobian[row/name=$myF_par2 and column/name=$myF_par2]"/>
-      <admst:text format=" ) \n\t\ttr_call_iwants(_N($(myF_par1)).m_(), _N($(myF_par2)).m_());\n"/>
+        test="../jacobian[row/name=$myF_par2 and column/name=$myF_par2]"/>)
+	  //tr_call_iwants(_N($(myF_par1)).m_(), _N($(myF_par2)).m_());
+#ifdef HAVE_ADP_NODE
+		if (!_n[$(node_prefix)$(myF_par1)].is_adp() && !_n[$(node_prefix)$(myF_par2)].is_adp())
+#endif
+		{
+			trace2("tr_iwants $(myF_par1) $(myF_par2)", _n[$(node_prefix)$(myF_par1)].is_adp(), _n[$(node_prefix)$(myF_par2)].is_adp() );
+			tr_call_iwants($(node_prefix)$(myF_par1), $(node_prefix)$(myF_par2));
+		}
     </admst:if>
   </admst:for-each>
 	//tr_iwant_matrix_extended();
@@ -1355,6 +1367,7 @@ void $(DEV_NAME)::tr_iwant_matrix()
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::ac_iwant_matrix()
 {
+	trace0("$(DEV_NAME)::ac_iwant_matrix()");
   <admst:for-each select="jacobian">
     <admst:variable  name="myF_par1" select="%(row/name)"/>
     <admst:variable  name="myF_par2" select="%(column/name)"/>
@@ -1379,8 +1392,11 @@ void $(DEV_NAME)::ac_iwant_matrix()
       <admst:text format=" || m_required[m_$(myF_par1)_$(myF_par1)]"
         test="../jacobian[row/name=$myF_par1 and column/name=$myF_par1]"/>
       <admst:text format=" || m_required[m_$(myF_par2)_$(myF_par2)]"
-        test="../jacobian[row/name=$myF_par2 and column/name=$myF_par2]"/>
-      <admst:text format=" ) \n\t\t_sim->_acx.iwant(_N($(myF_par1)).m_(), _N($(myF_par2)).m_());\n"/>
+        test="../jacobian[row/name=$myF_par2 and column/name=$myF_par2]"/>)
+#ifdef HAVE_ADP_NODE
+		if (!_n[$(node_prefix)$(myF_par1)].is_adp() && !_n[$(node_prefix)$(myF_par2)].is_adp())
+#endif
+		_sim->_acx.iwant(_N($(myF_par1)).m_(), _N($(myF_par2)).m_());
     </admst:if>
   </admst:for-each>
 	//ac_iwant_matrix_extended();
