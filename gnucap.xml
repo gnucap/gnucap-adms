@@ -1195,18 +1195,30 @@ void $(DEV_NAME)::expand()
 </admst:for-each>
 
 		for(unsigned ii = net_nodes(); ii &lt; matrix_nodes(); ++ii) {
-			if( !_n[ii].n_() && !_n[ii].is_adp()) {
-				if( ii &lt; max_nodes() ) {
-					trace2("$(DEV_NAME)::expand node between _net_nodes and max_nodes(): set to ground", ii, node_name(ii));
-					_n[ii].set_to_ground(this);
-				} else {
-					trace2("$(DEV_NAME)::expand node between max_nodes() and matrix_nodes(): alloc new", ii, node_name(ii));
-					_n[ii].new_model_node(node_name(ii), this);
+#ifdef HAVE_ADP_NODE
+			trace2("$(DEV_NAME)::expand nodes", ii, _n[ii].is_adp());
+			if(!_n[ii].is_adp()){
+#endif
+				if( !_n[ii].n_() ) {
+					if( ii &lt; max_nodes() ) {
+						trace2("$(DEV_NAME)::expand node between _net_nodes and max_nodes(): set to ground", ii, node_name(ii));
+						_n[ii].set_to_ground(this);
+					} else {
+						trace2("$(DEV_NAME)::expand node between max_nodes() and matrix_nodes(): alloc new", ii, node_name(ii));
+						_n[ii].new_model_node(node_name(ii), this);
+					}
 				}
-			} else if (_n[ii].is_adp() && ! _n[ii].a_()){
+#ifdef HAVE_ADP_NODE
+			} else if ( !_n[ii].a_()){
+				trace0("$(DEV_NAME)::expand node, registering new adpnode");
 				// no external adp nodes, so no unconnected ones.
 				untested();
 				_n[ii].new_model_adp_node(node_name(ii), this);
+				assert(_n[ii].t_()!=INVALID_NODE);
+			} else {
+				trace1("$(DEV_NAME)::expand node,not registering new adpnode", _n[ii].a_()->long_label() );
+
+#endif
 			}
 		}
 
@@ -1214,7 +1226,12 @@ void $(DEV_NAME)::expand()
 		for (unsigned ii = 0; ii &lt; matrix_nodes(); ++ii)
 		{
 			trace2("$(DEV_NAME)::expand matrix node check", ii, _n[ii].is_adp());
-			assert(_n[ii].n_() || _n[ii].is_adp() );
+			assert(_n[ii].t_()!=INVALID_NODE);
+			assert(_n[ii].n_()
+#ifdef HAVE_ADP_NODE
+			|| _n[ii].is_adp() 
+#endif
+			);
 		}
 <admst:for-each select="instance">
 		if (!_%(name)) {
