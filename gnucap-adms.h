@@ -21,8 +21,9 @@ extern module rcd_exp(p, n, e);
 	electrical p, n;
 	degradational e;
 
+	parameter real weight=1 from (0:inf);
 	parameter real re1=1e3 from [0:inf);
 	parameter real re0=1e3 from (-inf:inf);
-	parameter real rc1=1e3 from (-inf:0);
+	parameter real rc1=1e3 from (-inf:0];
 	parameter real rc0=1e3 from (-inf:inf);
 endmodule
