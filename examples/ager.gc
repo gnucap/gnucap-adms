@@ -1,0 +1,29 @@
+spice
+
+.param vdd 1.7
+
+V1 nin 0 pulse iv=0 pv=2 rise=200u delay=1 width=8
+*sin(frequency=1k, amplitude=1, offset=1)
+.list
+
+.verilog
+load rcd_sym.so
+load ./ager.so
+paramset myager ager
+	.r0=20k;
+endparamset
+spice
+.verilog
+myager r1 (nin,0);
+spice
+
+.print tran v(nodes) b(r1) a(r1) vin(r1.rcd1) tt(r1.rcd1) tr(r1.rcd1) i(v1)
+.print tt v(nodes) b(r1) a(r1) tt(r1.rcd1) tr(r1.rcd1)
+.print dc v(nodes) a(r1)
+
+.tw 1 10 100 100 new tran > tr.out
+.tw 200 pd
+.tw 300 pd
+.tw 400 cont tran >> tr.out
+
+.end

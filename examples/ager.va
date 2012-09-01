@@ -1,0 +1,35 @@
+// 'aging' resistor. dataflow demonstrator
+
+`include "gnucap-adms.h"
+`include "discipline.h"
+
+module ager(p,n);
+   inout p,n;
+   electrical p,n;
+	degradational nage;
+
+   // Model parameters
+   parameter real r0=10000 from (0:inf)
+                  (*info="Fresh resistance [Ohm]"*);
+
+   real v1, i1, g;
+	real a (*ask="yes"*);
+
+	rcd_exp #(.weight(1), .rc0(8), .rc1(2), .re0(12), .re1(-3)) rcd1(p,n,nage);
+
+   analog begin
+		@(initial_model) begin
+			g=1/r0;
+		end
+		@(initial_instance) begin
+			a=0;
+		end
+
+      begin
+			a = State(nage);
+		   v1 = V(p,n);
+         i1 = v1*g/(1+a);
+         I(p,n) <+ i1;
+      end
+   end
+endmodule
