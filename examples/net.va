@@ -1,0 +1,15 @@
+/*
+ * Net. just collapse nodes (for now)
+ */
+`include "discipline.h"
+
+module net (p,n);
+	inout p,n;
+	electrical p,n;
+
+	analog begin
+		begin
+			V(p,n) <+ 0;
+		end
+	end
+endmodule
