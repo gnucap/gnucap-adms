@@ -41,5 +41,10 @@ adms_cap_la_LDFLAGS = $(PLUGIN_LDFLAGS)
 adms_cap_la_SOURCES = cap.cc
 adms_cap_la_LIBADD = -le_adms
 
+plugin_LTLIBRARIES += adms_opamp.la
+adms_opamp_la_LDFLAGS = $(PLUGIN_LDFLAGS)
+adms_opamp_la_SOURCES = opamp.cc
+adms_opamp_la_LIBADD = -le_adms
+
 # automatically by "make depend"?
 #$(SOURCES:%.cc=%.o): %.o: %.cc %.h %_tr.hxx %_ac.hxx %_top.hxx
