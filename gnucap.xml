@@ -3492,20 +3492,29 @@ inline double d_doh(double x)          {return  exp(x)/(exp(x) + 1); }
 <!-- ----------------------------------------------------------------- -->
 <!-- analog//function: ddx handling -->
 <admst:template match="ddx:function:computation">
+  <admst:variable name="doit__" select="no"/>
+  <admst:if test="[datatypename='contribution' or lhs/insource='yes']">
+    <admst:message format="hmm test....\n"/>
+    <admst:if test="rhs[hasVoltageDependentFunction='yes']">
+      <admst:variable name="doit__" select="yes"/>
+    </admst:if>
+  </admst:if>
   <admst:message test="[/dbg_xml='yes']" format="*(ngspvers)ddx:function:computation
     ...  %(.)*
     ...  %(lhs)*
     ...  %(rhs)*
-    ...  %(lhs/type)*\n "/>
-  <admst:variable name="twocond" select="no"/>
+    ...  %(lhs/type)*
+    ...  $(doit__) \n "/>
 
+  <!--
   <admst:if test="lhs[insource!='no']">
     <admst:if test="rhs[hasVoltageDependentFunction='yes']">
-      <admst:variable name="twocond" select="yes"/>
+      <admst:variable name="doit__" select="yes"/>
     </admst:if>
   </admst:if>
+  -->
 
-  <admst:if test="[$twocond='yes']">
+  <admst:if test="[$doit__='yes']">
     <admst:if test="[$_DERIVATE='yes']">
       /* derivate stuff */
       <admst:for-each select="rhs/function">
@@ -3514,7 +3523,7 @@ inline double d_doh(double x)          {return  exp(x)/(exp(x) + 1); }
             <admst:if test="math[dependency!='constant']">
               <admst:value-of select="../position(.)-1"/>
               <admst:apply-templates select=".." match="function:getname_push"/>
-              <admst:text format="double __d_%s_%s=0.0;\n"/>
+              <admst:text format="double __d_%s_%s=0.0; // getname_push?\n"/>
             </admst:if>
           </admst:for-each>
         </admst:if>
@@ -3625,7 +3634,7 @@ inline double d_doh(double x)          {return  exp(x)/(exp(x) + 1); }
       </admst:for-each>
     </admst:if> <!-- _DERIVATE -->
   </admst:if>  <!-- 2 conditions -->
-  <admst:if test="[$_DERIVATE='no' or $twocond='no']">
+  <admst:if test="[$_DERIVATE='no' or $doit__='no']">
     // function assignment %(.)
 
     <admst:message test="[/dbg_xml='yes']" format="function:assignment from ddx\n"/>
