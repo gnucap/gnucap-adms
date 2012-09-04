@@ -2109,6 +2109,7 @@ $(COMMON_NAME)::$(COMMON_NAME)(const $(COMMON_NAME)&amp; p) :
 <admst:for-each select="$(ddts)">,
     ic_state_%(adms/id(.))(p.ic_state_%(adms/id(.)))
 </admst:for-each>
+    // global instance input vars
 <admst:for-each select="variable[input='yes' and scope='global_instance']">,
     $(var_prefix)%(.)(p.$(var_prefix)%(.))
 </admst:for-each>
@@ -2120,6 +2121,7 @@ $(COMMON_NAME)::$(COMMON_NAME)(int c) :
 <admst:for-each select="$(ddts)">,
     ic_state_%(adms/id(.))(NOT_INPUT)
 </admst:for-each>
+    // global instance input vars
 <admst:for-each select="variable[input='yes' and scope='global_instance']">,
     $(var_prefix)%(.)(NOT_INPUT) /* default?? */
 </admst:for-each>
