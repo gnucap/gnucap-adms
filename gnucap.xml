@@ -701,7 +701,7 @@ class $(COMMON_NAME) : public COMMON_COMPONENT
   </admst:for-each>
 </admst:if>
 
-	public:
+	public: // global_instance input
 
 <admst:for-each select="variable[input='yes' and scope='global_instance']">
   <admst:choose>
