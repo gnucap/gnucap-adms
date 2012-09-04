@@ -802,7 +802,7 @@ static $(COMMON_NAME) Default_$(COMMON_NAME)(CC_STATIC);
 $(MODEL_NAME)::$(MODEL_NAME)(const $(DEV_NAME)* p) :
     MODEL_CARD(p),
   <!-- output='yes' - no matter, parametertype=instance or module - no matter also -->
-  <admst:for-each select="variable[input='yes']">
+  <admst:for-each select="variable[input='yes' and scope='global_model']">
   <admst:apply-templates select="default/tree" match="stringify_expression"/>
     $(var_prefix)%(name)(%s),
   </admst:for-each>
@@ -814,7 +814,7 @@ $(MODEL_NAME)::$(MODEL_NAME)(const $(DEV_NAME)* p) :
 // -------------------------------------------------------------------------- //
 $(MODEL_NAME)::$(MODEL_NAME)(const $(MODEL_NAME)&amp; p) :
     MODEL_CARD(p),
-  <admst:for-each select="variable[input='yes']">
+  <admst:for-each select="variable[input='yes' and scope='global_model']">
     $(var_prefix)%(name)(p.$(var_prefix)%(name)),
   </admst:for-each>
     _key(p._key),
@@ -860,7 +860,7 @@ std::string $(MODEL_NAME)::param_value(int i) const
 {
 	switch(i)
 	{
-    <admst:for-each select="variable[input='yes']">
+    <admst:for-each select="variable[input='yes' and scope='global_model']">
 		case %(position(.)-1): return($(var_prefix)%(name).string());
     </admst:for-each>
 		default: return(&quot;&quot;);
@@ -874,7 +874,7 @@ void $(MODEL_NAME)::set_param_by_index(int i, std::string&amp; value, int offset
 	switch(i)
 	{
     <admst:for-each select="variable[input='yes' and scope!='global_instance']">
-		case %(position(.)-1): $(var_prefix)%(name)=value; break;
+		case %(position(.)-1): $(var_prefix)%(name)=value; break; // %(scope)
     </admst:for-each>
 		default: throw Exception_Too_Many(i, %(count(variable[input='yes'])), offset); break;
 	}
