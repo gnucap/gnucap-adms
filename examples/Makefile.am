@@ -25,3 +25,6 @@ ADMS_GC_XML=../adms/gnucap_0.xml
 
 %.cc %_tr.hxx %_top.hxx %_ac.hxx: %.va
 	gnucap-adms -v $<
+
+%.ii: %.va
+	gnucap-adms -v -i $<

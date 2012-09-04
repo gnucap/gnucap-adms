@@ -19,6 +19,7 @@ check_gnucap
 prefix=@prefix@
 adms_dbg_xml=no
 compile=no
+prep=no
 quiet=no
 verbose=no
 gnucap_libdir=@gnucap_libdir@
@@ -46,6 +47,14 @@ for arg in $*; do
 				[ $verbose = no ] || echo $cmd
 				$cmd
 			fi
+
+			if [ $prep = yes ]; then
+				cmd="@CPP@ $ndebug $trace $cppflags $(gnucap-conf --cppflags) \
+				    ${arg%.va}.cc -L@libdir@ -le_adms -o ${arg%.va}.ii $RPATH"
+				[ $quiet = no ] && echo writing ${arg%.va}.ii
+				[ $verbose = no ] || echo $cmd
+				$cmd
+			fi
 			;;
 		*.cc)
 			cmd="@CXX@ $ndebug $trace $gdb -O$opt $cppflags $(gnucap-conf --cppflags) -shared -fPIC \
@@ -53,6 +62,9 @@ for arg in $*; do
 			[ $quiet = no ] && echo compiling ${arg%.cc}.so
 			[ $verbose = no ] || echo $cmd
 			$cmd
+			;;
+		--prep|-i)
+			prep=yes
 			;;
 		--compile|-c)
 			compile=yes
