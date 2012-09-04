@@ -318,12 +318,14 @@ public:
 <!-- maybe can be cleared with: <admst:variable select="adms_ic_list" value="" /> -->
 <admst:for-each select="contribution">
   <!-- catch I(a,b) <+ ddt(V(a,b))  -->
-  <admst:if test="[./rhs/tree/datatypename='function']">
-          <admst:push into="$(ddt_ic_list)" select="./rhs/tree" onduplicate="ignore"/>
+  <admst:if test="[./rhs/tree/datatypename='function' and ./rhs/tree/name='ddt']">
+    <admst:push into="$(ddt_ic_list)" select="./rhs/tree" onduplicate="ignore"/>
+    <admst:message format="ic candidate1 %(./rhs/tree) %(adms/id(.))\n"/>
     <admst:if test="[./rhs/tree/name='ddt']">
       <admst:if test="[./rhs/tree/arguments[position(.)=1]/datatypename='probe']">
         <admst:if test="[./rhs/tree/arguments[position(.)=1]/branch/pnode=./lhs/branch/pnode and ./rhs/tree/arguments[position(.)=1]/branch/nnode=./lhs/branch/nnode]">
           <admst:push into="$(adms_ic_list)" select="." onduplicate="ignore"/>
+          <admst:message format="ic candidate2 %(.) %(adms/id(.))\n"/>
         </admst:if>
       </admst:if>
     </admst:if>
@@ -347,7 +349,7 @@ public:
             <admst:if test="[./rhs/tree/arg2/arguments[position(.)=1]/branch/pnode=./lhs/branch/pnode
                         and ./rhs/tree/arg2/arguments[position(.)=1]/branch/nnode=./lhs/branch/nnode]">
               <admst:push into="$(adms_ic_list)" select="." onduplicate="ignore"/>
-              <admst:message format="ic candidate %(.)\n"/>
+              <admst:message format="ic candidate3 %(.) %(adms/id(.))\n"/>
             </admst:if>
           </admst:if>
         </admst:if>
@@ -2081,7 +2083,7 @@ void $(DEV_NAME)::tr_eval()
 
 	double keep_%(adms/id(.))=1;
 	if(uic_now(_ddt_%(adms/id(.)))){
-		trace1(&quot; $(DEV_NAME)::tr_eval keeping &quot;, c-&gt;ic_state_%(adms/id(.)));
+		trace1("$(DEV_NAME)::tr_eval keeping", c->ic_state_%(adms/id(.)));
 #ifdef HAVE_KEEPCOEFF
 		keep_%(adms/id(.)) = OPT::keepcoeff;
 #endif
@@ -2158,11 +2160,11 @@ void $(COMMON_NAME)::set_param_by_name(std::string name, std::string value)
 	// %(.), %(adms/id(.))
 	<admst:apply-templates select="." match="ic_probe_names"/>
 
-	if( Umatch(name,&quot;ic_$(ddt_p)_$(ddt_n)&quot;) ) {
-		ic_state_%(adms/id(.)) = value;return;
+	if( Umatch(name,&quot;ic_$(ddt_p)_$(ddt_n)") ) {
+		ic_state_%(adms/id(.)) = value; return;
 	}
-	if( Umatch(name,&quot;ic_$(ddt_n)_$(ddt_p)&quot;) ) {
-		ic_state_%(adms/id(.)) = &quot;-(&quot;+value+&quot;)&quot;;return;
+	if( Umatch(name,&quot;ic_$(ddt_n)_$(ddt_p)") ) {
+		ic_state_%(adms/id(.)) = "-("+value+")"; return;
 	}
 
 </admst:for-each>
