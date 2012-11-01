@@ -1,4 +1,7 @@
 #!/bin/bash
+# this file is part of gnucap-adms
+# Copyright 2012 Felix Salfelder
+# License GPLv3+
 
 usage="type $0 some.va to generate some.cc and some.h. \n
 \n
