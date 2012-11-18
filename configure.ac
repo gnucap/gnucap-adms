@@ -46,6 +46,7 @@ else
 	gnucap_libdir=$HOME/.gnucap/lib
 fi
 
+test "x$prefix" = xNONE &&  prefix=$ac_default_prefix
 libdir=${prefix}/lib/gnucap-adms
 
 AC_SUBST([gnucap_libdir])
