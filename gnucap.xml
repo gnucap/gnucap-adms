@@ -3034,6 +3034,43 @@ inline double d_doh(double x)          {return  exp(x)/(exp(x) + 1); }
 </admst:template>
 
 <!-- ----------------------------------------------------------------- -->
+<!-- -------- expression//function: mapping verilog-name == C-name of function ------- -->
+<admst:template match="function:getname">
+  <admst:message test="[/dbg_xml='yes']" format="*MODULE function:getname: %(.)*\n"/>
+  <admst:choose>
+    <admst:when test="[name='abs']"><admst:return name="function:getname" value="abs"/></admst:when>
+    <admst:when test="[name='\$shrinkl']"><admst:return name="function:getname" value="shrinkl"/></admst:when>
+    <admst:when test="[name='\$shrinka']"><admst:return name="function:getname" value="shrinka"/></admst:when>
+    <admst:when test="[name='log']"><admst:return name="function:getname" value="log10"/></admst:when>
+    <admst:when test="[name='ln']"><admst:return name="function:getname" value="logE"/></admst:when>
+    <admst:when test="[name='limexp']"><admst:return name="function:getname" value="limexp"/></admst:when>
+    <admst:when test="[name='\$limexp']"><admst:return name="function:getname" value="limexp"/></admst:when>
+    <admst:when test="[name='\$model']"><admst:return name="function:getname" value="_modelname"/></admst:when>
+    <admst:when test="[name='\$instance']">
+      <admst:return name="function:getname" value="_instancename"/>
+    </admst:when>
+    <admst:when test="[name='\$temperature']">
+      <admst:return name="function:getname" value="_ambient_temp"/>
+    </admst:when>
+    <admst:when test="[name='\$nominal_temperature']">
+      <admst:return name="function:getname" value="_circuit_tnom"/>
+    </admst:when>
+    <admst:otherwise>
+      <admst:message test="[/dbg_xml='yes']" format="otherwise (not impl?) %(name)\n"/>
+      <admst:value-of select="name"/>
+      <admst:return name="function:getname" value="%s"/>
+    </admst:otherwise>
+  </admst:choose>
+</admst:template>
+<admst:template match="function:getname_push">
+  <admst:message format="*function:getname_push %(.)*\n"/>
+  <!--  <admst:value-of select="(%(functiongetname)(.)/[name='functiongetname'])"/> -->
+  <admst:apply-templates select="." match="function:getname">
+	  <admst:value-of select="returned('function:getname')/value"/>
+  </admst:apply-templates>
+</admst:template>
+
+<!-- -------------------------------------------------------------- -->
 <admst:template match="function">
   <admst:message format="* check: old function template?\n"/>
   <admst:choose>
@@ -5831,72 +5868,8 @@ and name!='initializeInstance')]">
     </admst:otherwise>
   </admst:choose>
 </admst:template>
-<!-- -------- expression//function: mapping verilog-name == C-name of function ------- -->
-<admst:template match="functiongetname">
-  <admst:message test="[/dbg_xml='yes']" format="*MODULE functiongetname: %(.)*\n"/>
-  <admst:choose>
-    <admst:when test="[name='abs']"><admst:return name="function:getname" value="abs"/></admst:when>
-    <admst:when test="[name='\$shrinkl']"><admst:return name="function:getname" value="shrinkl"/></admst:when>
-    <admst:when test="[name='\$shrinka']"><admst:return name="function:getname" value="shrinka"/></admst:when>
-    <admst:when test="[name='log']"><admst:return name="function:getname" value="log10"/></admst:when>
-    <admst:when test="[name='ln']"><admst:return name="function:getname" value="logE"/></admst:when>
-    <admst:when test="[name='limexp']"><admst:return name="function:getname" value="limexp"/></admst:when>
-    <admst:when test="[name='\$limexp']"><admst:return name="function:getname" value="limexp"/></admst:when>
-    <admst:when test="[name='\$model']"><admst:return name="function:getname" value="_modelname"/></admst:when>
-    <admst:when test="[name='\$instance']">
-      <admst:return name="function:getname" value="_instancename"/>
-    </admst:when>
-    <admst:when test="[name='\$temperature']">
-      <admst:return name="function:getname" value="_ambient_temp"/>
-    </admst:when>
-    <admst:when test="[name='\$nominal_temperature']">
-      <admst:return name="function:getname" value="_circuit_tnom"/>
-    </admst:when>
-    <admst:otherwise>
-      <admst:message test="[/dbg_xml='yes']" format="otherwise (not impl?) %(name)\n"/>
-      <admst:value-of select="name"/>
-      <admst:return name="functiongetname" value="%s"/>
-    </admst:otherwise>
-  </admst:choose>
-</admst:template>
-<admst:template match="function:getname">
-  <admst:message test="[/dbg_xml='yes']" format="*MODULE function:getname: %(.)*\n"/>
-  <admst:choose>
-    <admst:when test="[name='abs']"><admst:return name="function:getname" value="abs"/></admst:when>
-    <admst:when test="[name='\$shrinkl']"><admst:return name="function:getname" value="shrinkl"/></admst:when>
-    <admst:when test="[name='\$shrinka']"><admst:return name="function:getname" value="shrinka"/></admst:when>
-    <admst:when test="[name='log']"><admst:return name="function:getname" value="log10"/></admst:when>
-    <admst:when test="[name='ln']"><admst:return name="function:getname" value="logE"/></admst:when>
-    <admst:when test="[name='limexp']"><admst:return name="function:getname" value="limexp"/></admst:when>
-    <admst:when test="[name='\$limexp']"><admst:return name="function:getname" value="limexp"/></admst:when>
-    <admst:when test="[name='\$model']"><admst:return name="function:getname" value="_modelname"/></admst:when>
-    <admst:when test="[name='\$instance']">
-      <admst:return name="function:getname" value="_instancename"/>
-    </admst:when>
-    <admst:when test="[name='\$temperature']">
-      <admst:return name="function:getname" value="_ambient_temp"/>
-    </admst:when>
-    <admst:when test="[name='\$nominal_temperature']">
-      <admst:return name="function:getname" value="_circuit_tnom"/>
-    </admst:when>
-    <admst:otherwise>
-      <admst:message test="[/dbg_xml='yes']" format="otherwise (not impl?) %(name)\n"/>
-      <admst:value-of select="name"/>
-      <admst:return name="function:getname" value="%s"/>
-    </admst:otherwise>
-  </admst:choose>
-</admst:template>
 <!-- expression//function: mapping verilog-name == C-name of function -->
 <!-- ----------------------------------------------------------------- -->
-<admst:template match="function:getname_push">
-  <admst:message format="*function:getname_push %(.)*\n"/>
-  <!--  <admst:value-of select="(%(functiongetname)(.)/[name='functiongetname'])"/> -->
-  <admst:apply-templates select="." match="functiongetname">
-	  <admst:value-of select="returned('functiongetname')/value"/>
-  </admst:apply-templates>
-</admst:template>
-
-<!-- -------------------------------------------------------------- -->
 <admst:template match="af:print:expression">
 <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)af:print:expression*\n"/>
   <admst:choose>
