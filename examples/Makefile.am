@@ -1,7 +1,11 @@
-##
-# this makefile is intended to work _after_ installation
+
+GNUCAP_ADMS=../gnucap-adms
+GNUCAP=gnucap
 
 EXFILES=rc.va
+CHECK=opamp
+
+EXTRA_DIST=opamp.gc opamp.ref
 
 pkgexamplesdir=${pkgdatadir}/examples
 dist_pkgexamples_DATA=${EXFILES}
@@ -21,15 +25,25 @@ ADMS_GC_XML=../adms/gnucap_0.xml
 #$(CXX) $(MCXXFLAGS) $(MCPPFLAGS) $(MLDFLAGS) $< -o $@
 
 %.so: %.va
-	gnucap-adms -v -c $<
+	$(GNUCAP_ADMS) -v -c $<
 
 %.so: %.cc
-	gnucap-adms -v $<
+	$(GNUCAP_ADMS) -v $<
 
 %.cc %_tr.hxx %_top.hxx %_ac.hxx: %.va
-	gnucap-adms -v $<
+	$(GNUCAP_ADMS) -v $<
 
 %.ii: %.va
-	gnucap-adms -v -i $<
+	$(GNUCAP_ADMS) -v -i $<
 
 %.so: %_tr.hxx %_top.hxx %_ac.hxx %.cc
+
+%.reg: %.test %.ref
+	diff $+
+
+%.test: %.gc
+	$(GNUCAP) $< | grep '^[a-zA-Z0-9]*=' > $@
+
+check: $(CHECK:%=%.reg)
+
+.PHONY=%.reg
