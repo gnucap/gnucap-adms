@@ -34,7 +34,7 @@ configuration:
 
 features:
  - simple user interface
- - works with gnucap and gnucap-uf
+ - works with gnucap-uf and almost with gnucap
  - sparse matrix allocation
  - initial conditions (experimental)
  - temperature discipline (experimental)
