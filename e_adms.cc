@@ -84,7 +84,9 @@ void ADMS_BASE::precalc_last()
 void ADMS_BASE::tr_begin()
 {
 	trace1("ADMS_BASE::tr_begin for", short_label());
-	_time[0] = 0.;
+	for (int i=OPT::_keep_time_steps-1; i>=0; --i) {
+		_time[i] = 0;
+	}
 	_dt = NOT_VALID;
 
 	//from st.
@@ -136,10 +138,8 @@ void ADMS_BASE::dc_advance() // from elt.
 	for (int i=OPT::_keep_time_steps-1; i>=0; --i) {
 		trace3("ADMS_BASE::dc_advance", long_label(), i, _time[i]);
 		ass &= _time[i] == 0.;
-		assert(ass);
 	}
-	if(!ass) error(bDANGER, "//BUG// %s simtime: %f here: %f\n", long_label().c_str(), _sim->_time0, _time[0]);
-	assert(ass);
+	if(!ass) { untested(); }
 
 	_dt = NOT_VALID;
 
