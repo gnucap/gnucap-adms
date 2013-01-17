@@ -29,6 +29,7 @@ gnucap_libdir=@gnucap_libdir@
 ES=$(echo "-e@datarootdir@/gnucap-adms/gnucap_"{0,1,2}.xml)
 RPATH=-Wl,-rpath,@libdir@
 trace=
+translate=yes
 opt=0
 ndebug=
 gdb=
@@ -41,7 +42,9 @@ for arg in $*; do
 			check_adms
 			cmd="admsXml -I@includedir@/@PACKAGE@ $ES $arg -o ${arg%.va}"
 			[ $verbose = no ] || echo $cmd
-			$cmd
+			if [ $translate = yes ]; then
+				$cmd
+			fi
 
 			if [ $compile = yes ]; then
 				cmd="@CXX@ $ndebug $trace $gdb -O$opt $cppflags $(gnucap-conf --cppflags) -shared -fPIC \
@@ -70,6 +73,9 @@ for arg in $*; do
 			prep=yes
 			;;
 		--compile|-c)
+			if [ $compile = yes ]; then
+				translate=no
+			fi
 			compile=yes
 			;;
 		--verbose|-v)
