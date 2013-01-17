@@ -1,3 +1,8 @@
 simple
 - check for python (version?)
+- check for known-to-work gnucap
 - more devices/tests
+- fix portability of gnucap-adms.so
+
+difficult
+- see BUGS
