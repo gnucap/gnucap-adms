@@ -1976,11 +1976,14 @@ double $(DEV_NAME)::tr_probe_num(const std::string&amp; x)const
 {
 	trace3("$(DEV_NAME)::tr_probe_num", _dt, _time[0], _time[1]);
 	assert(_dt == NOT_VALID || conchk(_dt, _time[0] - _time[1]));
+<admst:if test="[($_num_states!='0')]">
 	static std::string state_names[_num_states];
+</admst:if>
 	static std::string contr_names[$_num_stamp_nodes];
 
   <admst:apply-templates select="." match="commonmodel"/>
 
+<admst:if test="[($_num_states!='0')]">
 	// init states &amp; node names
 	for(int i=0; i&lt;_num_states; i++)
 	{
@@ -1989,6 +1992,7 @@ double $(DEV_NAME)::tr_probe_num(const std::string&amp; x)const
 		ss &lt;&lt; i;
 		state_names[i] = &quot;state&quot; + ss.str();
 	}
+</admst:if>
 	for(int i=0; i&lt;$_num_stamp_nodes; i++)
 	{
 		std::stringstream ss;
@@ -1996,10 +2000,12 @@ double $(DEV_NAME)::tr_probe_num(const std::string&amp; x)const
 		contr_names[i] = &quot;cont&quot; + ss.str();
 	}
 
+<admst:if test="[($_num_states!='0')]">
 	// states probes
 	for (int ii=0; ii&lt;_num_states; ++ii)
 		if (Umatch(x, state_names[ii] + ' '))
 			return _states[0][ii];
+</admst:if>
 	// node probes
 	for(int i=0; i&lt;$_num_stamp_nodes; i++)
 		if( Umatch(x, contr_names[i] + ' ') )
