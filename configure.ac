@@ -3,7 +3,7 @@
 
 AC_PREREQ([2.67])
 AC_INIT([gnucap-adms], [0.0.1], [felix@salfelder.org])
-AC_CONFIG_SRCDIR([discipline.h])
+AC_CONFIG_SRCDIR([README])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE
@@ -56,8 +56,8 @@ CXXFLAGS+=" -Wall -pedantic"
 
 # Checks for library functions.
 
-AC_CONFIG_FILES([Makefile examples/Makefile])
-AC_CONFIG_FILES([gnucap-adms], [chmod +x gnucap-adms])
+AC_CONFIG_FILES([Makefile src/Makefile examples/Makefile])
+AC_CONFIG_FILES([src/gnucap-adms], [chmod +x src/gnucap-adms])
 AC_OUTPUT
 
 AC_MSG_RESULT([
