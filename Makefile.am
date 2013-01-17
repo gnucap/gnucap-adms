@@ -1,6 +1,9 @@
+SUBDIRS=examples
 pkgdata_DATA = gnucap_0.xml gnucap_1.xml gnucap_2.xml
 
 dist_bin_SCRIPTS=gnucap-adms
+DEV=cap res opamp
+EXTRA_DIST=$(DEV:%=%.va) gnucap.xml split.py
 
 gnucap_adms_include_HEADERS = discipline.h gnucap-adms.h e_adms.h
 gnucap_adms_includedir = $(pkgincludedir)
@@ -33,17 +36,17 @@ PLUGIN_LDFLAGS=-module -shared
 
 plugin_LTLIBRARIES += adms_res.la
 adms_res_la_LDFLAGS = $(PLUGIN_LDFLAGS)
-adms_res_la_SOURCES = res.cc
+nodist_adms_res_la_SOURCES = res.cc
 adms_res_la_LIBADD = -le_adms
 
 plugin_LTLIBRARIES += adms_cap.la
 adms_cap_la_LDFLAGS = $(PLUGIN_LDFLAGS)
-adms_cap_la_SOURCES = cap.cc
+nodist_adms_cap_la_SOURCES = cap.cc
 adms_cap_la_LIBADD = -le_adms
 
 plugin_LTLIBRARIES += adms_opamp.la
 adms_opamp_la_LDFLAGS = $(PLUGIN_LDFLAGS)
-adms_opamp_la_SOURCES = opamp.cc
+nodist_adms_opamp_la_SOURCES = opamp.cc
 adms_opamp_la_LIBADD = -le_adms
 
 # automatically by "make depend"?
