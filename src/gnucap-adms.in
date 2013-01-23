@@ -41,7 +41,7 @@ for arg in $*; do
 	case $arg in
 		*.va)
 			check_adms
-			cmd="admsXml -I@includedir@/@PACKAGE@ $ES $arg -o ${arg%.va}"
+			cmd="admsXml @ADMSXML_FLAGS@ -I@includedir@/@PACKAGE@ $ES $arg -o ${arg%.va}"
 			[ $verbose = no ] || echo $cmd
 			if [ $translate = yes ]; then
 				$cmd

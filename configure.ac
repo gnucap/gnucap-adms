@@ -37,12 +37,22 @@ if test "x$HAVE_GCCONF" = "xfalse"; then
 fi
 
 AC_MSG_CHECKING([extern support])
-if admsXml src/gnucap-adms.h 2>/dev/null >/dev/null; then
+ADMSXML_FLAGS=
+ADMSXML_NOEXTERN=
+# BUG in admsXml
+# if admsXml -DUSE_EXTERN src/gnucap-adms.h 2>/dev/null >/dev/null; then
+# doesnt work. using ugly check
+if echo "extern module foo();endmodule" | admsXml /dev/stdin 2>/dev/null >/dev/null; then
 	AC_MSG_RESULT([yes])
 	AC_DEFINE([VERILOG_EXTERN], [1], [admsXml understands 'extern'])
+	ADMSXML_FLAGS=-DUSE_EXTERN
+	ADMSXML_NOEXTERN=[\[extern=\'no\'\]]
 else
 	AC_MSG_RESULT([no])
 fi
+AC_SUBST([ADMSXML_FLAGS])
+AC_SUBST([ADMSXML_NOEXTERN])
+AM_CONDITIONAL([VERILOG_EXTERN], [test x$ADMSXML_NOEXTERN != x] )
 
 dnl ----------------- plugindir ------------------
 AC_MSG_CHECKING([local])
@@ -78,6 +88,7 @@ CXXFLAGS+=" -Wall -pedantic"
 
 AC_CONFIG_FILES([Makefile src/Makefile examples/Makefile])
 AC_CONFIG_FILES([src/gnucap-adms], [chmod +x src/gnucap-adms])
+AC_CONFIG_FILES([src/gnucap.xml])
 AC_OUTPUT
 
 AC_MSG_RESULT([
