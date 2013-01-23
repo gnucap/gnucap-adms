@@ -35,6 +35,7 @@ ndebug=
 gdb=
 cppflags="-I@includedir@/@PACKAGE@ $CPPFLAGS"
 ldflags="-L@libdir@ -Wl,-rpath,@libdir@ -le_adms"
+CXXFLAGS="-Wall -pedantic"
 
 for arg in $*; do
 	case $arg in
@@ -63,7 +64,7 @@ for arg in $*; do
 			fi
 			;;
 		*.cc)
-			cmd="@CXX@ $ndebug $trace $gdb -O$opt $cppflags $(gnucap-conf --cppflags) -shared -fPIC \
+			cmd="@CXX@ $CXXFLAGS $ndebug $trace $gdb -O$opt $cppflags $(gnucap-conf --cppflags) -shared -fPIC \
 				$arg -L@libdir@ -le_adms -o ${arg%.cc}.so $RPATH"
 			[ $quiet = no ] && echo compiling ${arg%.cc}.so
 			[ $verbose = no ] || echo $cmd
