@@ -1070,7 +1070,7 @@ $(DEV_NAME)::$(DEV_NAME)(const $(DEV_NAME)&amp; p) :
 	}
 
 	_n = _nodes;
-	for (unsigned ii = 0; ii &lt; int_nodes() + max_nodes(); ++ii){
+	for (uint_t ii = 0; ii &lt; int_nodes() + max_nodes(); ++ii){
 		_n[ii] = p._n[ii];
 		trace3("$(DEV_NAME)::$(DEV_NAME)", ii, _n[ii].is_adp(), p._n[ii].is_adp());
 	}
@@ -1195,7 +1195,7 @@ void $(DEV_NAME)::expand()
 		// %(name) %(discipline) %(location)
 </admst:for-each>
 
-		for(unsigned ii = net_nodes(); ii &lt; matrix_nodes(); ++ii) {
+		for(uint_t ii = net_nodes(); ii &lt; matrix_nodes(); ++ii) {
 #ifdef HAVE_ADP_NODE
 			trace2("$(DEV_NAME)::expand nodes", ii, _n[ii].is_adp());
 			if(!_n[ii].is_adp()){
@@ -1219,20 +1219,20 @@ void $(DEV_NAME)::expand()
 			} else {
 				trace1("$(DEV_NAME)::expand node,not registering new adpnode", _n[ii].a_()->long_label() );
 
-#endif
 			}
+#endif
 		}
 
 		assert(max_nodes() != 0);
-		for (unsigned ii = 0; ii &lt; matrix_nodes(); ++ii)
+		for (uint_t ii = 0; ii &lt; matrix_nodes(); ++ii)
 		{
 			trace2("$(DEV_NAME)::expand matrix node check", ii, _n[ii].is_adp());
 			assert(_n[ii].t_()!=INVALID_NODE);
-			assert(_n[ii].n_()
 #ifdef HAVE_ADP_NODE
-			|| _n[ii].is_adp() 
+			assert(_n[ii].n_() || _n[ii].is_adp());
+#else
+			assert(_n[ii].n_());
 #endif
-			);
 		}
 <admst:for-each select="instance">
 		if (!_%(name)) {
@@ -1273,9 +1273,9 @@ void $(DEV_NAME)::expand()
   </admst:for-each>
 		}
 </admst:for-each>
+	}else{
+		untested();
 	}
-	else
-	untested();
   <admst:if test="[$has_sckt!=0]">
 	assert(subckt());
 	trace0("$(DEV_NAME)::expand: expanding netlist");
@@ -1562,6 +1562,7 @@ void $(DEV_NAME)::tt_advance()
 	_dt=0;
 }
 /*--------------------------------------------------------------------------*/
+#ifdef HAVE_TT
 void $(DEV_NAME)::tt_begin()
 {
 	trace1("$(DEV_NAME)::tt_begin", _sim->_Time0);
@@ -1579,6 +1580,7 @@ void $(DEV_NAME)::tr_stress_last()
 	subckt()-&gt;tr_stress_last();
   </admst:if>
 }
+#endif
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::tr_restore()
 {
