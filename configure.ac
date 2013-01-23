@@ -23,6 +23,26 @@ GC_CPPFLAGS+=$(gnucap-conf --cppflags)
 
 # Checks for typedefs, structures, and compiler characteristics.
 
+dnl ----------------- admsXml ------------------
+AC_CHECK_PROG(HAVE_GCCONF, gnucap-conf, true, false)
+
+if test "x$HAVE_GCCONF" = "xfalse"; then
+	AC_MSG_ERROR([cannot find gnucap-conf, not implemented])
+fi
+
+dnl ----------------- admsXml ------------------
+AC_CHECK_PROG(HAVE_ADMSXML, admsXml, true, false)
+if test "x$HAVE_GCCONF" = "xfalse"; then
+	AC_MSG_ERROR([cannot find admsXml])
+fi
+
+AC_MSG_CHECKING([extern support])
+if admsXml src/gnucap-adms.h 2>/dev/null >/dev/null; then
+	AC_MSG_RESULT([yes])
+	AC_DEFINE([VERILOG_EXTERN], [1], [admsXml understands 'extern'])
+else
+	AC_MSG_RESULT([no])
+fi
 
 dnl ----------------- plugindir ------------------
 AC_MSG_CHECKING([local])
