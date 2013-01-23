@@ -1,0 +1,39 @@
+spice
+
+.options noincmode
+.options nobypass
+
+.verilog
+load ./lamp.so
+paramset mylamp heatball;
+	.C_tempcap=1e-4;
+	.C_rad=1e-12;
+endparamset
+
+mylamp H1 (0,ndd);
+
+spice
+.param vsupp=230
+.param vsupp0=0
+.param delay=0
+
+V1 ndd 0 pulse iv=vsupp0 pv=vsupp rise=.01 delay=delay
+
+.store tran temp(H1)
+.print tran v(nodes) temp(H1) v(H1.nodes) reff(H1) P_el(H1) P_rad(H1) P_thc(H1) ambient(H1) state0(H1)
+.print dc v(nodes) temp(H1) v(H1.nodes) reff(H1) P_el(H1) P_rad(H1) P_thc(H1) ambient(H1) state0(H1)
+
+.nodelist
+
+.dc trace=v
+*.end
+
+.tr 0 1 .01
+.measure t1 at(probe="temp(H1)" x=0.5)
+* .options temp=10
+.param vsupp0=230
+.param vsupp=0
+.param delay=1
+.tr 2 
+.measure t2 at(probe="temp(H1)" x=q.5)
+.end

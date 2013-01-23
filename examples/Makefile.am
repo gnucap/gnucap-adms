@@ -1,11 +1,11 @@
 
-GNUCAP_ADMS=../gnucap-adms
+GNUCAP_ADMS=../src/gnucap-adms
 GNUCAP=gnucap
 
 EXFILES=rc.va
 CHECK=opamp
 
-EXTRA_DIST=opamp.gc opamp.ref
+EXTRA_DIST=opamp.gc opamp.ref lamp.va lamp.gc
 
 pkgexamplesdir=${pkgdatadir}/examples
 dist_pkgexamples_DATA=${EXFILES}
