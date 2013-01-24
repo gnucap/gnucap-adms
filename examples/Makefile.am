@@ -1,6 +1,6 @@
 
 GNUCAP_ADMS=../src/gnucap-adms
-GNUCAP=gnucap
+GNUCAP=LD_LIBRARY_PATH=../src/.libs gnucap
 
 EXFILES=rc.va
 if VERILOG_EXTERN
