@@ -3,7 +3,10 @@ GNUCAP_ADMS=../src/gnucap-adms
 GNUCAP=gnucap
 
 EXFILES=rc.va
-CHECK=opamp
+if VERILOG_EXTERN
+EXT_CHECK=rc
+endif
+CHECK=opamp $(EXT_CHECK)
 
 EXTRA_DIST=opamp.gc opamp.ref lamp.va lamp.gc
 

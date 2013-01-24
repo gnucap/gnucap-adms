@@ -7,19 +7,19 @@ V1 nin 0 pulse iv=1 pv=0 rise=200u
 .list
 
 .verilog
-
 load ./rc.so
-
 paramset myrc rc; .c=3n; .r=200k; endparamset
 
 myrc rc1 (nin,nout1,0);
 spice
 
-.print tran v(nodes) v(rc1.int1) r(rc1) r(rc1.r1) c(rc1.c1)
+.print tran v(nodes)
+.store tran v(nodes)
 .print dc v(nodes) v(rc1.int1)
 
 .nodelist
 .dc trace=v
 .tran .05m 1m
+.measure v1 at(probe="v(nout1)", x=500.u)
 
 .end
