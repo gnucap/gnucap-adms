@@ -657,7 +657,8 @@ inline voltage_t _BP(ENode p, ENode n) { return volts_limited(_n[p],_n[n]);}
 		_states[0][stateno*2] = qq;
 
 		if (_sim->analysis_is_ac()) {
-			incomplete(); // shouldnt call DDT at all!
+			// BUG? fix later.
+			// shouldnt call DDT at all!
 			return 0;
 		}
 		assert(_dt != 0.0);
