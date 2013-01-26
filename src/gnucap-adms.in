@@ -9,15 +9,9 @@ to get a shared object type \n
 make some.o CXXFLAGS=\"--shared\ -fPIC\" CPPFLAGS=$(gnucap-conf --cppflags)\ LDFLAGS=\ \n
 mv some.o some.so"
 
-function check_gnucap {
-	[ -z `which gnucap-conf` ] &&  echo "need gnucap-conf" && exit 1 
-}
-
 function check_adms {
 	[ -z `which admsXml` ] &&  echo "need admsXml" && exit 1 
 }
-
-check_gnucap
 
 prefix=@prefix@
 compile=no
@@ -47,7 +41,7 @@ for arg in $*; do
 			fi
 
 			if [ $compile = yes ]; then
-				cmd="@CXX@ $ndebug $trace $gdb -O$opt $cppflags $(gnucap-conf --cppflags) -shared -fPIC \
+				cmd="@CXX@ $ndebug $trace $gdb -O$opt $cppflags @GC_CPPFLAGS@ -shared -fPIC \
 				    ${arg%.va}.cc -L@libdir@ -le_adms -o ${arg%.va}.so $RPATH"
 				[ $quiet = no ] && echo compiling ${arg%.va}.so
 				[ $verbose = no ] || echo $cmd
@@ -55,7 +49,7 @@ for arg in $*; do
 			fi
 
 			if [ $prep = yes ]; then
-				cmd="@CPP@ $ndebug $trace $cppflags $(gnucap-conf --cppflags) \
+				cmd="@CPP@ $ndebug $trace $cppflags @GC_CPPFLAGS@ \
 				    ${arg%.va}.cc -L@libdir@ -le_adms -o ${arg%.va}.ii $RPATH"
 				[ $quiet = no ] && echo writing ${arg%.va}.ii
 				[ $verbose = no ] || echo $cmd
@@ -63,7 +57,7 @@ for arg in $*; do
 			fi
 			;;
 		*.cc)
-			cmd="@CXX@ $CXXFLAGS $ndebug $trace $gdb -O$opt $cppflags $(gnucap-conf --cppflags) -shared -fPIC \
+			cmd="@CXX@ $CXXFLAGS $ndebug $trace $gdb -O$opt $cppflags @GC_CPPFLAGS@ -shared -fPIC \
 				$arg -L@libdir@ -le_adms -o ${arg%.cc}.so $RPATH"
 			[ $quiet = no ] && echo compiling ${arg%.cc}.so
 			[ $verbose = no ] || echo $cmd
