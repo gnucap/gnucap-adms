@@ -1,0 +1,21 @@
+This adms-script generate (analog) gnucap-models from verilog
+
+Adms 2.3.0 can be downloaded from:
+http://en.sourceforge.jp/projects/sfnet_mot-adms/downloads/adms-source/2.3/adms-2.3.0.tar.gz/
+
+The script gnucap.xml.in will be split, before can be used by admsXml:
+
+split.py: split gnucap.xml in many files, for each scope in gnucap.xml respectively
+Reason: many script-files allow you to implement something like derivation, for example:
+	admsXml -e sript1.xml -e script2.xml -e script3.xml
+
+	script1:
+		template a calls b
+		template b
+	script2:
+		calls a (-> calls script1::b)
+	script3:
+		template b
+		calls a (-> calls script3::b)
+
+If you try to impement this example with scopes, the script2-"a"-call will use script3::b (looks like a bug).
