@@ -219,8 +219,6 @@
 #define CONSTCtoK (273.15) // also in gnucap/constans.h P_CELSIUS0
 
 #define EXIT_IF_ISNAN(var) assert(is_number(var));
-inline void _used(double)  {}
-
 
 <admst:for-each select="assignment">
   <admst:apply-templates select="rhs/tree" match="ddtcollect"/>
@@ -4466,7 +4464,7 @@ inline double d_doh(double x)          {return  exp(x)/(exp(x) + 1); }
   <admst:if test="[type='integer']">\tint %(name);</admst:if>
   <admst:if test="[type='real']">\tdouble %(name) = std::numeric_limits&lt;double&gt;::quiet_NaN();</admst:if>
   <admst:if test="[type='string']">\tchar* %(name);</admst:if>
-      _used(%(name));
+      USE(%(name));
 
 </admst:template>
 
