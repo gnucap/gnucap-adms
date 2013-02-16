@@ -619,12 +619,6 @@ inline voltage_t _BP(ENode p, ENode n) { return volts_limited(_n[p],_n[n]);}
 	double m_entries_kept[%(count(jacobian))]; // keep_ic, uic etc.
 
 	enum EStates {
-    <admst:for-each select="assignment">
-      <admst:apply-templates select="rhs/tree" match="ddtcollect"/>
-    </admst:for-each>
-    <admst:for-each select="contribution">
-      <admst:apply-templates select="rhs/tree" match="ddtcollect"/>
-    </admst:for-each>
     <admst:for-each select="$(ddts)">
 		_ddt_%(adms/id(.)), // %(.)
     </admst:for-each>
