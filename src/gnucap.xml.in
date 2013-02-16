@@ -29,7 +29,7 @@
 </admst:for-each>
 
 <!-- prefix for local variables -->
-<admst:variable name="var_prefix" select="__"/>
+<admst:variable name="var_prefix" select="v_"/>
 <admst:variable name="instancevar" select="c->"/>
 <admst:variable name="modelvar" select="m->"/>
 <admst:variable name="node_prefix" select="n_"/>
