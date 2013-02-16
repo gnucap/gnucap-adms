@@ -1958,6 +1958,10 @@ void $(DEV_NAME)::tr_accept()
 #		include "$(filename)_$(module)_tr.hxx"
 #undef NOJAC
 #undef _DDT
+	}else{
+// analog:evaluate
+<admst:variable name="eval_mode" select="accept"/>
+<admst:apply-templates select="analog/code" match="analog:evaluate" required="yes"/>
 	}
 
 	
@@ -2924,11 +2928,53 @@ inline double d_doh(double x)          {return  exp(x)/(exp(x) + 1); }
 <!-- *********************************************************************************** -->
 <!-- ******************************* tree traverse ************************************* -->
 <!-- *********************************************************************************** -->
-
+<admst:template match="contribution:nonoise">
+  <admst:message test="[/dbg_xml='yes']" format="dummy contribution:nonoise\n"/>
+	/*dummy contribution:nonoise*/
+</admst:template>
 <!-- ----------------------------------------------------------------- -->
 <!-- analog/![initializeModel|initializeInstance|initial_model|initial_instance|initial_step|noise] -->
-<!-- from ngspiceMODULEload.c.xml -->
 <admst:template match="analog:evaluate">
+  <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)analog:evaluate*\n"/>
+  <admst:text select="$fnoise/item" format="fpnoise%(index($fnoise/item,.))=0.0;
+    fenoise%(index($fnoise/item,.))=0.0;\n"/>
+  <admst:text select="$tnoise/item" format="tnoise%(index($tnoise/item,.))=0.0;\n"/>
+  <admst:text select="$wnoise/item" format="wnoise%(index($wnoise/item,.))=0.0;\n"/>
+
+  <!-- local variable declarations. move to template? -->
+  <admst:for-each select="item">
+    <admst:if test="adms[datatypename='block']/..[name!='initial_model' and name!='initial_instance']">
+      <admst:text format="// declaration1\n"/>
+      <admst:apply-templates select="." match="block:local:declaration"/>
+    </admst:if>
+    <admst:if test="adms[datatypename!='block']">
+      <admst:text format="// declaration2\n"/>
+      <admst:apply-templates select="." match="block:local:declaration"/>
+    </admst:if>
+  </admst:for-each>
+  <admst:text format="// declaration3\n"/>
+  <admst:apply-templates select="module/evaluation/variable" match="variable:declaration"/>
+  <!-- local variable declarations -->
+
+  <admst:reset select="module/evaluation/variable"/>
+  <admst:for-each select="item">
+    <admst:choose>
+      <admst:when test="adms[datatypename!='block']">
+        <admst:apply-templates select="." match="%(adms/datatypename)"/>
+      </admst:when>
+      <admst:otherwise>
+        <admst:if test="[name!='initial_model' and name!='initial_instance']">
+//bug -- parts of this (%(name), %(datatypename)) has been done in tr_begin.
+
+          <admst:apply-templates select="." match="block"/>
+          <admst:text format="// end bug?\n"/>
+        </admst:if>
+      </admst:otherwise>
+    </admst:choose>
+  </admst:for-each>
+</admst:template>
+<!-- from ngspiceMODULEload.c.xml -->
+<admst:template match="analog:evaluate_OLD">
   <admst:message test="[/dbg_xml='yes']" format="*(ngspvers)analog:evaluate*\n"/>
   // evaluate template
   <admst:if test="code">
@@ -4266,7 +4312,7 @@ inline double d_doh(double x)          {return  exp(x)/(exp(x) + 1); }
     </admst:when>
     <admst:otherwise>
       <admst:value-of select="branch/pnode/name"/>
-      <admst:value-to select="/simulator/tmp" value="NP(n_%s)"/>
+      <admst:value-to select="/simulator/tmp" value="NP(%s)"/>
     </admst:otherwise>
   </admst:choose>
 </admst:template>
