@@ -199,14 +199,14 @@
 #include &quot;e_adms.h&quot;
 #include &quot;u_parameter.h&quot;
 
+#ifndef $(filename)_header__
+#define $(filename)_header__
 <admst:for-each select="/module@ADMSXML_NOEXTERN@">
   <admst:value-of select="attribute[name='ngspicename']/value"/>
   <admst:variable name="module" select="%s"/>
   <admst:variable name="DEV_NAME" select="DEV_%(upper-case(name))"/>
   <admst:variable name="MODEL_NAME" select="MODEL_%(upper-case(name))"/>
   <admst:variable name="COMMON_NAME" select="COMMON_%(upper-case(name))"/>
-#ifndef $(module)_header__
-#define $(module)_header__
 
 // customization - gnucap specific constants
 #define VALUE_NAME &quot;#&quot;
@@ -215,8 +215,6 @@
 #define _DERIVATEFORDDX
 
 #define SPICE_LETTER &quot;\\0&quot;
-#define DEVICE_TYPE &quot;dev_$(module)&quot;
-#define MODEL_TYPE &quot;$(module)&quot;
 
 #define CONSTCtoK (273.15) // also in gnucap/constans.h P_CELSIUS0
 
@@ -841,12 +839,13 @@ using namespace std;
   <admst:variable name="module" select="%s"/>
   <admst:variable name="DEV_NAME" select="DEV_%(upper-case(name))"/>
   <admst:variable name="MODEL_NAME" select="MODEL_%(upper-case(name))"/>
+  <admst:variable name="COMMON_NAME" select="COMMON_%(upper-case(name))"/>
 
-static $(DEV_NAME) p0;
-static DISPATCHER&lt;CARD&gt;::INSTALL d0(&amp;device_dispatcher, DEVICE_TYPE, &amp;p0);
+static $(DEV_NAME) p_dev_$(module);
+static DISPATCHER&lt;CARD&gt;::INSTALL d_$(module)_0(&amp;device_dispatcher, "dev_$(module)", &amp;p_dev_$(module));
 
-static $(MODEL_NAME) p1(&amp;p0);
-static DISPATCHER&lt;MODEL_CARD&gt;::INSTALL d1(&amp;model_dispatcher, MODEL_TYPE, &amp;p1);
+static $(MODEL_NAME) p_$(module)(&amp;p_dev_$(module));
+static DISPATCHER&lt;MODEL_CARD&gt;::INSTALL d_$(module)_1(&amp;model_dispatcher, "$(module)", &amp;p_$(module));
 
 static $(COMMON_NAME) Default_$(COMMON_NAME)(CC_STATIC);
 
@@ -1958,7 +1957,7 @@ void $(DEV_NAME)::tr_accept()
 <admst:for-each select="$(ddts)">
 		double keep_%(adms/id(.))=1;
 </admst:for-each>
-#		include &quot;$(filename)_tr.hxx&quot;
+#		include "$(filename)_$(module)_tr.hxx"
 #undef NOJAC
 #undef _DDT
 	}
@@ -2079,7 +2078,7 @@ void $(DEV_NAME)::guesstopology ()
 	for(int i=0; i&lt;%(count(jacobian)); i++)
         	m_required[i] = false;
 
-	#include &quot;$(filename)_top.hxx&quot;
+	#include "$(filename)_$(module)_top.hxx"
 
   for(int i=0; i&lt;%(count(jacobian)); i++){
     trace1(&quot;guess m&quot;, m_required[i]);
@@ -2133,7 +2132,7 @@ void $(DEV_NAME)::ac_eval()
 </admst:for-each>
 	{
 	// fixme: remerge _tr.hxx?
-		#include &quot;$(filename)_ac.hxx&quot;
+		#include "$(filename)_$(module)_ac.hxx"
 	}
 }
 // -------------------------------------------------------------------------- //
@@ -2212,7 +2211,7 @@ void $(DEV_NAME)::tr_eval()
 </admst:if>
 	
 	{
-		#include &quot;$(filename)_tr.hxx&quot;
+		#include "$(filename)_$(module)_tr.hxx"
 	}
 
 	// this is what cap does.
@@ -5335,7 +5334,7 @@ return
   <admst:variable name="DEV_NAME" select="DEV_%(upper-case(name))"/>
   <admst:variable name="MODEL_NAME" select="MODEL_%(upper-case(name))"/>
 
-  <admst:open file="$(filename)_top.hxx">
+  <admst:open file="$(filename)_$(module)_top.hxx">
     <admst:apply-templates select="analog/code[datatypename='block']/variable"
       match="generate_c:declare_variable"/>
 
@@ -5620,7 +5619,7 @@ and name!='initializeInstance')]">
   <admst:variable name="DEV_NAME" select="DEV_%(upper-case(name))"/>
   <admst:variable name="MODEL_NAME" select="MODEL_%(upper-case(name))"/>
 
-  <admst:open file="$(filename)_tr.hxx">
+  <admst:open file="$(filename)_$(module)_tr.hxx">
     <admst:apply-templates select="analog/code" match="analog:evaluate" required="yes"/>
   </admst:open>
 </admst:for-each>
@@ -5634,7 +5633,7 @@ and name!='initializeInstance')]">
   <admst:variable name="DEV_NAME" select="DEV_%(upper-case(name))"/>
   <admst:variable name="MODEL_NAME" select="MODEL_%(upper-case(name))"/>
 
-  <admst:open file="$(filename)_ac.hxx">
+  <admst:open file="$(filename)_$(module)_ac.hxx">
     <admst:apply-templates select="analog/code" match="analog:evaluate" required="yes"/>
   </admst:open>
 </admst:for-each>
