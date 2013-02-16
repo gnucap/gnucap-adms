@@ -20,7 +20,6 @@ function check_adms {
 check_gnucap
 
 prefix=@prefix@
-adms_dbg_xml=no
 compile=no
 prep=no
 quiet=no
@@ -96,7 +95,7 @@ for arg in $*; do
 			quiet=yes
 			;;
 		--debug|-d)
-			adms_dbg_xml=yes
+			export adms_dbg_xml=yes
 			;;
 		--ldflags)
 			echo $ldflags
