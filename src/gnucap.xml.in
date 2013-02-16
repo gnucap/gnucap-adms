@@ -619,7 +619,6 @@ inline voltage_t _BP(ENode p, ENode n) { return volts_limited(_n[p],_n[n]);}
 	double m_entries_kept[%(count(jacobian))]; // keep_ic, uic etc.
 
 	enum EStates {
-    <admst:variable name="numddt" select="0"/>
     <admst:for-each select="assignment">
       <admst:apply-templates select="rhs/tree" match="ddtcollect"/>
     </admst:for-each>
@@ -631,8 +630,6 @@ inline voltage_t _BP(ENode p, ENode n) { return volts_limited(_n[p],_n[n]);}
     </admst:for-each>
 		_num_states = %(count($ddts)) // $(_num_states)
 	};
-
-	//	unsigned num_ddt(){return $(_num_states);}
 
 	double* _states[OPT::_keep_time_steps]; // for each step: q0,i0, q1,i1, q2,i2, etc.
 	double* _states_q1;	// for step t1:  q0, q1, q2, q3, etc.
@@ -800,7 +797,6 @@ class $(COMMON_NAME) : public COMMON_COMPONENT
 <admst:template match="ddtcollect">
   <admst:message test="[/dbg_xml='yes']" format="*ddtcollect*\n"/>
   <admst:if test="[(adms/datatypename)='function' and name='ddt']">
-    <admst:variable name="numddt" select="$numddt+1"/>
     <admst:push into="$ddts" select="." onduplicate="ignore"/>
   </admst:if>
 
