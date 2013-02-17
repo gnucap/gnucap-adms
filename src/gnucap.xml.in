@@ -4740,16 +4740,16 @@ inline double d_doh(double x)          {return  exp(x)/(exp(x) + 1); }
     <admst:value-to select="/simulator/tmp" value="m-&gt;$(var_prefix)%s"/>
   </admst:if>
   <admst:if test="[input='yes' and parametertype='instance']">
-    <admst:value-to select="/simulator/tmp" value="/*instance*/&gt;$(var_prefix)%s"/>
+    <admst:value-to select="/simulator/tmp" value= "/*instance*/ &gt;$(var_prefix)%s"/>
   </admst:if>
   <admst:if test="[input='no' and scope='global_model']">
     <admst:value-to select="/simulator/tmp" value="m-&gt;$(var_prefix)%s"/>
   </admst:if>
   <admst:if test="[input='no' and scope='global_instance']">
-    <admst:value-to select="/simulator/tmp" value="/*gli*/$(var_prefix)%s"/>
+    <admst:value-to select="/simulator/tmp" value=" /*gli*/ $(var_prefix)%s"/>
   </admst:if>
   <admst:if test="[parametertype!='analogfunction' and scope='local']">
-    <admst:value-to select="/simulator/tmp" value="/*else*/%s"/>
+    <admst:value-to select="/simulator/tmp" value=" /*else*/ %s"/>
   </admst:if>
 </admst:template>
 
