@@ -1549,6 +1549,7 @@ void $(DEV_NAME)::expand()
 	assert(subckt());
 	trace0("$(DEV_NAME)::expand: expanding netlist");
 	subckt()->expand();
+	subckt()->set_slave();
   </admst:if>
 }
 // -------------------------------------------------------------------------- //
@@ -1958,9 +1959,6 @@ void $(DEV_NAME)::tr_eval_kept()
 bool $(DEV_NAME)::do_tr()
 {
 	trace1(&quot;$(DEV_NAME)::do_tr&quot;, long_label());
-  <admst:if test="[$has_sckt!=0]">
-	subckt()-&gt;do_tr();
-  </admst:if>
 
 	assert(OPT::_keep_time_steps &lt;= 8);
 	assert(_dt == NOT_VALID || conchk(_dt, _time[0] - _time[1]));
@@ -1978,7 +1976,7 @@ bool $(DEV_NAME)::do_tr()
 
 	// convergence check -- gnucap method
   <admst:if test="[$has_sckt!=0]">
-	set_converged( subckt()-&gt;do_tr());
+	set_converged( subckt()->do_tr());
   </admst:if>
   <admst:if test="[$has_sckt=0]">
 	set_converged(true);
@@ -2087,8 +2085,8 @@ void $(DEV_NAME)::tr_load()
 	                   OPT::traceload, _loaditer, _sim-&gt;iteration_tag());
 
   <admst:if test="[$has_sckt!=0]">
-	if( !OPT::traceload || !_sim-&gt;is_inc_mode()) {
-		subckt()-&gt;tr_load();
+	if( !OPT::traceload || !_sim->is_inc_mode()) {
+		subckt()->tr_load();
 	} else {
 		// subdevices have queued themselves if necessary.
 	}
