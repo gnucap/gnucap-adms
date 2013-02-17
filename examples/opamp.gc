@@ -17,10 +17,9 @@ V1 nin_p 0  sin(frequency=freq, amplitude=ampl, offset=0)
 .verilog
 
 paramset myota opamp;
-	.gain=100000;
-	.f0=300;
-	.slew_rate=5000
-	.vgap=0.333
+	.A0   = 2e5;
+	.f0dB = 1e6;
+	.Sr   = 5e5
 endparamset
 
 # biased by 1V
