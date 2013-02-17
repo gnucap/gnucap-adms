@@ -1865,7 +1865,7 @@ void $(DEV_NAME)::tr_advance()
   <admst:if test="[$has_sckt!=0]">
 	subckt()->tr_advance();
   </admst:if>
-  trace3(&quot;DEV_LAMP::tr_advance&quot;, _sim-&gt;_time0, _time[0], _time[1]);
+  trace3("$(DEV_NAME::tr_advance", _sim->_time0, _time[0], _time[1]);
   ADMS_BASE::tr_advance(); // does time.
 
   // shift states, clear states[0]
@@ -1958,7 +1958,7 @@ void $(DEV_NAME)::tr_eval_kept()
 // -------------------------------------------------------------------------- //
 bool $(DEV_NAME)::do_tr()
 {
-	trace1(&quot;$(DEV_NAME)::do_tr&quot;, long_label());
+	trace1("$(DEV_NAME)::do_tr", long_label());
 
 	assert(OPT::_keep_time_steps &lt;= 8);
 	assert(_dt == NOT_VALID || conchk(_dt, _time[0] - _time[1]));
