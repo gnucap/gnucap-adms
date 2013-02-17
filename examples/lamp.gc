@@ -5,7 +5,7 @@ spice
 
 .verilog
 load ./lamp.so
-paramset mylamp heatball;
+paramset mylamp lamp;
 	.C_tempcap=1e-4;
 	.C_rad=1e-12;
 endparamset
