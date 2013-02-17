@@ -2245,7 +2245,9 @@ void $(DEV_NAME)::tr_accept()
 	}else{
 // analog:evaluate
 <admst:variable name="eval_mode" select="accept"/>
+<admst:variable name="_DERIVATE" select="no"/>
 <admst:apply-templates select="analog/code" match="analog:evaluate" required="yes"/>
+<admst:variable name="_DERIVATE" select="yes"/> <!-- fixme -->
 	}
 
 	
@@ -3788,8 +3790,7 @@ inline double d_doh(double x)          {return  exp(x)/(exp(x) + 1); }
       <admst:if test="[type='real']">double %s=0.0/0.0;\n</admst:if>
       <admst:if test="[type='string']">char* %s;\n</admst:if>
       <admst:if test="[insource='yes']">
-        <admst:if test="probe">
-          <admst:text format="#if defined(_DERIVATE) // BAR\n"/>
+        <admst:if test="probe"><admst:if test="[$_DERIVATE='yes']">
           <admst:for-each select="probe">
             <admst:value-of select="branch/nnode/name"/>
             <admst:value-of select="branch/pnode/name"/>
@@ -3797,8 +3798,7 @@ inline double d_doh(double x)          {return  exp(x)/(exp(x) + 1); }
             <admst:value-of select="../name"/>
             <admst:text format="double %s_%s%s_%s=0.0;\n"/>
           </admst:for-each>
-          <admst:text format="#endif /*_DERIVATE*/\n"/>
-        </admst:if>
+        </admst:if></admst:if>
       </admst:if>
       <admst:if test="[static='no' and dynamic='yes']">#endif /*_DYNAMIC*/\n</admst:if>
     </admst:if>
@@ -4311,46 +4311,55 @@ inline double d_doh(double x)          {return  exp(x)/(exp(x) + 1); }
   </admst:for-each>
 
   <admst:apply-templates select="." match="ddx:function:computation"/>
+// done ddx
 
-  <admst:if test="lhs[prototype/insource='yes']">
-    <admst:if test="rhs/probe">
+  <admst:variable name="lhsderiv" select="no"/>
+  <admst:variable name="lhsderiv" test="lhs[derivate='yes']" select="yes"/>
 
-// iterating rhs probes
+  // lhsderivate $lhsderiv
 
-      <admst:for-each select="rhs/probe">
-// probe %(.)
-
-        <admst:value-of select="."/>
-        <admst:value-to select="/simulator/probe" value="%p"/>
-        <admst:apply-templates select="../tree" match="subexpression:differentiate"/>
-        <admst:value-of select="/simulator/ddx"/>
-        <admst:value-of select="branch/nnode/name"/>
-        <admst:value-of select="branch/pnode/name"/>
-        <admst:value-of select="nature/access"/>
-        <admst:value-of select="../../lhs/name"/>
-        <admst:text format="%s_%s%s_%s=%s;\n"/>
-        <admst:value-of select="branch/nnode/name"/>
-        <admst:value-of select="branch/pnode/name"/>
-        <admst:value-of select="nature/access"/>
-        <admst:value-of select="../../lhs/name"/>
-        <admst:text format="EXIT_IF_ISNAN(%s_%s%s_%s); // 3515\n"/>
-      </admst:for-each>
-
+  <admst:if test="[$lhsderiv='no' or $_DERIVATE='yes']">
+    <admst:if test="lhs[prototype/insource='yes']">
+      <admst:if test="rhs/probe"><admst:if test="[$_DERIVATE='yes']">
+  
+  // iterating rhs probes
+  
+        <admst:for-each select="rhs/probe">
+  // probe %(.)
+  
+          <admst:value-of select="."/>
+          <admst:value-to select="/simulator/probe" value="%p"/>
+          <admst:apply-templates select="../tree" match="subexpression:differentiate"/>
+          <admst:value-of select="/simulator/ddx"/>
+          <admst:value-of select="branch/nnode/name"/>
+          <admst:value-of select="branch/pnode/name"/>
+          <admst:value-of select="nature/access"/>
+          <admst:value-of select="../../lhs/name"/>
+          <admst:text format="%s_%s%s_%s = %s;\n"/>
+          <admst:value-of select="branch/nnode/name"/>
+          <admst:value-of select="branch/pnode/name"/>
+          <admst:value-of select="nature/access"/>
+          <admst:value-of select="../../lhs/name"/>
+          <admst:text format="EXIT_IF_ISNAN(%s_%s%s_%s); // 3515\n"/>
+        </admst:for-each>
+  
+      </admst:if></admst:if>
     </admst:if>
-  </admst:if>
 
-  <admst:apply-templates select="lhs" match="variable:lhs" required="yes"/>
-  <admst:apply-templates select="rhs" match="expression:stringify:noprobe"/>
-  <admst:text format="=%s;\n"/>
-  <admst:text format="EXIT_IF_ISNAN("/>
-  <admst:apply-templates select="lhs" match="variable:lhs" required="yes"/>
-  <admst:text format="); // 3526\n"/>
+    <admst:apply-templates select="lhs" match="variable:lhs" required="yes"/>
+    <admst:apply-templates select="rhs" match="expression:stringify:noprobe"/>
+    <admst:text format=" = %s;\n"/>
+    <admst:text format="EXIT_IF_ISNAN("/>
+    <admst:apply-templates select="lhs" match="variable:lhs" required="yes"/>
+    <admst:text format="); // 3526\n"/>
+ </admst:if>
+
+ // done A
 
   <admst:if test="lhs[insource='yes']">
     <admst:value-of select="rhs/probe"/>
     <admst:if-inside select="lhs/probe" list="%p">
-      <admst:if test="lhs/probe">
-
+      <admst:if test="lhs/probe"><admst:if test="[$_DERIVATE='yes']">
         <admst:for-each select="lhs/probe">
           <admst:value-of select="../../rhs/probe"/>
           <admst:if-not-inside select="." list="%p">
@@ -4358,13 +4367,15 @@ inline double d_doh(double x)          {return  exp(x)/(exp(x) + 1); }
             <admst:value-of select="branch/pnode/name"/>
             <admst:value-of select="nature/access"/>
             <admst:value-of select="../name"/>
-            <admst:text format="%s_%s%s_%s=0.0;\n"/>
+            <admst:text format="%s_%s%s_%s = 0.0;\n"/>
           </admst:if-not-inside>
         </admst:for-each>
 
-      </admst:if>
+      </admst:if></admst:if>
     </admst:if-inside>
   </admst:if>
+
+ // done B
 
   <admst:text test="rhs[not(nilled(function[class='builtin']))]" format="}\n"/>
 
@@ -4760,7 +4771,7 @@ inline double d_doh(double x)          {return  exp(x)/(exp(x) + 1); }
   <admst:text test="[input='yes' and parametertype='model']" format="m->$(var_prefix)%(name)"/>
   <admst:text test="[input='yes' and parametertype='instance']" format="/*i*/$(var_prefix)%(name)"/>
   <admst:text test="[input='no' and scope='global_model']" format="/*glm*/m->$(var_prefix)%(name)"/>
-  <admst:text test="[input='no' and scope='global_instance']" format="/*gli*/$(var_prefix)%(name)"/>
+  <admst:text test="[input='no' and scope='global_instance']" format=" /*gli*/ $(var_prefix)%(name)"/>
   <admst:text test="[scope='local']" format="%(name)"/>
 </admst:template>
 
