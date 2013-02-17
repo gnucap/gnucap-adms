@@ -61,26 +61,6 @@ bool ADMS_BASE::skip_dev_type(CS& cmd)
 	return cmd.umatch(dev_type() + ' ');
 }
 /*--------------------------------------------------------------------------*/
-void ADMS_BASE::precalc_last()
-{
-	COMPONENT::precalc_last();
-	unreachable();
-	return;
-
-	/// from sto
-	set_converged();
-	assert(!is_constant()); /* because of integration */
-
-	_method_a = method_select[OPT::method][_method_u];
-	//assert(_loss0 == 0.);
-	//assert(_loss1 == 0.);
-	/* m0 and acg are frequency/time dependent and cannot be set here.
-	 * If this is a coupled inductor, there is a subckt, which is expanded
-	 * by the mutual pseudo-element.
-	 * Assigning the values here becomes unnecessary, but harmless.
-	 */
-}
-/*--------------------------------------------------------------------------*/
 void ADMS_BASE::tr_begin()
 {
 	trace1("ADMS_BASE::tr_begin for", short_label());

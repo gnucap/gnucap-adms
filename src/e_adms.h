@@ -70,7 +70,7 @@ class ADMS_BASE : public COMPONENT {
 		string dev_type()const {return common()->modelname();} // from BASE_SUBCKT
 		virtual bool	   print_type_in_spice()const {return false;}
 	public:
-		virtual void precalc_last();
+		// virtual void precalc_last();
 		virtual void tr_begin();
 		virtual void tr_restore();
 		virtual void dc_advance();
