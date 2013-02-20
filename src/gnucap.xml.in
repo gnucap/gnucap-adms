@@ -1865,7 +1865,7 @@ void $(DEV_NAME)::tr_advance()
   <admst:if test="[$has_sckt!=0]">
 	subckt()->tr_advance();
   </admst:if>
-  trace3("$(DEV_NAME::tr_advance", _sim->_time0, _time[0], _time[1]);
+  trace3("$(DEV_NAME)::tr_advance", _sim->_time0, _time[0], _time[1]);
   ADMS_BASE::tr_advance(); // does time.
 
   // shift states, clear states[0]
