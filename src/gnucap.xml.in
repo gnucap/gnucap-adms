@@ -1896,14 +1896,17 @@ void $(DEV_NAME)::tr_regress()
 bool $(DEV_NAME)::tr_needs_eval()const
 {
 	trace3(&quot;$(DEV_NAME)::tr_needs_eval&quot;, converged(), is_q_for_eval(), _sim-&gt;is_advance_iteration());
+	if (is_q_for_eval()) return false; // needed?
+	if ( !OPT::lcbypass
+	  || !converged()
+	  || _sim->is_advance_or_first_iteration() )
+		return true;
   <admst:if test="[$has_sckt!=0]">
 	if( subckt()->tr_needs_eval()){
 		return true;
 	}
   </admst:if>
-	if (is_q_for_eval()) return false;
-	if (!converged()) return true;
-	if (_sim-&gt;is_advance_iteration()) return true;
+
 	if (_time[1] == 0){
 		trace0(&quot;tr_needs_eval: //BUG// needed?? for ngspice jfet, but not for spice3f5 jfet&quot;);
 		return true;
