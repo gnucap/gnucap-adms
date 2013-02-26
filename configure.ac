@@ -6,7 +6,7 @@ AC_INIT([gnucap-adms], [0.0.3], [felix@salfelder.org])
 AC_CONFIG_SRCDIR([README])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([-Wno-portability])
 LT_INIT()
 
 # Checks for programs.
