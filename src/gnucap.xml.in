@@ -1987,17 +1987,6 @@ bool $(DEV_NAME)::do_tr()
 	assert(OPT::_keep_time_steps &lt;= 8);
 	assert(_dt == NOT_VALID || ::conchk(_dt, _time[0] - _time[1]));
 
-	if (_sim-&gt;analysis_is_tran_dynamic())
-	{
-		trace1(&quot;$(DEV_NAME)::do_tr tran dynamic&quot;, long_label());
-		tr_eval(); // if needed??
-		q_load();
-
-	} else {
-		tr_eval(); // if needed??
-		q_load();
-	}
-
 	// convergence check -- gnucap method
   <admst:if test="[$has_sckt!=0]">
 	set_converged( subckt()->do_tr());
@@ -2005,6 +1994,14 @@ bool $(DEV_NAME)::do_tr()
   <admst:if test="[$has_sckt=0]">
 	set_converged(true);
   </admst:if>
+	if (_sim-&gt;analysis_is_tran_dynamic())
+	{
+		trace1(&quot;$(DEV_NAME)::do_tr tran dynamic&quot;, long_label());
+		tr_eval(); // if needed??
+	} else {
+		tr_eval(); // if needed??
+	}
+
 
 <admst:if test="[not( count($ddts)=0) ]">
 	for (unsigned ii = 0; ii &lt; _num_states; ++ii) { // similar e_cap.cc do_tr();
@@ -2013,41 +2010,24 @@ bool $(DEV_NAME)::do_tr()
 	}
 </admst:if>
 
-	for(int i=0; converged() &amp;&amp; i&lt;$_num_stamp_nodes; i++)
-	{
-		assert(is_number(it0[i]));
-		bool conv = ::conchk(it0[i], it1[i]); // BUG: use discipline
-		if (!conv) {
-			trace6(&quot;tr_eval: i not converged &quot;, i , it0[i], it1[i], _sim-&gt;iteration_number(), it0[i]-it1[i], conv );
-			set_converged(false);
-		}
-	}
-
-
-  <admst:text format="\n\tfor(int i=0; converged() && i<%(count(jacobian)); i++)"/>
-	if (m_entries[i]){
-	bool conv = ::conchk(m_entries[i], m_entries_old[i]); // BUG: use discipline
-		if (!conv) {
-			trace4(&quot;tr_eval: m not converged&quot;, i , m_entries[i], m_entries_old[i], _sim-&gt;iteration_number() );
-			set_converged(conv);
-		}
-	}
-
 	bool needs_load = !converged();
+  <admst:text format="\n\tfor(int i=0; converged() && i<%(count(jacobian)); i++)"/>
+
 	for (int i = 0; !needs_load &amp;&amp; i &lt; $_num_stamp_nodes; i++) {
 		if (m_required[i]){
 			needs_load = !::conchk(it0[i], it1[i], 0, OPT::reltol*OPT::loadtol); // BUG: use discipline
 		}
 	}
 
-  for(int i=0; !needs_load &amp;&amp; i&lt;%(count(jacobian)); i++)
-    if (m_required[i]){
-		 needs_load = !::conchk(m_entries[i], m_entries_old[i], 0, OPT::reltol * OPT::loadtol); // BUG: use discipline
-    }
+	for(int i=0; !needs_load &amp;&amp; i&lt;%(count(jacobian)); i++) {
+		if (m_required[i]){
+			needs_load = !::conchk(m_entries[i], m_entries_old[i], 0, OPT::reltol * OPT::loadtol); // BUG: use discipline
+		}
+	}
 
   store_values();
 
-                // if (needs_load)
+  if (needs_load) q_load();
   trace2(&quot;$(DEV_NAME)::do_tr done &quot;, converged(), needs_load );
   return converged();
 }
