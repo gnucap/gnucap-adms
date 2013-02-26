@@ -200,6 +200,10 @@
 #include &quot;e_adms.h&quot;
 #include &quot;u_parameter.h&quot;
 
+<admst:for-each select="discipline">
+#define abstol_potential_%(./name) %(potential/abstol)
+#define abstol_flow_%(./name) %(flow/abstol)
+
 #ifndef $(filename)_header__
 #define $(filename)_header__
 <admst:for-each select="/module@ADMSXML_NOEXTERN@">
