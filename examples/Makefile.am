@@ -7,9 +7,12 @@ if VERILOG_EXTERN
 EXT_CHECK=rc
 rc.test: rc.so
 endif
-CHECK=opamp $(EXT_CHECK)
+CHECK=opamp callfunctions $(EXT_CHECK)
 
-EXTRA_DIST=opamp.gc opamp.ref lamp.va lamp.gc
+EXTRA_DIST=opamp.gc opamp.ref \
+           lamp.va lamp.gc \
+           rc.va rc.gc \
+           callfunctions.va callfunctions.gc
 
 pkgexamplesdir=${pkgdatadir}/examples
 dist_pkgexamples_DATA=${EXFILES}
@@ -42,6 +45,14 @@ ADMS_GC_XML=../adms/gnucap_0.xml
 
 %.so: %_tr.hxx %_top.hxx %_ac.hxx %.cc
 
+callfunctions.out: callfunctions.so callfunctions.gc
+	$(GNUCAP) callfunctions.gc 2> $@ | grep too\ negative ;\
+	[ 0 -ne $$? ]
+
+callfunctions.reg: callfunctions.out
+	[ 4 -eq $$( grep -c negative $< ) ]
+	[ 1 -eq $$( grep -c too\ negative $< ) ]
+	
 %.reg: %.test %.ref
 	diff $+
 
