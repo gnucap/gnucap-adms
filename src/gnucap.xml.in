@@ -534,13 +534,13 @@ class $(DEV_NAME) : public ADMS_BASE
   </admst:for-each>
 		};
 	protected: // nodes sorted according to discipline
-		enum ENode {
+		enum Node_electrical {
 			n_GND=-1,
   <admst:join select="node[discipline/name='electrical' and grounded='no']" separator=",">
     <admst:text format="\n\t\t\t$node_prefix%(name)=__%(name)"/>
   </admst:join>
 		};
-		enum TNode {
+		enum Node_thermal {
   <admst:for-each select="node[discipline/name='thermal' and grounded='no']" separator=",">
     <admst:text format="\n\t\t\t$node_prefix%(name)=__%(name),"/>
   </admst:for-each>
@@ -569,10 +569,10 @@ inline double _BR(int p, int n) {
 
 // discipline wrapped value
 #define NP(p) _NP($(node_prefix) ## p)
-inline voltage_t _NP(ENode p){
+inline voltage_t _NP(Node_electrical p){
 	return std::min(1000., std::max(-1000., _n[p].v0()) );
 }
-inline double _NP(TNode p){
+inline double _NP(Node_thermal p){
 	assert(is_number(_n[p].v0()));
 	return _n[p].v0() + P_CELSIUS0;
 }
@@ -584,7 +584,7 @@ inline double _NP(ANode p){
 }
 </admst:if>
 #define BP(p,n) _BP($(node_prefix) ## p, $(node_prefix) ## n)
-inline voltage_t _BP(ENode p, ENode n) { return volts_limited(_n[p],_n[n]);}
+inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limited(_n[p],_n[n]);}
 
 #define _N(n) _n[$(node_prefix) ## n]
 
@@ -694,8 +694,8 @@ inline voltage_t _BP(ENode p, ENode n) { return volts_limited(_n[p],_n[n]);}
 		bool uic_now(unsigned stateno=-1)const;
 	</admst:if>
 	private: // discipline stuff
-		bool conchk( ENode a, double abstol=OPT::abstol, double reltol=OPT::reltol ) const;
-		bool conchk( ENode a, ENode b, double abstol=OPT::abstol, double reltol=OPT::reltol ) const;
+		bool conchk( Node_electrical a, double abstol=OPT::abstol, double reltol=OPT::reltol ) const;
+		bool conchk( Node_electrical a, Node_electrical b, double abstol=OPT::abstol, double reltol=OPT::reltol ) const;
 }; // $(DEV_NAME)
 // ------------------------------------------------------------------------ //
 // ------------------------------------------------------------------------ //
@@ -763,16 +763,16 @@ class $(COMMON_NAME) : public COMMON_COMPONENT
 
 };
 
-//inline double $(DEV_NAME)::BP2( $(DEV_NAME)::ENodes p,  $(DEV_NAME)::ENodes n  ) const{
+//inline double $(DEV_NAME)::BP2( $(DEV_NAME)::Node_electrical p,  $(DEV_NAME)::Node_electrical n  ) const{
 //	assert(is_number( _n[p].v0() - _n[n].v0() ));
 //	return  min( 100. , max (  _n[p].v0() - _n[n].v0(), -100. ));
 //}
 // -------------------------------------------------------------------------- //
-inline bool $(DEV_NAME)::conchk( ENode a, double abstol, double reltol ) const{
+inline bool $(DEV_NAME)::conchk( Node_electrical a, double abstol, double reltol ) const{
 	return ::conchk(CKT_BASE::_sim->_vt1[_n[a].m_()], _n[a].v0(), abstol, reltol);
 }
 // -------------------------------------------------------------------------- //
-inline bool $(DEV_NAME)::conchk( ENode a, ENode b, double abstol, double reltol ) const{
+inline bool $(DEV_NAME)::conchk( Node_electrical a, Node_electrical b, double abstol, double reltol ) const{
 	return ::conchk(CKT_BASE::_sim->_vt1[_n[a].m_()] - CKT_BASE::_sim->_vt1[_n[b].m_()],
 	    _n[a].v0() - _n[b].v0(), abstol, reltol);
 }
