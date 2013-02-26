@@ -2683,23 +2683,26 @@ inline double d_doh(double x)          {return  exp(x)/(exp(x) + 1); }
 </admst:template>
 
 
-<!-- analog//callfunctions -->
+<!-- analog//callfunctions
+FIXME: use eval_mode to choose what to do
+currently: only called for eval_mode==accept
+-->
 <admst:template match="callfunction">
   <admst:choose>
     <admst:when test="function[name='\$strobe']">
-      <admst:text format="_strobe("/>
+      <admst:text format="do_strobe("/>
     </admst:when>
     <admst:when test="function[name='\$warning']">
-      <admst:text format="_warning("/>
+      <admst:text format="do_warning("/>
     </admst:when>
     <admst:when test="function[name='\$error']">
-      <admst:text format="_error("/>
+      <admst:text format="do_error("/>
     </admst:when>
     <admst:when test="function[name='\$finish']">
-      <admst:text format="_finish("/>
+      <admst:text format="do_finish("/>
     </admst:when>
     <admst:when test="function[name='\$stop']">
-      <admst:text format="_stop("/>
+      <admst:text format="do_stop("/>
     </admst:when>
     <admst:otherwise>
       <admst:value-of select="/simulator/tmp"/>

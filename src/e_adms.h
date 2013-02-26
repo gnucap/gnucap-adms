@@ -510,7 +510,8 @@ inline double ADMS_BASE::tr_c_to_g(double c, double g)const
 */
 
 // FIXME: need more of these.
-inline void _strobe(const char* fmt, ... ){
+inline void _strobe(const char* fmt, ... ){}
+inline void do_strobe(const char* fmt, ... ){
 	va_list arg_ptr;
 	va_start(arg_ptr,fmt);
 	vfprintf(stdout,fmt,arg_ptr);
@@ -518,12 +519,23 @@ inline void _strobe(const char* fmt, ... ){
 	printf("\n");
 }
 
-inline void _error(const char* fmt, ... ){
+inline void _warning(const char* fmt, ... ){}
+inline void do_warning(const char* fmt, ... ){
 	va_list arg_ptr;
 	va_start(arg_ptr,fmt);
 	vfprintf(stderr,fmt,arg_ptr);
 	va_end(arg_ptr);
-	printf("\n");
+	fprintf(stderr,"\n");
+}
+
+inline void _error(const char* fmt, ... ){}
+inline void do_error(const char* fmt, ... ){
+	va_list arg_ptr;
+	va_start(arg_ptr,fmt);
+	vfprintf(stderr,fmt,arg_ptr);
+	va_end(arg_ptr);
+	fprintf(stderr,"\n");
+	exit(1); // better throw exception...
 }
 
 /*--------------------------------------------------------------------------*/
