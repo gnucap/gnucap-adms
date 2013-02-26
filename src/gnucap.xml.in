@@ -203,6 +203,7 @@
 <admst:for-each select="discipline">
 #define abstol_potential_%(./name) %(potential/abstol)
 #define abstol_flow_%(./name) %(flow/abstol)
+</admst:for-each>
 
 #ifndef $(filename)_header__
 #define $(filename)_header__
@@ -694,8 +695,31 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
 		bool uic_now(unsigned stateno=-1)const;
 	</admst:if>
 	private: // discipline stuff
-		bool conchk( Node_electrical a, double abstol=OPT::abstol, double reltol=OPT::reltol ) const;
-		bool conchk( Node_electrical a, Node_electrical b, double abstol=OPT::abstol, double reltol=OPT::reltol ) const;
+		// absolute checks FIXME: this is not the way gnucap does checks
+		bool conchk( Node_electrical a, double reltol=OPT::reltol ) const {
+			/// hmm really OPT::abstol?
+			return ::conchk(CKT_BASE::_sim->_vt1[_n[a].m_()], _n[a].v0(), OPT::abstol, reltol);
+		}
+		bool conchk( Node_thermal a, double reltol=OPT::reltol ) const {
+			return ::conchk(CKT_BASE::_sim->_vt1[_n[a].m_()], _n[a].v0(), abstol_flow_thermal, reltol);
+		}
+		// relative checks, FIXME: only where needed and keep history...
+		bool conchk( Node_electrical a, Node_electrical b, double reltol=OPT::reltol ) const {
+			return ::conchk(CKT_BASE::_sim->_vt1[_n[a].m_()] - CKT_BASE::_sim->_vt1[_n[b].m_()],
+			    _n[a].v0() - _n[b].v0(), OPT::abstol, reltol);
+		}
+		bool conchk( Node_thermal a, Node_thermal b, double reltol=OPT::reltol ) const {
+			return ::conchk(CKT_BASE::_sim->_vt1[_n[a].m_()] - CKT_BASE::_sim->_vt1[_n[b].m_()],
+			    _n[a].v0() - _n[b].v0(), abstol_flow_thermal, reltol);
+		}
+		// these are never inputs.
+		bool conchk( Node_electrical a, Node_thermal b, double reltol=0 ) const {
+			return true;
+		}
+		bool conchk( Node_thermal a, Node_electrical b, double reltol=0 ) const {
+			return true;
+		}
+// -------------------------------------------------------------------------- //
 }; // $(DEV_NAME)
 // ------------------------------------------------------------------------ //
 // ------------------------------------------------------------------------ //
@@ -767,15 +791,6 @@ class $(COMMON_NAME) : public COMMON_COMPONENT
 //	assert(is_number( _n[p].v0() - _n[n].v0() ));
 //	return  min( 100. , max (  _n[p].v0() - _n[n].v0(), -100. ));
 //}
-// -------------------------------------------------------------------------- //
-inline bool $(DEV_NAME)::conchk( Node_electrical a, double abstol, double reltol ) const{
-	return ::conchk(CKT_BASE::_sim->_vt1[_n[a].m_()], _n[a].v0(), abstol, reltol);
-}
-// -------------------------------------------------------------------------- //
-inline bool $(DEV_NAME)::conchk( Node_electrical a, Node_electrical b, double abstol, double reltol ) const{
-	return ::conchk(CKT_BASE::_sim->_vt1[_n[a].m_()] - CKT_BASE::_sim->_vt1[_n[b].m_()],
-	    _n[a].v0() - _n[b].v0(), abstol, reltol);
-}
 // -------------------------------------------------------------------------- //
 </admst:for-each>
 
@@ -1931,7 +1946,7 @@ bool $(DEV_NAME)::tr_needs_eval()const
 
 	// check the node voltages, reference to ground
 <admst:for-each select="node[grounded='no']">
-	if (!conchk( $node_prefix%(name), 0, OPT::reltol*OPT::bypasstol)) {
+	if (!conchk( $node_prefix%(name), OPT::reltol*OPT::bypasstol)) {
 		return true;
 	}
   <admst:variable name="name1" select="%(name)"/>
@@ -1939,7 +1954,7 @@ bool $(DEV_NAME)::tr_needs_eval()const
   <admst:for-each select="../node[grounded='no']">
     <admst:if test="[$upper='yes']">
 	// relative check %(name) $(name1) FIXME: iterate over branches?!
-	if (!conchk( $node_prefix%(name), $node_prefix$(name1), 0, OPT::reltol*OPT::bypasstol)) {
+	if (!conchk( $node_prefix%(name), $node_prefix$(name1), OPT::reltol*OPT::bypasstol)) {
 		return true; untested(); // is this happening/necessary (slow)?
 	}
     </admst:if>
