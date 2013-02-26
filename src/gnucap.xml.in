@@ -590,22 +590,9 @@ inline voltage_t _BP(ENode p, ENode n) { return volts_limited(_n[p],_n[n]);}
 		double i_kept[$_num_stamp_nodes];
 
 		enum EMatrixEntries {
-
-    <admst:variable name="local_var" select="II"/>
-    <admst:for-each select="jacobian">
-      <admst:value-of select="column/name"/>
-      <admst:value-of select="row/name"/>
-      <admst:text format="m_%s_%s=%(position(.)-1)"/>
-
-      <admst:variable name="local_var" select="$(local_var)I"/>
-      <admst:if test="[position(.)!=count(.)]">
-        <admst:text format=", "/>
-        <admst:if test="[$(local_var)='IIIIIII']">
-          <admst:variable name="local_var" select="I"/>
-          <admst:text format="\n\t\t\t"/>
-        </admst:if>
-      </admst:if>
-    </admst:for-each>
+    <admst:join select="jacobian" separator=",">
+			 m_%(row/name)_%(column/name)=%(position(.)-1) /* %(row/discipline) to %(column/discipline) */
+    </admst:join>
 		};
 
 	bool m_required[%(count(jacobian))];	// true if matrix entry is not constant zero for current set of parameters (s. guesstop)
