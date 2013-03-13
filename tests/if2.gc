@@ -1,0 +1,18 @@
+load ./if2.so
+
+verilog
+paramset myif dif; .r=2; endparamset
+
+myif foo(0 1);
+
+spice
+R1 2 1 4
+V1 2 0 1
+
+.list
+.print dc v(nodes)
+.store dc v(nodes)
+.dc
+
+.measure v0 at(probe="v(1)")
+.end

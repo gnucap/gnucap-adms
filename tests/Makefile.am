@@ -2,23 +2,20 @@
 GNUCAP_ADMS=../src/gnucap-adms
 GNUCAP=LD_LIBRARY_PATH=../src/.libs gnucap
 
-EXFILES=if.va
+EXFILES=if.va if2.va
 if VERILOG_EXTERN
-EXT_CHECK=if
-if.test: if.so
+EXT_CHECK=if if2
 endif
 CHECK=$(EXT_CHECK)
+
+$(EXFILES:%.va=%.test): %.test: %.so
 
 pkgexamplesdir=${pkgdatadir}/examples
 dist_pkgexamples_DATA=${EXFILES}
 
 i=0 1 2
-ADMS_ES=$(i:%=-e ../adms/gnucap_%.xml)
-ADMS_GC_XML=../adms/gnucap_0.xml
-
-# before installation
-# %.cc %_tr.hxx %_top.hxx %_ac.hxx: %.va $(ADMS_GC_XML)
-# 	admsXml -I../adms $< $(ADMS_ES) -o $*
+ADMS_ES=$(i:%=-e ../src/gnucap_%.xml)
+ADMS_GC_XML=../src/gnucap_0.xml
 
 %.so: MCXXFLAGS=--shared -fPIC $(CXXFLAGS)
 %.so: MCPPFLAGS=-I ../src $(CPPFLAGS)
