@@ -1,0 +1,31 @@
+/* Authors: Andreas Froese, Felix Salfelder
+ * Note: too trivial to state License/Copyright
+ *
+ * variables declared in analog block (BUG)
+ */
+`define P(x) (*x*)
+`include "discipline.h"
+
+module dif (p,n);
+	inout p,n;
+	electrical p,n;
+
+	parameter real r=1 from (0:inf)
+	                `P(info="Resistor [Ohm]");
+
+	analog begin
+	real g;
+	real current;
+		@(initial_model) begin
+			g=1/r;
+		end
+		current = 0;
+		$strobe("hello");
+		if(g>0) begin
+			$strobe(" world %f", g);
+			current = V(p,n)*g;
+		end
+		$strobe("\n");
+		I(p,n) <+ current;
+	end
+endmodule
