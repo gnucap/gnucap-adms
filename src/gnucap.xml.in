@@ -2141,9 +2141,9 @@ void $(DEV_NAME)::tr_load()
 	  <admst:value-of select="row/name"/>
 	  <admst:value-of select="column/name"/>
 	  <admst:value-of select="row/name"/>
-	  if( !m_required[m_%s_%s] &amp;&amp; (m_entries[m_%s_%s]!=0) ){
-		  error(bWARNING, "*** m_%s_%s\\n");
-	  }
+	if( !m_required[m_%s_%s] &amp;&amp; (m_entries[m_%s_%s]!=0) ){
+		error(bWARNING, "*** m_%s_%s=%i: %f\\n", m_%(row/name)_%(column/name), m_entries[m_%(row/name)_%(column/name)]);
+	}
 
   </admst:for-each>
 
