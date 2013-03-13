@@ -86,7 +86,8 @@ CXXFLAGS+=" -Wall -pedantic"
 
 # Checks for library functions.
 
-AC_CONFIG_FILES([Makefile src/Makefile examples/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile])
+AC_CONFIG_FILES([tests/Makefile examples/Makefile])
 AC_CONFIG_FILES([src/gnucap-adms], [chmod +x src/gnucap-adms])
 AC_CONFIG_FILES([src/gnucap.xml])
 AC_OUTPUT
