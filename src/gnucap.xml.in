@@ -478,11 +478,6 @@ class $(DEV_NAME) : public ADMS_BASE
 		};
 		int load(int mode);
 
-	private: // subdevices
-<admst:for-each select="instance">
-		COMPONENT* _%(name);
-</admst:for-each>
-
 	private: // global_instance (ask?)
 
 <admst:for-each select="variable[input='no' and scope='global_instance']">
@@ -720,6 +715,11 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
 			return true;
 		}
 // -------------------------------------------------------------------------- //
+	private: // subdevices
+<admst:for-each select="instance">
+		COMPONENT* _%(name);
+</admst:for-each>
+
 }; // $(DEV_NAME)
 // ------------------------------------------------------------------------ //
 // ------------------------------------------------------------------------ //
