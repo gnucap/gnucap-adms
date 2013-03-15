@@ -20,11 +20,12 @@
  */
 #ifndef E_ADMS_H
 #define E_ADMS_H
-#include "u_lang.h"
-#include "e_node.h"
-#include "m_cpoly.h"
-#include "l_denoise.h"
-#include "e_subckt.h"
+#include <u_lang.h>
+#include <e_node.h>
+#include <m_cpoly.h>
+#include <l_denoise.h>
+#include <e_subckt.h>
+#include <u_status.h>
 #include <algorithm>
 /*--------------------------------------------------------------------------*/
 using namespace std;
@@ -512,30 +513,36 @@ inline double ADMS_BASE::tr_c_to_g(double c, double g)const
 // FIXME: need more of these.
 inline void _strobe(const char* fmt, ... ){}
 inline void do_strobe(const char* fmt, ... ){
-	va_list arg_ptr;
-	va_start(arg_ptr,fmt);
-	vfprintf(stdout,fmt,arg_ptr);
-	va_end(arg_ptr);
-	printf("\n");
+	if(status.control == 1){
+		va_list arg_ptr;
+		va_start(arg_ptr,fmt);
+		vfprintf(stdout,fmt,arg_ptr);
+		va_end(arg_ptr);
+		printf("\n");
+	}
 }
 
 inline void _warning(const char* fmt, ... ){}
 inline void do_warning(const char* fmt, ... ){
-	va_list arg_ptr;
-	va_start(arg_ptr,fmt);
-	vfprintf(stderr,fmt,arg_ptr);
-	va_end(arg_ptr);
-	fprintf(stderr,"\n");
+	if(status.control == 1){
+		va_list arg_ptr;
+		va_start(arg_ptr,fmt);
+		vfprintf(stderr,fmt,arg_ptr);
+		va_end(arg_ptr);
+		fprintf(stderr,"\n");
+	}
 }
 
 inline void _error(const char* fmt, ... ){}
 inline void do_error(const char* fmt, ... ){
-	va_list arg_ptr;
-	va_start(arg_ptr,fmt);
-	vfprintf(stderr,fmt,arg_ptr);
-	va_end(arg_ptr);
-	fprintf(stderr,"\n");
-	exit(1); // better throw exception...
+	if(status.control == 1){
+		va_list arg_ptr;
+		va_start(arg_ptr,fmt);
+		vfprintf(stderr,fmt,arg_ptr);
+		va_end(arg_ptr);
+		fprintf(stderr,"\n");
+		exit(1); // better throw exception...
+	}
 }
 
 /*--------------------------------------------------------------------------*/
