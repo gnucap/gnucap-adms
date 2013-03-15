@@ -1584,7 +1584,7 @@ void $(DEV_NAME)::expand()
 	assert(subckt());
 	trace0("$(DEV_NAME)::expand: expanding netlist");
 	subckt()->expand();
-	subckt()->set_slave();
+	//	subckt()->set_slave(); NO. doesnt make sense
   </admst:if>
 }
 // -------------------------------------------------------------------------- //
@@ -1947,7 +1947,7 @@ bool $(DEV_NAME)::tr_needs_eval()const
 		return true;
   <admst:if test="[$has_sckt!=0]">
 	if( subckt()->tr_needs_eval()){
-		return true;
+		// return true; no (not slave)
 	}
   </admst:if>
 
@@ -2001,7 +2001,7 @@ bool $(DEV_NAME)::do_tr()
 
 	// convergence check -- gnucap method
   <admst:if test="[$has_sckt!=0]">
-	set_converged( subckt()->do_tr());
+  //	set_converged( subckt()->do_tr()); no!
   </admst:if>
   <admst:if test="[$has_sckt=0]">
 	set_converged(true);
@@ -2101,7 +2101,7 @@ void $(DEV_NAME)::tr_load()
 
   <admst:if test="[$has_sckt!=0]">
 	if( !OPT::traceload || !_sim->is_inc_mode()) {
-		subckt()->tr_load();
+		subckt()->tr_load(); untested();
 	} else {
 		// subdevices have queued themselves if necessary.
 	}
