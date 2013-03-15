@@ -47,10 +47,11 @@ ADMS_GC_XML=../src/gnucap_0.xml
 %.so: %.h %.cc
 
 callfunctions.out: callfunctions.so callfunctions.gc
-	$(GNUCAP) callfunctions.gc 2> $@ | grep too\ negative ;\
+	$(GNUCAP) callfunctions.gc 2> $@ | tee 2$@ | grep too\ negative ;\
 	[ 0 -ne $$? ]
 
 callfunctions.reg: callfunctions.out
+	[ 4 -eq $$( grep -c positive 2$< ) ]
 	[ 4 -eq $$( grep -c negative $< ) ]
 	[ 1 -eq $$( grep -c too\ negative $< ) ]
 	
