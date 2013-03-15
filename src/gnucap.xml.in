@@ -1448,7 +1448,6 @@ void $(COMMON_NAME)::expand(const COMPONENT* d)
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::expand()
 {
-	trace2("$(DEV_NAME)::expand()", long_label(), common()->modelname());
 	ADMS_BASE::expand();
 	
 	const $(COMMON_NAME)* c = static_cast&lt;const $(COMMON_NAME)*&gt;(common());
@@ -1567,9 +1566,9 @@ void $(DEV_NAME)::expand()
   <admst:join select="terminal" separator=",">
 				_n[n_%(nodefrominstantiator) /*%(nodefrommodule)*/]
   </admst:join> };
-			trace2("expand", long_label(),_%(name)->mutable_common()->model());
+			trace1("expand -- setting params", long_label());
 			_%(name)->set_parameters("%(name)", this, _%(name)->mutable_common(), 0/*value*/, 0, NULL, %(count(terminal)), nodes);
-			trace2("expand", long_label(),_%(name)->mutable_common()->model());
+			trace1("expand -- done setting params", long_label());
 
 			PARAMETER&lt;double&gt;tmp; USE(tmp);
   <admst:for-each select="parameterset">
