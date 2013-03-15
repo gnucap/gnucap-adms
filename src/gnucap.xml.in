@@ -8658,9 +8658,7 @@ return
         <admst:apply-templates select="." match="%(adms/datatypename)"/>
       </admst:when>
       <admst:otherwise>
-        <admst:if test="[name!='initial_model' and name!='initial_instance']">
-//bug -- parts of this (%(name), %(datatypename)) has been done in tr_begin.
-
+        <admst:if test="[name!='initial_model' and name!='initial_instance' and name!='initial_step']">
           <admst:apply-templates select="." match="block"/>
           <admst:text format="// end bug?\n"/>
         </admst:if>
