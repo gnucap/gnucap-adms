@@ -35,7 +35,7 @@ ADMS_GC_XML=../src/gnucap_0.xml
 #	$(GNUCAP_ADMS) -v -c $<
 
 %.so: %.cc %.h
-	CPPFLAGS=-I../src $(GNUCAP_ADMS) -v $<
+	CPPFLAGS="$(CPPFLAGS) -I../src" LDADD="-L../src/.libs" $(GNUCAP_ADMS) -v $<
 
 # ugh, also creates some hxx files!
 #%.cc %.h: %.va
