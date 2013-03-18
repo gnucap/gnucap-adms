@@ -9,6 +9,23 @@ AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([-Wno-portability])
 LT_INIT()
 
+dnl ------------------- debugging -------------------
+AC_MSG_CHECKING([if debug code should be compiled in])
+AC_ARG_ENABLE([debug],
+[  --enable-debug            Enable building of debug code. [[default: disabled]]],
+[
+if test "X$enable_debug" = "Xno" ; then
+	AC_MSG_RESULT([no])
+else
+	AC_MSG_RESULT([yes])
+	enable_debug=yes
+fi
+],
+[
+	AC_MSG_RESULT([no])
+	enable_debug=no
+])
+
 # Checks for programs.
 AC_PROG_CC
 AC_PROG_MAKE_SET
@@ -85,6 +102,12 @@ AC_SUBST([GC_CPPFLAGS])
 CXXFLAGS+=" -Wall -pedantic"
 
 # Checks for library functions.
+
+if test "$enable_debug" = "yes" ; then
+	CPPFLAGS="$CPPFLAGS -DTRACE_UNTESTED"
+else
+	CPPFLAGS="$CPPFLAGS -DNDEBUG"
+fi
 
 AC_CONFIG_FILES([Makefile src/Makefile])
 AC_CONFIG_FILES([tests/Makefile examples/Makefile])
