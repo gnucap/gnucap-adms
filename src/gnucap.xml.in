@@ -599,12 +599,14 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
     </admst:join>
 		};
 
+  <admst:if test="[count(jacobian)!=0]">
 	bool m_required[%(count(jacobian))];	// true if matrix entry is not constant zero for current set of parameters (s. guesstop)
 	// todo: distinguish between static and dynamic (tr-) matrix entries, the static ones must be loaded only once
 
 	double m_entries[%(count(jacobian))];		// also used for static-entries in ac-analysis
 	double m_entries_old[%(count(jacobian))];	// also used for dynamic-entries in ac-analyis
 	double m_entries_kept[%(count(jacobian))]; // keep_ic, uic etc.
+  </admst:if>
 
 	enum EStates {
     <admst:for-each select="$(ddts)">
@@ -1335,15 +1337,17 @@ void $(MODEL_NAME)::set_dev_type(const std::string&amp; new_type)
 }
 // ********************************* $(DEV_NAME) ********************************* //
 $(DEV_NAME)::$(DEV_NAME)()
-  :ADMS_BASE(),
-   _nodes(),
-	_states_q1(NULL)
+    : ADMS_BASE(),
+    _nodes(),
+    _states_q1(NULL)
 <admst:for-each select="instance">,
     _%(name)(0)
 </admst:for-each>
 {
+  <admst:if test="[count(jacobian)!=0]">
 	std::fill_n(m_entries, %(count(jacobian)), 0);
 	std::fill_n(m_entries_old, %(count(jacobian)), 0);
+  </admst:if>
 
 	attach_common(&amp;Default_$(COMMON_NAME));
 
@@ -1369,8 +1373,10 @@ $(DEV_NAME)::$(DEV_NAME)(const $(DEV_NAME)&amp; p) :
     _%(name)(0)
 </admst:for-each>
 {
+  <admst:if test="[count(jacobian)!=0]">
 	std::fill_n(m_entries, %(count(jacobian)), 0);
 	std::fill_n(m_entries_old, %(count(jacobian)), 0);
+  </admst:if>
 
 	for (int ii=0; ii&lt;OPT::_keep_time_steps; ++ii){
 		// not here!
@@ -1770,8 +1776,10 @@ void $(DEV_NAME)::tr_begin()
 
         //     in storag:
         // _m1 = _m0 = CPOLY1(0., 0., 0.);
+  <admst:if test="[count(jacobian)!=0]">
 	std::fill_n(m_entries, %(count(jacobian)), 0);
 	std::fill_n(m_entries_old, %(count(jacobian)), 0);
+  </admst:if>
 
 	internal_precalc();
 
@@ -2028,6 +2036,7 @@ bool $(DEV_NAME)::do_tr()
 	bool needs_load = !converged();
   <admst:text format="\n\tfor(int i=0; converged() && i<%(count(jacobian)); i++)"/>
 
+  <admst:if test="[count(jacobian)!=0]">
 	for (int i = 0; !needs_load &amp;&amp; i &lt; $_num_stamp_nodes; i++) {
 		if (m_required[i]){
 			needs_load = !::conchk(it0[i], it1[i], 0, OPT::reltol*OPT::loadtol); // BUG: use discipline
@@ -2039,6 +2048,7 @@ bool $(DEV_NAME)::do_tr()
 			needs_load = !::conchk(m_entries[i], m_entries_old[i], 0, OPT::reltol * OPT::loadtol); // BUG: use discipline
 		}
 	}
+  </admst:if>
 
   store_values();
 
@@ -2342,11 +2352,13 @@ void $(DEV_NAME)::do_ac()
   assert(OPT::_keep_time_steps &lt;= 8);
   assert(_dt == NOT_VALID || ::conchk(_dt, _time[0] - _time[1]));
 
-  std::fill_n(it0, (int)$_num_stamp_nodes, 0);
-  std::fill_n(it1, (int)$_num_stamp_nodes, 0);
+	std::fill_n(it0, (int)$_num_stamp_nodes, 0);
+	std::fill_n(it1, (int)$_num_stamp_nodes, 0);
 
-  std::fill_n(m_entries, %(count(jacobian)), 0);
-  std::fill_n(m_entries_old, %(count(jacobian)), 0);
+  <admst:if test="[count(jacobian)!=0]">
+	std::fill_n(m_entries, %(count(jacobian)), 0);
+	std::fill_n(m_entries_old, %(count(jacobian)), 0);
+  </admst:if>
 
   //pzLoad(_sim-&gt;_jomega);
 
@@ -2389,14 +2401,18 @@ void $(DEV_NAME)::guesstopology ()
 	const $(MODEL_NAME)* m = prechecked_cast&lt;const $(MODEL_NAME)*&gt;(c-&gt;model());
 	USE(m); assert(m);
 
+  <admst:if test="[count(jacobian)!=0]">
 	for(int i=0; i&lt;%(count(jacobian)); i++)
         	m_required[i] = false;
+  </admst:if>
 
 	#include "$(filename)_$(module)_top.hxx"
 
-  for(int i=0; i&lt;%(count(jacobian)); i++){
-    trace1(&quot;guess m&quot;, m_required[i]);
-  }
+  <admst:if test="[count(jacobian)!=0]">
+	for(int i=0; i&lt;%(count(jacobian)); i++){
+		trace1(&quot;guess m&quot;, m_required[i]);
+	}
+  </admst:if>
 }
 // -------------------------------------------------------------------------- //
 bool $(DEV_NAME)::conv_check()const
@@ -2413,6 +2429,7 @@ bool $(DEV_NAME)::conv_check()const
 		if (!conv) return false;
 	}
 
+  <admst:if test="[count(jacobian)!=0]">
    // FIXME: use only used entries.
 	for(unsigned i=0; converged() &amp;&amp; i&lt;%(count(jacobian)); i++) {
 		bool conv = ::conchk(m_entries[i], m_entries_old[i]); // BUG: use discipline
@@ -2421,6 +2438,7 @@ bool $(DEV_NAME)::conv_check()const
 			return false;
 		}
 	}
+  </admst:if>
 	return true;
 }
 
@@ -2430,8 +2448,10 @@ void $(DEV_NAME)::ac_eval()
 {
 	trace0(&quot;$(DEV_NAME)::ac_eval&quot;);
 	std::fill_n(it0, (int)$_num_stamp_nodes, 0);
+  <admst:if test="[count(jacobian)!=0]">
 	std::fill_n(m_entries, %(count(jacobian)), 0);
 	std::fill_n(m_entries_old, %(count(jacobian)), 0);
+  </admst:if>
 
 	const $(COMMON_NAME)* c = prechecked_cast&lt;const $(COMMON_NAME)*&gt;(common());
 	USE(c); assert(c);
@@ -2489,8 +2509,10 @@ double $(DEV_NAME)::tr_c_to_g(double c, double g)const
 void $(DEV_NAME)::tr_eval()
 {
 	trace1("$(DEV_NAME)::tr_eval", _sim->analysis_is_static());
+  <admst:if test="[count(jacobian)!=0]">
 	std::fill_n(it0, $_num_stamp_nodes, 0);
 	std::fill_n(m_entries, %(count(jacobian)), 0);
+  </admst:if>
 
 <admst:apply-templates select="analog/code[datatypename='block']/variable" match="generate_c:declare_variable"/>
 
