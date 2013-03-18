@@ -14,6 +14,13 @@ EXTRA_DIST=opamp.gc opamp.ref \
            rc.va rc.gc \
            callfunctions.va callfunctions.gc
 
+AGER_PS=ager_tr.2.4.ps \
+        ager_tr2.2.4.ps \
+        ager_tr_sin.2.4.ps \
+        ager_tw_tr.1.2.4.ps
+
+plot: $(AGER_PS) lamp_tr.1.3.ps
+
 pkgexamplesdir=${pkgdatadir}/examples
 dist_pkgexamples_DATA=${EXFILES}
 
@@ -68,4 +75,6 @@ clean: clean-ex
 clean-ex:
 	rm *.so *.hxx *.h *.cc
 
-.PHONY=%.reg clean-ex
+.PHONY=%.reg clean-ex plot
+
+include ../gnuplot.mk

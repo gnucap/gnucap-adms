@@ -14,8 +14,9 @@ module ager(p,n);
 
    real v1, i1, g;
 	real a (*ask="yes"*);
+	real b (*ask="yes"*);
 
-	rcd_exp #(.weight(1), .rc0(8), .rc1(2), .re0(12), .re1(-3)) rcd1(p,n,nage);
+	rcd_exp #(.weight(1), .rc0(4), .rc1(3), .re0(5), .re1(-2)) rcd1(p,n,nage);
 
    analog begin
 		@(initial_model) begin
@@ -23,6 +24,9 @@ module ager(p,n);
 		end
 		@(initial_instance) begin
 			a=0;
+		end
+		@(initial_step) begin
+			b = State(nage);
 		end
 
       begin
