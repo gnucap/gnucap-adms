@@ -7,11 +7,16 @@ if VERILOG_EXTERN
 EXT_CHECK=rc callfunctions
 rc.test: rc.so
 endif
-CHECK=opamp $(EXT_CHECK)
+CHECK=opamp sensor_chip $(EXT_CHECK)
+
+SENSOR_SO=op.so ldo.so vbg.so sensor.so
 
 EXTRA_DIST=opamp.gc opamp.ref \
            lamp.va lamp.gc \
            rc.va rc.gc \
+           $(SENSOR_SO:%.so=%.va) \
+           $(SENSOR_SO:%.so=%vm.core.gc) \
+           sensor_chip.gc sensor_chip.ref sensor_chip.ckt \
            callfunctions.va callfunctions.gc
 
 AGER_PS=ager_tr.2.4.ps \
@@ -61,6 +66,10 @@ callfunctions.reg: callfunctions.out
 	[ 4 -eq $$( grep -c positive 2$< ) ]
 	[ 4 -eq $$( grep -c negative $< ) ]
 	[ 1 -eq $$( grep -c too\ negative $< ) ]
+
+sensor_so: $(SENSOR_SO)
+
+sensor_chip.test: $(SENSOR_SO)
 	
 %.reg: %.test %.ref
 	diff $+
@@ -68,13 +77,15 @@ callfunctions.reg: callfunctions.out
 %.test: %.gc
 	$(GNUCAP) $< | grep '^[a-zA-Z0-9]*=' > $@
 
+plot: $(SENSOR_PS)
+
 check: $(CHECK:%=%.reg)
 
 clean: clean-ex
 
 clean-ex:
-	rm *.so *.hxx *.h *.cc
+	rm -f *.so *.hxx *.h *.cc
 
-.PHONY=%.reg clean-ex plot
+.PHONY=%.reg clean-ex sensor_so plot
 
 include ../gnuplot.mk

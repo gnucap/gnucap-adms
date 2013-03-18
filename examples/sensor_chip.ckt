@@ -1,0 +1,39 @@
+*
+* a sensor chip (IMtech_VAC_03)
+* this file is part of gnucap-adms
+* Copyright (c) 2013 Lars Hedrich, Felix Salfelder
+* License: GPLv3+
+*
+
+.SUBCKT ic9 VRo IA1+ IA2+ gnd IA1z IA1o IA1- IA2o IA2- out
+
+.include opvm.core.gc
+
+Rdummy IA1z out 0.001
+
+.include vbgvm.core.gc
+x2 vbg2 bvbg vdd gnd vbg102b
+
+.include ldovm.core.gc
+x1 vbg2 VRo vrs vdd gnd ldo101b
+
+VDD vdd gnd 5.0
+VSS gnd vss 2.0
+Xop1 IA1o IA1+ IA1- vdd vss op103b
+Xop2 IA2o IA2+ IA2- vdd vss op103b
+.ends ic9
+
+.include sensorvm.core.gc
+
+
+VSSEXT 0 1 0.0
+Vpin v_pin 0 pulse iv=piv pv=ppv rise=20m
+Xsensor1 0 IA2+ VRo IA1+ 0 v_pin DRUCKSENSOR
+Xdruck VRo IA1+ IA2+ 0 IA1o IA1o IA1- IA2o iA2- output ic9
+R4 1 iA2- 10k
+R3 iA2- IA2o 1k
+R2 IA2o IA1- 1k
+R5 iA2- IA1- 50k
+R6 1 IA1o 150k
+R1 IA1- IA1o 10k
+.end
