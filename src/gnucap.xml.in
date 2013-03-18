@@ -1934,7 +1934,6 @@ void $(DEV_NAME)::tr_advance()
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::tr_regress()
 {
-	untested();
 	ADMS_BASE::tr_regress();
   <admst:if test="[$has_sckt!=0]">
 	assert(subckt()); subckt()->tr_regress();
@@ -2115,7 +2114,7 @@ void $(DEV_NAME)::tr_load()
 
   <admst:if test="[$has_sckt!=0]">
 	if( !OPT::traceload || !_sim->is_inc_mode()) {
-		subckt()->tr_load(); untested();
+		subckt()->tr_load();
 	} else {
 		// subdevices have queued themselves if necessary.
 	}
