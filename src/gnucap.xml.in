@@ -395,7 +395,7 @@ class $(DEV_NAME) : public ADMS_BASE
 		bool tr_needs_eval()const;
 		bool do_tr();
 		void tr_load();
-		void tr_queue_eval();
+		//void tr_queue_eval();
 		void tr_eval();
 		void tr_eval_kept();
 		bool conv_check()const;
@@ -733,6 +733,9 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
 		COMPONENT* _%(name);
 </admst:for-each>
 
+#ifndef NDEBUG
+		unsigned _loaditer;
+#endif
 }; // $(DEV_NAME)
 // ------------------------------------------------------------------------ //
 // ------------------------------------------------------------------------ //
@@ -1931,6 +1934,7 @@ void $(DEV_NAME)::tr_advance()
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::tr_regress()
 {
+	untested();
 	ADMS_BASE::tr_regress();
   <admst:if test="[$has_sckt!=0]">
 	assert(subckt()); subckt()->tr_regress();
@@ -2001,7 +2005,7 @@ bool $(DEV_NAME)::do_tr()
 
 	// convergence check -- gnucap method
   <admst:if test="[$has_sckt!=0]">
-  //	set_converged( subckt()->do_tr()); no!
+	set_converged( subckt()->do_tr());
   </admst:if>
   <admst:if test="[$has_sckt=0]">
 	set_converged(true);
@@ -2086,18 +2090,28 @@ void $(DEV_NAME)::store_values()
   // ELEMENT does y[0] -&gt; y_1
 }
 // -------------------------------------------------------------------------- //
-void $(DEV_NAME)::tr_queue_eval()
-{
-	ADMS_BASE::tr_queue_eval();
-  <admst:if test="[$has_sckt!=0]">
-	subckt()-&gt;tr_queue_eval();
-	</admst:if>
-}
+//void $(DEV_NAME)::tr_queue_eval()
+//{
+//	ADMS_BASE::tr_queue_eval();
+//	<admst:if test="[$has_sckt!=0]">
+//		// NO:
+//		// this is only needed in d_subckt
+//		// subckt()-&gt;tr_queue_eval();
+//	</admst:if>
+//}
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::tr_load()
 {
 	trace5(&quot;$(DEV_NAME)::tr_load()&quot;, long_label(), _sim-&gt;is_inc_mode(),
 	                   OPT::traceload, _loaditer, _sim-&gt;iteration_tag());
+
+#if !defined(NDEBUG)
+  if (_loaditer == _sim->iteration_tag()){
+	  error(bDANGER, "ELEMENT::tr_load_source. double load\\n");
+    return;
+  }
+  _loaditer = _sim->iteration_tag();
+#endif
 
   <admst:if test="[$has_sckt!=0]">
 	if( !OPT::traceload || !_sim->is_inc_mode()) {
