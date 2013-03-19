@@ -1,1 +1,36 @@
+V1 ( nin 0 ) pulse iv= 1. pv= 0. delay=NA( 0.) rise= 200.u fall=NA( 0.) width=NA( Inf) period=NA( Inf)
+*sin(frequency=1k, amplitude=1, offset=1) 
+name   ...
+have 2 nodes. model: 0 sckt: 0 adp 0
+
+nin      ninmatrix_number 2, user_number 1 nm[t]  vdc  0.
+nout1    nout1matrix_number 1, user_number 2 nm[t]  vdc  0.
+-rc1
+#           v(nin)     v(nout1)  
+ 0.         0.         0.        
+-1.         1.         1.        
+-2.         1.         1.        
+ 0.         1.         1.        
+#Time       v(nin)     v(nout1)  
+ 0.         1.         1.        
+ 50.u       0.75       0.99055   
+ 100.u      0.5        0.9613    
+ 150.u      0.25       0.9144    
+ 200.u      42.562p    0.85125   
+ 250.u      39.057p    0.78115   
+ 300.u      35.933p    0.71866   
+ 350.u      33.058p    0.66116   
+ 400.u      30.414p    0.60827   
+ 450.u      27.98p     0.55961   
+ 500.u      25.742p    0.51484   
+ 550.u      23.683p    0.47365   
+ 600.u      21.788p    0.43576   
+ 650.u      20.045p    0.4009    
+ 700.u      18.441p    0.36883   
+ 750.u      16.966p    0.33932   
+ 800.u      15.609p    0.31218   
+ 850.u      14.36p     0.2872    
+ 900.u      13.211p    0.26423   
+ 950.u      12.154p    0.24309   
+ 0.001      11.182p    0.22364   
 v1= 0.51484

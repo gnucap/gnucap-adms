@@ -2,12 +2,14 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.67])
-AC_INIT([gnucap-adms], [0.0.4], [felix@salfelder.org])
+AC_INIT([gnucap-adms], [0.0.5], [felix@salfelder.org])
 AC_CONFIG_SRCDIR([README])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([-Wno-portability])
-LT_INIT()
+AM_INIT_AUTOMAKE([-Wno-portability silent-rules])
+LT_INIT([disable-static])
+
+AS_IF([ test x$program_suffix = xNONE ],,[_program_suffix=$program_suffix])
 
 dnl ------------------- debugging -------------------
 AC_MSG_CHECKING([if debug code should be compiled in])
@@ -36,15 +38,15 @@ AC_LANG(C++)
 # Checks for libraries.
 
 # Checks for header files.
-GC_CPPFLAGS+=$(gnucap-conf --cppflags)
+GC_CPPFLAGS+=$(gnucap-conf$_program_suffix --cppflags)
 
 # Checks for typedefs, structures, and compiler characteristics.
 
 dnl ----------------- admsXml ------------------
-AC_CHECK_PROG(HAVE_GCCONF, gnucap-conf, true, false)
+AC_CHECK_PROG(HAVE_GCCONF, gnucap-conf$_program_suffix, true, false)
 
 if test "x$HAVE_GCCONF" = "xfalse"; then
-	AC_MSG_ERROR([cannot find gnucap-conf, not implemented])
+	AC_MSG_ERROR([cannot find gnucap-conf$_program_suffix, not implemented])
 fi
 
 dnl ----------------- admsXml ------------------
@@ -89,7 +91,7 @@ fi
 ])
 
 if test "X$enable_local" = "Xno"; then
-	gnucap_libdir=$(gnucap-conf --libdir)
+	gnucap_libdir=$(gnucap-conf$_program_suffix --libdir)
 else
 	gnucap_libdir=$HOME/.gnucap/lib
 fi

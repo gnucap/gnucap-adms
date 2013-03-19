@@ -22,7 +22,6 @@ spice
 .tr 0.000005 80m trace=alltime > sensor_net_tr.out
 
 .measure vout at(probe="v(output)" x=40m)
-.status
 .mstat
 
 .end

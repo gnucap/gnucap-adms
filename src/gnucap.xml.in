@@ -537,9 +537,9 @@ class $(DEV_NAME) : public ADMS_BASE
   </admst:join>
 		};
 		enum Node_thermal {
-  <admst:for-each select="node[discipline/name='thermal' and grounded='no']" separator=",">
+  <admst:join select="node[discipline/name='thermal' and grounded='no']" separator=",">
     <admst:text format="\n\t\t\t$node_prefix%(name)=__%(name),"/>
-  </admst:for-each>
+  </admst:join>
 		};
 		enum Node_degradational {
   <admst:if test="[count(node[discipline/name='degradational' and grounded='no'])!=0]">
@@ -1356,7 +1356,7 @@ $(DEV_NAME)::$(DEV_NAME)()
 <admst:for-each select="node[grounded='no']" separator=";">
 	// %(name) %(discipline) %(location)
   <admst:text test="[discipline/name='degradational']" format="\n\t_n[i].set_adp();"/>
-	assert(!(_n[i++].n_()));
+	assert(!(_n[i].n_())); i++;
 </admst:for-each>
 
 	for (int ii=0; ii&lt;OPT::_keep_time_steps; ++ii){
@@ -1551,26 +1551,28 @@ void $(DEV_NAME)::expand()
 		if (!_%(name)) {
 			trace1("$(DEV_NAME)::expand, instanciating", hp(_%(name)));
 			// FIXME: recycle u_lang or move to e_adms.cc
-			const CARD* p = LANGUAGE::find_proto(&quot;%(module)&quot;, this);
+			const CARD* p = LANGUAGE::find_proto("%(module)", this);
 			if(!p) throw Exception("cannot find '%(module)'. Load module first?");
 			_%(name) = dynamic_cast&lt;COMPONENT*&gt;(p-&gt;clone_instance());
 			trace2("$(DEV_NAME)::expand", long_label(), _%(name)->has_common());
 			if(_%(name)->has_common()){
 				trace2("$(DEV_NAME)::expand", long_label(),_%(name)->mutable_common()->model());
 
-				if(dynamic_cast&lt;const MODEL_CARD*&gt;(p)){
-					untested();
+				if(dynamic_cast&lt;const MODEL_CARD*&gt;(p)) { untested();
 					trace2("$(DEV_NAME)::expand attaching submodel", _%(name)->common()->modelname(), _%(name)->mutable_common()->model());
 					_%(name)->set_dev_type("%(module)");
-					_%(name)->mutable_common()->attach_model(_%(name));
-
+					CARD* q = p->clone();
+					q->set_label("%(module)");
+					subckt()->push_front(q); // keep local copy to make find_model happy
+					// _%(name)->mutable_common()->attach_model(_%(name)); this looks like nonsense
+				}else{ untested();
 				}
 			}
-
 			assert(_%(name));
+			trace0("$(DEV_NAME)::expand, pushing");
 			subckt()-&gt;push_front(_%(name));
 		}
-		{
+		{ untested();
 			node_t nodes[] = {
   <admst:join select="terminal" separator=",">
 				_n[n_%(nodefrominstantiator) /*%(nodefrommodule)*/]
@@ -1586,8 +1588,7 @@ void $(DEV_NAME)::expand()
   </admst:for-each>
 		}
 </admst:for-each>
-	}else{
-		untested();
+	}else{ untested();
 	}
   <admst:if test="[$has_sckt!=0]">
 	assert(subckt());

@@ -13,9 +13,11 @@ paramset myager ager
 	.r0=20k;
 endparamset
 spice
+
 .verilog
 myager r1 (nin,0);
 spice
+
 
 .print tran s(r1.rcd1) a(r1) E_end(r1.rcd1) tau(r1.rcd1) tt(r1.rcd1) tr(r1.rcd1) i(v1) Eend(r1.rcd1) b(r1)
 +ulo(r1.rcd1) uhi(r1.rcd1) P(r1.rcd1)

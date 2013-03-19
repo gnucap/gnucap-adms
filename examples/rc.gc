@@ -15,7 +15,7 @@ spice
 
 .print tran v(nodes)
 .store tran v(nodes)
-.print dc v(nodes) v(rc1.int1)
+.print dc v(nodes)
 
 .nodelist
 .dc trace=v
