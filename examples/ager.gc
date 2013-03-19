@@ -1,11 +1,10 @@
 spice
+* simplistic ager example
 
 .param vdd 1.7
 .options numdgt=15
 
-V1 nin 0 pulse iv=0 pv=1 rise=200u delay=1 width=5
-*sin(frequency=1k, amplitude=1, offset=1)
-.list
+V1 nin 0 pulse iv=0 pv=1 rise=500u delay=1 width=10
 
 .verilog
 load rcd_sym.so
@@ -18,14 +17,14 @@ spice
 myager r1 (nin,0);
 spice
 
-.print tran v(nodes) b(r1) a(r1) vin(r1.rcd1) tt(r1.rcd1) i(v1)
+.print tran s(r1.rcd1) a(r1) E_end(r1.rcd1) tau(r1.rcd1) tt(r1.rcd1) tr(r1.rcd1) i(v1) Eend(r1.rcd1) b(r1)
 +ulo(r1.rcd1) uhi(r1.rcd1) P(r1.rcd1)
 .print tt v(nodes) b(r1) a(r1) tt(r1.rcd1) tr(r1.rcd1)
 .print dc v(nodes) a(r1)
+.store tw a(r1) b(r1)
 
-.tw 1 10 100 100 new tran > tr.out
-.tw 200 pd
-.tw 300 pd
-.tw 400 cont tran >> tr.out
+.tw 1 100 200 new > ager_tw.out tran > ager_tr.out
 
+.measure a at(probe="a(r1)" x=34)
+.measure b at(probe="b(r1)" x=34)
 .end

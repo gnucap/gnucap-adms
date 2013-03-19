@@ -4,15 +4,16 @@ GNUCAP=LD_LIBRARY_PATH=../src/.libs gnucap
 
 EXFILES=rc.va
 if VERILOG_EXTERN
-EXT_CHECK=rc callfunctions
+EXT_CHECK=rc ager
 rc.test: rc.so
 endif
-CHECK=opamp sensor_chip $(EXT_CHECK)
+CHECK=opamp sensor_chip callfunctions $(EXT_CHECK)
 
 SENSOR_SO=op.so ldo.so vbg.so sensor.so
 
 EXTRA_DIST=opamp.gc opamp.ref \
            lamp.va lamp.gc \
+           ager.gc ager.va ager.ref \
            rc.va rc.gc \
            $(SENSOR_SO:%.so=%.va) \
            $(SENSOR_SO:%.so=%vm.core.gc) \
