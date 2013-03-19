@@ -2115,7 +2115,7 @@ void $(DEV_NAME)::tr_load()
 	                   OPT::traceload, _loaditer, _sim-&gt;iteration_tag());
 
 #if !defined(NDEBUG)
-  if (_loaditer == _sim->iteration_tag()){
+  if (_loaditer == (unsigned)_sim->iteration_tag()){
 	  error(bDANGER, "ELEMENT::tr_load_source. double load\\n");
     return;
   }
