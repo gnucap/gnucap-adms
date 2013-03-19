@@ -6,8 +6,7 @@
 usage="type $0 some.va to generate some.cc and some.h. \n
 \n
 to get a shared object type \n
-make some.o CXXFLAGS=\"--shared\ -fPIC\" CPPFLAGS=$(gnucap-conf --cppflags)\ LDFLAGS=\ \n
-mv some.o some.so"
+type $0 -c some.va"
 
 function check_adms {
 	[ -z `which admsXml` ] &&  echo "need admsXml" && exit 1 
@@ -27,7 +26,7 @@ opt=0
 ndebug=
 gdb=
 cppflags="$CPPFLAGS -I@includedir@/@PACKAGE@"
-ldflags="-L@libdir@ -Wl,-rpath,@libdir@ -le_adms"
+ldflags="$LDADD -L@libdir@ -Wl,-rpath,@libdir@ -le_adms"
 CXXFLAGS="-Wall -pedantic"
 
 while [ $# -gt 0 ]; do
@@ -44,7 +43,7 @@ while [ $# -gt 0 ]; do
 
 			if [ $compile = yes ]; then
 				cmd="@CXX@ $ndebug $trace $gdb -O$opt $cppflags @GC_CPPFLAGS@ -shared -fPIC \
-				    ${arg%.va}.cc -L@libdir@ -le_adms -o ${arg%.va}.so $RPATH"
+				    ${arg%.va}.cc $LDADD -L@libdir@ -le_adms -o ${arg%.va}.so $RPATH"
 				[ $quiet = no ] && echo compiling ${arg%.va}.so
 				[ $verbose = no ] || echo $cmd
 				$cmd
@@ -52,7 +51,7 @@ while [ $# -gt 0 ]; do
 
 			if [ $prep = yes ]; then
 				cmd="@CPP@ $ndebug $trace $cppflags @GC_CPPFLAGS@ \
-				    ${arg%.va}.cc -L@libdir@ -le_adms -o ${arg%.va}.ii $RPATH"
+				    ${arg%.va}.cc $LDADD -L@libdir@ -le_adms -o ${arg%.va}.ii $RPATH"
 				[ $quiet = no ] && echo writing ${arg%.va}.ii
 				[ $verbose = no ] || echo $cmd
 				$cmd
@@ -60,7 +59,7 @@ while [ $# -gt 0 ]; do
 			;;
 		*.cc)
 			cmd="@CXX@ $CXXFLAGS $ndebug $trace $gdb -O$opt $cppflags @GC_CPPFLAGS@ -shared -fPIC \
-				$arg -L@libdir@ -le_adms -o ${arg%.cc}.so $RPATH"
+				$arg $LDADD -L@libdir@ -le_adms -o ${arg%.cc}.so $RPATH"
 			[ $quiet = no ] && echo compiling ${arg%.cc}.so
 			[ $verbose = no ] || echo $cmd
 			$cmd
