@@ -190,7 +190,9 @@
 
 <admst:open file="$(filename).h">
 #include &lt;stdio.h&gt;
-#include  &quot;math.h&quot;
+#include  &lt;math.h&gt;
+#define ADD_VERSION
+#include &lt;globals.h&gt;
 
 #include &quot;u_xprobe.h&quot;
 #include &quot;d_subckt.h&quot;

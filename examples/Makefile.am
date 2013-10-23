@@ -55,7 +55,7 @@ $(TESTS): %.sh: %.out
 #	$(GNUCAP) $< > $*.out
 
 PREDIFF= \
-    '1,/^\#·See·the·file/d'
+    '1,/^\#·See·the·file/d' \
     '/^stashing·as/d' \
     '/^@/d' \
     '/:·already.installed,·replacing/d'

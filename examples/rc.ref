@@ -3,8 +3,8 @@ V1 ( nin 0 ) pulse iv= 1. pv= 0. delay=NA( 0.) rise= 200.u fall=NA( 0.) width=NA
 name   ...
 have 2 nodes. model: 0 sckt: 0 adp 0
 
-nin      ninmatrix_number 2, user_number 1 nm[t]  vdc  0.
-nout1    nout1matrix_number 1, user_number 2 nm[t]  vdc  0.
+nin      nin matrix_number 2, user_number 1 nm[t]  vdc  0.
+nout1    nout1 matrix_number 1, user_number 2 nm[t]  vdc  0.
 -rc1
 #           v(nin)     v(nout1)  
  0.         0.         0.        
