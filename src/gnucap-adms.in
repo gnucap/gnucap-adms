@@ -34,8 +34,9 @@ while [ $# -gt 0 ]; do
 	shift
 	case $arg in
 		*.va)
+			outfile=`basename ${arg%.va}`
 			check_adms
-			cmd="admsXml @ADMSXML_FLAGS@ -I@includedir@/@PACKAGE@ $ES $arg -o ${arg%.va}"
+			cmd="admsXml @ADMSXML_FLAGS@ -I@includedir@/@PACKAGE@ $ES $arg -o $outfile"
 			[ $verbose = no ] || echo $cmd
 			if [ $translate = yes ]; then
 				$cmd
@@ -43,7 +44,7 @@ while [ $# -gt 0 ]; do
 
 			if [ $compile = yes ]; then
 				cmd="@CXX@ $ndebug $trace $gdb -O$opt $cppflags @GC_CPPFLAGS@ -shared -fPIC \
-				    ${arg%.va}.cc $LDADD -L@libdir@ -le_adms -o ${arg%.va}.so $RPATH"
+				    $outfile.cc $LDADD -L@libdir@ -le_adms -o $outfile.so $RPATH"
 				[ $quiet = no ] && echo compiling ${arg%.va}.so
 				[ $verbose = no ] || echo $cmd
 				$cmd
