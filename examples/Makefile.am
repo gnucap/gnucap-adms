@@ -18,7 +18,7 @@ AM_DEFAULT_SOURCE_EXT = .va
 .va.cc:
 check_LTLIBRARIES = \
     op.la vbg.la ldo.la sensor.la callfunctions.la \
-    lamp.la $(EXT_LA)
+    lamp.la motor.la $(EXT_LA)
 AM_CPPFLAGS = @GC_CPPFLAGS@ -I$(top_srcdir)/src
 LIBS = ../src/libe_adms.la
 AM_LDFLAGS = -module -avoid-version -rpath /dev/null
@@ -27,7 +27,7 @@ AM_LDFLAGS = -module -avoid-version -rpath /dev/null
 	[ -f $@ ] || $(LN_S) .libs/$@ .
 
 EXTRA_DIST= \
-    lamp.va ager.va rc.va \
+    lamp.va ager.va rc.va motor.va \
     $(SENSOR_SO:%.so=%.va) \
     $(SENSOR_SO:%.so=%vm.core.gc) \
     sensor_chip.ckt \
@@ -35,7 +35,7 @@ EXTRA_DIST= \
 
 TEST_EXTENSIONS = .sh
 AM_TESTS_FD_REDIRECT = 9>&2
-GC_TESTS = opamp.sh sensor_chip.sh lamp.sh $(EXT_TESTS)
+GC_TESTS = opamp.sh sensor_chip.sh lamp.sh motor.sh $(EXT_TESTS)
 CUSTOM_TESTS = callfunctions.sh
 TESTS = $(GC_TESTS) $(CUSTOM_TESTS)
 
@@ -106,6 +106,7 @@ ADMS_GC_XML=../src/gnucap_0.xml
 	[ 0 -ne $$? ]
 
 lamp.out: lamp.so
+motor.out: motor.so
 ager.out: ager.so
 rc.out: rc.so
 
