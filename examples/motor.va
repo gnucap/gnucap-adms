@@ -1,0 +1,51 @@
+// Copyright 2012 Accellera Systems Initiative
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at:
+// http://www.apache.org/licenses/LICENSE-2.0
+
+// lamp
+
+`include "discipline.h"
+`include "constants.h"
+
+module motor(p1,p2,sens);
+	inout p1,p2,sens;
+	electrical p1,p2,sens;
+	rotational_omega t1;
+
+	parameter real R_fric     = 1.0e-4,
+	               R_inertia  = 1.0e-12,
+	               Alpha      = 3.0e-3,
+	               Rnom       = 50.0 from (0:inf);
+
+	real reff      (*ask="yes"*);
+	real omega     (*ask="yes"*);
+	real ambient   (*ask="yes"*);
+	real P_el      (*ask="yes"*);
+	real P_rot     (*ask="yes"*);
+	real P_fric    (*ask="yes"*);
+	real t4;
+	branch (p1,p2) res;
+
+	analog begin	
+		//reff = Rnom*(1+Alpha*(Omega(t1)-(`P_CELSIUS0+RnomReftemp)));
+		reff = Rnom*(1+Alpha*(Omega(t1)));
+
+		P_el = V(res)*V(res) / reff;
+		P_fric = pow(R_fric * Omega(t1),2);
+		P_rot = R_inertia * ddt(Omega(t1));
+
+		I(res) <+ V(res) / reff;
+		// Pwr(t1) <+ P_el - P_rad - P_thc;
+		Tau(t1) <+ P_el; // V(res)*V(res) / reff; // P_el;
+		Tau(t1) <+ - P_fric;
+		// P_thc
+ 	     	Tau(t1) <+ - ddt(R_inertia*Omega(t1)); // BUG (see BUGS)
+		omega = Omega(t1);
+
+		I(sens) <+ - V(sens)/1e-12;
+		I(sens) <+ omega/5e-10;
+   end
+endmodule
