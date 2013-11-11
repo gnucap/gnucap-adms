@@ -538,6 +538,11 @@ class $(DEV_NAME) : public ADMS_BASE
     <admst:text format="\n\t\t\t$node_prefix%(name)=__%(name)"/>
   </admst:join>
 		};
+		enum Node_rotational_omega {
+  <admst:join select="node[discipline/name='rotational_omega' and grounded='no']" separator=",">
+    <admst:text format="\n\t\t\t$node_prefix%(name)=__%(name),"/>
+  </admst:join>
+		};
 		enum Node_thermal {
   <admst:join select="node[discipline/name='thermal' and grounded='no']" separator=",">
     <admst:text format="\n\t\t\t$node_prefix%(name)=__%(name),"/>
@@ -569,6 +574,10 @@ inline double _BR(int p, int n) {
 #define NP(p) _NP($(node_prefix) ## p)
 inline voltage_t _NP(Node_electrical p){
 	return std::min(1000., std::max(-1000., _n[p].v0()) );
+}
+inline double _NP(Node_rotational_omega p){
+	assert(is_number(_n[p].v0()));
+	return _n[p].v0();
 }
 inline double _NP(Node_thermal p){
 	assert(is_number(_n[p].v0()));
@@ -703,6 +712,9 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
 			/// hmm really OPT::abstol?
 			return ::conchk(CKT_BASE::_sim->_vt1[_n[a].m_()], _n[a].v0(), OPT::abstol, reltol);
 		}
+		bool conchk( Node_rotational_omega a, double reltol=OPT::reltol ) const {
+			return ::conchk(CKT_BASE::_sim->_vt1[_n[a].m_()], _n[a].v0(), abstol_flow_rotational_omega, reltol);
+		}
 		bool conchk( Node_thermal a, double reltol=OPT::reltol ) const {
 			return ::conchk(CKT_BASE::_sim->_vt1[_n[a].m_()], _n[a].v0(), abstol_flow_thermal, reltol);
 		}
@@ -719,6 +731,12 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
 			    _n[a].v0() - _n[b].v0(), abstol_flow_thermal, reltol);
 		}
 		// these are never inputs.
+		bool conchk( Node_rotational_omega a, Node_electrical b, double reltol=0 ) const {
+			return true;
+		}
+		bool conchk( Node_electrical a, Node_rotational_omega b, double reltol=0 ) const {
+			return true;
+		}
 		bool conchk( Node_electrical a, Node_thermal b, double reltol=0 ) const {
 			return true;
 		}
