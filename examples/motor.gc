@@ -6,32 +6,39 @@ spice
 .verilog
 load ./motor.so
 paramset mymotor motor;
-	.R_inertia=1e-4;
+	.R_inertia=1e-3;
 	.R_fric=1e-4;
 endparamset
 
-mymotor M1 (0,ndd,nsens);
+mymotor M1 (0,np,nsens);
 
 spice
-.param vsupp=5
-.param vsupp0=0
+.param pv=5
+.param iv=0.1
 .param delay=0
+.param rise=0.1
 
-V1 ndd 0 pulse iv=vsupp0 pv=vsupp rise=.01 delay=delay
+V1 ndd 0 pulse iv=iv pv=pv rise=rise delay=delay
+R1 ndd np 10
 
-.store tran omega(M1)
-.print tran v(ndd) omega(M1) v(M1.nodes) reff(M1) P_el(M1) P_rad(M1) P_rot(M1) v(nsens) state0(M1)
-.print dc v(ndd) omega(M1) v(M1.nodes) reff(M1) P_el(M1) P_rad(M1) P_rot(M1) ambient(M1) state0(M1)
-
-.nodelist
-
+.store tran omega(M1) v(nsens)
+.print tran v(ndd) I(M1) I(R1) omega(M1) v(nsens) P_fric(M1) state0(M1)
+.print dc v(ndd) omega(M1) v(M1.nodes) reff(M1) P_el(M1) P_rad(M1) P_rot(M1) v(nsens) state0(M1)
 .dc trace=v
-
-.tr 0 1 .01 > motor_tr.out
+.tr 0 1 .1 trace=a
 .measure t1 at(probe="omega(M1)" x=0.5)
-.param vsupp0=5
-.param vsupp=0
+
+.param iv=5
+.param pv=-5
 .param delay=1
-.tr 2 >> motor_tr.out
-.measure t2 at(probe="omega(M1)" x=0.5)
+.param rise=1
+.tr 2 trace=n
+.measure t2 at(probe="omega(M1)" x=1.5)
+.measure s2 at(probe="v(nsens)" x=1.5)
+
+.param iv=-5
+.param pv=0
+.param delay=2
+.tr 5 trace=n
+.measure t3 at(probe="omega(M1)" x=3.5)
 .end

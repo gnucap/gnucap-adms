@@ -16,7 +16,8 @@ module ager(p,n);
 	real a (*ask="yes"*);
 	real b (*ask="yes"*);
 
-	rcd_exp #(.weight(1), .rc0(4), .rc1(3), .re0(5), .re1(-2)) rcd1(p,n,nage);
+// swapped
+	rcd_exp #(.weight(1), .re0(4), .re1(3), .rc0(5), .rc1(-2)) rcd1(p,n,nage);
 
    analog begin
 		@(initial_model) begin
