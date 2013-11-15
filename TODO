@@ -3,6 +3,7 @@ simple
 - check for known-to-work gnucap
 - more devices/tests
 - fix portability of gnucap-adms.so
+- dont convert module names to caps.
 
 difficult
 - see BUGS

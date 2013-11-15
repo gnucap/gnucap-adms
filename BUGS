@@ -2,4 +2,4 @@
   i=ddt(V); I<+i; dont work (without warning).  I<+ddt(V) works
   (this is a known bug: see adms.implicit.xml line 156) 
 - some scopes are chosen terribly wrong (c->, m->, etc.)
-- V(..)<+ doesn't work?
+- V(..)<+ is experimental

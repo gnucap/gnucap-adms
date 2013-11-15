@@ -1,15 +1,15 @@
 gnucap-adms package
-Copyright: 2012 Felix Salfelder <felix@salfelder.org>
+Copyright: 2012-13 Felix Salfelder <felix@salfelder.org>
 License: GPL3+
 
 This package helps compiling verilog-a models to gnucap devices.
 
 synopsis:
     gnucap-adms [options] file.va
-    
+
     generates c++ code distributed over file.cc file.h file_top.hxx ...
     containing a gnucap device
- 
+
 -v  verbose output
 -c  compile shared object (file.so)
 -t  compile with -DDO_TRACE
@@ -37,13 +37,12 @@ features:
  - works with gnucap-uf and almost with gnucap
  - sparse matrix allocation
  - initial conditions (experimental)
- - temperature discipline (experimental)
+ - disciplines from discipline.h (experimental)
  - subdevices (incomplete, but works)
  - under active development
 
 bugs:
  - should use Makefile for translate/compile rules
- - only "I" etc. on left hand side supported
  - ... lots. lets fix the serious ones first
 
 remarks:

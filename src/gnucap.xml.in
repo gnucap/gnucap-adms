@@ -215,6 +215,7 @@
   <admst:variable name="DEV_NAME" select="DEV_%(upper-case(name))"/>
   <admst:variable name="MODEL_NAME" select="MODEL_%(upper-case(name))"/>
   <admst:variable name="COMMON_NAME" select="COMMON_%(upper-case(name))"/>
+  <admst:variable name="_num_stamp_nodes" select="%(count(node[grounded='no' and discipline/name!='degradational']))"/>
 
 // customization - gnucap specific constants
 #define VALUE_NAME &quot;#&quot;
@@ -850,6 +851,7 @@ class $(COMMON_NAME) : public COMMON_COMPONENT
   <admst:variable name="module" select="%s"/>
   <admst:variable name="DEV_NAME" select="DEV_%(upper-case(name))"/>
   <admst:variable name="MODEL_NAME" select="MODEL_%(upper-case(name))"/>
+  <admst:variable name="_num_stamp_nodes" select="%(count(node[grounded='no' and discipline/name!='degradational']))"/>
 
   <admst:open file="$(filename)_$(module)_top.hxx">
     <admst:apply-templates select="analog/code[datatypename='block']/variable"
@@ -936,7 +938,8 @@ and name!='initializeInstance')]">
 
           </admst:when>
           <admst:otherwise>
-            <admst:text format="$node_prefix%(lhs/branch/pnode/name) = 0; /* pnode collapsed to GND */ \n"/>
+// dont know.
+            <admst:text format="// _nodes[$node_prefix%(lhs/branch/pnode/name)] = 0; /* pnode collapsed to GND */ \n"/>
           </admst:otherwise>
         </admst:choose>
       </admst:if>
@@ -1179,6 +1182,7 @@ using namespace std;
   <admst:variable name="DEV_NAME" select="DEV_%(upper-case(name))"/>
   <admst:variable name="MODEL_NAME" select="MODEL_%(upper-case(name))"/>
   <admst:variable name="COMMON_NAME" select="COMMON_%(upper-case(name))"/>
+  <admst:variable name="_num_stamp_nodes" select="%(count(node[grounded='no' and discipline/name!='degradational']))"/>
 
 static $(DEV_NAME) p_dev_$(module);
 static DISPATCHER&lt;CARD&gt;::INSTALL d_$(module)_0(&amp;device_dispatcher, "dev_$(module)", &amp;p_dev_$(module));
@@ -1419,7 +1423,7 @@ bool $(DEV_NAME)::uic_now(unsigned stateno)const{
 	if(!_sim-&gt;uic_now()) return 0;
 	const $(COMMON_NAME)* c = static_cast&lt;const $(COMMON_NAME)*&gt;(common());
 
-	incomplete();
+	// incomplete();
 	switch(stateno){
 <admst:for-each select="$(ddts)">
 		case _ddt_%(adms/id(.)):
@@ -2530,8 +2534,8 @@ double $(DEV_NAME)::tr_c_to_g(double c, double g)const
 void $(DEV_NAME)::tr_eval()
 {
 	trace1("$(DEV_NAME)::tr_eval", _sim->analysis_is_static());
-  <admst:if test="[count(jacobian)!=0]">
 	std::fill_n(it0, $_num_stamp_nodes, 0);
+  <admst:if test="[count(jacobian)!=0]">
 	std::fill_n(m_entries, %(count(jacobian)), 0);
   </admst:if>
 
@@ -4547,6 +4551,17 @@ currently: only called for eval_mode==accept
 
 <admst:template match="contribution">
   <admst:message test="[/dbg_xml='yes']" format="*(ngspvers)contribution*\n"/>
+	/* contribution dummy template? why? */
+<!-- MOVE TO IMPLICIT PREPROCESSOR -->
+<admst:value-to test="[lhs/discipline/potential=lhs/nature]" select="lhs/type" string="ps"/>
+<!-- UNTIL HERE -->
+
+  <admst:choose>
+    <admst:when test="[lhs/type='ps']">
+    </admst:when>
+    <admst:otherwise>
+    </admst:otherwise>
+  </admst:choose>
   <admst:choose>
     <admst:when test="[whitenoise='no' and flickernoise='no']">
       <admst:apply-templates select="." match="contribution:nonoise" required="yes"/>
@@ -5829,6 +5844,17 @@ return
 <!-- -------------------- analog//contribution ------------------------ -->
 <admst:template match="contribution">
 // MODULE contribution %(.)
+<!-- MOVE TO IMPLICIT PREPROCESSOR -->
+<admst:value-to test="[lhs/discipline/potential=lhs/nature]" select="lhs/type" string="ps"/>
+<!-- UNTIL HERE -->
+  <admst:choose>
+    <admst:when test="[lhs/type='ps']">
+<admst:apply-templates select="." match="lossleft" required="yes"/>
+    </admst:when>
+    <admst:otherwise>
+		 // noloss
+    </admst:otherwise>
+  </admst:choose>
   <admst:choose>
     <admst:when test="[whitenoise='yes' or flickernoise='yes']">
       <admst:variable name="SkipFVariable" select="y"/>
@@ -5856,6 +5882,16 @@ return
     </admst:when>
     <admst:otherwise>
 // nonoise contribution: %(.)
+// contribution lhs (type source): %(./lhs)
+// lhs discipline %(./lhs/discipline)
+// lhs discipline flow %(./lhs/discipline/flow)
+// lhs discipline potential %(./lhs/discipline/potential)
+// lhs type (basicenum) %(./lhs/type) (bug?!)
+<!-- MOVE TO IMPLICIT PREPROCESSOR -->
+<admst:value-to test="[lhs/discipline/potential=lhs/nature]" select="lhs/type" string="ps"/>
+<!-- UNTIL HERE -->
+// lhs type (basicenum) %(./lhs/type) (fixed?!)
+// lhs probe nature (basicenum) nature %(./lhs/nature)
 
       <admst:apply-templates select="." match="contribution:nonoise"/>
     </admst:otherwise>
@@ -8355,7 +8391,7 @@ return
 </admst:template>
 <!-- ---------------------------------------------------------- -->
 <admst:template match="contribution:nonoise">
-  <admst:text format="// contribution:nonoise %(.) \n"/>
+// contribution:nonoise %(.)
 
   <admst:if test="rhs[not(nilled(function[class='builtin']))]">
 	{ // %(.) 7804
@@ -8435,13 +8471,15 @@ return
   <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)residual2*\n"/>
   <admst:variable name="Pp" select="%(lhs/branch/pnode/name)"/>
   <admst:variable name="Pn" select="%(lhs/branch/nnode/name)"/>
+  <admst:variable name="loss" select=""/>
+  <admst:variable name="loss" select="-1/OPT::shortckt * " test="[lhs/type='ps']"/>
 	// residual2($(Pp),$(Pn),%(rhs/tree))
 	{  // recheck: static is same as dynamic?
 		double vx = %(e(rhs/tree)); // %(rhs/tree)
 		assert(is_number(vx));
-		it0[$(node_prefix)$(Pp)] -= vx;
+		it0[$(node_prefix)$(Pp)] -= $(loss) vx;
 	<admst:if test="lhs/branch/nnode[grounded='no']">
-		it0[$(node_prefix)$(Pn)] += vx;
+		it0[$(node_prefix)$(Pn)] += $(loss) vx;
 	</admst:if>
 	}
 
@@ -8459,6 +8497,20 @@ return
 
 </admst:template>
 
+<!-- ----------------------  loss left stamp ------------------ -->
+<admst:template match="lossleft">
+  <admst:variable name="Sp" select="%(./lhs/branch/pnode/name)"/>
+  <admst:variable name="Sn" select="%(./lhs/branch/nnode/name)"/>
+	{
+		double loss = 1./OPT::shortckt;
+<admst:if test="./lhs/branch/nnode[grounded='no']">
+		_write_d$(eval_mode)($Sn, $Sn,  loss);
+		_write_d$(eval_mode)($Sn, $Sp, -loss);
+		_write_d$(eval_mode)($Sp, $Sn, -loss);
+</admst:if>
+		_write_d$(eval_mode)($Sp, $Sp,  loss);
+	}
+</admst:template>
 <!-- ----------------------  jacobian stamp ------------------ -->
 <admst:template match="jacobian_">
   <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)jacobian_*\n"/>
@@ -8509,7 +8561,7 @@ return
 	}
 #endif
 
-    </admst:when>
+	 </admst:when> <!--dynamic=yes-->
 
     <admst:otherwise>
 	{ // jacobian4($(Sp), $(Sn), $(Pp), $(Pn), $(ep)) - static
@@ -8685,7 +8737,7 @@ return
 </admst:template>
 <!-- -------------------------------------------------- -->
 <admst:template match="analog:evaluate">
-<admst:message test="[/dbg_xml='yes']" format="*(tr_eval)analog:evaluate*\n"/>
+  <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)analog:evaluate*\n"/>
   <admst:text select="$fnoise/item" format="fpnoise%(index($fnoise/item,.))=0.0;
     fenoise%(index($fnoise/item,.))=0.0;\n"/>
   <admst:text select="$tnoise/item" format="tnoise%(index($tnoise/item,.))=0.0;\n"/>
