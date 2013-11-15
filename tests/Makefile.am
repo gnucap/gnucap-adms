@@ -7,7 +7,7 @@ GNUCAP = LD_LIBRARY_PATH=../src/.libs $(shell echo gnucap | sed -e '$(transform)
 
 AM_DEFAULT_SOURCE_EXT = .va
 .va.cc:
-check_LTLIBRARIES = if.la if2.la # bug1.la
+check_LTLIBRARIES = if.la if2.la vs.la cs.la cap.la
 AM_CPPFLAGS = @GC_CPPFLAGS@ -I$(top_srcdir)/src
 LIBS = ../src/libe_adms.la
 AM_LDFLAGS = -module -avoid-version -rpath /dev/null
@@ -23,7 +23,7 @@ TEST_EXTENSIONS = .sh
 AM_TESTS_FD_REDIRECT = 9>&2
 GC_TESTS = opamp.sh sensor_chip.sh
 TESTS = $(EXT_TESTS) $(GC_TESTS)
-GC_TESTS = if.sh if2.sh
+GC_TESTS = if.sh if2.sh vs.sh cs.sh cap.sh
 
 EXTRA_DIST = $(TESTS:%.sh=%.ref) $(GC_TESTS:%.sh=%.gc)
 
@@ -37,6 +37,9 @@ $(GC_TESTS) $(EXT_TESTS): %.sh: %.ref
 
 $(TESTS): %.sh: %.out
 
+cap.out: cap.so
+vs.out: vs.so
+cs.out: cs.so
 if.out: if.so
 if2.out: if2.so
 
@@ -75,7 +78,7 @@ ADMS_GC_XML=../src/gnucap_0.xml
 
 check: $(CHECK:%=%.reg)
 
-clean: clean-examples
+clean-local: clean-examples
 
 clean-examples:
 	rm -f *.out *.so *.cc *.hxx *.h
