@@ -16,6 +16,13 @@ extern module C(p,n);
 	parameter real c=1e-6 from [0:inf);
 endmodule
 
+extern module L(p,n);
+   inout p,n;
+	electrical p,n;
+
+	parameter real l=1e-6 from [0:inf);
+endmodule
+
 extern module rcd_exp(p, n, e);
 	inout p, n;
 	output e;
