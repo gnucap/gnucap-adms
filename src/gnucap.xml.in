@@ -116,7 +116,7 @@
 <!-- bugs: a) already has empty or may be null element, so count(list)=1 -->
 <!--       b) admst:for-each on this list works, but gives many warnings -->
 <admst:new datatype="list" arguments="function">
-	<admst:variable name="ddt_ic_list" select="" />
+  <admst:variable name="ddt_ic_list" select="" />
 </admst:new>
 
 <!--          thats why this list used only to filter contributions list -->
@@ -202,9 +202,14 @@
 #include &quot;e_adms.h&quot;
 #include &quot;u_parameter.h&quot;
 
+<admst:new datatype="list" arguments="discipline">
+  <admst:variable name="mydisciplines" select="" />
+</admst:new>
+
 <admst:for-each select="discipline">
 #define abstol_potential_%(./name) %(potential/abstol)
 #define abstol_flow_%(./name) %(flow/abstol)
+  <admst:push into="$(mydisciplines)" select="." onduplicate="ignore"/>
 </admst:for-each>
 
 #ifndef $(filename)_header__
@@ -532,23 +537,28 @@ class $(DEV_NAME) : public ADMS_BASE
   </admst:for-each>
 		};
 	protected: // nodes sorted according to discipline
-		enum Node_electrical {
-			n_GND=-1,
-  <admst:join select="node[discipline/name='electrical' and grounded='no']" separator=",">
-    <admst:text format="\n\t\t\t$node_prefix%(name)=__%(name)"/>
-  </admst:join>
+
+
+
+	<admst:variable name="mytmpmodule" select="%(.)" />
+
+
+  <admst:for-each select="$mydisciplines[.!='']">
+	  	enum Node_%(./name) {
+    <admst:variable name="foo" select="%(.)" />
+    
+    <!-- place your specific definitions here -->
+    <admst:if test="[(name='electrical')]">
+	    		n_GND=-1,
+    </admst:if>
+
+    <admst:join select="$mytmpmodule/node[discipline=$(foo) and grounded='no']" separator=",">
+      <admst:text format="\n\t\t\t$node_prefix%(name)=__%(name)"/>
+    </admst:join>
 		};
-		enum Node_rotational_omega {
-  <admst:join select="node[discipline/name='rotational_omega' and grounded='no']" separator=",">
-    <admst:text format="\n\t\t\t$node_prefix%(name)=__%(name),"/>
-  </admst:join>
-		};
-		enum Node_thermal {
-  <admst:join select="node[discipline/name='thermal' and grounded='no']" separator=",">
-    <admst:text format="\n\t\t\t$node_prefix%(name)=__%(name),"/>
-  </admst:join>
-		};
-		enum Node_degradational {
+  </admst:for-each>
+
+                enum Node_degradational {
   <admst:if test="[count(node[discipline/name='degradational' and grounded='no'])!=0]">
     <admst:for-each select="node[discipline/name='degradational' and grounded='no']" separator=",">
         <admst:text format="\n\t\t\t$node_prefix%(name)=__%(name),"/>
@@ -574,6 +584,10 @@ inline double _BR(int p, int n) {
 #define NP(p) _NP($(node_prefix) ## p)
 inline voltage_t _NP(Node_electrical p){
 	return std::min(1000., std::max(-1000., _n[p].v0()) );
+}
+inline double _NP(Node_magnetic p){
+	assert(is_number(_n[p].v0()));
+	return _n[p].v0();
 }
 inline double _NP(Node_rotational_omega p){
 	assert(is_number(_n[p].v0()));
@@ -712,6 +726,9 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
 			/// hmm really OPT::abstol?
 			return ::conchk(CKT_BASE::_sim->_vt1[_n[a].m_()], _n[a].v0(), OPT::abstol, reltol);
 		}
+		bool conchk( Node_magnetic a, double reltol=OPT::reltol ) const {
+			return ::conchk(CKT_BASE::_sim->_vt1[_n[a].m_()], _n[a].v0(), abstol_flow_magnetic, reltol);
+		}
 		bool conchk( Node_rotational_omega a, double reltol=OPT::reltol ) const {
 			return ::conchk(CKT_BASE::_sim->_vt1[_n[a].m_()], _n[a].v0(), abstol_flow_rotational_omega, reltol);
 		}
@@ -731,6 +748,12 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
 			    _n[a].v0() - _n[b].v0(), abstol_flow_thermal, reltol);
 		}
 		// these are never inputs.
+		bool conchk( Node_magnetic a, Node_electrical b, double reltol=0 ) const {
+			return true;
+		}
+		bool conchk( Node_electrical a, Node_magnetic b, double reltol=0 ) const {
+			return true;
+		}
 		bool conchk( Node_rotational_omega a, Node_electrical b, double reltol=0 ) const {
 			return true;
 		}
