@@ -10,7 +10,7 @@ AM_DEFAULT_SOURCE_EXT = .va
 check_LTLIBRARIES = \
     if.la if2.la \
     vs.la cs.la cap.la \
-    coil.la
+    coil.la subcoil.la
 
 AM_CPPFLAGS = @GC_CPPFLAGS@ -I$(top_srcdir)/src
 LIBS = ../src/libe_adms.la
@@ -26,7 +26,7 @@ endif
 TEST_EXTENSIONS = .sh
 AM_TESTS_FD_REDIRECT = 9>&2
 TESTS = $(EXT_TESTS) $(GC_TESTS)
-GC_TESTS = if.sh if2.sh coil.sh vs.sh cs.sh cap.sh
+GC_TESTS = if.sh if2.sh coil.sh vs.sh cs.sh cap.sh subcoil.sh
 
 EXTRA_DIST = $(TESTS:%.sh=%.ref) $(GC_TESTS:%.sh=%.gc)
 
@@ -42,6 +42,7 @@ $(TESTS): %.sh: %.out
 
 cap.out: cap.so
 coil.out: coil.so
+subcoil.out: subcoil.so
 vs.out: vs.so
 cs.out: cs.so
 if.out: if.so

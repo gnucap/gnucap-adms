@@ -1,0 +1,23 @@
+spice
+
+.load ./subcoil.so
+
+.verilog
+paramset mycoil subcoil;
+endparamset
+
+mycoil lm (nm,0);
+spice
+
+V1 n1 0 pulse iv=0 pv=1 rise=1m delay=0
+Ra n1 na 1k
+Rb n1 nb 1k
+Rm n1 nm 1k
+
+* builtin coil for comparison
+Lb nb 0 1
+
+.list
+.print tran v(nodes) i(r*) v(lm) v(lb) inductance(lb)
+.tran 0 10m 10m trace=a
+.end
