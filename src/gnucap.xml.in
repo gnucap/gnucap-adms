@@ -559,7 +559,8 @@ class $(DEV_NAME) : public ADMS_BASE
 		};
   </admst:for-each>
 
-                enum Node_degradational {
+  <!--
+		enum Node_degradational {
   <admst:if test="[count(node[discipline/name='degradational' and grounded='no'])!=0]">
     <admst:for-each select="node[discipline/name='degradational' and grounded='no']" separator=",">
         <admst:text format="\n\t\t\t$node_prefix%(name)=__%(name),"/>
@@ -567,6 +568,7 @@ class $(DEV_NAME) : public ADMS_BASE
     <admst:text format="\n\t\t\t_num_adp_nodes=%(count(node[discipline/name='degradational' and grounded='no']))"/>
   </admst:if>
 		};
+  -->
 
 	private: // nodes / matrix indexes
 
