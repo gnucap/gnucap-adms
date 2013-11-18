@@ -1,0 +1,69 @@
+// Copyright 2013 Felix
+//
+// coil variants
+
+`include "discipline.h"
+`include "constants.h"
+
+
+module coil_mag(p1,p2);
+	inout p1,p2;
+	electrical p1,p2;
+	magnetic m1;
+
+	parameter real inductance = 1.0e-3;
+
+	branch (p1,p2) res;
+	real v (*ask="yes"*);
+
+	analog begin	
+		v = V(res);
+		Phi(m1) <+ ddt(MMF(m1)) +0*MMF(m1) + 0*V(res);
+		Phi(m1) <+ - inductance * V(res);
+		I(res) <+ MMF(m1) + 0*V(res);
+	end
+endmodule
+
+// these don't work yet
+`ifdef foo
+module coil_auto(p,n);
+	inout p,n;
+	electrical p,n;
+
+	parameter real inductance    = 1 from [0:inf);
+
+	analog begin	
+		V(p,n) <+ ddt(inductance * I(p,n));
+		I(p,n) <+ 0*V(p,n); // fixme, guesstopology bug
+   end
+endmodule
+
+module coilideal(p,n);
+	inout p,n;
+	electrical p,n;
+	electrical q;
+
+	parameter real inductance    = 1 from [0:inf);
+
+	real loss;
+	analog begin	
+		I(q) <+ inductance - V(p,n);
+		I(p,n) <+ V(q);
+   end
+endmodule
+
+module coilreal(p,n);
+	inout p,n;
+	electrical p,n;
+
+	parameter real inductance    = 1 from [0:inf);
+	parameter real loss       = 1e9 from [0:inf);
+
+	real i (*ask="yes"*);
+
+	analog begin	
+		i = (V(p,n)-inductance)*loss;
+		I(p,n) <+ i;
+   end
+endmodule
+`endif

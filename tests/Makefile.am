@@ -7,7 +7,11 @@ GNUCAP = LD_LIBRARY_PATH=../src/.libs $(shell echo gnucap | sed -e '$(transform)
 
 AM_DEFAULT_SOURCE_EXT = .va
 .va.cc:
-check_LTLIBRARIES = if.la if2.la vs.la cs.la cap.la
+check_LTLIBRARIES = \
+    if.la if2.la \
+    vs.la cs.la cap.la \
+    coil.la
+
 AM_CPPFLAGS = @GC_CPPFLAGS@ -I$(top_srcdir)/src
 LIBS = ../src/libe_adms.la
 AM_LDFLAGS = -module -avoid-version -rpath /dev/null
@@ -21,9 +25,8 @@ endif
 
 TEST_EXTENSIONS = .sh
 AM_TESTS_FD_REDIRECT = 9>&2
-GC_TESTS = opamp.sh sensor_chip.sh
 TESTS = $(EXT_TESTS) $(GC_TESTS)
-GC_TESTS = if.sh if2.sh vs.sh cs.sh cap.sh
+GC_TESTS = if.sh if2.sh coil.sh vs.sh cs.sh cap.sh
 
 EXTRA_DIST = $(TESTS:%.sh=%.ref) $(GC_TESTS:%.sh=%.gc)
 
@@ -38,6 +41,7 @@ $(GC_TESTS) $(EXT_TESTS): %.sh: %.ref
 $(TESTS): %.sh: %.out
 
 cap.out: cap.so
+coil.out: coil.so
 vs.out: vs.so
 cs.out: cs.so
 if.out: if.so
