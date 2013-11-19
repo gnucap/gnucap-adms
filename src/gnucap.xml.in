@@ -371,6 +371,43 @@ class $(MODEL_NAME) : public MODEL_CARD {
 <!-- fixme: use probe name macro... -->
 
 /* ========================================================= */
+  <admst:reset select="/@jacobian"/>
+  <admst:for-each select="contribution">
+    <admst:variable name="mycontribution" path="."/>
+    <admst:variable name="mysource" path="lhs"/>
+	 <!--    <admst:push into="$mysource/attribute" select="attribute"/> -->
+    <!-- case V() <+ .I(). -->
+    <admst:for-each select="lhs[(nature=discipline/potential)]">
+		<admst:message format="lhs pot: %(.)\n"/>
+		<admst:new datatype="jacobian" inputs="module,$mysource/branch/pnode,$mysource/branch/pnode">
+        <admst:push into="/@jacobian" select="." onduplicate="ignore"/>
+      </admst:new>
+		<admst:new datatype="jacobian" inputs="module,$mysource/branch/nnode,$mysource/branch/nnode">
+        <admst:push into="/@jacobian" select="." onduplicate="ignore"/>
+      </admst:new>
+		<admst:new datatype="jacobian" inputs="module,$mysource/branch/nnode,$mysource/branch/pnode">
+        <admst:push into="/@jacobian" select="." onduplicate="ignore"/>
+      </admst:new>
+		<admst:new datatype="jacobian" inputs="module,$mysource/branch/pnode,$mysource/branch/nnode">
+        <admst:push into="/@jacobian" select="." onduplicate="ignore"/>
+      </admst:new>
+    </admst:for-each>
+	 <admst:for-each select="/reverse(@jacobian)">
+		 <admst:choose>
+			 <admst:when test="module/jacobian[row=../../row and column=../../column]">
+				 <admst:variable name="jacobian" path="module/jacobian[row=../../row and column=../../column]"/>
+				 <admst:message format="not pushing: %(.)\n"/>
+			 </admst:when>
+			 <admst:otherwise>
+				 <admst:variable name="jacobian" path="."/>
+				 <admst:value-to select="[row=column]/diagonal" string="yes"/>
+				 <admst:message format="pushing: %(.)\n"/>
+				 <admst:push into="module/jacobian" select="."/>
+			 </admst:otherwise>
+		 </admst:choose>
+	 </admst:for-each>
+  </admst:for-each>
+/* ========================================================= */
 
 class $(DEV_NAME) : public ADMS_BASE
 {
@@ -636,6 +673,8 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
 			 m_%(row/name)_%(column/name)=%(position(.)-1) /* %(row/discipline) to %(column/discipline) */
     </admst:join>
 		};
+		enum ElossEntries { //?
+		};
 
   <admst:if test="[count(jacobian)!=0]">
 	bool m_required[%(count(jacobian))];	// true if matrix entry is not constant zero for current set of parameters (s. guesstop)
@@ -886,7 +925,6 @@ class $(COMMON_NAME) : public COMMON_COMPONENT
 <!-- *********************************************************************************** -->
 
 <admst:for-each select="/module@ADMSXML_NOEXTERN@">
-  <admst:reset select="$(ddts)"/>
   <admst:apply-templates select="." match="ddtcollect"/>
 
   <admst:value-of select="attribute[name='ngspicename']/value"/>
@@ -898,9 +936,6 @@ class $(COMMON_NAME) : public COMMON_COMPONENT
 
   <admst:open file="$(filename)_$(module)_top.hxx">
 // topology for $(module)
-  <admst:for-each select="@ddts">
-	  // %(.)
-  </admst:for-each>
 
     <admst:apply-templates select="analog/code[datatypename='block']/variable"
       match="generate_c:declare_variable"/>
@@ -939,7 +974,7 @@ and name!='initializeInstance')]">
 
     <admst:apply-templates select="variable" match="generate_c:declare_variable"/>
   </admst:if>
-// here.
+// cevaluatetopology
 
   <admst:choose>
     <admst:when test="[datatypename='callfunction']">
@@ -975,7 +1010,20 @@ and name!='initializeInstance')]">
       </admst:if>
     </admst:when>
     <admst:when test="[datatypename='contribution']">
-      <admst:if test="lhs[discipline/potential=nature]">
+      <admst:variable name="contribution" select="%(.)"/>
+      <admst:variable name="psource" select="%(lhs/branch/pnode)"/>
+      <admst:variable name="nsource" select="%(lhs/branch/nnode)"/>
+		<!--<admst:if test="lhs[discipline/flow=nature]"> type==fs?
+		</admst:if>-->
+      <admst:if test="lhs[discipline/potential=nature]"> <!-- type==ps? -->
+        <admst:choose>
+          <admst:when test="[($nsource/grounded='no')]">
+            <admst:text format="static_jacobian4(%($psource/name),%($nsource/name),%($psource/name),%($nsource/name))\n"/>
+          </admst:when>
+		    <admst:otherwise>
+            <admst:text format="static_jacobian1(%($psource/name),%($psource/name))\n"/>
+		    </admst:otherwise>
+        </admst:choose>
         <admst:choose>
           <admst:when test="lhs/branch[grounded='no']">
             <admst:text test="lhs/branch/nnode[location='internal']"
@@ -992,9 +1040,6 @@ and name!='initializeInstance')]">
           </admst:otherwise>
         </admst:choose>
       </admst:if>
-      <admst:variable name="contribution" select="%(.)"/>
-      <admst:variable name="psource" select="%(lhs/branch/pnode)"/>
-      <admst:variable name="nsource" select="%(lhs/branch/nnode)"/>
       <admst:for-each select="rhs/probe">
         <admst:variable name="pprobe" select="%(branch/pnode)"/>
         <admst:variable name="nprobe" select="%(branch/nnode)"/>
