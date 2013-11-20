@@ -4817,6 +4817,11 @@ currently: only called for eval_mode==accept
 <!-- expression//probe -->
 <admst:template match="probe">
   <admst:message test="[/dbg_xml='yes']" format="*(ngspvers)probe*\n"/>
+  <!-- MOVE TO IMPLICIT PREPROCESSOR  (does not even work, why?!) -->
+  <admst:if test="[branch/discipline/flow=nature]">
+    <admst:value-to select="source/type" string="fs"/>
+  </admst:if>
+  <!-- UNTIL HERE -->
   <admst:choose>
     <admst:when test="branch/nnode[grounded='no']">
       <admst:value-of select="branch/nnode/name"/>
