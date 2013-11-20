@@ -741,7 +741,7 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
 		}
 
 		trace0("calling differentiate");
-		i[0] = differentiate(&amp;q[0], &amp;i[0], _time, method);
+		i[0] = differentiate(&amp;q[0], &amp;i[0], _time, _method_a);
 		trace6("differentiate", _time[0], method, q[0].f0, q[1].f0, i[0].f0, _time[0]-_time[1]);
 		trace1("differentiate", ( q[0].f0 - q[1].f0 ) / ( _time[0]-_time[1]));
 		assert(i[0].f0 == i[0].f0);
