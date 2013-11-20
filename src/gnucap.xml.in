@@ -372,11 +372,42 @@ class $(MODEL_NAME) : public MODEL_CARD {
 
 /* ========================================================= */
   <admst:reset select="/@jacobian"/>
+  <admst:for-each select="probe[nature=discipline/flow]">
+    <admst:variable name="mysource" path="."/>
+    <admst:new datatype="jacobian" inputs="module,$mysource/branch/pnode,$mysource/branch/pnode">
+      <admst:push into="/@jacobian" select="." onduplicate="ignore"/>
+    </admst:new>
+    <admst:new datatype="jacobian" inputs="module,$mysource/branch/nnode,$mysource/branch/nnode">
+      <admst:push into="/@jacobian" select="." onduplicate="ignore"/>
+    </admst:new>
+    <admst:new datatype="jacobian" inputs="module,$mysource/branch/nnode,$mysource/branch/pnode">
+      <admst:push into="/@jacobian" select="." onduplicate="ignore"/>
+    </admst:new>
+    <admst:new datatype="jacobian" inputs="module,$mysource/branch/pnode,$mysource/branch/nnode">
+      <admst:push into="/@jacobian" select="." onduplicate="ignore"/>
+    </admst:new>
+  </admst:for-each>
+
   <admst:for-each select="contribution">
     <admst:variable name="mycontribution" path="."/>
     <admst:variable name="mysource" path="lhs"/>
 	 <!--    <admst:push into="$mysource/attribute" select="attribute"/> -->
+    <!-- case I() <+ .V(). supported by .implicit* -->
     <!-- case V() <+ .I(). -->
+	 <admst:for-each select="rhs/probe[nature=discipline/flow]">
+      <admst:new datatype="jacobian" inputs="module,$mysource/branch/pnode,branch/pnode">
+        <admst:push into="/@jacobian" select="." onduplicate="ignore"/>
+      </admst:new>
+      <admst:new datatype="jacobian" inputs="module,$mysource/branch/nnode,branch/pnode">
+        <admst:push into="/@jacobian" select="." onduplicate="ignore"/>
+      </admst:new>
+      <admst:new datatype="jacobian" inputs="module,$mysource/branch/pnode,branch/nnode">
+        <admst:push into="/@jacobian" select="." onduplicate="ignore"/>
+      </admst:new>
+      <admst:new datatype="jacobian" inputs="module,$mysource/branch/nnode,branch/nnode">
+        <admst:push into="/@jacobian" select="." onduplicate="ignore"/>
+      </admst:new>
+    </admst:for-each>
     <admst:for-each select="lhs[(nature=discipline/potential)]">
 		<admst:message format="lhs pot: %(.)\n"/>
 		<admst:new datatype="jacobian" inputs="module,$mysource/branch/pnode,$mysource/branch/pnode">
