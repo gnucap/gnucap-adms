@@ -41,6 +41,7 @@
 <admst:variable name="localvariables"/>
 <admst:variable name="ddt_cur" select="0"/>
 <admst:variable name="ddts"/>
+<admst:variable name="idts"/>
 <admst:variable name="ddts_list"/>
 <admst:variable name="ddts_ic"/>
 <admst:variable name="have_callfunction" select="no"/>
@@ -295,7 +296,13 @@
 #define EXIT_IF_ISNAN(var) assert(is_number(var));
 
 // counted ddts %(count($ddts))
-<admst:variable name="_num_states" select="%(count($ddts))"/>
+<admst:variable name="_num_states" select="%(count($ddts))+%(count($idts))"/>
+<admst:variable name="_has_states" select="false"/>
+<admst:variable name="tmpc" select="%(count($ddts))"/>
+<admst:variable name="_has_states" select="true" test="[($tmpc!='0')]"/>
+<admst:variable name="tmpc" select="%(count($idts))"/>
+<admst:variable name="_has_states" select="true" test="[($tmpc!='0')]"/>
+
 // there are nodes that work different... hmmm
 // BUG: number of stamp nodes is topology dependent!
 <admst:variable name="_num_stamp_nodes" select="%(count(node[grounded='no' and discipline/name!='degradational']))"/>
@@ -513,7 +520,7 @@ class $(DEV_NAME) : public ADMS_BASE
 
 	public: // misc
 		void keep_ic();
-		bool has_memory(){return $_num_states;}
+		bool has_memory(){return $_has_states;}
 
 	public: // ports
 		std::string port_name(uint_t i)const {
@@ -731,7 +738,7 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
 	double _DDT(double qq, unsigned stateno){
 		unsigned qcap = stateno*2;
 		trace4("$(DEV_NAME)::_DDT", stateno, qq, _sim->_mode, _sim->_phase);
-<admst:if test="[$(_num_states)!=0]">
+<admst:if test="[$(_has_states)='true']">
 		trace2(&quot;$(DEV_NAME)::_DDT&quot;, uic_now(stateno), _sim-&gt;uic_now());
 		if(uic_now(stateno)){
 			_states[0][qcap] = qq;
@@ -799,7 +806,7 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
 		<admst:for-each select="contribution[is_ic_contribution(.)/[name='x']/value='yes']">
 		// PARAMETER&lt;double&gt; ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode);
 		</admst:for-each>
-<admst:if test="[$(_num_states)!=0]">
+<admst:if test="[$(_has_states)='true']">
 	private: // from storage
 		double tr_c_to_g(double c, double g)const;
 		bool uic_now(unsigned stateno=-1)const;
@@ -887,7 +894,7 @@ class $(COMMON_NAME) : public COMMON_COMPONENT
 	  PARAMETER&lt;double&gt; ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode);
   </admst:for-each>
 
-<admst:if test="[$(_num_states)!=0]">
+<admst:if test="[$(_has_states)='true']">
 	public: // storage related
 
 		void set_states(double*x){
@@ -1599,7 +1606,7 @@ $(DEV_NAME)::$(DEV_NAME)(const $(DEV_NAME)&amp; p) :
 	}
 }
 // -------------------------------------------------------------------------- //
-<admst:if test="[$(_num_states)!=0]">
+<admst:if test="[$(_has_states)='true']">
 bool $(DEV_NAME)::uic_now(unsigned stateno)const{
 	if(!_sim-&gt;uic_now()) return 0;
 	const $(COMMON_NAME)* c = static_cast&lt;const $(COMMON_NAME)*&gt;(common());
@@ -1623,7 +1630,7 @@ bool $(DEV_NAME)::uic_now(unsigned stateno)const{
 // -------------------------------------------------------------------------- //
 $(DEV_NAME)::~$(DEV_NAME)()
 {
-<admst:if test="[$(_num_states)!=0]">
+<admst:if test="[$(_has_states)='true']">
 	if (_states[0]) {
 		trace1(&quot;cleaning up states&quot;, long_label());
 		for (int ii=0; ii&lt;OPT::_keep_time_steps; ++ii) {
@@ -1684,7 +1691,7 @@ void $(DEV_NAME)::expand()
   guesstopology();
   // allocate state vectors
 
-<admst:if test="[$(_num_states)!=0]">
+<admst:if test="[$(_has_states)='true']">
   if (!_states[0]) {
     // initialise in tr_begin() ?
     for (int ii=0; ii&lt;OPT::_keep_time_steps; ++ii)  // &gt;
@@ -1973,7 +1980,7 @@ void $(DEV_NAME)::tr_begin()
 	}
 	std::fill_n(_states_q1, (_num_states), 0);
 
-<admst:if test="[$_num_states!=0]">
+<admst:if test="[$(_has_states)='true']">
 	unsigned k = 0;
   <admst:for-each select="$(ddts)">
 	  // old	if(c-&gt;ic_state_%(adms/id(.)).has_good_value()){
@@ -2039,7 +2046,7 @@ void $(DEV_NAME)::dc_advance()
 
 	ADMS_BASE::dc_advance();
 
-<admst:if test="[$_num_states!=0]">
+<admst:if test="[$(_has_states)='true']">
 	// storage-like
 	for (int t = 1;  t &lt; OPT::_keep_time_steps;  ++t) {
 		//  notstd::copy_n(_states[0], 2*(unsigned)_num_states, _states[i]);
@@ -2291,7 +2298,7 @@ void $(DEV_NAME)::keep_ic()
 	const $(MODEL_NAME)* m = prechecked_cast&lt;const $(MODEL_NAME)*&gt;(c-&gt;model());
 	USE(m); assert(m);
 
-<admst:if test="[not($_num_states=0)]">
+<admst:if test="[$(_has_states)='true']">
 	tr_eval();
 	store_values();
 	double s[_num_states];
@@ -2310,7 +2317,7 @@ void $(DEV_NAME)::store_values()
   trace1(&quot;$(DEV_NAME)::store_values&quot;, long_label());
   // notstd::copy_n(_states[0],(unsigned) 2*_num_states, _states_1);
 
-<admst:if test="[($_num_states!='0')]">
+<admst:if test="[$(_has_states)='true']">
 	for( unsigned i=0; i&lt;_num_states; ++i){
 		_states_q1[i]=_states[0][2*i];
 	}
@@ -2513,14 +2520,14 @@ double $(DEV_NAME)::tr_probe_num(const std::string&amp; x)const
 {
 	trace3("$(DEV_NAME)::tr_probe_num", _dt, _time[0], _time[1]);
 	assert(_dt == NOT_VALID || ::conchk(_dt, _time[0] - _time[1]));
-<admst:if test="[($_num_states!='0')]">
+<admst:if test="[$(_has_states)='true']">
 	static std::string state_names[_num_states];
 </admst:if>
 	static std::string contr_names[$_num_stamp_nodes];
 
   <admst:apply-templates select="." match="commonmodel"/>
 
-<admst:if test="[($_num_states!='0')]">
+<admst:if test="[$(_has_states)='true']">
 	// init states &amp; node names
 	for(int i=0; i&lt;_num_states; i++)
 	{
@@ -2537,7 +2544,7 @@ double $(DEV_NAME)::tr_probe_num(const std::string&amp; x)const
 		contr_names[i] = &quot;cont&quot; + ss.str();
 	}
 
-<admst:if test="[($_num_states!='0')]">
+<admst:if test="[$(_has_states)='true']">
 	// states probes
 	for (int ii=0; ii&lt;_num_states; ++ii)
 		if (Umatch(x, state_names[ii] + ' '))
@@ -2637,7 +2644,7 @@ void $(DEV_NAME)::guesstopology ()
 // -------------------------------------------------------------------------- //
 bool $(DEV_NAME)::conv_check()const
 {
-<admst:if test="[($_num_states!='0')]">
+<admst:if test="[$(_has_states)='true']">
 	for (unsigned ii = 0; ii &lt; _num_states; ++ii) {
 		if (!::conchk(_states[0][2*ii], _states_q1[ii])) // BUG: use discipline
 			return false;
@@ -2690,7 +2697,7 @@ void $(DEV_NAME)::ac_eval()
 	}
 }
 // -------------------------------------------------------------------------- //
-<admst:if test="[$(_num_states)!=0]">
+<admst:if test="[$(_has_states)='true']">
 // ripped from storage...
 double $(DEV_NAME)::tr_c_to_g(double c, double g)const
 {
@@ -2741,7 +2748,7 @@ void $(DEV_NAME)::tr_eval()
 	const $(MODEL_NAME)* m = prechecked_cast&lt;const $(MODEL_NAME)*&gt;(c-&gt;model());
 	USE(m); assert(m);
 
-<admst:if test="[$(_num_states)!=0]">
+<admst:if test="[$(_has_states)='true']">
 	double CKTag0 = tr_c_to_g(1., 1.);
 
 	//if(_sim-&gt;uic_now() &amp;&amp; have_ic()){
@@ -2814,7 +2821,7 @@ bool $(COMMON_NAME)::operator==(const COMMON_COMPONENT&amp; x)const
 // -------------------------------------------------------------------------- //
 #if 0
 map&lt;string, PARA_BASE $(COMMON_NAME)::*&gt; $(COMMON_NAME)::param_dict
-<admst:if test="[$(_num_states)!=0]">
+<admst:if test="[$(_has_states)='true']">
   = boost::assign::map_list_of
 	<admst:join select="$(ddts)" separator="">
 		(&quot;_ddt_%(adms/id(.))&quot;, (PARA_BASE $(COMMON_NAME)::*) 
