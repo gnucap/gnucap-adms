@@ -8041,6 +8041,13 @@ return
       <admst:assert test="[nilled(arguments)]" format="%(name): should not have arguments\n"/>
       <admst:variable name="e" select="_abstime"/>
     </admst:when>
+    <admst:when test="[name='idx']">
+      <admst:assert test="arguments[count(.)=2]" format="%(name): should have two arguments exactly\n"/>
+      <admst:assert test="arguments[2]/adms[datatypename='probe']" format="%(name): second argument is not a probe\n"/>
+		<admst:apply-templates select="arguments[1]" match="idx"/>
+		/* idx, incomplete */
+      <admst:variable name="e" select="0.0 /* BUG: idx should be top node of expression!*/"/>
+    </admst:when>
     <admst:when test="[name='ddx']">
       <admst:assert test="arguments[count(.)=2]" format="%(name): should have two arguments exactly\n"/>
       <admst:assert test="arguments[2]/adms[datatypename='probe']" format="%(name): second argument is not a probe\n"/>
