@@ -1153,9 +1153,9 @@ and name!='initializeInstance')]">
         <admst:variable name="nprobe" select="%(branch/nnode)"/>
         <admst:choose>
           <admst:when test="$contribution[static='yes']">static_</admst:when>
-          <admst:when test="$contribution[dynamic='yes']"> <admst:text format="  dynamic_"/> </admst:when>
-          <admst:when test="$contribution[whitenoise='yes']"> <admst:text format="  whitenoise_"/> </admst:when>
-          <admst:when test="$contribution[flickernoise='yes']"> <admst:text format="  flickernoise_"/> </admst:when>
+          <admst:when test="$contribution[dynamic='yes']">dynamic_</admst:when>
+          <admst:when test="$contribution[whitenoise='yes']">whitenoise_</admst:when>
+          <admst:when test="$contribution[flickernoise='yes']">flickernoise_</admst:when>
         </admst:choose>
 			 <!-- passing arguments?!?!<admst:apply-templates select="." match="jacobianX"/>-->
   <admst:choose>
@@ -7940,11 +7940,6 @@ return
   </admst:if>
 </admst:template>
 <!-- -------------------------------------------------- -->
-<admst:template match="DDT">
-  <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)DDT*\n"/>
-  <admst:variable name="ddt_cur" select="$(ddt_cur)_"/>
-</admst:template>
-<!-- -------------------------------------------------- -->
 <admst:template match="function">
 <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)function*\n"/>
   <admst:choose>
@@ -7953,12 +7948,6 @@ return
       <admst:variable name="e" select="$e"/>
     </admst:when>
     <admst:when test="[name='ddt']">
-
-
-      <!-- --------------i
-      <admst:text  format="//before  DDT: ep $ep\n"/>
-      <admst:variable name="xp"/>
-      <admst:apply-templates select="." match="DDT"/> ------ -->
 
 			/* function ddt %(.)*/
 
