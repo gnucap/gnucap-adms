@@ -1353,6 +1353,7 @@ and name!='initializeInstance')]">
 
 <admst:template match="ddtcollect">
   <admst:reset select="$(ddts)"/>
+  <admst:reset select="$(idts)"/>
   <admst:for-each select="assignment">
     <admst:apply-templates select="rhs/tree" match="_ddtcollect"/>
   </admst:for-each>
@@ -1365,6 +1366,9 @@ and name!='initializeInstance')]">
   <admst:message test="[/dbg_xml='yes']" format="*_ddtcollect*\n"/>
   <admst:if test="[(adms/datatypename)='function' and name='ddt']">
     <admst:push into="$ddts" select="." onduplicate="ignore"/>
+  </admst:if>
+  <admst:if test="[(adms/datatypename)='function' and name='idt']">
+    <admst:push into="$idts" select="." onduplicate="ignore"/>
   </admst:if>
 
   <admst:if test="[datatypename='mapply_unary'
@@ -2551,6 +2555,9 @@ void $(DEV_NAME)::tr_accept()
 <admst:for-each select="$(ddts)">
 		double keep_%(adms/id(.))=1;
 </admst:for-each>
+<admst:for-each select="$(idts)">
+		double keep_%(adms/id(.))=1;
+</admst:for-each>
 #		include "$(filename)_$(module)_tr.hxx"
 #undef NOJAC
 #undef _DDT
@@ -2740,6 +2747,9 @@ void $(DEV_NAME)::ac_eval()
 <admst:for-each select="$(ddts)">
 	double keep_%(adms/id(.))=1;
 </admst:for-each>
+<admst:for-each select="$(idts)">
+	double keep_%(adms/id(.))=1;
+</admst:for-each>
 	{
 	// fixme: remerge _tr.hxx?
 		#include "$(filename)_$(module)_ac.hxx"
@@ -2806,7 +2816,7 @@ void $(DEV_NAME)::tr_eval()
 	//}else{
 	//	ddtone = 1.;
 	//}
-<admst:for-each select="$(ddts)">
+  <admst:for-each select="$(ddts)">
 
 	double keep_%(adms/id(.))=1;
 	if(uic_now(_ddt_%(adms/id(.)))){
@@ -2818,7 +2828,10 @@ void $(DEV_NAME)::tr_eval()
 		trace3(&quot; $(DEV_NAME)::tr_eval not keeping &quot;, c-&gt;ic_state_%(adms/id(.)),
 		    _sim-&gt;uic_now(), uic_now(_ddt_%(adms/id(.))) );
 	}
-</admst:for-each>
+  </admst:for-each>
+  <admst:for-each select="$(idts)">
+	double keep_%(adms/id(.))=1; // incomplete...
+  </admst:for-each>
 
 </admst:if>
 	
@@ -7158,7 +7171,13 @@ return
 </admst:template>
 <!-- -------------------------------------------------- -->
 <admst:template match="ddx">
-<admst:message test="[/dbg_xml='yes']" format="*(tr_eval)ddx*\n"/>
+  <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)ddx*\n"/>
+  <admst:apply-templates select="." match="%(adms/datatypename)"/>
+</admst:template>
+<!-- -------------------------------------------------- -->
+<!-- what's this? -->
+<admst:template match="idx">
+  <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)idx*\n"/>
   <admst:apply-templates select="." match="%(adms/datatypename)"/>
 </admst:template>
 <!-- -------------------------------------------------- -->
@@ -8164,6 +8183,9 @@ return
     <admst:when test="[name='ddt']">
       <admst:variable name="ep" select="$xp"/> <!-- ??? -->
     </admst:when>
+    <admst:when test="[name='idt']">
+      <admst:variable name="ep" select="$xp"/> <!-- ??? -->
+    </admst:when>
     <admst:when test="[name='abs' or name='acos' or name='asin' or name='atan'
                     or name='cos' or name='cosh' or name='exp' or name='hypot'
                     or name='limexp' or name='ln' or name='log' or name='sin'
@@ -8234,7 +8256,10 @@ return
     <admst:when test="[$SkipFVariable='y']">
     </admst:when>
     <admst:when test="[name='ddt']">
-      <admst:variable name="eq" select="$xq"/>
+      <admst:variable name="eq" select=" /*xq*/ $xq"/>
+    </admst:when>
+    <admst:when test="[name='idt']">
+      <admst:variable name="eq" select=" /*xq*/ $xq"/>
     </admst:when>
     <admst:when test="[name='abs' or name='acos' or name='asin' or name='atan'
                        or name='cos' or name='cosh' or name='exp' or name='hypot'
