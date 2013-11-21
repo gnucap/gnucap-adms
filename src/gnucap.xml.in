@@ -8642,6 +8642,7 @@ return
   <admst:variable name="Pn" select="%(lhs/branch/nnode/name)"/>
   <admst:variable name="loss" select=""/>
   <admst:variable name="loss" select="-1/OPT::shortckt * " test="[lhs/type='ps']"/>
+
 	// residual2($(Pp),$(Pn),%(rhs/tree))
 	{  // recheck: static is same as dynamic?
 		double vx = %(e(rhs/tree)); // %(rhs/tree)
@@ -8688,12 +8689,19 @@ return
   <admst:variable name="Pp" select="%(branch/pnode/name)"/>
   <admst:variable name="Pn" select="%(branch/nnode/name)"/>
 
+  <admst:variable name="flowcoeff" select=""/>
+  <admst:if test="[discipline/flow=nature]">
+                // RHS flow, incomplete, %(.)
+                // will only work for flowprobe->potential source (?)
+    <admst:variable name="flowcoeff" select="* (-1/OPT::shortckt/OPT::shortckt)"/>
+  </admst:if>
+
   <admst:choose>
 
 		<admst:when test="..[dynamic='yes']">
 #ifndef NOJAC
 	{ // jacobian4($(Sp), $(Sn), $(Pp), $(Pn)) - dynamic
-		double eac = $ep;
+		double eac = $ep $flowcoeff;
 		double etr = eac * CKTag0;
 		double ceq;
 
