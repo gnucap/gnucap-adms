@@ -76,12 +76,11 @@
 <admst:variable name="str_res_hxx_ac" select=""/>
 <admst:variable name="str_res_hxx_tr" select=""/>
 
-<!-- noise -->
-<admst:value-to select="/simulator/package_name" value="fucap"/>
-<admst:value-to select="/simulator/package_tarname" value="fucap"/>
-<admst:value-to select="/simulator/package_version" value="0.0.1"/>
-<admst:value-to select="/simulator/package_string" value="fucap 0.0.1"/>
-<admst:value-to select="/simulator/package_bugreport" value="felix@salfelder.org"/>
+<admst:value-to select="/simulator/package_name" value="@PACKAGE_NAME@"/>
+<admst:value-to select="/simulator/package_tarname" value="@PACKAGE_TARNAME@"/>
+<admst:value-to select="/simulator/package_version" value="@PACKAGE_VERSION@"/>
+<admst:value-to select="/simulator/package_string" value="@PACKAGE_STRING@"/>
+<admst:value-to select="/simulator/package_bugreport" value="@PACKAGE_BUGREPORT@"/>
 
 <!-- create list for initial conditions, for now. only very specific patterns are supported -->
 <!-- maybe can be cleared with: <admst:variable select="adms_ic_list" value="" /> -->
