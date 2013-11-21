@@ -3683,6 +3683,12 @@ currently: only called for eval_mode==accept
         <admst:value-to select="/simulator/tmp" value="/*tmp*/ %s"/>
       </admst:for-each>
     </admst:when>
+    <admst:when test="[name='idt']">
+      <admst:for-each select="arguments[position(.)=1]">
+        <admst:apply-templates select="." match="subexpression:stringify:noprobe"/>
+        <admst:value-to select="/simulator/tmp" value="/*tmp*/ %s"/>
+      </admst:for-each>
+    </admst:when>
     <admst:when test="[name='\$given']">
       <admst:for-each select="arguments[position(.)=1]">
         <admst:if test="adms[datatypename!='variable']">
@@ -7958,6 +7964,32 @@ return
 
       <admst:variable name="ddt_cur" select="$(ddt_cur)_"/>
 
+
+      <!-- ------------------------ -->
+
+    </admst:when>
+    <admst:when test="[name='idt']">
+
+			/* function idt %(.)*/
+
+      <admst:variable name="keepstate" select="keep_%(adms/id(.))"/>
+      <admst:variable name="keepstatename" select="_idt_%(adms/id(.))"/>
+      <admst:apply-templates select="arguments[1]" match="idx"/>
+      <admst:variable name="keepstate" select="1."/>
+      <admst:variable name="keepstatevar" select="keep_%(adms/id(.))"/>
+      <admst:variable name="x" select="$e"/>
+      <admst:variable name="xp" select="$ep"/>
+      <admst:variable name="xq" select="$eq"/>
+      <admst:variable name="xpq" select="$epq"/>
+#if 0
+			* x $x
+			* xp $xp
+			* xq $xq
+			* xpq $xpq
+#endif
+
+      <admst:variable name="e" select="_IDT($x, _idt_%(adms/id(.)) ) "/>
+      <admst:variable name="idt_cur" select="$(idt_cur)_"/>
 
       <!-- ------------------------ -->
 
