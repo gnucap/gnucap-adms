@@ -137,7 +137,7 @@
           <admst:apply-templates select="arguments" match="e:dependency"/>
           <admst:choose>
             <admst:when test="[(name='ddt' or name='\$ddt')or(name='idt' or name='\$idt')]">
-              <admst:value-to select="dependency" string="nonlinear"/>
+              <admst:value-to select="dependency" string="nonlinear"/><!--huh?-->
             </admst:when>
             <admst:when test="arguments/dependency[.='linear' or .='nonlinear']">
               <admst:value-to select="dependency" string="nonlinear"/>
@@ -155,6 +155,7 @@
       <admst:value-to select="subexpression/expression" path="$globalexpression"/>
       <!-- fixme: these flags should be set after all contribs are transformed to ...<+F(...); canonical form -->
       <admst:value-to test="[name='ddt']" select="$globalcontribution/#fixmedynamic" path="1"/>
+      <admst:value-to test="[name='idt']" select="$globalcontribution/#fixmedynamic" path="1"/>
       <admst:value-to test="[name='white_noise']" select="$globalcontribution/#fixmewhitenoise" path="1"/>
       <admst:value-to test="[name='flicker_noise']" select="$globalcontribution/#fixmeflickernoise" path="1"/>
       <admst:value-to test="[name='\$temperature']" select="$globalassignment/lhs/TemperatureDependent" string="yes"/>
@@ -722,3 +723,5 @@
 
 
 </admst>
+<!-- vim:ts=8:sw=2:et
+-->
