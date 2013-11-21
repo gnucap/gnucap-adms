@@ -820,11 +820,11 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
 		bool conchk( Node_thermal a, double reltol=OPT::reltol ) const {
 			return ::conchk(CKT_BASE::_sim->_vt1[_n[a].m_()], _n[a].v0(), abstol_flow_thermal, reltol);
 		}
-#if 0
+  <admst:for-each select="$mydisciplines[./name='degradational']">
 		bool conchk( Node_degradational a, double reltol=OPT::reltol ) const {
 			return ::conchk(CKT_BASE::_sim->_vt1[_n[a].m_()], _n[a].v0(), abstol_flow_thermal, reltol);
 		}
-#endif
+  </admst:for-each>
 		// relative checks, FIXME: only where needed and keep history...
 		bool conchk( Node_electrical a, Node_electrical b, double reltol=OPT::reltol ) const {
 			return ::conchk(CKT_BASE::_sim->_vt1[_n[a].m_()] - CKT_BASE::_sim->_vt1[_n[b].m_()],
