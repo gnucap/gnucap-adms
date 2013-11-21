@@ -3,14 +3,15 @@
 # license: GPLv3+
 
 GNUCAP_ADMS = ../src/gnucap-adms
-GNUCAP = LD_LIBRARY_PATH=../src/.libs $(shell echo gnucap | sed -e '$(transform)')
+# GNUCAP = LD_LIBRARY_PATH=../src/.libs
+GNUCAP = $(shell echo gnucap | sed -e '$(transform)')
 
 AM_DEFAULT_SOURCE_EXT = .va
 .va.cc:
 check_LTLIBRARIES = \
     if.la if2.la \
     vs.la cs.la cap.la \
-    coil.la
+    coil.la ccvs.la vccs.la
 
 AM_CPPFLAGS = @GC_CPPFLAGS@ -I$(top_srcdir)/src
 LIBS = ../src/libe_adms.la
@@ -23,38 +24,56 @@ if VERILOG_EXTERN
 EXT_TESTS =
 endif
 
-TEST_EXTENSIONS = .sh
+AM_TESTS_ENVIRONMENT = \
+    export PATH='../src:$(PATH)'\
+           LD_LIBRARY_PATH='../src/.libs'\
+           GNUCAP='$(GNUCAP)'\
+           REDIRECT='exec 2>&9'\
+           GNUCAP_CPPFLAGS='-I$(abs_top_builddir)/src -I$(abs_top_srcdir)/src'\
+           srcdir='$(srcdir)';
 AM_TESTS_FD_REDIRECT = 9>&2
+TEST_EXTENSIONS = .sh
 TESTS = $(EXT_TESTS) $(GC_TESTS) $(GCUF_TESTS)
-GC_TESTS = if.sh if2.sh coil.sh vs.sh cs.sh cap.sh
+GC_TESTS = if.sh if2.sh coil.sh vs.sh cs.sh cap.sh \
+    ccvs.sh vccs.sh
 
 # will only work with -uf
 GCUF_TESTS = rc_uic.sh ddc_rc.sh
 
+# needs work
+XFAIL_TESTS = ddc_rc.sh
+
 EXTRA_DIST = $(TESTS:%.sh=%.ref) $(GC_TESTS:%.sh=%.gc)
 
-$(GC_TESTS) $(EXT_TESTS): %.sh: %.ref
+$(GCUF_TESTS) $(GC_TESTS) $(EXT_TESTS): %.sh: %.gc Makefile %.ref
 	@echo "#!/bin/sh" > $@
 	@echo "set -e" >> $@
-	@echo "exec 2>&9" >> $@
-	@echo "diff -rup $< $*.out || exit 1" >> $@
+	@echo "GNUCAP=\$${GNUCAP-$(GNUCAP)}" >> $@
+	@echo "eval \$$REDIRECT" >> $@
+	@echo "\$$GNUCAP \$$GNUCAP_ARGS $(LT) $< | sed $(subst ·, ,$(PREDIFF:%=-e %)) \\" >> $@
+	@echo "$(if $(POSTDIFF),| sed) $(subst ·, ,$(POSTDIFF:%=-e %)) > $*.out" >> $@
+#@echo "./filter $(lastword $+) < $*.out | diff -rup $(lastword $+) - || exit 1" >> $@
+	@echo "diff -rup $(lastword $+) $*.out || exit 1" >> $@
 	@echo "rm $*.out" >> $@
 	@chmod +x $@
 
-$(TESTS): %.sh: %.out
 
-cap.out: cap.so
-coil.out: coil.so
-vs.out: vs.so
-cs.out: cs.so
-if.out: if.so
-if2.out: if2.so
+# $(TESTS): %.sh: %.out
+
+vccs.log ccvs.log cap.log: %.log: %.so
+coil.log: coil.so
+vs.log: vs.so
+cs.log: cs.so
+if.log: if.so
+if2.log: if2.so
 
 PREDIFF= \
     '1,/^\#·See·the·file/d'
     '/^stashing·as/d' \
     '/^@/d' \
     '/:·already.installed,·replacing/d'
+
+$(TESTS:%.sh=%.log): Makefile
 
 $(TESTS:%.sh=%.out): %.out: %.gc
 	$(AM_V_at)$(GNUCAP) $(GNUCAP_PLUGINS:%=-a ../plugins/.libs/%) $(GNUCAP_ARGS) $< | \
@@ -67,7 +86,7 @@ ADMS_GC_XML=../src/gnucap_0.xml
 
 # ugh, also creates some hxx files!
 %.cc %.h: %.va $(ADMS_GC_XML)
-	admsXml @ADMSXML_FLAGS@ -I$(top_srcdir)/src $< $(ADMS_ES) -o $(notdir $*)
+	adms_implicit_transforms=$(top_srcdir)/src/implicit.xml admsXml @ADMSXML_FLAGS@ -I$(top_srcdir)/src $< $(ADMS_ES) -o $(notdir $*)
 
 %.cc %.h: %.va
 	$(GNUCAP_ADMS) -v $<
@@ -94,4 +113,9 @@ CLEANFILES = .*.adms *.out $(GC_TESTS) *.hxx .*.xml
 CLEANFILES+= $(check_LTLIBRARIES:%.la=%.h) \
              $(check_LTLIBRARIES:%.la=%.cc)
 
-.PHONY: %.reg clean-examples
+$(TESTS:%.sh=%.log): .P
+
+.P:
+	@:
+
+.PHONY: %.reg clean-examples .P
