@@ -722,10 +722,13 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
   </admst:if>
 
 	enum EStates {
+    <admst:for-each select="$(idts)">
+		_idt_%(adms/id(.)), // %(.)
+    </admst:for-each>
     <admst:for-each select="$(ddts)">
 		_ddt_%(adms/id(.)), // %(.)
     </admst:for-each>
-		_num_states = %(count($ddts)) // $(_num_states)
+		_num_states //  = %(count($ddts)) // $(_num_states)
 	};
 
 	double* _states[OPT::_keep_time_steps]; // for each step: q0,i0, q1,i1, q2,i2, etc.
