@@ -25,8 +25,11 @@ endif
 
 TEST_EXTENSIONS = .sh
 AM_TESTS_FD_REDIRECT = 9>&2
-TESTS = $(EXT_TESTS) $(GC_TESTS)
+TESTS = $(EXT_TESTS) $(GC_TESTS) $(GCUF_TESTS)
 GC_TESTS = if.sh if2.sh coil.sh vs.sh cs.sh cap.sh
+
+# will only work with -uf
+GCUF_TESTS = rc_uic.sh ddc_rc.sh
 
 EXTRA_DIST = $(TESTS:%.sh=%.ref) $(GC_TESTS:%.sh=%.gc)
 

@@ -1,0 +1,26 @@
+spice
+
+V1 m1 0 3
+R1 m1 m2 50
+
+.verilog
+load adms_cap.so
+paramset mycap cap;
+.c=4u;
+endparamset
+mycap #(.ic_n_p(.5)) c1 (m2,0);
+spice
+
+*     V1   __R3  C3
+*  o---O--[__]--||---o
+*  |                 |
+*  V                 V
+
+.print dc v(nodes)
+.print TRAN  v(nodes) conv(c1)
+
+.dc uic
+.TRAN 0 200u 10u cont
+*.tran 0 200u 10u uic // undesired because of SPICE compatibility
+
+.end

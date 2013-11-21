@@ -1,0 +1,34 @@
+spice
+
+.param P -1
+.param I 1
+.param qci1=1
+.param in0=1
+
+* test input
+
+.verilog
+load adms_cap.so
+paramset mycap cap;
+.c=1m;
+endparamset
+mycap #(.ic_n_p(qci1)) c1 (m2,0);
+spice
+
+R1 n1 0 5k
+
+.echo dc dm
+.dc dm
+.echo dc dm done
+
+.print ddc v(nodes) v(C1) dv(nodes) ddv(nodes) i(C1)
+.ddc tr dm trstep=1e-3
+*.ddc dm old
+.end
+.print tran v(nodes) v(C1) dv(nodes)
+
+.tran 0 1 .1 trace=a cont
+.end
+.echo old?
+.ddc dm old
+.end
