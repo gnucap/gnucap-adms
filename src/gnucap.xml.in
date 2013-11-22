@@ -67,8 +67,9 @@
 <admst:variable name="eq"/>
 <admst:variable name="epq"/>
 <admst:variable name="keep_ic" select="no"/>
-<admst:variable name="ddtp" select="1."/>
-<admst:variable name="pddt" select="-1"/>
+<admst:variable name="keepstate" select="1."/>
+<admst:variable name="keepstatename" select="-1"/>
+<admst:variable name="keepstatevar" select="-1"/>
 <admst:variable name="eval_kept" select="no"/>
 <admst:variable name="globalanalogfunction"/>
 
@@ -7259,7 +7260,7 @@ return
 
   <admst:choose>
     <admst:when test="[.=$pprobe]">
-      <admst:variable name="ep" select=" /*pprobe*/ $(ddtp) "/>
+      <admst:variable name="ep" select=" /*pprobe*/ $(keepstate) "/>
     </admst:when>
     <admst:otherwise>
       <admst:variable name="ep" select="0. /*pprobe*/"/>
@@ -7269,7 +7270,7 @@ return
   <admst:if test="$qprobe">
   <admst:choose>
     <admst:when test="[.=$qprobe]">
-      <admst:variable name="eq" select=" /*qprobe*/$(ddtp) "/>
+      <admst:variable name="eq" select=" /*qprobe*/$(keepstate) "/>
     </admst:when>
     <admst:otherwise>
       <admst:variable name="eq" select="0. /*qprobe*/ "/>
@@ -7951,10 +7952,11 @@ return
 
 			/* function ddt %(.)*/
 
-      <admst:variable name="ddtp" select="keep_%(adms/id(.))"/>
-      <admst:variable name="pddt" select="%(adms/id(.))"/>
+      <admst:variable name="keepstate" select="keep_%(adms/id(.))"/>
+      <admst:variable name="keepstatename" select="_ddt_%(adms/id(.))"/>
       <admst:apply-templates select="arguments[1]" match="ddx"/>
-      <admst:variable name="ddtp" select="1."/>
+      <admst:variable name="keepstate" select="1."/>
+      <admst:variable name="keepstatevar" select="keep_%(adms/id(.))"/>
       <admst:variable name="x" select="$e"/>
       <admst:variable name="xp" select="$ep"/>
       <admst:variable name="xq" select="$eq"/>
@@ -8170,7 +8172,7 @@ return
     <admst:when test="[$SkipFVariable='y']">
     </admst:when>
     <admst:when test="[name='ddt']">
-      <admst:variable name="ep" select="$xp"/> <!-- ??? -->
+      <admst:variable name="ep" select="($xp)"/> <!-- ??? -->
     </admst:when>
     <admst:when test="[name='idt']">
       <admst:variable name="ep" select="$xp"/> <!-- ??? -->
@@ -8878,10 +8880,10 @@ return
 		double ceq;
 
 #ifdef HAVE_KEEPCOEFF
-		if(uic_now( _ddt_$pddt ) /* HACK. argh.*/){
+		if(uic_now( $keepstatename ) /* HACK. argh.*/){
 			ceq = eac * BR($Pp, $Pn);
 
-			keep_$pddt=1;	
+			$keepstatevar = 1;
 			eac = $ep;
 			etr = - eac * OPT::keepcoeff;
 		} else
