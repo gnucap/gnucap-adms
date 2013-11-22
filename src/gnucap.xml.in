@@ -2810,6 +2810,7 @@ void $(DEV_NAME)::tr_eval()
 
 <admst:if test="[$(_has_states)='true']">
 	double CKTag0 = tr_c_to_g(1., 1.);
+	double CKTga0 = _dt;
 
 	//if(_sim-&gt;uic_now() &amp;&amp; have_ic()){
 
@@ -8172,10 +8173,10 @@ return
     <admst:when test="[$SkipFVariable='y']">
     </admst:when>
     <admst:when test="[name='ddt']">
-      <admst:variable name="ep" select="($xp)"/> <!-- ??? -->
+      <admst:variable name="ep" select="CKTag0 * ($xp)"/> <!-- ??? -->
     </admst:when>
     <admst:when test="[name='idt']">
-      <admst:variable name="ep" select="$xp"/> <!-- ??? -->
+      <admst:variable name="ep" select="CKTga0 * ($xp)"/> <!-- ??? -->
     </admst:when>
     <admst:when test="[name='abs' or name='acos' or name='asin' or name='atan'
                     or name='cos' or name='cosh' or name='exp' or name='hypot'
@@ -8876,11 +8877,13 @@ return
 #ifndef NOJAC
 	{ // jacobian4($(Sp), $(Sn), $(Pp), $(Pn)) - dynamic
 		double eac = $ep $flowcoeff;
-		double etr = eac * CKTag0;
+		double etr = eac;
 		double ceq;
 
 #ifdef HAVE_KEEPCOEFF
-		if(uic_now( $keepstatename ) /* HACK. argh.*/){
+		if (uic_now( $keepstatename ) /* HACK. argh.*/) {
+			double CKTag0 = 1.;
+			eac = $ep $flowcoeff;
 			ceq = eac * BR($Pp, $Pn);
 
 			$keepstatevar = 1;
