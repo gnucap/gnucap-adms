@@ -69,7 +69,7 @@
 <admst:variable name="keep_ic" select="no"/>
 <admst:variable name="keepstate" select="1."/>
 <admst:variable name="keepstatename" select="-1"/>
-<admst:variable name="keepstatevar" select="-1"/>
+<admst:variable name="keepstatevar" select=""/>
 <admst:variable name="eval_kept" select="no"/>
 <admst:variable name="globalanalogfunction"/>
 
@@ -799,7 +799,7 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
 
 		return i[0].f0;
 	}
-	double _IDT(double qq, unsigned stateno) {
+	double _IDT(double qq, unsigned stateno) { untested();
 		unsigned qcap = stateno * 2;
 		trace4("$(DEV_NAME)::_DDT", stateno, qq, _sim->_mode, _sim->_phase);
 <admst:if test="[$(_has_states)='true']">
@@ -813,38 +813,35 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
 			}
 #endif
 </admst:if>
-		_states[0][qcap] = qq;
+		_states[0][qcap+1] = qq;
 
 		if (_sim->analysis_is_ac()) {
 		// BUG? fix later.
 		// shouldnt call IDT at all!
-		return 0;
+			return 0;
 		}
 		assert(_dt != 0.0);
 		METHOD method;
 		if( (_time[1]!=0) && (_method_a==mTRAP)) { untested();
-		method = mTRAP;
+			method = mTRAP;
 		} else { untested();
-		method = mEULER;
+			method = mEULER;
 		}
-
-		unsigned k = OPT::_keep_time_steps;
-		// stupid copy. fixme.
-		// gnucap stores things more usable.
 
 		double integral;
 
-		if( _sim->analysis_is_static() ) {
-		integral = 0;
-		} else {
-		integral = _states[1][qcap];
-		integral += _dt * ( integral + qq );
+		if( _sim->analysis_is_static() ) { untested();
+			integral = 0;
+			return 0;
+		} else { untested();
+			integral = _states[1][qcap];
+			integral += _dt * ( _states[1][qcap+1] + qq ) / 2;
 		}
 
-		_states[0][qcap+1] = integral;
+		_states[0][qcap] = integral;
+		assert(integral == integral);
 		return integral;
-		}
-
+	}
 
 	// noise: something is calculated, but never used
 	<admst:text select="$fnoise/item" format="\n\tdouble fpnoise%(index($fnoise/item,.)), fenoise%(index($fnoise/item,.));\n"/>
@@ -1414,7 +1411,7 @@ using namespace std;
 <admst:for-each select="/module@ADMSXML_NOEXTERN@">
   <admst:apply-templates select="." match="ddticcollect"/>
   <admst:apply-templates select="." match="ddtcollect"/>
-  <admst:variable name="_num_states" select="%(count($ddts))"/>
+  <admst:variable name="_num_states" select="%(count($ddts)) + %(count($idts))"/>
 
 //analog function stuff
 
@@ -2742,7 +2739,8 @@ void $(DEV_NAME)::ac_eval()
 	const $(MODEL_NAME)* m = prechecked_cast&lt;const $(MODEL_NAME)*&gt;(c-&gt;model());
 	USE(m); assert(m);
 
-	double CKTag0 = 0.; USE(CKTag0); // BUG (necessary?)
+	double CKTag0 = 1.; USE(CKTag0); // BUG (necessary?)
+	double CKTga0 = 1.; USE(CKTag0); // BUG (necessary?)
 	double ddtone = 1.; USE(ddtone); // not necessary in the end?
 
 <admst:for-each select="$(ddts)">
@@ -2776,7 +2774,7 @@ double $(DEV_NAME)::tr_c_to_g(double c, double g)const
 		assert(_sim-&gt;analysis_is_tran_dynamic());
 		METHOD method;
 		if (_time[1] == 0) {
-		  method = mEULER; // Bogus current in previous step.  Force Euler.
+		  method = mEULER; // Bogus current in previous steps. Force Euler.
 		}else{
 		  method = _method_a;
 		}
@@ -2810,16 +2808,16 @@ void $(DEV_NAME)::tr_eval()
 
 <admst:if test="[$(_has_states)='true']">
 	double CKTag0 = tr_c_to_g(1., 1.);
-	double CKTga0 = _dt;
+	assert(_dt == _dt);
 
-	//if(_sim-&gt;uic_now() &amp;&amp; have_ic()){
+	double CKTga0;
+	if( _sim->analysis_is_static() ) {
+		CKTga0 = 0;
+	} else {
+		CKTga0 = _dt/2;
+	}
 
-	//	ddtone = 1./OPT::shortckt;
-	//}else{
-	//	ddtone = 1.;
-	//}
   <admst:for-each select="$(ddts)">
-
 	double keep_%(adms/id(.))=1;
 	if(uic_now(_ddt_%(adms/id(.)))){
 		trace1("$(DEV_NAME)::tr_eval keeping", c->ic_state_%(adms/id(.)));
@@ -2834,7 +2832,6 @@ void $(DEV_NAME)::tr_eval()
   <admst:for-each select="$(idts)">
 	double keep_%(adms/id(.))=1; // incomplete...
   </admst:for-each>
-
 </admst:if>
 	
 	{
@@ -3690,7 +3687,7 @@ currently: only called for eval_mode==accept
 
 <!-- -------------------------------------------------------------- -->
 <admst:template match="function">
-  <admst:message format="* check: old function template?\n"/>
+  <admst:message format="* check: old function template l. 3643?\n"/>
   <admst:choose>
     <admst:when test="[name='ddt']">
       <admst:for-each select="arguments[position(.)=1]">
@@ -6148,7 +6145,7 @@ return
 <!-- ----------------------------------------------------------------- -->
 <!-- -------------------- analog//contribution ------------------------ -->
 <admst:template match="contribution">
-// MODULE contribution %(.)
+// MODULE contribution %(.) static:%(static) dynamic:%(dynamic)
 <!-- MOVE TO IMPLICIT PREPROCESSOR -->
 <admst:value-to test="[lhs/discipline/potential=lhs/nature]" select="lhs/type" string="ps"/>
 <!-- UNTIL HERE -->
@@ -7970,9 +7967,6 @@ return
 #endif
 
       <admst:variable name="e" select="_DDT($x, _ddt_%(adms/id(.)) ) "/>
-
-      <!-- <admst:apply-templates select="." match="DDT"/>  -->
-
       <admst:variable name="ddt_cur" select="$(ddt_cur)_"/>
 
 
@@ -8063,7 +8057,7 @@ return
       <admst:assert test="arguments[count(.)=2]" format="%(name): should have two arguments exactly\n"/>
       <admst:assert test="arguments[2]/adms[datatypename='probe']" format="%(name): second argument is not a probe\n"/>
       <admst:apply-templates select="arguments[1]" match="ddx"/>
-      <admst:variable name="e" select="0.0 /*ddx should be top node of expression!*/"/>
+      <admst:variable name="e" select="0.0 /* BUG: should be top node of expression!*/"/>
     </admst:when>
     <admst:when test="[name='floor']">
       <admst:assert test="arguments[count(.)=1]" format="%(name): should have one argument exactly\n"/>
@@ -8885,6 +8879,7 @@ return
 			double CKTag0 = 1.;
 			eac = $ep $flowcoeff;
 			ceq = eac * BR($Pp, $Pn);
+			//#undef CKTag0
 
 			$keepstatevar = 1;
 			eac = $ep;

@@ -3,7 +3,10 @@ simple
 - check for known-to-work gnucap
 - more devices/tests
 - fix portability of gnucap-adms.so
-- dont convert module names to caps.
+- dont convert module names to caps in class names.
+
+medium
+- get rid of MODULE(?)
 
 difficult
 - see BUGS

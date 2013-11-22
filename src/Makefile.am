@@ -1,9 +1,9 @@
-pkgdata_DATA = gnucap_0.xml gnucap_1.xml gnucap_2.xml
+pkgdata_DATA = gnucap_0.xml gnucap_1.xml gnucap_2.xml implicit.xml
 
-dist_bin_SCRIPTS=gnucap-adms
+dist_bin_SCRIPTS = gnucap-adms
 DEV=cap res opamp
 EXTRA_DIST = $(DEV:%=%.va) gnucap.xml split.py \
-             discipline.h
+             discipline.h implicit.xml
 
 gnucap_adms_include_HEADERS = discipline.h gnucap-adms.h e_adms.h
 gnucap_adms_includedir = $(pkgincludedir)
@@ -11,7 +11,7 @@ gnucap_adms_includedir = $(pkgincludedir)
 plugindir = @gnucap_libdir@
 # libdir = @libdir@/gnucap-adms
 lib_LTLIBRARIES = libe_adms.la
-libe_adms_la_LDFLAGS = -module -shared
+# libe_adms_la_LDFLAGS = -module -shared
 libe_adms_la_SOURCES = e_adms.cc
 
 AM_CPPFLAGS=$(GC_CPPFLAGS)
