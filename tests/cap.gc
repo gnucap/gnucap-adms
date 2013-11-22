@@ -3,7 +3,7 @@ spice
 .load ./cap.so
 
 .verilog
-paramset mycap cap;
+paramset mycap va_cap;
 	.capacitance = 4;
 endparamset
 
