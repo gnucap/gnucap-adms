@@ -3,24 +3,33 @@ spice
 .load ./coil.so
 
 .verilog
-paramset mycoil_auto coil_auto;
+paramset mycoil_br coil_br;
+	.inductance=100m;
+endparamset
+paramset mycoil_int coil_idt;
 	.inductance=1;
 endparamset
 paramset mycoil_mag coil_mag;
 	.inductance=1;
 endparamset
 
-mycoil_auto la (na,0);
+mycoil_int lint (nint,0);
+mycoil_br lbr (nbr,0);
 mycoil_mag lm (nm,0);
 spice
 
 V1 n1 0 pulse iv=0 pv=1 rise=1m delay=0
 Ra n1 na 1k
-Rb n1 nb 1k
+Rint n1 nint .1k
+Rb n1 nb .1k
+Rbr n1 nbr .1k
 Rm n1 nm 1k
 
 * builtin coil for comparison
-Lb nb 0 1
+Lb nb 0 100m
+
+.print dc v(nodes) i(R*)
+.dc
 
 .list
 .print tran v(nodes) i(r*) v(lm) v(lb) inductance(lb)

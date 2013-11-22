@@ -1,4 +1,3 @@
-// Copyright 2013 Felix
 //
 // coil variants
 
@@ -16,25 +15,54 @@ module coil_mag(p1,p2);
 	branch (p1,p2) res;
 	real v (*ask="yes"*);
 
-	analog begin	
+	analog begin
 		v = V(res);
-		Phi(m1) <+ ddt(MMF(m1)) +0*MMF(m1) + 0*V(res);
+		Phi(m1) <+ ddt(MMF(m1));
 		Phi(m1) <+ - inductance * V(res);
-		I(res) <+ MMF(m1) + 0*V(res);
+		I(res) <+ MMF(m1);
 	end
 endmodule
 
-// these don't work yet
+// does not converge well
+module coil_br(p,n);
+	inout p,n;
+	electrical p,n;
+	electrical e1;
+
+	parameter real inductance = 1;
+	real i (*ask="yes"*);
+	real v (*ask="yes"*);
+
+	analog begin
+		i = I(e1,n);
+		v = ddt(inductance * I(e1,n));
+		V(p,e1) <+ ddt(inductance * I(e1,n));
+	//	I(p) <+ 0*V(n); // BUG
+	end
+endmodule
+
+module coil_idt(p,n);
+	inout p,n;
+	electrical p,n;
+
+	parameter real inductance    = 1 from [0:inf);
+
+	analog begin
+		I(p,n) <+ idt(V(p,n)/inductance);
+   end
+endmodule
+
 `ifdef foo
+
+// this cannot work, a flow probe shortcuts the potential
 module coil_auto(p,n);
 	inout p,n;
 	electrical p,n;
 
 	parameter real inductance    = 1 from [0:inf);
 
-	analog begin	
+	analog begin
 		V(p,n) <+ ddt(inductance * I(p,n));
-		I(p,n) <+ 0*V(p,n); // fixme, guesstopology bug
    end
 endmodule
 
@@ -46,7 +74,7 @@ module coilideal(p,n);
 	parameter real inductance    = 1 from [0:inf);
 
 	real loss;
-	analog begin	
+	analog begin
 		I(q) <+ inductance - V(p,n);
 		I(p,n) <+ V(q);
    end
@@ -61,7 +89,7 @@ module coilreal(p,n);
 
 	real i (*ask="yes"*);
 
-	analog begin	
+	analog begin
 		i = (V(p,n)-inductance)*loss;
 		I(p,n) <+ i;
    end

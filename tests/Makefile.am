@@ -11,7 +11,8 @@ AM_DEFAULT_SOURCE_EXT = .va
 check_LTLIBRARIES = \
     if.la if2.la \
     vs.la cs.la cap.la \
-    coil.la ccvs.la vccs.la
+    coil.la ccvs.la vccs.la \
+    int.la
 
 AM_CPPFLAGS = @GC_CPPFLAGS@ -I$(top_srcdir)/src
 LIBS = ../src/libe_adms.la
@@ -35,7 +36,7 @@ AM_TESTS_FD_REDIRECT = 9>&2
 TEST_EXTENSIONS = .sh
 TESTS = $(EXT_TESTS) $(GC_TESTS) $(GCUF_TESTS)
 GC_TESTS = if.sh if2.sh coil.sh vs.sh cs.sh cap.sh \
-    ccvs.sh vccs.sh
+    ccvs.sh vccs.sh int.sh
 
 # will only work with -uf
 GCUF_TESTS = rc_uic.sh ddc_rc.sh
@@ -66,6 +67,8 @@ vs.log: vs.so
 cs.log: cs.so
 if.log: if.so
 if2.log: if2.so
+
+$(TESTS:%.sh=%.log): %.log: %.so
 
 PREDIFF= \
     '1,/^\#·See·the·file/d'
@@ -119,3 +122,5 @@ $(TESTS:%.sh=%.log): .P
 	@:
 
 .PHONY: %.reg clean-examples .P
+
+@am__include@ @top_srcdir@/gnuplot.mk
