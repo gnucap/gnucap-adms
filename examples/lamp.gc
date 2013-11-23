@@ -28,12 +28,14 @@ V1 ndd 0 pulse iv=vsupp0 pv=vsupp rise=.01 delay=delay
 .dc trace=v
 *.end
 
-.tr 0 1 .01 > lamp_tr.out
+.tr 0 1 .1
+* > lamp_tr.out
 .measure t1 at(probe="temp(H1)" x=0.5)
 * .options temp=10
 .param vsupp0=230
 .param vsupp=0
 .param delay=1
-.tr 2 >> lamp_tr.out
+.tr 2
+* >> lamp_tr.out
 .measure t2 at(probe="temp(H1)" x=0.5)
 .end
