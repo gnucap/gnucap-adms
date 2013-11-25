@@ -12,7 +12,8 @@ check_LTLIBRARIES = \
     if.la if2.la \
     vs.la cs.la cap.la \
     coil.la ccvs.la vccs.la \
-    int.la
+    int.la \
+    subcoil.la
 
 AM_CPPFLAGS = @GC_CPPFLAGS@ -I$(top_srcdir)/src
 LIBS = ../src/libe_adms.la
@@ -36,7 +37,8 @@ AM_TESTS_FD_REDIRECT = 9>&2
 TEST_EXTENSIONS = .sh
 TESTS = $(EXT_TESTS) $(GC_TESTS) $(GCUF_TESTS)
 GC_TESTS = if.sh if2.sh coil.sh vs.sh cs.sh cap.sh \
-    ccvs.sh vccs.sh int.sh
+    ccvs.sh vccs.sh int.sh \
+    subcoil.sh
 
 # will only work with -uf
 GCUF_TESTS = rc_uic.sh ddc_rc.sh
@@ -57,9 +59,6 @@ $(GCUF_TESTS) $(GC_TESTS) $(EXT_TESTS): %.sh: %.gc Makefile %.ref
 	@echo "diff -rup $(lastword $+) $*.out || exit 1" >> $@
 	@echo "rm $*.out" >> $@
 	@chmod +x $@
-
-
-# $(TESTS): %.sh: %.out
 
 vccs.log ccvs.log cap.log: %.log: %.so
 coil.log: coil.so
