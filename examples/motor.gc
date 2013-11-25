@@ -8,7 +8,7 @@ spice
 load ./motor.so
 paramset mymotor motor;
 	.R_inertia=1e-4;
-	.R_fric=1e-4;
+	.R_fric=1e-2;
 endparamset
 
 mymotor M1 (0,np,nsens);
