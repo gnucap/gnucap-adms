@@ -135,14 +135,7 @@ class ADMS_BASE : public COMPONENT {
 	public: // commons
 		COMPLEX  _ev;		// ac effective value (usually real)
 		double   _dt;
-
 		double   _time[OPT::_keep_time_steps];
-
-		// BUG?
-		// BUG: only needed if cap present!
-		// FPOLY1   _y1;		// iteration parameters, 1 iter ago
-		// FPOLY1   _y[OPT::_keep_time_steps]; /* charge or flux, and deriv.	*/
-
 	private: // from storage
 		int	   order()const {
 			const int o[] = {1, 1, 2, 1, 1};
@@ -319,16 +312,33 @@ inline void ADMS_BASE::tr_advance()
 
 	_dt = _time[0] - _time[1];
 
-	//storag
-	//for (int i=OPT::_keep_time_steps-1; i>0; --i) {
-	//	_i[i] = _i[i-1];
-	//}
+#ifdef HAVE_DISCONT
+	method_t m = _method_u;
+	trace1("tr_advance", long_label());
+
+	DISCONT d = 0;
+	for (unsigned i=0;i < net_nodes(); ++i) {
+		d |= _n[i]->discont();
+	}
+
+	if (_time[1] == 0) {
+		m = meEULER;
+	} else if (d) {
+		m = meEULER;
+	} else {
+	}
+	_method_a = method_select[OPT::method][m];
+#endif
+
 }
 /*--------------------------------------------------------------------------*/
 inline double ADMS_BASE::tr_probe_num(const std::string& x)const
 {
-	if (Umatch(x, "conv{erged} "))
+	if (Umatch(x, "conv{erged} ")) { untested();
 		return converged();
+	} else if (Umatch(x, "met{hod} ")) { untested();
+		return _method_a;
+	}
 
 	return COMPONENT::tr_probe_num(x);
 }
