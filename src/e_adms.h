@@ -80,7 +80,7 @@ class ADMS_BASE : public COMPONENT {
 		virtual bool tr_needs_eval()const;
 		virtual bool do_tr() { unreachable(); return false; }
 			
-		TIME_PAIR tr_review();
+		// TIME_PAIR tr_review();
 		virtual void  tr_stress() {
 			trace0( ("ADMS_BASE device " + short_label() + ": no stress").c_str() );
 		} // calcul

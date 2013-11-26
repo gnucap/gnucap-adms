@@ -142,28 +142,6 @@ void ADMS_BASE::tr_regress()
 	_dt = _time[0] - _time[1];
 }
 /*--------------------------------------------------------------------------*/
-TIME_PAIR ADMS_BASE::tr_review()
-{
-	assert(false);
-	COMPONENT::tr_review();
-	if (_method_a == mEULER) {
-		// Backward Euler, no step control, take it as it comes
-	}else{
-		// double timestep = tr_review_trunc_error(_y);
-//		_time_by.min_error_estimate(tr_review_check_and_convert(timestep));
-	}
-	return _time_by;
-}
-/*--------------------------------------------------------------------------*/
-/*--------------------------------------------------------------------------*/
-#if 0
-COMPLEX ADMS_BASE::ac_amps()const
-{
-	assert(!is_source());
-	return (ac_involts() * _acg + ac_outvolts() * (double)_loss0);
-}
-#endif
-/*--------------------------------------------------------------------------*/
 double ADMS_BASE::tr_review_trunc_error(const FPOLY1* q)
 {
 	trace1("ADMS_BASE::tr_review_trunc_error", order());
