@@ -22,12 +22,8 @@ module vbg(vbg, bvbg, vdd, vss);
 
 	analog begin
 		i_out= ( bg - V(vbg, vss) ) /rout  + psrr*(V(vdd,vss)-Vddmin)/rout;
-		if ( V(vdd,vss) < 2.0 ) $strobe("vbg.va: Error vbg: Input voltage to low");
+		if ( V(vdd,vss) < 2.0 ) $strobe("vbg.va: Error vbg: Input voltage too low");
 
-//		if ( i_out > Imax ) i_out=i_out/5+Imax;
-//		if ( i_out < -Imax ) i_out=i_out/5-Imax;
-//		if ( i_out > Imax ) i_out=+ (i_out-Imax)/Imax*( +0.8*( bg - V(vbg, vss) ) /rout   + 50*psrr*(V(vdd,vss)-Vddmin)/rout);
-//		if ( i_out < -Imax ) i_out=+ (-i_out-Imax)/Imax*1.0*(+0.8*( bg - V(vbg, vss) ) /rout + 50*psrr*(V(vdd,vss)-Vddmin)/rout);
 		I(vdd, vss) <+ Ibias;
 		I(vbg, vss) <+ -i_out;
 
