@@ -1,0 +1,39 @@
+spice
+* this file is part of gnucap-adms
+* Copyright (C) 2013 Felix Salfelder
+* License GPLv3 (or later)
+
+.load ./op.so
+
+.options noinc
+
+.verilog
+paramset myota someop;
+.gain=1820000;
+.f0dB=1e6;
+.Sr=5e5;
+endparamset
+
+// myota OTA0 (nout, nss, ninp, nout, ndd, nss);
+
+module op103b (0, 0, 0, 0, 0);
+myota OTA0 (0, 0, 0, 0, 0, 0);
+endmodule
+
+myota OTA1 (nout, nss, ninp, ninn, ndd, nss);
+spice
+
+* Xop1 nout ninp ninn ndd nss op103b
+
+Vss nss 0 -2
+Vdd ndd 0 5
+V2 ninn 0 1
+vin ninp ninn sin amplitude=1u frequency=1 peak zero
+
+.list
+
+.print tran v(nodes) v(vin)
+.tran 0 1 1 trace=a
+.print dc v(nodes) v(vin)
+.dc vin 0 1u .1u
+.end
