@@ -1,0 +1,35 @@
+name   ...
+have 2 nodes. model: 0 sckt: 0 adp 0
+
+nin      nin matrix_number 1, user_number 2 nm[t]  vdc  0.
+nout     nout matrix_number 2, user_number 1 nm[t]  vdc  0.
+-e1
+.print dc v(nodes) i(r1) 
+                     ^ ? no match
+#           v(nin)     v(nout)   
+ 0.         0.         0.        
+
+--- aa -------
+ 100.K       0.         
+ 5.          100.K      
+--- i ----
+ 100.K     ,  0.        , 
+-----
+-1.         1.        -50.u      
+
+--- aa -------
+ 100.K       0.         
+ 5.          100.K      
+--- i ----
+ 100.K     ,  500.K     , 
+-----
+-2.         1.         5.        
+
+--- aa -------
+ 100.K       0.         
+ 5.          100.K      
+--- i ----
+ 100.K     ,  500.K     , 
+-----
+-3.         1.         5.        
+ 0.         1.         5.        

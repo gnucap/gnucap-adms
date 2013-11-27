@@ -19,5 +19,5 @@ Lb nb 0 1
 
 .list
 .print tran v(nodes) i(r*) v(lm) v(lb) inductance(lb)
-.tran 0 10m 10m trace=a
+.tran 0 10m .5m trace=n
 .end

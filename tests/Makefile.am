@@ -12,7 +12,9 @@ check_LTLIBRARIES = \
     if.la if2.la \
     vs.la cs.la cap.la \
     coil.la ccvs.la vccs.la \
-    int.la \
+    int.la pid.la vcvs.la \
+    diff.la \
+    mul.la \
     subcoil.la
 
 AM_CPPFLAGS = @GC_CPPFLAGS@ -I$(top_srcdir)/src
@@ -37,7 +39,13 @@ AM_TESTS_FD_REDIRECT = 9>&2
 TEST_EXTENSIONS = .sh
 TESTS = $(EXT_TESTS) $(GC_TESTS) $(GCUF_TESTS)
 GC_TESTS = if.sh if2.sh coil.sh vs.sh cs.sh cap.sh \
-    ccvs.sh vccs.sh int.sh \
+    int.sh \
+    pid.sh \
+	 diff.sh \
+	 mul.sh \
+    ccvs.sh \
+    vccs.sh \
+    vcvs.sh \
     subcoil.sh
 
 # will only work with -uf
@@ -47,6 +55,7 @@ GCUF_TESTS = rc_uic.sh ddc_rc.sh
 XFAIL_TESTS = ddc_rc.sh
 
 EXTRA_DIST = $(TESTS:%.sh=%.ref) $(GC_TESTS:%.sh=%.gc)
+FILTER = cat
 
 $(GCUF_TESTS) $(GC_TESTS) $(EXT_TESTS): %.sh: %.gc Makefile %.ref
 	@echo "#!/bin/sh" > $@
@@ -55,8 +64,7 @@ $(GCUF_TESTS) $(GC_TESTS) $(EXT_TESTS): %.sh: %.gc Makefile %.ref
 	@echo "eval \$$REDIRECT" >> $@
 	@echo "\$$GNUCAP \$$GNUCAP_ARGS $(LT) $< | sed $(subst ·, ,$(PREDIFF:%=-e %)) \\" >> $@
 	@echo "$(if $(POSTDIFF),| sed) $(subst ·, ,$(POSTDIFF:%=-e %)) > $*.out" >> $@
-#@echo "./filter $(lastword $+) < $*.out | diff -rup $(lastword $+) - || exit 1" >> $@
-	@echo "diff -rup $(lastword $+) $*.out || exit 1" >> $@
+	@echo "$(FILTER) $*.out < $(lastword $+) | diff -rup $(lastword $+) - || exit 1" >> $@
 	@echo "rm $*.out" >> $@
 	@chmod +x $@
 
@@ -67,7 +75,8 @@ cs.log: cs.so
 if.log: if.so
 if2.log: if2.so
 
-$(TESTS:%.sh=%.log): %.log: %.so
+$(GC_TESTS:%.sh=%.log): %.log: %.so
+$(GC_TESTS:%.sh=%.out): %.out: %.so
 
 PREDIFF= \
     '1,/^\#·See·the·file/d'

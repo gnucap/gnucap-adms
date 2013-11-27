@@ -1,6 +1,7 @@
 spice
 
 .load ./coil.so
+.options initsc 0
 
 .verilog
 paramset mycoil_br coil_br;
