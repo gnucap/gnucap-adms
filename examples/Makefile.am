@@ -35,7 +35,12 @@ EXTRA_DIST= \
 
 TEST_EXTENSIONS = .sh
 AM_TESTS_FD_REDIRECT = 9>&2
-GC_TESTS = opamp.sh sensor_chip.sh lamp.sh motor.sh $(EXT_TESTS)
+GC_TESTS = \
+    opamp.sh \
+    op.sh \
+    sensor_chip.sh \
+    lamp.sh motor.sh $(EXT_TESTS) \
+    vbg.sh
 CUSTOM_TESTS = callfunctions.sh
 TESTS = $(GC_TESTS) $(CUSTOM_TESTS)
 
@@ -114,8 +119,9 @@ callfunctions.log: callfunctions.out 2callfunctions.out
 
 sensor_so: $(SENSOR_SO)
 
-sensor_chip.out: $(SENSOR_SO) $(PWD)/sensor_chip.ckt $(PWD)/opvm.core.gc $(PWD)/vbgvm.core.gc $(PWD)/ldovm.core.gc \
-                 vbg.so ldo.so sensor.so $(PWD)/sensorvm.core.gc
+vbg.out sensor_chip.out: \
+    $(SENSOR_SO) $(PWD)/sensor_chip.ckt $(PWD)/opvm.core.gc $(PWD)/vbgvm.core.gc $(PWD)/ldovm.core.gc \
+    vbg.so ldo.so sensor.so $(PWD)/sensorvm.core.gc
 
 $(PWD)/%.ckt: %.ckt
 	[ -f $@ ] || $(LN_S) $< .
