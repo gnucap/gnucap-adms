@@ -250,17 +250,17 @@
 
 <admst:open file="$(filename).h">
 #include &lt;stdio.h&gt;
-#include  &lt;math.h&gt;
+#include &lt;math.h&gt;
 #define ADD_VERSION
 #include &lt;globals.h&gt;
 
-#include &quot;u_xprobe.h&quot;
-#include &quot;d_subckt.h&quot;
-#include &quot;e_storag.h&quot;
-#include &quot;e_model.h&quot;
-#include &quot;e_compon.h&quot;
-#include &quot;e_adms.h&quot;
-#include &quot;u_parameter.h&quot;
+#include &lt;u_xprobe.h&gt;
+#include &lt;d_subckt.h&gt;
+#include &lt;e_storag.h&gt;
+#include &lt;e_model.h&gt;
+#include &lt;e_compon.h&gt;
+#include &lt;e_adms.h&gt;
+#include &lt;u_parameter.h&gt;
 
 <admst:new datatype="list" arguments="discipline">
   <admst:variable name="mydisciplines" select="" />
@@ -272,8 +272,8 @@
   <admst:push into="$(mydisciplines)" select="." onduplicate="ignore"/>
 </admst:for-each>
 
-#ifndef $(filename)_header__
-#define $(filename)_header__
+#ifndef _$(filename)_header__
+#define _$(filename)_header__
 <admst:for-each select="/module@ADMSXML_NOEXTERN@">
   <admst:apply-templates select="." match="ddticcollect"/>
 
@@ -1408,7 +1408,7 @@ and name!='initializeInstance')]">
 #include &lt;boost/algorithm/string.hpp>
 
 #include &quot;$(filename).h&quot;
-#include &quot;e_adms.h&quot;
+#include &lt;e_adms.h&gt;
 
 using namespace std;
 <admst:for-each select="/module@ADMSXML_NOEXTERN@">
