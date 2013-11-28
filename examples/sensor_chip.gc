@@ -18,6 +18,7 @@ spice
 .print tran v(v_pin) v(output) gmin(0) damp(0) control(0)
 + v(ia1+) v(ia1-)
 + T(Xsensor1.DR2) v(Xsensor1.DR2.t1)
+* + v(nodes)
 
 .store tran v(output)
 .tr 0.000005 80m trace=alltime

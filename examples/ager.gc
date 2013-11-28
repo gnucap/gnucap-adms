@@ -2,7 +2,7 @@ spice
 * simplistic ager example
 
 .param vdd 1.7
-.options numdgt=15
+.options numdgt=5
 
 V1 nin 0 pulse iv=0 pv=1 rise=500u delay=1 width=10
 
@@ -25,8 +25,8 @@ spice
 .print dc v(nodes) a(r1)
 .store tw a(r1) b(r1)
 
-.tw 1 100 200 new > ager_tw.out tran > ager_tr.out
-
+.list
+.tw 1 100 200 new tran > ager_tr.out
 .measure a at(probe="a(r1)" x=34)
 .measure b at(probe="b(r1)" x=34)
 .end

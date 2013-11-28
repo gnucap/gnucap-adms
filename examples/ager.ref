@@ -1,2 +1,10 @@
+* simplistic ager example 
+V1 ( nin 0 ) pulse iv= 0. pv= 1. delay= 1. rise= 500.u fall=NA( 0.) width= 10. period=NA( Inf)
+.model myager ager ( r0=20k)
+r1 ( nin 0 )  myager 
+#TTime      v(nin)     b(r1)      a(r1)      tt(r1.rcd1) tr(r1.rcd1)
+ 0.         0.         0.         0.         0.        -Inf       
+ 100.       0.         0.         0.031274   0.0305     0.03297   
+ 200.       0.         0.         0.03325    0.032427   0.032029  
 a= 0.03127424
 b= 0.
