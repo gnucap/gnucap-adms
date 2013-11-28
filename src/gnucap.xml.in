@@ -2256,7 +2256,7 @@ bool $(DEV_NAME)::tr_needs_eval()const
     <admst:if test="[$upper='yes']">
 	// relative check %(name) $(name1) FIXME: iterate over branches?!
 	if (!conchk( $node_prefix%(name), $node_prefix$(name1), OPT::reltol*OPT::bypasstol)) {
-		return true; untested(); // is this happening/necessary (slow)?
+		return true; // is this happening/necessary (slow)?
 	}
     </admst:if>
     <admst:variable name="upper" select="yes" test="[name=$(name1)]"/>
