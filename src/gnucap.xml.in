@@ -7246,7 +7246,7 @@ return
 </admst:if>
 <!-- UNTIL HERE -->
   <admst:variable name="loss" select=""/>
-  <admst:variable name="loss" select="1/OPT::shortckt * " test="[nature=discipline/flow]"/>
+  <admst:variable name="loss" select="/*flowp*/ 1/OPT::shortckt * " test="[nature=discipline/flow]"/>
   <admst:choose>
     <admst:when test="branch/nnode[grounded='no']">
       <admst:variable name="e" select="(/* treval */ $(loss) BP(%(branch/pnode/name), %(branch/nnode/name)))"/>
@@ -8811,7 +8811,7 @@ return
   <admst:variable name="Pp" select="%(lhs/branch/pnode/name)"/>
   <admst:variable name="Pn" select="%(lhs/branch/nnode/name)"/>
   <admst:variable name="loss" select=""/>
-  <admst:variable name="loss" select="-1/OPT::shortckt * " test="[lhs/type='ps']"/>
+  <admst:variable name="loss" select="/*lhpot*/-1/OPT::shortckt * " test="[lhs/type='ps']"/>
 
 	// residual2($(Pp),$(Pn),%(rhs/tree))
 	{  // recheck: static is same as dynamic?
