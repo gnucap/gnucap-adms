@@ -16,6 +16,7 @@ spice
 .dc Vpin 1e-8 1000 * 1.3 > sensor_net_dc.out
 
 .print tran v(v_pin) v(output) gmin(0) damp(0) control(0)
++ v(ia1+) v(ia1-)
 + T(Xsensor1.DR2) v(Xsensor1.DR2.t1)
 
 .store tran v(output)
