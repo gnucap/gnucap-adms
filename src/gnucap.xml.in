@@ -86,6 +86,7 @@
 
 <!-- create list for initial conditions, for now. only very specific patterns are supported -->
 <!-- maybe can be cleared with: <admst:variable select="adms_ic_list" value="" /> -->
+<!-- fixme: what is ddts_ic, what is ddts_list?
 <!-- this is braindead. how to keep the results?! -->
 <admst:template match="ddticcollect">
   <admst:reset select="$(ddts_list)"/>
@@ -401,17 +402,19 @@ class $(MODEL_NAME) : public MODEL_CARD {
 	 <!--    <admst:push into="$mysource/attribute" select="attribute"/> -->
     <!-- case I() <+ .V(). supported by .implicit* -->
     <!-- case V() <+ .I(). -->
-	 <admst:for-each select="rhs/probe[nature=discipline/flow]">
+	 <!-- <admst:for-each select="rhs/probe[(nature=discipline/flow)and($mysource/nature=$mysource/discipline/potential)]"> -->
+	 <admst:for-each select="rhs/probe[($mysource/nature=$mysource/discipline/potential)]">
+    <!-- <admst:for-each select="rhs/probe[nature=discipline/flow]"> -->
       <admst:new datatype="jacobian" inputs="module,$mysource/branch/pnode,branch/pnode">
         <admst:push into="/@jacobian" select="." onduplicate="ignore"/>
       </admst:new>
-      <admst:new datatype="jacobian" inputs="module,$mysource/branch/nnode,branch/pnode">
+      <admst:new datatype="jacobian" test="$mysource/branch/nnode[grounded='no']" inputs="module,$mysource/branch/nnode,branch/pnode">
         <admst:push into="/@jacobian" select="." onduplicate="ignore"/>
+		  <admst:new datatype="jacobian" test="../branch/nnode[grounded='no']" inputs="module,$mysource/branch/nnode,../branch/nnode">
+          <admst:push into="/@jacobian" select="." onduplicate="ignore"/>
+        </admst:new>
       </admst:new>
-      <admst:new datatype="jacobian" inputs="module,$mysource/branch/pnode,branch/nnode">
-        <admst:push into="/@jacobian" select="." onduplicate="ignore"/>
-      </admst:new>
-      <admst:new datatype="jacobian" inputs="module,$mysource/branch/nnode,branch/nnode">
+      <admst:new datatype="jacobian" test="branch/nnode[grounded='no']" inputs="module,$mysource/branch/pnode,branch/nnode">
         <admst:push into="/@jacobian" select="." onduplicate="ignore"/>
       </admst:new>
     </admst:for-each>
@@ -707,7 +710,7 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
 
 		enum EMatrixEntries {
     <admst:join select="jacobian" separator=",">
-			 m_%(row/name)_%(column/name)=%(position(.)-1) /* %(row/discipline) to %(column/discipline) */
+			m_%(row/name)_%(column/name)=%(position(.)-1) /* %(row/discipline) to %(column/discipline) */
     </admst:join>
 		};
 		enum ElossEntries { //?
@@ -1665,6 +1668,7 @@ bool $(DEV_NAME)::uic_now(unsigned stateno)const{
 	// incomplete();
 	switch(stateno){
 <admst:for-each select="$(ddts)">
+   // %(.)
 	// old		case _ddt_%(adms/id(.)):
 	// old			return c-&gt;ic_state_%(adms/id(.)).has_good_value();
 </admst:for-each>
@@ -6156,7 +6160,6 @@ return
 <!-- UNTIL HERE -->
   <admst:choose>
     <admst:when test="[lhs/type='ps']">
-<admst:apply-templates select="." match="lossleft" required="yes"/>
     </admst:when>
     <admst:otherwise>
 		 // noloss
