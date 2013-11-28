@@ -6054,6 +6054,11 @@ return
   <admst:variable name="MODEL_NAME" select="MODEL_%(upper-case(name))"/>
 
   <admst:open file="$(filename)_$(module)_tr.hxx">
+    <admst:for-each select="source[nature=discipline/potential]">
+		 // lossleft for pot  %(.)
+      <admst:apply-templates select="." match="lossleft" required="yes"/>
+
+    </admst:for-each>
     <admst:for-each select="probe[nature=discipline/flow]">
 		 // probe %(.)
 
