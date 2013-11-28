@@ -1669,13 +1669,13 @@ bool $(DEV_NAME)::uic_now(unsigned stateno)const{
 	switch(stateno){
 <admst:for-each select="$(ddts)">
    // %(.)
-	// old		case _ddt_%(adms/id(.)):
-	// old			return c-&gt;ic_state_%(adms/id(.)).has_good_value();
+			case _ddt_%(adms/id(.)):
+				return c-&gt;ic_state_%(adms/id(.)).has_good_value();
 </admst:for-each>
 <admst:for-each select="$(ddts_list)">
 	// %(.)
-		case _ddt_%(adms/id(.)):
-			return c-&gt;ic_state_%(adms/id(.)).has_good_value();
+	// new?	case _ddt_%(adms/id(.)):
+	// new?		return c-&gt;ic_state_%(adms/id(.)).has_good_value();
 </admst:for-each>
 		default:
 			assert(0); return(0);
