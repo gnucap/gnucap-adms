@@ -3,7 +3,18 @@
 # license: GPLv3+
 
 GNUCAP_ADMS = ../src/gnucap-adms
-GNUCAP = LD_LIBRARY_PATH=../src/.libs $(shell echo gnucap | sed -e '$(transform)')
+GNUCAP = $(shell echo gnucap | sed -e '$(transform)')
+
+AM_TESTS_ENVIRONMENT = \
+    export PATH='../src:$(PATH)'\
+           LD_LIBRARY_PATH='../src/.libs'\
+           GNUCAP='$(GNUCAP)'\
+           GNUCAP_ADMS_DATADIR='$(PWD)/../src'\
+           GNUCAP_ADMS_LDFLAGS='-L$(abs_top_builddir)/src/.libs'\
+           GNUCAP_ADMS_LIBS='-le_adms'\
+           GNUCAP_ADMS_TMPDIR='$(PWD)/.admstmp'\
+           REDIRECT='exec 2>&9'\
+           srcdir='$(srcdir)';
 
 EXFILES=rc.va
 if VERILOG_EXTERN
@@ -36,18 +47,27 @@ EXTRA_DIST= \
 TEST_EXTENSIONS = .sh
 AM_TESTS_FD_REDIRECT = 9>&2
 GC_TESTS = \
-    opamp.sh \
     op.sh \
     sensor.sh \
-    sensor_chip.sh \
     lamp.sh motor.sh $(EXT_TESTS) \
     vbg.sh
-CUSTOM_TESTS = callfunctions.sh
+CUSTOM_TESTS = callfunctions.sh \
+    sensor_chip.sh \
+    inline.sh \
+    opamp.sh
 TESTS = $(GC_TESTS) $(CUSTOM_TESTS)
 
-EXTRA_DIST+= $(GC_TESTS:%.sh=%.gc) $(GC_TESTS:%.sh=%.ref)
+inline.log: cleantmp
 
-$(GC_TESTS): %.sh: %.ref
+cleantmp:
+	rm -rf .admstmp
+
+$(GC_TESTS:%.sh=%.log): %.log: %.so
+
+EXTRA_DIST+= $(GC_TESTS:%.sh=%.gc) $(GC_TESTS:%.sh=%.ref)
+FILTER=cat
+
+callfunctions.sh: %.sh: %.out
 	@echo "#!/bin/sh" > $@
 	@echo "set -e" >> $@
 	@echo "exec 2>&9" >> $@
@@ -55,7 +75,18 @@ $(GC_TESTS): %.sh: %.ref
 	@echo "rm $*.out" >> $@
 	@chmod +x $@
 
-$(TESTS): %.sh: %.out
+inline.sh opamp.sh $(GC_TESTS): %.sh: %.gc Makefile %.ref
+	@echo "#!/bin/sh" > $@
+	@echo "set -e" >> $@
+	@echo "GNUCAP=\$${GNUCAP-$(GNUCAP)}" >> $@
+	@echo "eval \$$REDIRECT" >> $@
+	@echo "\$$GNUCAP \$$GNUCAP_ARGS $(LT) $< | sed $(subst ·, ,$(PREDIFF:%=-e %)) \\" >> $@
+	@echo "$(if $(POSTDIFF),| sed) $(subst ·, ,$(POSTDIFF:%=-e %)) > $*.out" >> $@
+	@echo "$(FILTER) $*.out < $(lastword $+) | diff -rup $(lastword $+) - || exit 1" >> $@
+	@echo "rm $*.out" >> $@
+	@chmod +x $@
+
+# $(TESTS): %.sh: %.out
 
 # %.out %_tr.out: %.gc
 #	$(GNUCAP) $< > $*.out
@@ -66,8 +97,10 @@ PREDIFF= \
     '/^@/d' \
     '/:·already.installed,·replacing/d'
 
+inline.sh: POSTDIFF='1,/^\#Time/d'
+
 $(TESTS:%.sh=%.out): %.out: %.gc
-	$(AM_V_at)$(GNUCAP) $(GNUCAP_PLUGINS:%=-a ../plugins/.libs/%) $(GNUCAP_ARGS) $< | \
+	$(AM_TESTS_ENVIRONMENT)$(GNUCAP) $(GNUCAP_PLUGINS:%=-a ../plugins/.libs/%) $(GNUCAP_ARGS) $< | \
 	    sed $(subst ·, ,$(PREDIFF:%=-e %)) \
 	    $(if $(POSTDIFF),| sed) $(subst ·, ,$(POSTDIFF:%=-e %)) > $*.out
 
@@ -111,13 +144,8 @@ ADMS_GC_XML=../src/gnucap_0.xml
 	$(GNUCAP) $(lastword $+) 2> 2$*.out | tee $*.out | grep too\ negative ;\
 	[ 0 -ne $$? ]
 
-lamp.out: lamp.so
-motor.out: motor.so
-ager.out: ager.so
-rc.out: rc.so
-sensor.out: sensor.so
-
-callfunctions.log: callfunctions.out 2callfunctions.out
+callfunct1ions.log: callfunctions.out 2callfunctions.out
+sensor_chip.log: vbg.so op.so ldo.so
 
 sensor_so: $(SENSOR_SO)
 
@@ -136,13 +164,19 @@ $(PWD)/%.gc: %.gc
 plot: $(SENSOR_PS)
 
 clean-local: clean-ex
+	rm -rf .admstmp
 
 clean-ex:
 	rm -f *.so *.hxx *.h *.cc
 
 CLEANFILES = .*.adms *.out $(GC_TESTS) *.hxx .*.xml
 
-.PHONY: $(TESTS:%.sh=%.out) clean-ex sensor_so plot
+$(TESTS:%.sh=%.log): .P
+
+.P:
+	@:
+
+.PHONY: .P clean-ex sensor_so plot
 .PRECIOUS: %.cc %.h %.so %.la
 
 @am__include@ @top_srcdir@/gnuplot.mk
