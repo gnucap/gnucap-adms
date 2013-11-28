@@ -38,6 +38,7 @@ AM_TESTS_FD_REDIRECT = 9>&2
 GC_TESTS = \
     opamp.sh \
     op.sh \
+    sensor.sh \
     sensor_chip.sh \
     lamp.sh motor.sh $(EXT_TESTS) \
     vbg.sh
@@ -114,6 +115,7 @@ lamp.out: lamp.so
 motor.out: motor.so
 ager.out: ager.so
 rc.out: rc.so
+sensor.out: sensor.so
 
 callfunctions.log: callfunctions.out 2callfunctions.out
 
