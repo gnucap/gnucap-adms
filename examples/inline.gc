@@ -2,7 +2,6 @@ attach lang_adms.so
 
 adms
 `include "discipline.h"
-`include "constants.h"
 module va_cap(p,n);
 	inout p,n;
 	electrical p,n;

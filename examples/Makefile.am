@@ -144,7 +144,7 @@ ADMS_GC_XML=../src/gnucap_0.xml
 	$(GNUCAP) $(lastword $+) 2> 2$*.out | tee $*.out | grep too\ negative ;\
 	[ 0 -ne $$? ]
 
-callfunct1ions.log: callfunctions.out 2callfunctions.out
+callfunctions.log: callfunctions.out 2callfunctions.out
 sensor_chip.log: vbg.so op.so ldo.so
 
 sensor_so: $(SENSOR_SO)
