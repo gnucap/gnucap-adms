@@ -1,5 +1,12 @@
-Tue Aug 21
+0.0.0
  - gnucap-adms available
 
-Sep 01
+0.0.1
  - added opamp device model
+
+0.0.6
+ - support current probes
+ - support voltage source
+ - support idt
+ - add test suite
+ - lang_adms plugin
