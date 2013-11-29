@@ -97,11 +97,17 @@ else
 fi
 
 test "x$prefix" = xNONE &&  prefix=$ac_default_prefix
-libdir=${prefix}/lib/gnucap-adms
+# libdir=${prefix}/lib/gnucap-adms
 
 AC_SUBST([gnucap_libdir])
 AC_SUBST([GC_CPPFLAGS])
 CXXFLAGS+=" -Wall -pedantic"
+AC_DEFINE_UNQUOTED(ADMS_DATADIR, ["$prefix/share/gnucap-adms"], [path to xml files])
+AC_DEFINE_UNQUOTED(ADMS_INCLUDEDIR, ["$prefix/include/gnucap-adms"], [path to include])
+AC_DEFINE_UNQUOTED(ADMS_LIBDIR, ["$prefix/lib/gnucap-adms"], [libdir])
+AC_DEFINE_UNQUOTED(ADMS_CPPFLAGS, ["-I$prefix/include/gnucap-adms"], [pass to cpp])
+AC_DEFINE_UNQUOTED(ADMS_LDFLAGS, ["-L$prefix/lib/gnucap-adms -Wl,-rpath,$prefix/lib/gnucap-adms"], [pass to ld])
+AC_DEFINE_UNQUOTED(ADMS_LIBS, ["-lgnucap_adms"], [link against])
 
 # Checks for library functions.
 
