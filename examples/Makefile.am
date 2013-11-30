@@ -10,8 +10,10 @@ AM_TESTS_ENVIRONMENT = \
            LD_LIBRARY_PATH='../src/.libs'\
            GNUCAP='$(GNUCAP)'\
            GNUCAP_ADMS_DATADIR='$(PWD)/../src'\
+           GNUCAP_ADMS_INCLUDEDIR='$(abs_top_srcdir)/src'\
+           GNUCAP_ADMS_CPPFLAGS='-I$(abs_top_srcdir)/src'\
            GNUCAP_ADMS_LDFLAGS='-L$(abs_top_builddir)/src/.libs'\
-           GNUCAP_ADMS_LIBS='-le_adms'\
+           GNUCAP_ADMS_LIBS='-lgnucap_adms'\
            GNUCAP_ADMS_TMPDIR='$(PWD)/.admstmp'\
            REDIRECT='exec 2>&9'\
            srcdir='$(srcdir)';
@@ -31,7 +33,7 @@ check_LTLIBRARIES = \
     op.la vbg.la ldo.la sensor.la callfunctions.la \
     lamp.la motor.la $(EXT_LA)
 AM_CPPFLAGS = @GC_CPPFLAGS@ -I$(top_srcdir)/src
-LIBS = ../src/libe_adms.la
+LIBS = ../src/libgnucap_adms.la
 AM_LDFLAGS = -module -avoid-version -rpath /dev/null
 
 %.so: %.la
@@ -42,7 +44,12 @@ EXTRA_DIST= \
     $(SENSOR_SO:%.so=%.va) \
     $(SENSOR_SO:%.so=%vm.core.gc) \
     sensor_chip.ckt \
-    callfunctions.va callfunctions.gc callfunctions.sh
+    sensor_chip.gc sensor_chip.ref \
+    callfunctions.va callfunctions.gc callfunctions.sh \
+    opamp.gc opamp.ref \
+    inline.gc inline.ref
+
+sensor_chip.log: $(PWD)/sensor_chip.ckt
 
 TEST_EXTENSIONS = .sh
 AM_TESTS_FD_REDIRECT = 9>&2
@@ -51,7 +58,8 @@ GC_TESTS = \
     sensor.sh \
     lamp.sh motor.sh $(EXT_TESTS) \
     vbg.sh
-CUSTOM_TESTS = callfunctions.sh \
+CUSTOM_TESTS = \
+    callfunctions.sh \
     sensor_chip.sh \
     inline.sh \
     opamp.sh
@@ -64,6 +72,8 @@ cleantmp:
 
 $(GC_TESTS:%.sh=%.log): %.log: %.so
 
+callfunctions.out: callfunctions.so
+
 EXTRA_DIST+= $(GC_TESTS:%.sh=%.gc) $(GC_TESTS:%.sh=%.ref)
 FILTER=cat
 
@@ -75,7 +85,7 @@ callfunctions.sh: %.sh: %.out
 	@echo "rm $*.out" >> $@
 	@chmod +x $@
 
-inline.sh opamp.sh $(GC_TESTS): %.sh: %.gc Makefile %.ref
+sensor_chip.sh inline.sh opamp.sh $(GC_TESTS): %.sh: %.gc Makefile %.ref
 	@echo "#!/bin/sh" > $@
 	@echo "set -e" >> $@
 	@echo "GNUCAP=\$${GNUCAP-$(GNUCAP)}" >> $@
@@ -149,9 +159,11 @@ sensor_chip.log: vbg.so op.so ldo.so
 
 sensor_so: $(SENSOR_SO)
 
-vbg.out sensor_chip.out: \
+vbg.out sensor_chip.log sensor_chip.out: \
     $(SENSOR_SO) $(PWD)/sensor_chip.ckt $(PWD)/opvm.core.gc $(PWD)/vbgvm.core.gc $(PWD)/ldovm.core.gc \
     vbg.so ldo.so sensor.so $(PWD)/sensorvm.core.gc
+
+EXTRA_DIST+= opvm.core.gc vbgvm.core.gc ldovm.core.gc sensorvm.core.gc
 
 $(PWD)/%.ckt: %.ckt
 	[ -f $@ ] || $(LN_S) $< .
@@ -169,7 +181,10 @@ clean-local: clean-ex
 clean-ex:
 	rm -f *.so *.hxx *.h *.cc
 
-CLEANFILES = .*.adms *.out $(GC_TESTS) *.hxx .*.xml
+CLEANFILES = .*.adms *.out $(GC_TESTS) *.hxx .*.xml \
+    callfunctions.sh \
+    inline.sh opamp.sh sensor_chip.sh
+
 
 $(TESTS:%.sh=%.log): .P
 
