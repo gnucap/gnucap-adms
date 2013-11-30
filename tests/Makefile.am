@@ -18,7 +18,7 @@ check_LTLIBRARIES = \
     subcoil.la
 
 AM_CPPFLAGS = @GC_CPPFLAGS@ -I$(top_srcdir)/src
-LIBS = ../src/libe_adms.la
+LIBS = ../src/libgnucap_adms.la
 AM_LDFLAGS = -module -avoid-version -rpath /dev/null
 
 %.so: %.la
@@ -54,7 +54,7 @@ GCUF_TESTS = rc_uic.sh ddc_rc.sh
 # needs work
 XFAIL_TESTS = ddc_rc.sh
 
-EXTRA_DIST = $(TESTS:%.sh=%.ref) $(GC_TESTS:%.sh=%.gc)
+EXTRA_DIST = $(TESTS:%.sh=%.ref) $(GC_TESTS:%.sh=%.gc) rc_uic.gc ddc_rc.gc
 FILTER = cat
 
 $(GCUF_TESTS) $(GC_TESTS) $(EXT_TESTS): %.sh: %.gc Makefile %.ref
@@ -120,7 +120,9 @@ clean-local: clean-examples
 clean-examples:
 	rm -f *.out *.so *.cc *.hxx *.h
 
-CLEANFILES = .*.adms *.out $(GC_TESTS) *.hxx .*.xml
+CLEANFILES = .*.adms *.out $(GC_TESTS) *.hxx .*.xml \
+    rc_uic.sh \
+    ddc_rc.sh
 CLEANFILES+= $(check_LTLIBRARIES:%.la=%.h) \
              $(check_LTLIBRARIES:%.la=%.cc)
 
