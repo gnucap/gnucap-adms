@@ -2540,6 +2540,7 @@ void $(DEV_NAME)::tr_accept()
   <admst:apply-templates select="." match="commonmodel"/>
 
   trace0(&quot;$(DEV_NAME)::tr_accept&quot;);
+  double CKTga0 = 0; // incomplete?
   if (_sim-&gt;analysis_is_dcop() || _sim-&gt;analysis_is_ac()) {
     assert(_dt == NOT_VALID || ::conchk(_dt, _time[0] - _time[1]));
     // int mode;

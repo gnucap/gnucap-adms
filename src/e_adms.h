@@ -300,7 +300,7 @@ inline bool ADMS_BASE::using_ac_eval()const
 /*--------------------------------------------------------------------------*/
 inline void ADMS_BASE::tr_advance()
 {
-	trace1("ADMS_BASE::tr_advance ", _sim->_time0 );
+	trace2("ADMS_BASE::tr_advance ", _sim->_time0, net_nodes());
 	assert(_time[0] < _sim->_time0); // moving forward
 
 	for (int i=OPT::_keep_time_steps-1; i>0; --i) {

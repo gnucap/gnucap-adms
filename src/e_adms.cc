@@ -16,11 +16,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301, USA.
  *------------------------------------------------------------------
- * Base class for adms models (former ELEMENT & STORAGE)
  */
-#include "m_divdiff.h"
-#include "u_xprobe.h"
-#include "e_aux.h"
+#include <m_divdiff.h>
+#include <u_xprobe.h>
+#include <e_aux.h>
 #include "e_adms.h"
 /*--------------------------------------------------------------------------*/
 ADMS_BASE::ADMS_BASE():
@@ -109,8 +108,8 @@ void ADMS_BASE::tr_restore()
 }
 /*--------------------------------------------------------------------------*/
 void ADMS_BASE::dc_advance() // from elt.
-{
-	trace1( "ADMS_BASE::dc_advance " , long_label());
+{ untested();
+	trace2( "ADMS_BASE::dc_advance " , long_label(), net_nodes());
 	assert(_sim->_time0 == 0.); // DC
 
 	bool ass = true;;
@@ -127,10 +126,12 @@ void ADMS_BASE::dc_advance() // from elt.
 	// for (int i = 1;  i < OPT::_keep_time_steps;  ++i) {
 	//  _i[i] = _i[0];
 	// }
+	//
 }
 /*--------------------------------------------------------------------------*/
 void ADMS_BASE::tr_regress()
 {
+  	trace2("ADMS_BASE::tr_regress", long_label(), net_nodes());
 	assert(_time[0] >= _sim->_time0); // moving backwards
 	assert(_time[1] <= _sim->_time0); // but not too far backwards
 
@@ -140,6 +141,22 @@ void ADMS_BASE::tr_regress()
 	_time[0] = _sim->_time0;
 
 	_dt = _time[0] - _time[1];
+#ifdef HAVE_DISCONT
+	method_t m = _method_u;
+
+	DISCONT d = 0;
+	for (unsigned i=0;i < net_nodes(); ++i) { untested();
+		d = d | _n[i]->discont();
+	}
+
+	if (_time[1] == 0) {
+		m = meEULER;
+	} else if (d) { untested();
+		m = meEULER;
+	} else {
+	}
+	_method_a = method_select[OPT::method][m];
+#endif
 }
 /*--------------------------------------------------------------------------*/
 double ADMS_BASE::tr_review_trunc_error(const FPOLY1* q)

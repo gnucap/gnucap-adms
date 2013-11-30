@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.67])
-AC_INIT([gnucap-adms], [0.0.6-rc1], [felix@salfelder.org])
+AC_INIT([gnucap-adms], [0.0.6-rc2], [felix@salfelder.org])
 AC_CONFIG_SRCDIR([README])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
@@ -97,9 +97,11 @@ else
 fi
 
 test "x$prefix" = xNONE &&  prefix=$ac_default_prefix
-# libdir=${prefix}/lib/gnucap-adms
+pkglibdir=${prefix}/lib/gnucap-adms
+libdir=${prefix}/lib
 
 AC_SUBST([gnucap_libdir])
+AC_SUBST([pkglibdir])
 AC_SUBST([GC_CPPFLAGS])
 CXXFLAGS+=" -Wall -pedantic"
 AC_DEFINE_UNQUOTED(ADMS_DATADIR, ["$prefix/share/gnucap-adms"], [path to xml files])
@@ -129,4 +131,5 @@ AC_MSG_RESULT([
    prefix:     $prefix
    CPPFLAGS:   $CPPFLAGS
    plugindir:  $gnucap_libdir
+   pkglibdir:  $pkglibdir
 ])

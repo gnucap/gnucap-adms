@@ -3,12 +3,14 @@ pkgdata_DATA = gnucap_0.xml gnucap_1.xml gnucap_2.xml implicit.xml
 dist_bin_SCRIPTS = gnucap-adms
 DEV=cap res opamp
 EXTRA_DIST = $(DEV:%=%.va) gnucap.xml split.py \
-             discipline.h implicit.xml
+             discipline.h implicit.xml md5.h
 
 gnucap_adms_include_HEADERS = \
     constants.h \
     discipline.h \
-    gnucap-adms.h e_adms.h
+    gnucap-adms.h \
+    e_adms.h
+
 gnucap_adms_includedir = $(pkgincludedir)
 
 # libdir = @gnucap_libdir@
