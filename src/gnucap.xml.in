@@ -4978,11 +4978,13 @@ currently: only called for eval_mode==accept
     <admst:value-to select="source/type" string="fs"/>
   </admst:if>
   <!-- UNTIL HERE -->
+  <admst:variable name="loss" select=""/>
+  <admst:variable name="loss" select="/*flowp*/ 1/OPT::shortckt * " test="[nature=discipline/flow]"/>
   <admst:choose>
     <admst:when test="branch/nnode[grounded='no']">
       <admst:value-of select="branch/nnode/name"/>
       <admst:value-of select="branch/pnode/name"/>
-      <admst:value-to select="/simulator/tmp" value="/* probe */ BP(%s,%s)"/>
+      <admst:value-to select="/simulator/tmp" value="/* probe */ $loss BP(%s,%s)"/>
     </admst:when>
     <admst:otherwise>
       <admst:value-of select="branch/pnode/name"/>
