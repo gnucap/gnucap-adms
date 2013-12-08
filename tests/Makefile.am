@@ -127,6 +127,7 @@ CLEANFILES+= $(check_LTLIBRARIES:%.la=%.h) \
              $(check_LTLIBRARIES:%.la=%.cc)
 
 $(TESTS:%.sh=%.log): .P
+$(TESTS:%.sh=%.out): .P
 
 .P:
 	@:
