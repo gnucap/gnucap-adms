@@ -876,7 +876,7 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
 		bool conchk( Node_thermal a, double reltol=OPT::reltol ) const {
 			return ::conchk(CKT_BASE::_sim->_vt1[_n[a].m_()], _n[a].v0(), abstol_flow_thermal, reltol);
 		}
-  <admst:for-each select="$mydisciplines[./name='degradational']">
+  <admst:for-each select="$mydisciplines[.!='' and ./name='degradational']">
 		bool conchk( Node_degradational a, double reltol=OPT::reltol ) const {
 			return ::conchk(CKT_BASE::_sim->_vt1[_n[a].m_()], _n[a].v0(), abstol_flow_thermal, reltol);
 		}
@@ -4978,11 +4978,13 @@ currently: only called for eval_mode==accept
     <admst:value-to select="source/type" string="fs"/>
   </admst:if>
   <!-- UNTIL HERE -->
+  <admst:variable name="loss" select=""/>
+  <admst:variable name="loss" select="/*flowp*/ 1/OPT::shortckt * " test="[nature=discipline/flow]"/>
   <admst:choose>
     <admst:when test="branch/nnode[grounded='no']">
       <admst:value-of select="branch/nnode/name"/>
       <admst:value-of select="branch/pnode/name"/>
-      <admst:value-to select="/simulator/tmp" value="/* probe */ BP(%s,%s)"/>
+      <admst:value-to select="/simulator/tmp" value="/* probe */ $loss BP(%s,%s)"/>
     </admst:when>
     <admst:otherwise>
       <admst:value-of select="branch/pnode/name"/>

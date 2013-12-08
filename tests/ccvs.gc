@@ -1,0 +1,28 @@
+spice
+.load ./ccvs.so
+
+.verilog
+paramset myccvs ccvsva;
+	.gain = 1k;
+	.offset = 1;
+endparamset
+
+myccvs  h1  (noutp,noutn,ninp,ninn);
+spice
+
+*.nodelist
+
+i1 ninp ninn pulse iv=-1m pv=1m rise=1
+rp ninp ninn 1
+
+* h1 noutp noutn i1 5k
+rload noutp noutn 1
+r2 noutn 0 1
+r3 ninn 0 1
+
+.print dc v(nodes) v(r1) i(h1) i(rp) i(i1)
+.print tran v(nodes) v(r1) i(h1) i(rp)
+
+.dc trace=i
+.tran 0 1 .1 trace=n
+.end
