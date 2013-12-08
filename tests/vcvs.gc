@@ -1,0 +1,22 @@
+spice
+
+.load ./vcvs.so
+
+.verilog
+paramset mye vavcvs;
+	.gain = 5;
+endparamset
+
+mye  e1  (nout,0,nin,0);
+spice
+
+.nodelist
+
+v1 nin 0 1
+
+
+.print dc v(nodes) i(r1)
+
+.dc trace=i dm
+.end
+.tran 0 1 1

@@ -1,0 +1,110 @@
+`include "discipline.h"
+`include "constants.h"
+`define PI  	3.14159265358979323846264338327950288419716939937511
+
+//    gain           = gain []
+//    freq_unitygain = unity gain frequency [Hz]
+//    r_in            = input resistance [Ohms]
+//    vin_offset     = input offset voltage referred to negative [V]
+//    ibias          = input current [A]
+//    iin_max           = maximum current [A]
+//    slew_rate      = slew rate [A/F]
+//    r_out           = output resistance [Ohms]
+//    vsoft          = soft output limiting value [V]
+//
+// MODEL parameters
+//    {none}
+//
+
+
+
+
+module someop(out, vref, inp, inn, vddp, vddn);
+	inout  out, vref, inp, inn, vddp, vddn;
+	electrical out, vref, inp, inn, vddp, vddn;
+
+	// parameter
+	parameter real gain = 2e5;
+	parameter real Rin = 2e6;
+	parameter real Rinp = 2000e6;
+	parameter real Rinn = 2000e6;
+	parameter real Rout = 75;
+	parameter real Sr = 5e5;
+	parameter real f0dB = 1e6;
+	parameter real output_range = 0.70;
+
+	// internal
+	parameter R1 = 100e6;
+	parameter Rf = 10;
+
+	// precalculated
+	real C1; (*ask="yes"*)
+	real gm1; (*ask="yes"*)
+	real gm2; (*ask="yes"*)
+	real Im; (*ask="yes"*)
+	real Vk; (*ask="yes"*)
+	real w0; (*ask="yes"*)
+	real w1; (*ask="yes"*)
+
+	real sup; (*ask="yes"*)
+	real vv1; (*ask="yes"*)
+	real vvout; (*ask="yes"*)
+
+	real i_unlim; (*ask="yes"*)
+   real _circuit_gmin;
+
+	electrical v1;
+ 	analog begin
+
+	@ initial_model begin
+		w0 = 2 * `PI * f0dB;
+		w1 = w0 / gain;
+		C1 = 1 / (w1*R1);	// w1 = 1/(C1*R1)
+		gm2 = 1 / Rout;
+		gm1 = gain / R1;		// gain = gm1 * R1 * gm2 * Rout
+		Im = C1 * Sr;		// |dV/dt| = 1/C * |i| <= Im / C
+		Vk = Im / gm1;
+	end
+
+	vv1 = V(v1,vref);
+
+	// input stage
+	I(inp, vref) <+ V(inp, vref) / Rinp;
+	I(inn, vref) <+ V(inn, vref) / Rinn;
+	I(inp, inn) <+ V(inp, inn) / Rin;
+
+	// w1
+	I(v1, vref) <+ C1 * ddt(V(v1, vref));
+	I(v1, vref) <+ V(v1, vref) / R1; 
+
+	// slew rate
+	i_unlim = gm1* V(inp, inn);
+	if( i_unlim > Im  ) i_unlim = Im;
+	if( i_unlim < -Im ) i_unlim = -Im;
+
+	// output stage
+	sup = V(vddp,vddn);
+
+//		if( vv1 > 1.3   && i_unlim > 0 ) i_unlim = 0;
+//		if( vv1 < -1.3  &&  i_unlim < 0 ) i_unlim =  0;
+//		if( vv1 > output_range*sup/2   && i_unlim > 0 ) i_unlim = 0;
+//		if( vv1 < -1*output_range*sup/2 &&  i_unlim < 0 ) i_unlim =  0;
+
+	I(vref, v1) <+ i_unlim;
+
+	vvout = V(v1, vref)+sup/2; // Asymetrisch um zw. die Vdd und vss zu kommen
+//	vvout = tanh(V(v1, vref)-sup/2)*sup/2+sup/2;
+	I(vref, out) <+ gm2 * vvout; //  * V(vddp,vddn);
+	I(vref, out) <+ V(vref, out) * gm2 + _circuit_gmin;
+
+
+	// finite output swing
+	if( V(v1,vref) > 1.7 ) I(v1, vref) <+ (V(v1, vref)-1.7) / Rf;
+	if( V(v1,vref) < -1.7 ) I(v1, vref) <+ (V(v1, vref)+1.7) / Rf;
+//	if( V(v1,vref) > output_range*sup/2 ) I(v1, vref) <+ (V(v1, vref)-output_range*sup/2) / Rf;
+//	if( V(v1,vref) < -1*output_range*sup/2 ) I(v1, vref) <+ (V(v1, vref)+output_range*sup/2) / Rf;
+	end
+endmodule
+
+
+

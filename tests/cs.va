@@ -1,0 +1,16 @@
+// Copyright 2013 Felix
+// voltage source
+
+`include "discipline.h"
+`include "constants.h"
+
+module cs(p,n);
+	inout p,n;
+	electrical p,n;
+
+	parameter real current    = 1 from [0:inf);
+
+	analog begin	
+		I(p,n) <+ current;
+   end
+endmodule

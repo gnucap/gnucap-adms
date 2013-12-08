@@ -1,0 +1,22 @@
+spice
+
+.load ./vccs.so
+
+.verilog
+paramset myg vavccs;
+	.gain = 5;
+endparamset
+
+myg  g1  (np,nn,nin,nd);
+spice
+
+rd 0 nd 1
+v1 nin nd 1m
+r1 np nn 1
+
+
+.print dc v(nodes) i(r1)
+
+.dc trace=i dm
+.end
+.tran 0 1 1

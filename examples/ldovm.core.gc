@@ -1,0 +1,18 @@
+* Verilog Wrapper for behavioral model of low drop regulator ldo
+
+* this file is part of gnucap-adms
+* Copyright (C) 2013 Lars Hedrich, Felix Salfelder
+* License GPLv3 (or later)
+
+.load ./ldo.so
+.verilog
+
+paramset myldo ldo;
+.rout=2;
+endparamset
+
+module ldo101b (vbg2, nout, vrs, vdd, gnd);
+myldo LDO1 (vbg2, nout, vrs, vdd, gnd);
+endmodule
+
+spice

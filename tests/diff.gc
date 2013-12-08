@@ -1,0 +1,29 @@
+spice
+
+*.options method=euler
+.options initsc 1
+.load ./diff.so
+
+.verilog
+paramset myddt diff;
+	.gain=2;
+endparamset
+
+myddt ddt1 (nddt, 0, n1, 0);
+spice
+
+V1 n1 0 pulse iv=0 pv=1m rise=1m delay=1n width=4m period=8m fall=1m
+R1 nddt n2 100
+C1 n2 0 1u
+
+.nodelist
+
+.print dc v(nodes) i(R*)
+.dc
+
+.list
+.print tran v(nodes) state0(ddt1) hidden(0) dis(n*) v(C1)
+.tran 0 10m 10m basic trace=a
+
+.stat notime
+.end

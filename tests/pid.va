@@ -1,0 +1,20 @@
+//
+// integrator variants
+
+`include "discipline.h"
+`include "constants.h"
+
+module pid(sp,sn,cp,cn);
+	inout sp,sn,cp,cn;
+	electrical sp,sn,cp,cn;
+
+	parameter real p = 1 from [0:inf);
+	parameter real i = 1 from [0:inf);
+	parameter real d = 1 from [0:inf);
+
+	analog begin
+		V(sp,sn) <+ p * V(cp,cn);
+		V(sp,sn) <+ i * idt(V(cp,cn));
+		V(sp,sn) <+ d * ddt(V(cp,cn));
+   end
+endmodule

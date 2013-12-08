@@ -1,0 +1,106 @@
+`include "discipline.h"
+`include "constants.h"
+
+module drucksensor(nout, pout, p_in, ndd, ngnd);
+	inout nout, pout, p_in, ndd, ngnd ;
+	electrical nout, pout, p_in, ndd, ngnd ;
+
+	parameter real beta     = 0.0054;   // temp coeff Ni [1/K]
+	parameter real Rnull    = 6200;     // bridge resistance [Ohm]
+	parameter real G_b      = 0.8e-6;   // Waermeleitungs-Leitwert Bruecke [W/K]
+	parameter real sigma    = 5.67e-8;  // [W/(m^2*K)] Stefan Boltzmann Konstante
+	parameter real epsilon  = 0.03;     // 0 Spiegel, 1 Schwarz ,0.03 Gold
+	parameter real Area     = 2e-3*2e-3;// Flaeche in m^2
+	parameter real lambda0  = 0.0256;   // Wärmeleitfähigkeit Luft bei 1013mbar [W/(m*K)]
+	parameter real lquerLuft= 6.65e-5;  // air at 300K lquer*p=koeff [m mbar]
+	parameter real k        = 1.8;      // G(p) correction
+	parameter real a        = 0.77;     // accomodation
+	parameter real d1       = 50e-6;    // distance sensor to bridge [m]
+	parameter real d2       = 300e-6;   // distance sensor to socket [m]
+	parameter real ub0      = 3;        // bridge voltage [V]
+	parameter real C_waerm  = 1e-8;     // membrane capacitance [J/K?]
+
+	real deltaT (*ask="yes"*);// Temperaturerhöhung gegen Umgebung
+	real up (*ask="yes"*);
+	real R_p (*ask="yes"*);   // Druckabhaengiger Widerstand
+	real R_k (*ask="yes"*);   // Kompensation
+	real Gp (*ask="yes"*);    // Druckabhaengiger Waermeleitwert
+	real T       (*info="Temperatur" ask="yes"*);
+	real PStr (*ask="yes"*);  // Waermestrahlungsleistung
+	real PSum (*ask="yes"*);  // alle Ps
+	real PHeiz (*ask="yes"*);  // Heizleistung
+	real PLeit (*ask="yes"*);  // Waermeleistung
+	real PSonst (*ask="yes"*);  // Waermeleistung
+	real lquer (*ask="yes"*); // mittlere freie Weglänge
+	real t4 (*ask="yes"*);
+   real _circuit_gmin;
+
+   thermal t1;
+
+	analog begin
+		@ initial_step begin
+			up = 3/2;
+			R_k =Rnull;
+			t4 = pow(273.15,4);
+			t4 = pow($temperature,4); // funktioniert nicht, warum ? 
+		end
+   
+// Bruecke mit
+//
+//            o UB
+//       _____|_____
+//       |         |
+//      [ ] R_k   [ ] Rnull
+//      [ ]       [ ]
+//       |         |
+//pout o_|         |_o nout
+//       |         |
+//      [ ] R_p   [ ] Rnull
+//      [ ]       [ ]
+//       |_________|
+//           _|_
+//
+//  R_p (p_in) = Rnull(1+beta*deltaT(p))
+//  deltaT, s.u.
+//
+		up = V(pout,ngnd);
+//		up= 1.5; // damit wird es etwas stabiler ...
+
+		T = Temp(t1);
+		PStr = epsilon * sigma * Area * (T*T*T*T-t4);
+
+		deltaT = Temp(t1) - $temperature;
+		lquer = lquerLuft/(V(p_in,ngnd)+1E-9);
+		//1E-9 eingefuegt um Division durch 0 zu vermeiden
+		Gp = k*(lambda0/(1+2*(2-a)/a*lquer/d1)*Area/d1
+                       +lambda0/(1+2*(2-a)/a*lquer/d2)*Area/d2);
+                 
+		R_p = Rnull*(1.0+beta*deltaT);
+		if ( deltaT < 0 ) R_p = Rnull;
+// wichtig um zweiten hinrissigen stabilen Arbeitspunkt bei negativer Temperatur zu verhindern und dann hier negativem Widerstand 
+
+
+ 		Pwr(t1) <+ up*up/(R_p);             // Heizung
+ 		Pwr(t1) <+ -( G_b + Gp )*deltaT;    // Waermeleitung 
+ 		Pwr(t1) <+ - PStr;                  // Strahlung
+                Pwr(t1) <+  _circuit_gmin*deltaT;   // zur Herbeifuehrung der Konvergenz
+		Pwr(t1) <+ - C_waerm * ddt(deltaT); // W"armekapazit"at
+
+// die hier nur zum debuggen... 
+                PSum = up*up/(R_p) - ( G_b + Gp )*deltaT - PStr + _circuit_gmin*deltaT;;
+                PHeiz = up*up/(R_p);
+                PLeit = ( G_b + Gp )*deltaT;
+                PSonst =_circuit_gmin*deltaT ;
+
+
+		I(ndd) <+ -1*V(ndd,nout)/Rnull - V(ndd,pout)/R_k ;
+		I(pout) <+ V(ndd,pout)/R_k - V(pout,ngnd)/R_p;
+		I(nout) <+ V(ndd,nout)/Rnull - V(nout,ngnd)/Rnull;
+		I(ngnd) <+ V(nout,ngnd)/Rnull + V(pout,ngnd)/R_p  ;
+
+		if ( deltaT < 0 ) $strobe("sensor cooler than environment (by %fK)", deltaT);
+
+	end
+endmodule
+
+

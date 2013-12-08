@@ -1,0 +1,24 @@
+* Wrapper for op amp model
+
+* this file is part of gnucap-adms
+* Copyright (C) 2013 Lars Hedrich, Felix Salfelder
+* License GPLv3 (or later)
+
+
+.load ./op.so
+
+.verilog
+paramset myota someop;
+.gain=1820000;
+.f0dB=1e6;
+.Sr=5e5;
+endparamset
+
+spice
+.verilog
+
+module op103b (nout, ninp, ninn, vdd, gnd);
+myota OTA0 (nout, gnd, ninp, ninn, vdd, gnd);
+endmodule
+
+spice

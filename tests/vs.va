@@ -1,0 +1,48 @@
+// Copyright 2013 Felix
+//
+// voltage source variants
+
+`include "discipline.h"
+`include "constants.h"
+
+module vsauto(p,n);
+	inout p,n;
+	electrical p,n;
+
+	parameter real voltage    = 1 from [0:inf);
+
+	real loss;
+	analog begin	
+		V(p,n) <+ voltage;
+//		I(p,n) <+ 0*V(p,n); // fixme, guesstopology bug
+   end
+endmodule
+
+module vsideal(p,n);
+	inout p,n;
+	electrical p,n;
+	electrical q;
+
+	parameter real voltage    = 1 from [0:inf);
+
+	real loss;
+	analog begin	
+		I(q) <+ voltage - V(p,n);
+		I(p,n) <+ V(q);
+   end
+endmodule
+
+module vsreal(p,n);
+	inout p,n;
+	electrical p,n;
+
+	parameter real voltage    = 1 from [0:inf);
+	parameter real loss       = 1e9 from [0:inf);
+
+	real i (*ask="yes"*);
+
+	analog begin	
+		i = (V(p,n)-voltage)*loss;
+		I(p,n) <+ i;
+   end
+endmodule

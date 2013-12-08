@@ -1,0 +1,24 @@
+spice
+
+.load ./pid.so
+.options initsc 1
+
+.verilog
+paramset mypid pid;
+	.p=1;
+	.i=1;
+	.d=1m;
+endparamset
+
+mypid pid1 (nr, 0, n1, 0);
+spice
+
+V1 n1 0 pulse iv=0 pv=1 rise=2m delay=0 width=4m period=12m fall=1m
+
+.print dc v(nodes)
+.dc
+
+.list
+.print tran v(nodes) state0(pid1) state1(pid1)
+.tran 0 10m .5m basic trace=n
+.end

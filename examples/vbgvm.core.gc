@@ -1,0 +1,17 @@
+* Wrapper for behavioral model of bandgap
+
+* this file is part of gnucap-adms
+* Copyright (C) 2013 Lars Hedrich, Felix Salfelder
+* License GPLv3 (or later)
+
+.load ./vbg.so
+.verilog
+paramset myvbg vbg;
+.rout=994;
+endparamset
+
+module vbg102b (vbg2, bvbg, vdd, gnd);
+myvbg VBG1 (vbg2, bvbg, vdd, gnd);
+endmodule
+
+spice
