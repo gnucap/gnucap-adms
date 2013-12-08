@@ -1,0 +1,21 @@
+spice
+.load ./vbg.so
+.verilog
+paramset myvbg vbg;
+.rout=994;
+endparamset
+
+myvbg VBG1 (vbg2, bvbg, ndd, 0);
+
+spice
+
+V1 ndd 0 2.3
+Vb bvbg 0 pulse iv=0 pv=2 rise=1
+
+R1 vbg2 0 10k
+
+.print dc v(nodes) r(r1)
+.dc vb 1 2 .5 R1 1 1k * 10
+.print tran v(nodes)
+.tr 0 1 .05 trace=n
+.end
