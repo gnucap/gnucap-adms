@@ -45,7 +45,7 @@ EXTRA_DIST= \
     $(SENSOR_SO:%.so=%vm.core.gc) \
     sensor_chip.ckt \
     sensor_chip.gc sensor_chip.ref \
-    callfunctions.va callfunctions.gc callfunctions.sh \
+    callfunctions.va callfunctions.gc \
     opamp.gc opamp.ref \
     inline.gc inline.ref
 
