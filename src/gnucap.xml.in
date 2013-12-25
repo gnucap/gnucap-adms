@@ -2745,7 +2745,7 @@ void $(DEV_NAME)::ac_eval()
 	USE(m); assert(m);
 
 	double CKTag0 = 1.; USE(CKTag0); // BUG (necessary?)
-	double CKTga0 = 1.; USE(CKTag0); // BUG (necessary?)
+	double CKTga0 = 1.; USE(CKTga0); // BUG (necessary?)
 	double ddtone = 1.; USE(ddtone); // not necessary in the end?
 
 <admst:for-each select="$(ddts)">
