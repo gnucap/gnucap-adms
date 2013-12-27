@@ -301,16 +301,25 @@ inline bool ADMS_BASE::using_ac_eval()const
 inline void ADMS_BASE::tr_advance()
 {
 	trace2("ADMS_BASE::tr_advance ", _sim->_time0, net_nodes());
+#ifdef USE_DTIME
+	double delta = _time[0];
+#else
+	double delta = 0;
 	assert(_time[0] < _sim->_time0); // moving forward
+#endif
 
 	for (int i=OPT::_keep_time_steps-1; i>0; --i) {
-		assert(_time[i] < _time[i-1] || _time[i] == 0.);
-		_time[i] = _time[i-1];
-//		_y[i] = _y[i-1];
+		assert(delta || _time[i] < _time[i-1] || _time[i] == 0.);
+		_time[i] = _time[i-1] - delta;
 	}
-	_time[0] = _sim->_time0;
 
+#ifdef USE_DTIME
+	_time[0] = _sim->_dt0;
+	_dt = _time[0];
+#else
+	_time[0] = _sim->_time0;
 	_dt = _time[0] - _time[1];
+#endif
 
 #ifdef HAVE_DISCONT
 	method_t m = _method_u;
