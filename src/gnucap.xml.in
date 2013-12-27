@@ -251,7 +251,9 @@
 <admst:open file="$(filename).h">
 #include &lt;stdio.h&gt;
 #include &lt;math.h&gt;
-#define ADD_VERSION
+#ifndef ADD_VERSION
+# define ADD_VERSION
+#endif
 #include &lt;globals.h&gt;
 
 #include &lt;u_xprobe.h&gt;
