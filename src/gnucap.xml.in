@@ -2771,7 +2771,8 @@ double $(DEV_NAME)::tr_c_to_g(double c, double g)const
 //	}
 
 	if (_sim-&gt;analysis_is_static()) {
-		assert(_time[0] == 0.);
+		if (_time[0] != 0.) { untested();
+		}
 		return 0.;
 	}else if (_sim-&gt;analysis_is_restore()) {itested();
 		// assert(_time[0] &gt; 0); not necessarily in rc_uic.gc
