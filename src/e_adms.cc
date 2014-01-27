@@ -114,11 +114,9 @@ void ADMS_BASE::dc_advance() // from elt.
 
 	bool ass = true;;
 
-	for (int i=OPT::_keep_time_steps-1; i>=0; --i) {
-		trace3("ADMS_BASE::dc_advance", long_label(), i, _time[i]);
-		ass &= _time[i] == 0.;
+	for (int i=OPT::_keep_time_steps-1; i>=0; --i) { itested();
+		_time[i] = _sim->_time0;
 	}
-	if(!ass) { untested(); }
 
 	_dt = NOT_VALID;
 
