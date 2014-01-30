@@ -827,7 +827,7 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
 		}
 		assert(_dt != 0.0);
 		METHOD method;
-		if( (_time[1]!=0) && (_method_a==mTRAP)) { untested();
+		if( (_time[1]!=0) && (_method_a==mTRAP)) { // incomplete(); ... later
 			method = mTRAP;
 		} else { untested();
 			method = mEULER;
