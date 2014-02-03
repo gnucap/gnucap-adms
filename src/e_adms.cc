@@ -112,8 +112,6 @@ void ADMS_BASE::dc_advance() // from elt.
 	trace2( "ADMS_BASE::dc_advance " , long_label(), net_nodes());
 	assert(_sim->_time0 == 0.); // DC
 
-	bool ass = true;;
-
 	for (int i=OPT::_keep_time_steps-1; i>=0; --i) { itested();
 		_time[i] = _sim->_time0;
 	}

@@ -367,6 +367,7 @@ inline double ADMS_BASE::tr_c_to_g(double c, double g)const
 			case mTRAPEULER: incomplete();
 			case mEULER: /* g *= 1 */	break;
 			case mTRAP:	 g *= 2;	break;
+			default: incomplete();
 		}
 		return g;
 	}
