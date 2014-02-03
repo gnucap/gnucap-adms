@@ -1,7 +1,7 @@
 spice
 
 *.options method=euler
-.options initsc 1
+*.options initsc 1
 .load ./mul.so
 
 .verilog
