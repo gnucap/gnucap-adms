@@ -102,6 +102,7 @@ LANG_ADMS::LANG_ADMS()
 void LANG_ADMS::init()
 {
   _lines.clear();
+  _lines.push_back("//" PATCHLEVEL "\n");
   __md5_init_ctx (&_md5_ctx);
 }
 /*--------------------------------------------------------------------------*/
