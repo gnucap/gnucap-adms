@@ -140,9 +140,9 @@ void ADMS_BASE::tr_regress()
 #ifdef HAVE_DISCONT
 	method_t m = _method_u;
 
-	DISCONT d = 0;
+	DISCONT d = disNONE;
 	for (unsigned i=0;i < net_nodes(); ++i) { untested();
-		d = d | _n[i]->discont();
+		d |= _n[i]->discont();
 	}
 
 	if (_time[1] == 0) {

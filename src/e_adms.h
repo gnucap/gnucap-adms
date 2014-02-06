@@ -316,7 +316,7 @@ inline void ADMS_BASE::tr_advance()
 	method_t m = _method_u;
 	trace1("tr_advance", long_label());
 
-	DISCONT d = 0;
+	DISCONT d = disNONE;
 	for (unsigned i=0;i < net_nodes(); ++i) {
 		d |= _n[i]->discont();
 	}
