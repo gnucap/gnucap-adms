@@ -30,6 +30,7 @@
 
 <!-- prefix for local variables -->
 <admst:variable name="var_prefix" select="v_"/>
+<admst:variable name="af_prefix" select="af_"/>
 <admst:variable name="instancevar" select="d->"/>
 <admst:variable name="modelvar" select="m->"/>
 <admst:variable name="node_prefix" select="n_"/>
@@ -1261,7 +1262,7 @@ and name!='initializeInstance')]">
         <admst:choose>
           <admst:when test="[parametertype='model']">
             <admst:value-of select="name"/>
-            <admst:value-to select="/simulator/tmp" value="m->$var_prefix)%s.has_good_value())"/>
+            <admst:value-to select="/simulator/tmp" value="$(modelvar)$var_prefix)%s.has_good_value())"/>
           </admst:when>
           <admst:when test="[parametertype='instance']">
             <admst:value-of select="name"/>
@@ -3731,6 +3732,7 @@ currently: only called for eval_mode==accept
 </admst:template>
 
 <!-- -------------------------------------------------------------- -->
+<!-- IMPLEMENTED TWICE. (1), unused? no! -->
 <admst:template match="function">
   <admst:message format="* check: old function template l. 3643?\n"/>
   <admst:choose>
@@ -4037,6 +4039,7 @@ currently: only called for eval_mode==accept
         <admst:otherwise>
           <admst:value-of select="name"/>
           <admst:variable name="function" select="%s"/>
+			 <admst:variable name="function" test="[class!='builtin']" select="$(af_prefix)$(function)"/>
           <admst:variable name="args" select=""/>
           <admst:for-each select="arguments">
             <admst:value-of select="position(.)"/>
@@ -4083,7 +4086,7 @@ currently: only called for eval_mode==accept
 
 <!-- ----------------------------------------------------------------- -->
 <admst:template match="function:analysis">
-<admst:message test="[/dbg_xml='yes']" format="*(ngspvers)function:analysis*\n"/>
+  <admst:message test="[/dbg_xml='yes']" format="*(ngspvers)function:analysis*\n"/>
   <admst:value-of select="name"/>
   <admst:variable name="function" select="%s"/>
   <admst:variable name="args" select=""/>
@@ -4103,7 +4106,7 @@ currently: only called for eval_mode==accept
       <admst:error format="$function($args): replaced by 0.0\n"/>
     </admst:when>
     <admst:otherwise>
-      <admst:error format="$function($args) -- not implemented in ngspice interface\n"/>
+      <admst:error format="$function($args) -- not implemented in this interface\n"/>
     </admst:otherwise>
   </admst:choose>
 </admst:template>
@@ -4404,7 +4407,7 @@ currently: only called for eval_mode==accept
 <admst:template match="ddx:function:computation:reference">
   <admst:message test="[/dbg_xml='yes']" format="*(ngspvers)ddx:function:computation\n"/>
   <admst:if test="[datatypename='contribution' or lhs/insource='yes']">
-	  <!-- <admst:if test="lhs[insource='yes']"> -->
+    <!-- <admst:if test="lhs[insource='yes']"> -->
     <admst:if test="rhs[hasVoltageDependentFunction='yes']">
       <admst:text format="#if defined(_DERIVATE)\n"/>
       <admst:for-each select="rhs/function">
@@ -4594,8 +4597,8 @@ currently: only called for eval_mode==accept
         </admst:if>
       </admst:for-each>
     </admst:if> <!-- _DERIVATE -->
-	 <admst:if test="[$_DERIVATE!='yes']">/*no _DERIVATE*/</admst:if>
-	 <admst:if test="[$_DERIVATE='yes']"> // derivate... %(.)
+    <admst:if test="[$_DERIVATE!='yes']">/*no _DERIVATE*/</admst:if>
+    <admst:if test="[$_DERIVATE='yes']"> // derivate... %(.)
 
       <admst:for-each select="rhs/function">
         <admst:if test="arguments[count(.)=1]">
@@ -5160,11 +5163,11 @@ currently: only called for eval_mode==accept
 </admst:template>
 
 <!-- ----------------------------------------------------------------- -->
-<!-- variable:rhs -->
+<!-- variable:rhs IMPLEMENTED TWICE (1) -->
 <admst:template match="variable">
   <admst:value-of select="name"/>
   <admst:if test="[parametertype='analogfunction']">
-    <admst:value-to select="/simulator/tmp" value="%s"/>
+	  <admst:value-to select="/simulator/tmp" value=" /*af*/ $(af_prefix)%s"/>
   </admst:if>
   <admst:if test="[input='yes' and parametertype='model']">
     <admst:value-to select="/simulator/tmp" value="m-&gt;$(var_prefix)%s"/>
@@ -5668,7 +5671,7 @@ currently: only called for eval_mode==accept
       </admst:if>
     </admst:when>
 
-    <admst:when test="adms[datatypename='function']">
+	 <admst:when test="adms[datatypename='function']">/*FF*/
       <admst:apply-templates select="." match="afunction:getname">
         <admst:variable name="function" select="%(returned('afunction:getname')/value)"/>
       </admst:apply-templates>
@@ -5911,17 +5914,16 @@ currently: only called for eval_mode==accept
   <admst:for-each select="/module/analogfunction">
     <admst:variable name="function" select="%(name)"/>
 \t\t
-    <admst:apply-templates select="." match="v2c:converttype"/> $function (
+    <admst:apply-templates select="." match="v2c:converttype"/> $(af_prefix)$(function) (
     <admst:join select="variable[input='yes']" separator=", ">
-      <admst:apply-templates select="." match="v2c:converttype"/>
-      <admst:text format=" %(name)"/>
+      <admst:apply-templates select="." match="v2c:converttype"/> %(name)
     </admst:join>);
 \t\t
-    <admst:apply-templates select="." match="v2c:converttype"/> d_$(function) (
+    <admst:apply-templates select="." match="v2c:converttype"/> d_$(af_prefix)$(function) (
     <admst:join select="variable[input='yes']" separator=", ">
-      <admst:apply-templates select="." match="v2c:converttype"/><admst:text format=" %(name)"/>
+      <admst:apply-templates select="." match="v2c:converttype"/> %(name)
     </admst:join>, <admst:join select="variable[input='yes']" separator=", ">
-      <admst:apply-templates select="." match="v2c:converttype"/><admst:text format=" d_%(name)"/>
+      <admst:apply-templates select="." match="v2c:converttype"/> d_%(name)
     </admst:join>);
   </admst:for-each>
 </admst:template>
@@ -5930,31 +5932,29 @@ currently: only called for eval_mode==accept
   <admst:for-each select="/module/analogfunction">
     <admst:variable name="globalanalogfunction" select="%(.)"/>
     <admst:variable name="function" select="%(name)"/>
-    <admst:apply-templates select="." match="v2c:converttype"/>
-$(DEV_NAME)::$function (
+    <admst:apply-templates select="." match="v2c:converttype"/> \
+$(DEV_NAME)::$(af_prefix)$function (
     <admst:join select="variable[input='yes']" separator=", ">
-      <admst:apply-templates select="." match="v2c:converttype"/><admst:text format=" %(name)"/>
+      <admst:apply-templates select="." match="v2c:converttype"/> %(name)
     </admst:join>)
 {
     <admst:text format="\tdouble $function; "/>
     <admst:for-each select="variable[input='no' and output='no']">
-      <admst:apply-templates select="." match="v2c:converttype"/>
-      <admst:text format=" %(name);\n"/>
+      <admst:apply-templates select="." match="v2c:converttype"/> d_%(name);
     </admst:for-each>
     <admst:apply-templates select="tree" match="af:print">
       <admst:text format="%(returned('x')/value)"/>
     </admst:apply-templates>
 return $function;
 }
-double $(DEV_NAME)::d_$(function) (
+double $(DEV_NAME)::d_$(af_prefix)$(function) (
     <admst:join select="variable[input='yes']" separator=", ">
 
     <admst:apply-templates select="." match="v2c:converttype"/>
     <admst:text format=" %(name)"/>
     </admst:join>,
     <admst:join select="variable[input='yes']" separator=", ">
-      <admst:apply-templates select="." match="v2c:converttype"/>
-      <admst:text format=" d_%(name)"/>
+      <admst:apply-templates select="." match="v2c:converttype"/> d_%(name)
     </admst:join>)
 {
     <admst:text format="double $function"/>
@@ -7243,22 +7243,26 @@ return
     value="%(name)_%($pprobe/nature/access)%($pprobe/branch/pnode/name)_%($pprobe/branch/nnode/name)"/>
 </admst:template>
 <!-- -------------------------------------------------- -->
+<!-- variable:rhs IMPLEMENTED TWICE (2) -->
 <admst:template match="variable">
   <admst:choose>
+    <admst:when test="[parametertype='analogfunction']">
+      <admst:variable name="e" select="$(af_prefix)%(name)"/>
+    </admst:when>
     <admst:when test="[input='yes' and parametertype='model']">
-      <admst:variable name="e" select="m-&gt;$(var_prefix)%(name)"/>
+      <admst:variable name="e" select="$(modelvar)$(var_prefix)%(name)"/>
     </admst:when>
     <admst:when test="[input='yes' and parametertype='instance']">
       <admst:variable name="e" select="$(instancevar)$(var_prefix)%(name)"/>
     </admst:when>
     <admst:when test="[input='no' and scope='global_model']">
-      <admst:variable name="e" select="m-&gt;$(var_prefix)%(name)"/>
+      <admst:variable name="e" select="$(modelvar)$(var_prefix)%(name)"/>
     </admst:when>
     <admst:when test="[input='no' and scope='global_instance']">
       <admst:variable name="e" select="$(var_prefix)%(name)"/>
     </admst:when>
     <admst:otherwise>
-      <admst:variable name="e" select="%(name)"/>
+      <admst:variable name="e" select=" /*e*/ %(name)"/>
     </admst:otherwise>
   </admst:choose>
 
@@ -7990,8 +7994,10 @@ return
   </admst:if>
 </admst:template>
 <!-- -------------------------------------------------- -->
+<!-- IMPLEMENTED TWICE. (2) -->
 <admst:template match="function">
-<admst:message test="[/dbg_xml='yes']" format="*(tr_eval)function*\n"/>
+  <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)function*\n"/>
+  /*F*/
   <admst:choose>
     <admst:when test="[name='absdelay']">
       <admst:apply-templates select="arguments[1]" match="ddx"/>
@@ -8164,6 +8170,7 @@ return
     </admst:when>
     <admst:otherwise>
       <admst:variable name="fname" select="%(funcname(.)/[name='fname']/value)"/>
+		<admst:variable name="fname" test="[class!='builtin']" select="$(af_prefix)$(fname)"/>
       <admst:variable name="args" select=""/>
       <admst:for-each select="arguments">
         <admst:if test="[$args!='']">
@@ -8697,7 +8704,7 @@ return
             <admst:text format="$e = "/> %(e(rhs/tree)) <admst:text format=" /*tree, incomplete.*/ \n"/>
           </admst:if>
           <admst:if test="[$eval_kept='no']">
-          <admst:text format="double x%(adms/id(.)) = $e = "/> %(e(rhs/tree)) ;
+            <admst:text format="double x%(adms/id(.)) = $e = "/> %(e(rhs/tree)); // ...
 		assert(is_number(x%(adms/id(.)))); /*tree7704*/
           </admst:if>
         <!--<admst:text format="EXIT_IF_ISNAN($e)\n"/>-->
