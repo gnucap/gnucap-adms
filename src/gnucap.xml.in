@@ -30,7 +30,7 @@
 
 <!-- prefix for local variables -->
 <admst:variable name="var_prefix" select="v_"/>
-<admst:variable name="instancevar" select="c->"/>
+<admst:variable name="instancevar" select="d->"/>
 <admst:variable name="modelvar" select="m->"/>
 <admst:variable name="node_prefix" select="n_"/>
 <admst:variable name="cont_prefix" select="c_"/>
@@ -456,13 +456,30 @@ class $(DEV_NAME) : public ADMS_BASE
 	private:
 		std::string _modelname;
 		node_t _nodes[ %(count(node[grounded='no'])) ];
-
+#ifdef HAVE_PARA_BASE
+		static std::map&lt;string, PARA_BASE $(DEV_NAME)::*&gt; param_dict;
+		static std::map&lt;string, PARA_BASE $(DEV_NAME)::*&gt; param_dict_low;
+#endif
 	private:
 		explicit $(DEV_NAME)(const $(DEV_NAME)&amp; p);
 	public:
 		explicit $(DEV_NAME)();
 		~$(DEV_NAME)();
+	public: // global_instance input
 
+<admst:for-each select="variable[input='yes' and scope='global_instance']">
+  <admst:choose>
+    <admst:when test="[type='real']">
+      <admst:text format="\t\tPARAMETER&lt;double&gt; $(var_prefix)%(.);\n"/>
+    </admst:when>
+    <admst:when test="[type='integer']">
+      <admst:text format="\t\tPARAMETER&lt;int&gt; $(var_prefix)%(.);\n"/>
+    </admst:when>
+    <admst:otherwise>
+      <admst:fatal format="type of verilog-parameter is not real or integer\n"/>
+    </admst:otherwise>
+  </admst:choose>
+</admst:for-each>
 	protected: // override virtual
 		char id_letter()const	{untested();return SPICE_LETTER[0];}
 		bool print_type_in_spice()const {return true;}
@@ -962,22 +979,6 @@ class $(COMMON_NAME) : public COMMON_COMPONENT
 		PARAMETER&lt;double&gt; ic_state_%(adms/id(.)); // %(.)
   </admst:for-each>
 </admst:if>
-
-	public: // global_instance input
-
-<admst:for-each select="variable[input='yes' and scope='global_instance']">
-  <admst:choose>
-    <admst:when test="[type='real']">
-      <admst:text format="\t\tPARAMETER&lt;double&gt; $(var_prefix)%(.);\n"/>
-    </admst:when>
-    <admst:when test="[type='integer']">
-      <admst:text format="\t\tPARAMETER&lt;int&gt; $(var_prefix)%(.);\n"/>
-    </admst:when>
-    <admst:otherwise>
-      <admst:fatal format="type of verilog-parameter is not real or interger\n"/>
-    </admst:otherwise>
-  </admst:choose>
-</admst:for-each>
 
 };
 
@@ -1555,17 +1556,6 @@ void $(MODEL_NAME)::set_param_by_name(string Name, string Value)
 void $(COMMON_NAME)::precalc_first(const CARD_LIST* par_scope)
 {
 	USE(par_scope);
-  <admst:for-each select="variable[input='yes' and scope='global_instance']">
-    <admst:apply-templates select="default/tree" match="subexpression:stringify:noprobe"/>
-    <admst:choose>
-      <admst:when test="[type='real']">
-        <admst:text format="\te_val(&amp;($(var_prefix)%(name)), (double)%s, par_scope);\n"/>
-      </admst:when>
-      <admst:when test="[type='integer']">
-        <admst:text format="\te_val(&amp;($(var_prefix)%(name)), (int)%s, par_scope);\n"/>
-      </admst:when>
-    </admst:choose>
-  </admst:for-each>
   <admst:for-each select="$(ddts_list)">
 	ic_state_%(adms/id(.)).e_val(NOT_INPUT,par_scope);
   </admst:for-each>
@@ -1611,6 +1601,9 @@ $(DEV_NAME)::$(DEV_NAME)()
 <admst:for-each select="instance">,
     _%(name)(0)
 </admst:for-each>
+<admst:for-each select="variable[input='yes' and scope='global_instance']">,
+	$(var_prefix)%(.)(%(./default))
+</admst:for-each>
 {
   <admst:if test="[count(jacobian)!=0]">
 	std::fill_n(m_entries, %(count(jacobian)), 0);
@@ -1639,6 +1632,9 @@ $(DEV_NAME)::$(DEV_NAME)(const $(DEV_NAME)&amp; p) :
     _states_q1(NULL)
 <admst:for-each select="instance">,
     _%(name)(0)
+</admst:for-each>
+<admst:for-each select="variable[input='yes' and scope='global_instance']">,
+    $(var_prefix)%(.)(p.$(var_prefix)%(.))
 </admst:for-each>
 {
   <admst:if test="[count(jacobian)!=0]">
@@ -1712,8 +1708,39 @@ $(DEV_NAME)::~$(DEV_NAME)()
 
 <admst:apply-templates select="/module" match="analogfunctionC"/>
 // -------------------------------------------------------------------------- //
+#ifdef HAVE_PARA_BASE
+std::map&lt;string, PARA_BASE $(DEV_NAME)::*&gt; $(DEV_NAME)::param_dict
+<admst:if test="[count(variable[input='yes' and scope='global_instance'])!=0]">
+  = boost::assign::map_list_of
+<admst:join select="variable[input='yes' and scope='global_instance']" separator="">
+  (&quot;%(name)&quot;, (PARA_BASE $(DEV_NAME)::*)  (&amp;$(DEV_NAME)::$(var_prefix)%(name)))
+</admst:join>
+</admst:if>;
+
+std::map&lt;string, PARA_BASE $(DEV_NAME)::*&gt; $(DEV_NAME)::param_dict_low
+<admst:if test="[count(variable[input='yes' and scope='global_instance'])!=0]">
+  = boost::assign::map_list_of
+<admst:join select="variable[input='yes' and scope='global_instance']" separator="">
+    (toLower("%(name)"), (PARA_BASE $(DEV_NAME)::*)
+        (&amp;$(DEV_NAME)::$(var_prefix)%(name)))
+</admst:join>
+</admst:if>;
+#endif
+// -------------------------------------------------------------------------- //
 void $(DEV_NAME)::set_param_by_name(std::string Name, std::string value)
 {
+#ifdef HAVE_PARA_BASE
+	PARA_BASE $(DEV_NAME)::* x = (OPT::case_insensitive)?
+		(param_dict_low[toLower(Name)]) : (param_dict[Name]);
+	trace3("$(DEV_NAME)::set_param_by_name", Name, OPT::case_insensitive, x);
+	if(x) {
+		PARA_BASE* p = &(this->*x);
+		*p = value;
+		return;
+	}
+#else
+	incomplete();
+#endif
 	COMPONENT::set_param_by_name(Name,value);
 }
 // -------------------------------------------------------------------------- //
@@ -1875,6 +1902,19 @@ void $(DEV_NAME)::expand()
 void $(DEV_NAME)::precalc_first()
 {
 	ADMS_BASE::precalc_first();
+	const CARD_LIST* par_scope = scope();
+	assert(par_scope);
+  <admst:for-each select="variable[input='yes' and scope='global_instance']">
+    <admst:apply-templates select="default/tree" match="subexpression:stringify:noprobe"/>
+    <admst:choose>
+      <admst:when test="[type='real']">
+        <admst:text format="\te_val(&amp;($(var_prefix)%(name)), (double)%s, par_scope);\n"/>
+      </admst:when>
+      <admst:when test="[type='integer']">
+        <admst:text format="\te_val(&amp;($(var_prefix)%(name)), (int)%s, par_scope);\n"/>
+      </admst:when>
+    </admst:choose>
+  </admst:for-each>
   <admst:if test="[$has_sckt!=0]">
 	if(subckt()) subckt()-&gt;precalc_first();
   </admst:if>
@@ -2536,6 +2576,7 @@ TIME_PAIR $(DEV_NAME)::tr_review()
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::tr_accept()
 {
+	$(DEV_NAME)* d = this;
   <admst:if test="[$has_sckt!=0]">
 	subckt()->tr_accept();
   </admst:if>
@@ -2734,6 +2775,7 @@ bool $(DEV_NAME)::conv_check()const
 // write G and C into matrix and matrix_old
 void $(DEV_NAME)::ac_eval()
 {
+	$(DEV_NAME)* d = this;
 	trace0(&quot;$(DEV_NAME)::ac_eval&quot;);
 	std::fill_n(it0, (int)$_num_stamp_nodes, 0);
   <admst:if test="[count(jacobian)!=0]">
@@ -2801,6 +2843,7 @@ double $(DEV_NAME)::tr_c_to_g(double c, double g)const
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::tr_eval()
 {
+	$(DEV_NAME)* d = this;
 	trace1("$(DEV_NAME)::tr_eval", _sim->analysis_is_static());
 	std::fill_n(it0, $_num_stamp_nodes, 0);
   <admst:if test="[count(jacobian)!=0]">
@@ -2857,9 +2900,6 @@ $(COMMON_NAME)::$(COMMON_NAME)(const $(COMMON_NAME)&amp; p) :
 	// %(.)
 	ic_state_%(adms/id(.))(p.ic_state_%(adms/id(.)))
 </admst:for-each>
-<admst:for-each select="variable[input='yes' and scope='global_instance']">,
-    $(var_prefix)%(.)(p.$(var_prefix)%(.))
-</admst:for-each>
 {
 }
 // -------------------------------------------------------------------------- //
@@ -2867,9 +2907,6 @@ $(COMMON_NAME)::$(COMMON_NAME)(int c) :
     COMMON_COMPONENT(c)
 <admst:for-each select="$(ddts)">,
     ic_state_%(adms/id(.))(NOT_INPUT)
-</admst:for-each>
-<admst:for-each select="variable[input='yes' and scope='global_instance']">,
-    $(var_prefix)%(.)(NOT_INPUT) /* default?? */
 </admst:for-each>
 {
 }
@@ -4148,7 +4185,7 @@ currently: only called for eval_mode==accept
   <admst:for-each select="module/evaluation/variable">
     <admst:assert test="adms[datatypename='variable']" format="expecting datatypename=variable\n"/>
     <admst:if test="[scope='local']">
-      <admst:if test="[static='no' and dynamic='yes']">#if defined(_DYNAMIC)\n</admst:if>
+      <admst:if test="[static='no' and dynamic='yes']">// BUG?! #if defined(_DYNAMIC)\n</admst:if>
       <admst:value-of select="name"/>
       <admst:if test="[type='integer']">int %s;\n</admst:if>
       <admst:if test="[type='real']">double %s=0.0/0.0;\n</admst:if>
@@ -4164,7 +4201,7 @@ currently: only called for eval_mode==accept
           </admst:for-each>
         </admst:if></admst:if>
       </admst:if>
-      <admst:if test="[static='no' and dynamic='yes']">#endif /*_DYNAMIC*/\n</admst:if>
+      <admst:if test="[static='no' and dynamic='yes']">// BUG?! #endif /*_DYNAMIC*/\n</admst:if>
     </admst:if>
     <admst:if test="[scope!='local']">
       <admst:if test="[insource='yes']">
@@ -5133,7 +5170,7 @@ currently: only called for eval_mode==accept
     <admst:value-to select="/simulator/tmp" value="m-&gt;$(var_prefix)%s"/>
   </admst:if>
   <admst:if test="[input='yes' and parametertype='instance']">
-    <admst:value-to select="/simulator/tmp" value= "/*instance*/ &gt;$(var_prefix)%s"/>
+	  <admst:value-to select="/simulator/tmp" value= "/*instance*/d-&gt;$(var_prefix)%s"/>
   </admst:if>
   <admst:if test="[input='no' and scope='global_model']">
     <admst:value-to select="/simulator/tmp" value="m-&gt;$(var_prefix)%s"/>
@@ -5151,7 +5188,7 @@ currently: only called for eval_mode==accept
 <admst:template match="variable:lhs">
   <admst:message test="[/dbg_xml='yes']" format="*(ngspvers)variable:lhs*\n"/>
   <admst:text test="[input='yes' and parametertype='model']" format="m->$(var_prefix)%(name)"/>
-  <admst:text test="[input='yes' and parametertype='instance']" format="/*i*/$(var_prefix)%(name)"/>
+  <admst:text test="[input='yes' and parametertype='instance']" format="/*i*/d-&gt;$(var_prefix)%(name)"/>
   <admst:text test="[input='no' and scope='global_model']" format="/*glm*/m->$(var_prefix)%(name)"/>
   <admst:text test="[input='no' and scope='global_instance']" format=" /*gli*/ $(var_prefix)%(name)"/>
   <admst:text test="[scope='local']" format="%(name)"/>
