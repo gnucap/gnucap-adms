@@ -14,7 +14,7 @@ V1 ( n1 0 ) pulse iv= 0. pv= 1. delay= 0. rise= 0.001 fall= 0.001 width= 0.003 p
  0.005      0.         4.         0.004     
  0.006      1.         4.5        0.0045    
  0.009      1.         7.5        0.0075    
- 0.01       1.E-15     8.         0.008     
+ 0.01       0.         8.         0.008     
 Gnucap   System status
 iterations: op=0, dc=3, tran=32, fourier=0, total=44
 transient timesteps: accepted=9, rejected=0, total=9
