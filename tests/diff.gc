@@ -1,7 +1,6 @@
 spice
 
 *.options method=euler
-.options initsc 1
 .load ./diff.so
 
 .verilog
@@ -18,11 +17,11 @@ C1 n2 0 1u
 
 .nodelist
 
-.print dc v(nodes) i(R*)
+.print dc v(nodes) i(R*) method(c1)
 .dc
 
 .list
-.print tran v(nodes) state0(ddt1) hidden(0) dis(n*) v(C1)
+.print tran v(nodes) state0(ddt1) hidden(0) dis(n*) v(C1) meth(C1) metg(ddt1)
 .tran 0 10m 10m basic trace=a
 
 .stat notime

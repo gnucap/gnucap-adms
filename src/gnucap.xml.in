@@ -2625,6 +2625,9 @@ double $(DEV_NAME)::tr_probe_num(const std::string&amp; x)const
 	assert(_dt == NOT_VALID || ::conchk(_dt, _time[0] - _time[1]));
 <admst:if test="[$(_has_states)='true']">
 	static std::string state_names[_num_states];
+	if (Umatch(x, "meth{od} ")) {
+		return _method_a;
+	}
 </admst:if>
 	static std::string contr_names[$_num_stamp_nodes];
 
@@ -2649,14 +2652,18 @@ double $(DEV_NAME)::tr_probe_num(const std::string&amp; x)const
 
 <admst:if test="[$(_has_states)='true']">
 	// states probes
-	for (int ii=0; ii&lt;_num_states; ++ii)
-		if (Umatch(x, state_names[ii] + ' '))
+	for (int ii=0; ii&lt;_num_states; ++ii) {
+		if (Umatch(x, state_names[ii] + ' ')) {
 			return _states[0][ii];
+		}
+	}
 </admst:if>
 	// node probes
-	for(int i=0; i&lt;$_num_stamp_nodes; i++)
-		if( Umatch(x, contr_names[i] + ' ') )
+	for(int i=0; i&lt;$_num_stamp_nodes; i++) {
+		if( Umatch(x, contr_names[i] + ' ') ) {
 			return it0[i];
+		}
+	}
 
 	// verilog-variables ('global_...' eq. with 'ask' field)
   <admst:for-each select="variable[input='no' and scope='global_instance']">
