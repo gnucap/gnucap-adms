@@ -2333,7 +2333,9 @@ bool $(DEV_NAME)::do_tr()
 	trace1("$(DEV_NAME)::do_tr", long_label());
 
 	assert(OPT::_keep_time_steps &lt;= 8);
+#ifndef USE_DTIME
 	assert(_dt == NOT_VALID || ::conchk(_dt, _time[0] - _time[1]));
+#endif
 
 	// convergence check -- gnucap method
   <admst:if test="[$has_sckt!=0]">
@@ -2546,19 +2548,34 @@ TIME_PAIR $(DEV_NAME)::tr_review()
 	</admst:for-each>
     //-----
 
+#ifdef USE_DTIME
+	_dt_by._error_estimate = tr_review_check_and_convert(timestep);
+	_dt_by._event = NEVER;
+#else
 	_time_by._error_estimate = tr_review_check_and_convert(timestep);
 	_time_by._event = NEVER;
+#endif
 
   <admst:if test="[$has_sckt!=0]">
 	assert(subckt());
-	_time_by.min( subckt()-&gt;tr_review() );
+#ifdef USE_DTIME
+	_dt_by.
+#else
+	_time_by.
+#endif
+	  min( subckt()-&gt;tr_review() );
+
   </admst:if>
 
   <admst:if test="[$have_callfunction!='no']">
 	q_accept(); //callfunction
   </admst:if>
 
+#ifdef USE_DTIME
+	return  _dt_by;
+#else
 	return  _time_by;
+#endif
 }
 // -------------------------------------------------------------------------- //
 <admst:template match="model">
@@ -2831,7 +2848,12 @@ double $(DEV_NAME)::tr_c_to_g(double c, double g)const
 	}else{
 		assert(_sim-&gt;analysis_is_tran_dynamic());
 		METHOD method;
-		if (_time[1] == 0) {
+#ifdef USE_DTIME
+		if (_time[1] == _time[0])
+#else
+		if (_time[1] == 0)
+#endif
+		{
 		  method = mEULER; // Bogus current in previous steps. Force Euler.
 		}else{
 		  method = _method_a;

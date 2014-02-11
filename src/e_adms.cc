@@ -134,9 +134,14 @@ void ADMS_BASE::tr_regress()
 	for (int i=OPT::_keep_time_steps-1; i>0; --i) {
 		assert(_time[i] < _time[i-1] || _time[i] == 0.);
 	}
-	_time[0] = _sim->_time0;
 
+#ifdef USE_DTIME
+	_time[0] = _sim->_dt0;
+	_dt = _time[0];
+#else
+	_time[0] = _sim->_time0;
 	_dt = _time[0] - _time[1];
+#endif
 #ifdef HAVE_DISCONT
 	method_t m = _method_u;
 
@@ -145,7 +150,12 @@ void ADMS_BASE::tr_regress()
 		d |= _n[i]->discont();
 	}
 
-	if (_time[1] == 0) {
+#ifdef USE_DTIME
+	if (_time[1] == _time[0])
+#else
+	if (_time[1] == 0)
+#endif
+	{
 		m = meEULER;
 	} else if (d) { untested();
 		m = meEULER;
@@ -165,7 +175,11 @@ double ADMS_BASE::tr_review_trunc_error(const FPOLY1* q)
 	if (_time[0] <= 0.) {
 		// DC, I know nothing
 		timestep = NEVER;
+#ifdef USE_DTIME
+	}else if (_time[error_deriv-1] == _time[error_deriv]) {
+#else
 	}else if (_time[error_deriv] <= 0.) {
+#endif
 		// first few steps, I still know nothing
 		// repeat whatever step was used the first time
 		timestep = _dt;
