@@ -27,4 +27,5 @@ r3 nv n3 .1
 .print tran v(nodes)
 
 .tran 0 1 1 trace=a
+.status notime
 .end

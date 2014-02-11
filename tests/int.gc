@@ -10,7 +10,7 @@ endparamset
 myint int1 (nint, 0, n1, 0);
 spice
 
-V1 n1 0 pulse iv=0 pv=1 rise=1m delay=0 width=3m period=5m
+V1 n1 0 pulse iv=0 pv=1 rise=1m delay=0 width=3m period=5m fall=1m
 
 .print dc v(nodes) i(R*)
 .dc
@@ -18,4 +18,5 @@ V1 n1 0 pulse iv=0 pv=1 rise=1m delay=0 width=3m period=5m
 .list
 .print tran v(nodes) state0(int1)
 .tran 0 10m 10m basic trace=a
+.status notime
 .end
