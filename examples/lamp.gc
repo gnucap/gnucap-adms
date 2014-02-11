@@ -37,5 +37,6 @@ V1 ndd 0 pulse iv=vsupp0 pv=vsupp rise=.01 delay=delay
 .param delay=1
 .tr 2
 * >> lamp_tr.out
-.measure t2 at(probe="temp(H1)" x=0.5)
+.measure t2 at(probe="temp(H1)" x=1.5)
+.status notime
 .end

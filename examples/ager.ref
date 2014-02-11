@@ -5,6 +5,14 @@ r1 ( nin 0 )  myager
 #TTime      v(nin)     b(r1)      a(r1)      tt(r1.rcd1) tr(r1.rcd1)
  0.         0.         0.         0.         0.        -Inf       
  100.       0.         0.         0.031274   0.0305     0.03297   
- 200.       0.         0.         0.03325    0.032427   0.032029  
+ 200.       0.         0.         0.033433   0.032606   0.031942  
+ 310.       0.         0.         0.033339   0.032515   0.031986  
+ 500.       0.         0.         0.033385   0.032559   0.031965  
 a= 0.03127424
 b= 0.
+Gnucap   System status
+iterations: op=0, dc=0, tran=0, fourier=0, total=1727
+transient timesteps: accepted=433, rejected=0, total=432
+twotime timesteps: accepted=4, rejected=0, total=4
+nodes: user=1, subckt=0, model=0, total=1
+dctran density=100.0%, ac density=100.0%

@@ -26,7 +26,9 @@ spice
 .store tw a(r1) b(r1)
 
 .list
-.tw 1 100 200 new tran > ager_tr.out
+.tw 1 100 500 * 2 new tran > ager_tr.out
 .measure a at(probe="a(r1)" x=34)
 .measure b at(probe="b(r1)" x=34)
+
+.status notime
 .end
