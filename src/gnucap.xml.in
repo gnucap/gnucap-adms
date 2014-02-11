@@ -1597,12 +1597,12 @@ void $(MODEL_NAME)::set_dev_type(const std::string&amp; new_type)
 $(DEV_NAME)::$(DEV_NAME)()
     : ADMS_BASE(),
     _nodes(),
+<admst:for-each select="variable[input='yes' and scope='global_instance']">
+	$(var_prefix)%(.)(%(./default)),
+</admst:for-each>
     _states_q1(NULL)
 <admst:for-each select="instance">,
     _%(name)(0)
-</admst:for-each>
-<admst:for-each select="variable[input='yes' and scope='global_instance']">,
-	$(var_prefix)%(.)(%(./default))
 </admst:for-each>
 {
   <admst:if test="[count(jacobian)!=0]">
@@ -1629,12 +1629,12 @@ $(DEV_NAME)::$(DEV_NAME)()
 $(DEV_NAME)::$(DEV_NAME)(const $(DEV_NAME)&amp; p) :
     ADMS_BASE(p),
     _nodes(),
+<admst:for-each select="variable[input='yes' and scope='global_instance']">
+    $(var_prefix)%(.)(p.$(var_prefix)%(.)),
+</admst:for-each>
     _states_q1(NULL)
 <admst:for-each select="instance">,
     _%(name)(0)
-</admst:for-each>
-<admst:for-each select="variable[input='yes' and scope='global_instance']">,
-    $(var_prefix)%(.)(p.$(var_prefix)%(.))
 </admst:for-each>
 {
   <admst:if test="[count(jacobian)!=0]">
