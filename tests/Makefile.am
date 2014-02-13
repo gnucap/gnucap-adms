@@ -123,6 +123,7 @@ clean-examples:
 	rm -f *.out *.so *.cc *.hxx *.h
 
 CLEANFILES = .*.adms *.out $(GC_TESTS) *.hxx .*.xml \
+    core \
     rc_uic.sh \
     ddc_rc.sh
 CLEANFILES+= $(check_LTLIBRARIES:%.la=%.h) \
