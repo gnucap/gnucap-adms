@@ -2825,7 +2825,10 @@ void $(DEV_NAME)::ac_eval()
 </admst:for-each>
 	{
 	// fixme: remerge _tr.hxx?
+	// #HACK:
+		#define _DDT(qq, stateno) 0
 		#include "$(filename)_$(module)_ac.hxx"
+		#undef _DDT
 	}
 }
 // -------------------------------------------------------------------------- //
