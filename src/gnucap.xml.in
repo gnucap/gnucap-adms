@@ -1554,11 +1554,24 @@ void $(MODEL_NAME)::set_param_by_name(string Name, string Value)
 #endif
 }
 // -------------------------------------------------------------------------- //
-void $(COMMON_NAME)::precalc_first(const CARD_LIST* par_scope)
+void $(COMMON_NAME)::precalc_first(const CARD_LIST* scope)
 {
-	USE(par_scope);
+	COMMON_COMPONENT::precalc_first(scope);
+}
+// -------------------------------------------------------------------------- //
+void $(COMMON_NAME)::precalc_last(const CARD_LIST* scope)
+{
+	COMMON_COMPONENT::precalc_last(scope);
+  <admst:for-each select="contribution[is_ic_contribution(.)/[name='x']/value='yes']">
+	ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode).e_val(0,scope);
+  </admst:for-each>
+
+  <admst:apply-templates select="." match="model"/>
+#if 0 // hmm wrong place
+  <admst:apply-templates select="analog" match="analog:initial_instance" required="yes"/>
+#endif
   <admst:for-each select="$(ddts_list)">
-	ic_state_%(adms/id(.)).e_val(NOT_INPUT,par_scope);
+	ic_state_%(adms/id(.)).e_val(NOT_INPUT, scope);
   </admst:for-each>
 }
 // -------------------------------------------------------------------------- //
@@ -1930,19 +1943,6 @@ void $(DEV_NAME)::precalc_last()
   <admst:if test="[$has_sckt!=0]">
 	if(subckt()) subckt()-&gt;precalc_last();
   </admst:if>
-}
-// -------------------------------------------------------------------------- //
-void $(COMMON_NAME)::precalc_last(const CARD_LIST* scope)
-{
-	COMMON_COMPONENT::precalc_last(scope);
-  <admst:for-each select="contribution[is_ic_contribution(.)/[name='x']/value='yes']">
-	ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode).e_val(0,scope);
-  </admst:for-each>
-
-  <admst:apply-templates select="." match="model"/>
-#if 0 // hmm wrong place
-  <admst:apply-templates select="analog" match="analog:initial_instance" required="yes"/>
-#endif
 }
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::internal_precalc()
