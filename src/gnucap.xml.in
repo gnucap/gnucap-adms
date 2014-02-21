@@ -2903,8 +2903,11 @@ void $(DEV_NAME)::tr_eval()
 
   <admst:for-each select="$(ddts)">
 	double keep_%(adms/id(.))=1;
-	if(uic_now(_ddt_%(adms/id(.)))){
+	if (uic_now(_ddt_%(adms/id(.)))) {
 		trace1("$(DEV_NAME)::tr_eval keeping", c->ic_state_%(adms/id(.)));
+		if(c->ic_state_%(adms/id(.)).has_good_value()){
+			_states[1][2*_ddt_%(adms/id(.))] = c->ic_state_%(adms/id(.));
+		}
 #ifdef HAVE_KEEPCOEFF
 		keep_%(adms/id(.)) = OPT::keepcoeff;
 #endif
