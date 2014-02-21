@@ -1,0 +1,12 @@
+cap: already installed, replacing
+stashing as cap:0
+dc 
+#           v(n1)      v(n2)      ic(c1)     ic_p_n(c1)
+ 0.         1.         2.n        ??         ??        
+ 0.5        1.         0.5        ??         ??        
+ 1.         1.         1.         ??         ??        
+ddc 
+#           v(n1)      v(n2)      dv(n1)     dv(n2)     ddv(n1)    ddv(n2)    qci1      
+ 0.         1.         2.n       -0.2       -400.p      NaN        NaN        1.        
+ 0.5        1.         0.5       -0.1       -200.p      NaN        NaN        1.        
+ 1.         1.         1.         54.21E-18  108.4E-27  NaN        NaN        1.        

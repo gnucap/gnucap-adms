@@ -51,10 +51,7 @@ GC_TESTS = if.sh if2.sh coil.sh vs.sh cs.sh cap.sh \
     subcoil.sh
 
 # will only work with -uf
-GCUF_TESTS = rc_uic.sh ddc_rc.sh
-
-# needs work
-XFAIL_TESTS = ddc_rc.sh
+GCUF_TESTS = rc_uic.sh ddc_rc.sh ddc.2.sh
 
 EXTRA_DIST = $(TESTS:%.sh=%.ref) $(GC_TESTS:%.sh=%.gc) rc_uic.gc ddc_rc.gc
 FILTER = cat
