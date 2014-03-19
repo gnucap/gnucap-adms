@@ -11,6 +11,7 @@ AM_TESTS_ENVIRONMENT = \
            GNUCAP='$(GNUCAP)'\
            GNUCAP_ADMS_DATADIR='$(PWD)/../src'\
            GNUCAP_ADMS_INCLUDEDIR='$(abs_top_srcdir)/src'\
+           GNUCAP_ADMS_IMPLICIT='$(abs_top_srcdir)/src/implicit.xml'\
            GNUCAP_ADMS_CPPFLAGS='-I$(abs_top_srcdir)/src'\
            GNUCAP_ADMS_LDFLAGS='-L$(abs_top_builddir)/src/.libs'\
            GNUCAP_ADMS_LIBS='-lgnucap_adms'\
@@ -65,7 +66,7 @@ CUSTOM_TESTS = \
     opamp.sh
 TESTS = $(GC_TESTS) $(CUSTOM_TESTS)
 
-inline.log: cleantmp
+inline.log inline.out: cleantmp
 
 cleantmp:
 	rm -rf .admstmp
