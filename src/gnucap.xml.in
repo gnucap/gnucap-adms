@@ -9007,6 +9007,9 @@ return
 #endif
 
     </admst:when> <!--dynamic=yes-->
+    <admst:when test="../../lhs/branch/pnode[discipline/name='degradational']">
+		//skipping jacobian for degr node
+    </admst:when> <!--degradational-->
     <admst:otherwise>
 	{ // jacobian4($(Sp), $(Sn), $(Pp), $(Pn), $(ep)) - static
 		double ep = $ep;
