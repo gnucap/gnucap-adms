@@ -8894,25 +8894,41 @@ return
   <admst:variable name="loss" select="/*lhpot*/-1/OPT::shortckt * " test="[lhs/type='ps']"/>
 
 	// residual2($(Pp),$(Pn),%(rhs/tree))
-	{  // recheck: static is same as dynamic?
+	{
 		double vx = %(e(rhs/tree)); // %(rhs/tree)
 		assert(is_number(vx));
-		it0[$(node_prefix)$(Pp)] -= $(loss) vx;
-	<admst:if test="lhs/branch/nnode[grounded='no']">
-		it0[$(node_prefix)$(Pn)] += $(loss) vx;
-	</admst:if>
+    <admst:choose><!-- HACK ... implement later -->
+      <admst:when test="[lhs/branch/pnode/discipline/name='degradational']">
+			assert(_n[$node_prefix$Pp].a_());
+			_n[$node_prefix$Pp].a_()->tr() = vx; // hack, should be +=
+      </admst:when>
+      <admst:otherwise>
+			it0[$(node_prefix)$(Pp)] -= $(loss) vx;
+        <admst:if test="lhs/branch/nnode[grounded='no']">
+			it0[$(node_prefix)$(Pn)] += $(loss) vx;
+        </admst:if>
+      </admst:otherwise>
+    </admst:choose>
 	}
 
 </admst:template>
 
+<!-- unused tamplate?! -->
 <admst:template match="residual1">
   <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)residual1*\n"/>
   <admst:variable name="Pp" select="%(lhs/branch/pnode/name)"/>
 	// residual1($(Pp),%(rhs/tree))
-	{ // recheck: static is same as dynamic?
+	{ // $lhs/branch/pnode/discipline
 		double vx = %(e(rhs/tree));
 		assert(is_number(vx));
-		it0[$node_prefix$Pp] -= vx;
+    <admst:choose><!-- HACK ... cleanup later -->
+      <admst:when test="[lhs/branch/pnode/discipline='degradational']">
+			_n[$node_prefix$Pp]->tr() += vx;
+      </admst:when>
+      <admst:otherwise>
+			it0[$node_prefix$Pp] -= vx;
+      </admst:otherwise>
+    </admst:choose>
 	}
 
 </admst:template>
