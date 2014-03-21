@@ -38,8 +38,11 @@ AM_TESTS_ENVIRONMENT = \
            srcdir='$(srcdir)';
 AM_TESTS_FD_REDIRECT = 9>&2
 TEST_EXTENSIONS = .sh
-TESTS = $(EXT_TESTS) $(GC_TESTS) $(GCUF_TESTS)
-GC_TESTS = if.sh if2.sh coil.sh vs.sh cs.sh cap.sh \
+TESTS = $(EXT_TESTS) $(GC_TESTS) $(GCUF_TESTS) \
+    abs.sh
+GC_TESTS = \
+    if.sh \
+    if2.sh coil.sh vs.sh cs.sh cap.sh \
     analogfunction.sh \
     int.sh \
     pid.sh \
