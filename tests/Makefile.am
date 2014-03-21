@@ -13,6 +13,7 @@ check_LTLIBRARIES = \
     vs.la cs.la cap.la \
     coil.la ccvs.la vccs.la \
     analogfunction.la \
+    afsquare.la \
     int.la pid.la vcvs.la \
     diff.la \
     mul.la \
@@ -44,6 +45,7 @@ GC_TESTS = \
     if.sh \
     if2.sh coil.sh vs.sh cs.sh cap.sh \
     analogfunction.sh \
+    afsquare.sh \
     int.sh \
     pid.sh \
 	 diff.sh \
