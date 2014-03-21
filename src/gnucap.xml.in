@@ -298,8 +298,6 @@
 
 #define CONSTCtoK (273.15) // also in gnucap/constans.h P_CELSIUS0
 
-#define EXIT_IF_ISNAN(var) assert(is_number(var));
-
 // counted ddts %(count($ddts))
 <admst:variable name="_num_states" select="%(count($ddts))+%(count($idts))"/>
 <admst:variable name="_has_states" select="false"/>
@@ -4396,10 +4394,10 @@ currently: only called for eval_mode==accept
           <admst:apply-templates select="." match="subexpression:stringify:noprobe"/>
           <admst:text format="(%s)"/>
         </admst:join>
-        <admst:text format=")\n"/>
+        <admst:text format=");\n"/>
         <admst:value-of select="position(.)-1"/>
         <admst:apply-templates select="." match="function:getname_push"/>
-        <admst:text format="EXIT_IF_ISNAN(__%s_%s)\n"/>
+EXIT_IF_ISNAN(__%s_%s); // A
       </admst:when>
       <admst:when test="arguments[count(.)=2]">
         <admst:value-of select="position(.)-1"/>
@@ -4415,7 +4413,7 @@ currently: only called for eval_mode==accept
         <admst:text format=")\n"/>
         <admst:value-of select="position(.)-1"/>
         <admst:apply-templates select="." match="function:getname_push"/>
-        <admst:text format="EXIT_IF_ISNAN(__%s_%s)\n"/>
+EXIT_IF_ISNAN(__%s_%s); // B
       </admst:when>
       <admst:otherwise>
         <admst:value-of select="name"/>
@@ -4478,10 +4476,10 @@ currently: only called for eval_mode==accept
                 <admst:text format="_d_%s(__%s_%s,__d_%s_%s,(%s))\n"/>
                 <admst:value-of select="../position(.)-1"/>
                 <admst:apply-templates select=".." match="function:getname_push"/>
-                <admst:text format="EXIT_IF_ISNAN(__%s_%s)\n"/>
+                EXIT_IF_ISNAN(__%s_%s);
                 <admst:value-of select="../position(.)-1"/>
                 <admst:apply-templates select=".." match="function:getname_push"/>
-                <admst:text format="EXIT_IF_ISNAN(__d_%s_%s)\n"/>
+                EXIT_IF_ISNAN(__d_%s_%s);
               </admst:when>
               <admst:otherwise>
                 <admst:value-of select="../position(.)-1"/>
@@ -4519,7 +4517,7 @@ currently: only called for eval_mode==accept
                 <admst:text format=")\n"/>
                 <admst:value-of select="../position(.)-1"/>
                 <admst:apply-templates select=".." match="function:getname_push"/>
-                <admst:text format="EXIT_IF_ISNAN(__dFx_%s_%s)\n"/>
+                EXIT_IF_ISNAN(__dFx_%s_%s);
               </admst:if>
             </admst:if>
             <admst:if test="[position(.)=2]">
@@ -4539,13 +4537,13 @@ currently: only called for eval_mode==accept
                 <admst:text format=")\n"/>
                 <admst:value-of select="../position(.)-1"/>
                 <admst:apply-templates select=".." match="function:getname_push"/>
-                <admst:text format="EXIT_IF_ISNAN(__dFy_%s_%s)\n"/>
+                EXIT_IF_ISNAN(__dFy_%s_%s);
               </admst:if>
             </admst:if>
           </admst:for-each>
           <admst:value-of select="position(.)-1"/>
           <admst:apply-templates select="." match="function:getname_push"/>
-          <admst:text format="EXIT_IF_ISNAN(__%s_%s)\n"/>
+          EXIT_IF_ISNAN(__%s_%s);
         </admst:if>
       </admst:for-each>
       <admst:text format="#else\n"/>
@@ -4636,10 +4634,10 @@ currently: only called for eval_mode==accept
                 <admst:text format="_d_%s(__%s_%s,__d_%s_%s,(%s))\n"/>
                 <admst:value-of select="../position(.)-1"/>
                 <admst:apply-templates select=".." match="function:getname_push"/>
-                <admst:text format="EXIT_IF_ISNAN(__%s_%s);\n"/>
+                EXIT_IF_ISNAN(__%s_%s);
                 <admst:value-of select="../position(.)-1"/>
                 <admst:apply-templates select=".." match="function:getname_push"/>
-                <admst:text format="EXIT_IF_ISNAN(__d_%s_%s);\n"/>
+                EXIT_IF_ISNAN(__d_%s_%s);
               </admst:when>
               <admst:otherwise>
                 <admst:value-of select="../position(.)-1"/>
@@ -4677,7 +4675,7 @@ currently: only called for eval_mode==accept
 					 <admst:text format=") // 3606\n"/>
                 <admst:value-of select="../position(.)-1"/>
                 <admst:apply-templates select=".." match="function:getname_push"/>
-                <admst:text format="EXIT_IF_ISNAN(__dFx_%s_%s);\n"/>
+                EXIT_IF_ISNAN(__dFx_%s_%s);
               </admst:if>
             </admst:if>
             <admst:if test="[position(.)=2]">
@@ -4697,7 +4695,7 @@ currently: only called for eval_mode==accept
                 <admst:text format=")\n"/>
                 <admst:value-of select="../position(.)-1"/>
                 <admst:apply-templates select=".." match="function:getname_push"/>
-                <admst:text format="EXIT_IF_ISNAN(__dFy_%s_%s);\n"/>
+                EXIT_IF_ISNAN(__dFy_%s_%s);
               </admst:if>
             </admst:if>
           </admst:for-each>

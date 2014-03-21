@@ -520,7 +520,9 @@ inline double ADMS_BASE::tr_c_to_g(double c, double g)const
 #define _d_limexp(val,dval,arg)  val = ((arg)<(90)) ? (exp(arg)) : (exp(90)*(1.0+(arg-90))); dval = val;
 #define _fabs(val,arg)           val = fabs(arg);
 #define _d_fabs(val,dval,arg)    val = fabs(arg);    dval = (((val)>=0)?(+1.0):(-1.0));
-#define _abs(val)                ((val)<(0) ? (-(val)):(val))
+
+inline void _abs(double& val, const double& arg){val=abs(arg);}
+inline double _abs(const double& arg){return abs(arg);}
 
 /*
 #define _(val,arg)         val = ((arg)<(90)) ? (exp(arg)) : (exp(90)*(1.0+(arg-90)));
@@ -597,6 +599,7 @@ inline string toLower(string s){
 	transform (s.begin(), s.end(), s.begin(), ::tolower);
 	return s;
 }
+#define EXIT_IF_ISNAN(var) assert(is_number(var))
 
 // -------------------------------------------------------------------------- //
 #endif
