@@ -619,7 +619,7 @@ class $(DEV_NAME) : public ADMS_BASE
 
 
 	private: // analog functions from va
-	<admst:apply-templates select="/module" match="analogfunctionH"/>
+	<admst:apply-templates select="." match="analogfunctionH"/>
 
 	private: // node numbers
 		// stick to gnucap node ordering (external first)
@@ -1705,7 +1705,7 @@ $(DEV_NAME)::~$(DEV_NAME)()
 }
 // ---------------- all analog functions from verilog-module here: ---------- //
 
-<admst:apply-templates select="/module" match="analogfunctionC"/>
+<admst:apply-templates select="." match="analogfunctionC"/>
 // -------------------------------------------------------------------------- //
 #ifdef HAVE_PARA_BASE
 std::map&lt;string, PARA_BASE $(DEV_NAME)::*&gt; $(DEV_NAME)::param_dict
