@@ -534,7 +534,11 @@ class $(DEV_NAME) : public ADMS_BASE
 #ifdef HAVE_TT
 	public: // tt
 		void tt_advance();
+#if HAVE_TT + 0 == 2
+		void do_tt();
+#else
 		void stress_apply();
+#endif
 		void tt_accept();
 		void tt_begin();
 		void tr_stress_last(); // tt_stress??
@@ -2156,12 +2160,21 @@ void $(DEV_NAME)::tt_accept()
   </admst:if>
 }
 // -------------------------------------------------------------------------- //
+#if HAVE_TT + 0 == 2
+void $(DEV_NAME)::do_tt()
+{
+  <admst:if test="[$has_sckt!=0]">
+	subckt()->do_tt();
+  </admst:if>
+}
+#else
 void $(DEV_NAME)::stress_apply()
 {
   <admst:if test="[$has_sckt!=0]">
 	subckt()->stress_apply();
   </admst:if>
 }
+#endif
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::tt_advance()
 {
