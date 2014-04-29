@@ -22,6 +22,7 @@ plugindir = @gnucap_libdir@
 plugin_LTLIBRARIES = lang_adms.la
 lang_adms_la_LDFLAGS = -module -shared
 lang_adms_la_SOURCES = lang_adms.cc md5.c # c_attach.cc
+lang_adms_la_CPPFLAGS = $(AM_CPPFLAGS) -DGNUCAP_ADMS_IMPLICIT=\"$(pkgdatadir)/implicit.xml\"
 
 AM_CPPFLAGS = $(GC_CPPFLAGS) -DADD_VERSION
 

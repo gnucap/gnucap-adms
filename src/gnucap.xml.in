@@ -298,8 +298,6 @@
 
 #define CONSTCtoK (273.15) // also in gnucap/constans.h P_CELSIUS0
 
-#define EXIT_IF_ISNAN(var) assert(is_number(var));
-
 // counted ddts %(count($ddts))
 <admst:variable name="_num_states" select="%(count($ddts))+%(count($idts))"/>
 <admst:variable name="_has_states" select="false"/>
@@ -621,7 +619,7 @@ class $(DEV_NAME) : public ADMS_BASE
 
 
 	private: // analog functions from va
-	<admst:apply-templates select="/module" match="analogfunctionH"/>
+	<admst:apply-templates select="." match="analogfunctionH"/>
 
 	private: // node numbers
 		// stick to gnucap node ordering (external first)
@@ -646,18 +644,16 @@ class $(DEV_NAME) : public ADMS_BASE
 		};
 	protected: // nodes sorted according to discipline
 
-
-
-	<admst:variable name="mytmpmodule" select="%(.)" />
-
+  <admst:variable name="mytmpmodule" select="%(.)" />
 
   <admst:for-each select="$mydisciplines[.!='']">
-	  	enum Node_%(./name) {
     <admst:variable name="foo" select="%(.)" />
-    
-    <!-- place your specific definitions here -->
+	 <admst:if test="[(count($mytmpmodule/node[discipline=$(foo) and grounded='no']))!=0]">
+		 // REQUIRED, write out in any case (incomplete)
+    </admst:if>
+		enum Node_%(./name) {
     <admst:if test="[(name='electrical')]">
-	    		n_GND=-1,
+			n_GND=-1,
     </admst:if>
 
     <admst:join select="$mytmpmodule/node[discipline=$(foo) and grounded='no']" separator=",">
@@ -665,17 +661,6 @@ class $(DEV_NAME) : public ADMS_BASE
     </admst:join>
 		};
   </admst:for-each>
-
-  <!--
-		enum Node_degradational {
-  <admst:if test="[count(node[discipline/name='degradational' and grounded='no'])!=0]">
-    <admst:for-each select="node[discipline/name='degradational' and grounded='no']" separator=",">
-        <admst:text format="\n\t\t\t$node_prefix%(name)=__%(name),"/>
-      </admst:for-each>
-    <admst:text format="\n\t\t\t_num_adp_nodes=%(count(node[discipline/name='degradational' and grounded='no']))"/>
-  </admst:if>
-	  };
-  -->
 
 	private: // nodes / matrix indexes
 
@@ -1720,7 +1705,7 @@ $(DEV_NAME)::~$(DEV_NAME)()
 }
 // ---------------- all analog functions from verilog-module here: ---------- //
 
-<admst:apply-templates select="/module" match="analogfunctionC"/>
+<admst:apply-templates select="." match="analogfunctionC"/>
 // -------------------------------------------------------------------------- //
 #ifdef HAVE_PARA_BASE
 std::map&lt;string, PARA_BASE $(DEV_NAME)::*&gt; $(DEV_NAME)::param_dict
@@ -2903,8 +2888,11 @@ void $(DEV_NAME)::tr_eval()
 
   <admst:for-each select="$(ddts)">
 	double keep_%(adms/id(.))=1;
-	if(uic_now(_ddt_%(adms/id(.)))){
+	if (uic_now(_ddt_%(adms/id(.)))) {
 		trace1("$(DEV_NAME)::tr_eval keeping", c->ic_state_%(adms/id(.)));
+		if(c->ic_state_%(adms/id(.)).has_good_value()){
+			_states[1][2*_ddt_%(adms/id(.))] = c->ic_state_%(adms/id(.));
+		}
 #ifdef HAVE_KEEPCOEFF
 		keep_%(adms/id(.)) = OPT::keepcoeff;
 #endif
@@ -4406,10 +4394,10 @@ currently: only called for eval_mode==accept
           <admst:apply-templates select="." match="subexpression:stringify:noprobe"/>
           <admst:text format="(%s)"/>
         </admst:join>
-        <admst:text format=")\n"/>
+        <admst:text format=");\n"/>
         <admst:value-of select="position(.)-1"/>
         <admst:apply-templates select="." match="function:getname_push"/>
-        <admst:text format="EXIT_IF_ISNAN(__%s_%s)\n"/>
+EXIT_IF_ISNAN(__%s_%s); // A
       </admst:when>
       <admst:when test="arguments[count(.)=2]">
         <admst:value-of select="position(.)-1"/>
@@ -4425,7 +4413,7 @@ currently: only called for eval_mode==accept
         <admst:text format=")\n"/>
         <admst:value-of select="position(.)-1"/>
         <admst:apply-templates select="." match="function:getname_push"/>
-        <admst:text format="EXIT_IF_ISNAN(__%s_%s)\n"/>
+EXIT_IF_ISNAN(__%s_%s); // B
       </admst:when>
       <admst:otherwise>
         <admst:value-of select="name"/>
@@ -4488,10 +4476,10 @@ currently: only called for eval_mode==accept
                 <admst:text format="_d_%s(__%s_%s,__d_%s_%s,(%s))\n"/>
                 <admst:value-of select="../position(.)-1"/>
                 <admst:apply-templates select=".." match="function:getname_push"/>
-                <admst:text format="EXIT_IF_ISNAN(__%s_%s)\n"/>
+                EXIT_IF_ISNAN(__%s_%s);
                 <admst:value-of select="../position(.)-1"/>
                 <admst:apply-templates select=".." match="function:getname_push"/>
-                <admst:text format="EXIT_IF_ISNAN(__d_%s_%s)\n"/>
+                EXIT_IF_ISNAN(__d_%s_%s);
               </admst:when>
               <admst:otherwise>
                 <admst:value-of select="../position(.)-1"/>
@@ -4529,7 +4517,7 @@ currently: only called for eval_mode==accept
                 <admst:text format=")\n"/>
                 <admst:value-of select="../position(.)-1"/>
                 <admst:apply-templates select=".." match="function:getname_push"/>
-                <admst:text format="EXIT_IF_ISNAN(__dFx_%s_%s)\n"/>
+                EXIT_IF_ISNAN(__dFx_%s_%s);
               </admst:if>
             </admst:if>
             <admst:if test="[position(.)=2]">
@@ -4549,13 +4537,13 @@ currently: only called for eval_mode==accept
                 <admst:text format=")\n"/>
                 <admst:value-of select="../position(.)-1"/>
                 <admst:apply-templates select=".." match="function:getname_push"/>
-                <admst:text format="EXIT_IF_ISNAN(__dFy_%s_%s)\n"/>
+                EXIT_IF_ISNAN(__dFy_%s_%s);
               </admst:if>
             </admst:if>
           </admst:for-each>
           <admst:value-of select="position(.)-1"/>
           <admst:apply-templates select="." match="function:getname_push"/>
-          <admst:text format="EXIT_IF_ISNAN(__%s_%s)\n"/>
+          EXIT_IF_ISNAN(__%s_%s);
         </admst:if>
       </admst:for-each>
       <admst:text format="#else\n"/>
@@ -4646,10 +4634,10 @@ currently: only called for eval_mode==accept
                 <admst:text format="_d_%s(__%s_%s,__d_%s_%s,(%s))\n"/>
                 <admst:value-of select="../position(.)-1"/>
                 <admst:apply-templates select=".." match="function:getname_push"/>
-                <admst:text format="EXIT_IF_ISNAN(__%s_%s);\n"/>
+                EXIT_IF_ISNAN(__%s_%s);
                 <admst:value-of select="../position(.)-1"/>
                 <admst:apply-templates select=".." match="function:getname_push"/>
-                <admst:text format="EXIT_IF_ISNAN(__d_%s_%s);\n"/>
+                EXIT_IF_ISNAN(__d_%s_%s);
               </admst:when>
               <admst:otherwise>
                 <admst:value-of select="../position(.)-1"/>
@@ -4687,7 +4675,7 @@ currently: only called for eval_mode==accept
 					 <admst:text format=") // 3606\n"/>
                 <admst:value-of select="../position(.)-1"/>
                 <admst:apply-templates select=".." match="function:getname_push"/>
-                <admst:text format="EXIT_IF_ISNAN(__dFx_%s_%s);\n"/>
+                EXIT_IF_ISNAN(__dFx_%s_%s);
               </admst:if>
             </admst:if>
             <admst:if test="[position(.)=2]">
@@ -4707,7 +4695,7 @@ currently: only called for eval_mode==accept
                 <admst:text format=")\n"/>
                 <admst:value-of select="../position(.)-1"/>
                 <admst:apply-templates select=".." match="function:getname_push"/>
-                <admst:text format="EXIT_IF_ISNAN(__dFy_%s_%s);\n"/>
+                EXIT_IF_ISNAN(__dFy_%s_%s);
               </admst:if>
             </admst:if>
           </admst:for-each>
@@ -8904,25 +8892,41 @@ return
   <admst:variable name="loss" select="/*lhpot*/-1/OPT::shortckt * " test="[lhs/type='ps']"/>
 
 	// residual2($(Pp),$(Pn),%(rhs/tree))
-	{  // recheck: static is same as dynamic?
+	{
 		double vx = %(e(rhs/tree)); // %(rhs/tree)
 		assert(is_number(vx));
-		it0[$(node_prefix)$(Pp)] -= $(loss) vx;
-	<admst:if test="lhs/branch/nnode[grounded='no']">
-		it0[$(node_prefix)$(Pn)] += $(loss) vx;
-	</admst:if>
+    <admst:choose><!-- HACK ... implement later -->
+      <admst:when test="[lhs/branch/pnode/discipline/name='degradational']">
+			assert(_n[$node_prefix$Pp].a_());
+			_n[$node_prefix$Pp].a_()->tr() = vx; // hack, should be +=
+      </admst:when>
+      <admst:otherwise>
+			it0[$(node_prefix)$(Pp)] -= $(loss) vx;
+        <admst:if test="lhs/branch/nnode[grounded='no']">
+			it0[$(node_prefix)$(Pn)] += $(loss) vx;
+        </admst:if>
+      </admst:otherwise>
+    </admst:choose>
 	}
 
 </admst:template>
 
+<!-- unused tamplate?! -->
 <admst:template match="residual1">
   <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)residual1*\n"/>
   <admst:variable name="Pp" select="%(lhs/branch/pnode/name)"/>
 	// residual1($(Pp),%(rhs/tree))
-	{ // recheck: static is same as dynamic?
+	{ // $lhs/branch/pnode/discipline
 		double vx = %(e(rhs/tree));
 		assert(is_number(vx));
-		it0[$node_prefix$Pp] -= vx;
+    <admst:choose><!-- HACK ... cleanup later -->
+      <admst:when test="[lhs/branch/pnode/discipline='degradational']">
+			_n[$node_prefix$Pp]->tr() += vx;
+      </admst:when>
+      <admst:otherwise>
+			it0[$node_prefix$Pp] -= vx;
+      </admst:otherwise>
+    </admst:choose>
 	}
 
 </admst:template>
@@ -9001,6 +9005,9 @@ return
 #endif
 
     </admst:when> <!--dynamic=yes-->
+    <admst:when test="../../lhs/branch/pnode[discipline/name='degradational']">
+		//skipping jacobian for degr node
+    </admst:when> <!--degradational-->
     <admst:otherwise>
 	{ // jacobian4($(Sp), $(Sn), $(Pp), $(Pn), $(ep)) - static
 		double ep = $ep;

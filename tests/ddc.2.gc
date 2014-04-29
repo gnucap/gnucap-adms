@@ -16,12 +16,16 @@ mycap #(.ic_p_n(qci1)) c1 (n1,0);
 spice
 *c1 n1 0 1m ic=qci1
 
-R1 n1 0 5k
+R1 n1 n2 5k
+V1 n2 0 vdd
+.param vdd 1
 
-.dc
+.print dc v(nodes) ic(c1) ic_p_n(c1)
+.print ddc v(nodes) dv(nodes) ddv(nodes) qci1
 
-.print ddc v(nodes) v(C1) dv(nodes) ddv(nodes) i(C1) iter(0)
-* tr is broken.
-.ddc qci1 0 1 .1 tr trstep=1e-3
-*.ddc dm old
+.echo dc
+.dc v1 0 1 .5 uic
+.echo ddc
+.ddc vdd 0 1 .5
+
 .end

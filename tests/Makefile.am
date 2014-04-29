@@ -13,6 +13,8 @@ check_LTLIBRARIES = \
     vs.la cs.la cap.la \
     coil.la ccvs.la vccs.la \
     analogfunction.la \
+    afsquare.la \
+    square.la \
     int.la pid.la vcvs.la \
     diff.la \
     mul.la \
@@ -38,9 +40,14 @@ AM_TESTS_ENVIRONMENT = \
            srcdir='$(srcdir)';
 AM_TESTS_FD_REDIRECT = 9>&2
 TEST_EXTENSIONS = .sh
-TESTS = $(EXT_TESTS) $(GC_TESTS) $(GCUF_TESTS)
-GC_TESTS = if.sh if2.sh coil.sh vs.sh cs.sh cap.sh \
+TESTS = $(EXT_TESTS) $(GC_TESTS) $(GCUF_TESTS) \
+    abs.sh
+GC_TESTS = \
+    if.sh \
+    if2.sh coil.sh vs.sh cs.sh cap.sh \
     analogfunction.sh \
+    afsquare.sh \
+    square.sh \
     int.sh \
     pid.sh \
 	 diff.sh \
@@ -51,10 +58,7 @@ GC_TESTS = if.sh if2.sh coil.sh vs.sh cs.sh cap.sh \
     subcoil.sh
 
 # will only work with -uf
-GCUF_TESTS = rc_uic.sh ddc_rc.sh
-
-# needs work
-XFAIL_TESTS = ddc_rc.sh
+GCUF_TESTS = rc_uic.sh ddc_rc.sh ddc.2.sh
 
 EXTRA_DIST = $(TESTS:%.sh=%.ref) $(GC_TESTS:%.sh=%.gc) rc_uic.gc ddc_rc.gc
 FILTER = cat

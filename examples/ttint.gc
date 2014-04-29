@@ -1,0 +1,90 @@
+load lang_adms.so
+spice
+* simplistic integrating ager
+
+.param vdd 1.7
+.options numdgt=5
+
+V1 nin 0 pulse iv=0 pv=1 rise=.2 fall=.2 delay=.1 width=.1
+
+.adms
+`include "gnucap-adms.h"
+`include "discipline.h"
+
+extern module ttint(e);
+	inout e;
+	degradational e;
+endmodule
+
+module ager(p,n);
+   inout p,n;
+   electrical p,n;
+	degradational nage;
+
+   // Model parameters
+   parameter real r0=10000 from (0:inf)
+                  (*info="Fresh resistance [Ohm]"*);
+
+   real v1, i1, g;
+	real a (*ask="yes"*);
+	real b (*ask="yes"*);
+
+	// ttint #(.dummy(1)) int1(nage);
+	ttint #() int1(nage);
+
+   analog begin
+		@(initial_model) begin
+			g=1/r0;
+		end
+		@(initial_instance) begin
+			a=0;
+		end
+		@(initial_step) begin
+			b = State(nage);
+		end
+
+      begin
+			a = State(nage);
+		   v1 = V(p,n);
+         i1 = v1*g/(1+a);
+         I(p,n) <+ i1;
+			Level(nage) <+ v1;
+      end
+   end
+endmodule
+endadms
+load d_ttint.so
+
+paramset myager ager
+	.r0=20k;
+endparamset
+spice
+
+.verilog
+myager r1 (nin,0);
+spice
+
+
+.print tran
++ v(nodes)
++ tr(r1.int1)
++ tt(r1.int1)
+
+.print tt v(nodes)
++ a(r1)
++ tr(r1.nage)
++ tt(r1.nage)
++ tr(r1.int1)
++ tt(r1.int1)
++ I(v1)
+
+.print dc v(nodes) a(r1)
+.store tw a(r1) b(r1) tr(r1.nage)
+
+.list
+.ttr 0 2 .1 .6 * 2 new tran
+.measure a at(probe="a(r1)" x=34)
+.measure b at(probe="b(r1)" x=34)
+
+.status notime
+.end

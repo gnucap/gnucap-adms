@@ -1,0 +1,32 @@
+spice
+.load lang_adms.so
+.adms
+`include "discipline.h"
+
+module dabs (p,n);
+	inout p,n;
+	electrical p,n;
+
+	parameter real r=1 from (0:inf);
+	real a (*ask="yes"*);
+
+	real g;
+	real current;
+	analog begin
+		a=abs(V(p,n));
+	end
+endmodule
+endadms
+paramset myabs dabs;
+endparamset
+
+myabs foo(0 1);
+
+spice
+V1 1 0 sin amplitude=1 frequency=1
+
+.print tran v(1) a(foo)
+.tran 0 1 .1
+
+.status notime
+.end
