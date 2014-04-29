@@ -21,7 +21,7 @@ AM_TESTS_ENVIRONMENT = \
 
 EXFILES=rc.va
 if VERILOG_EXTERN
-EXT_TESTS = rc.sh ager.sh
+EXT_TESTS = rc.sh ager.sh ttint.sh
 EXT_LA = rc.la ager.la
 rc.test: rc.so
 endif
@@ -54,11 +54,12 @@ sensor_chip.log: $(PWD)/sensor_chip.ckt
 
 TEST_EXTENSIONS = .sh
 AM_TESTS_FD_REDIRECT = 9>&2
-GC_TESTS = \
+SO_TESTS = \
     op.sh \
     sensor.sh \
-    lamp.sh motor.sh $(EXT_TESTS) \
+    lamp.sh motor.sh \
     vbg.sh
+GC_TESTS = $(SO_TESTS) $(EXT_TESTS)
 CUSTOM_TESTS = \
     callfunctions.sh \
     sensor_chip.sh \
@@ -71,7 +72,7 @@ inline.log inline.out: cleantmp
 cleantmp:
 	rm -rf .admstmp
 
-$(GC_TESTS:%.sh=%.log): %.log: %.so
+$(SO_TESTS:%.sh=%.log): %.log: %.so
 
 callfunctions.out: callfunctions.so
 
@@ -151,7 +152,7 @@ ADMS_GC_XML=../src/gnucap_0.xml
 
 %.so: %.h %.cc
 
-%.out %.ret 2%.out: %.so %.gc
+%.out %.ret 2%.out: %.gc
 	$(GNUCAP) $(lastword $+) 2> 2$*.out | tee $*.out | grep too\ negative ;\
 	[ 0 -ne $$? ]
 
