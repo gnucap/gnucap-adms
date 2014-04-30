@@ -23,6 +23,9 @@ endparamset
 myabs foo(0 1);
 
 spice
+
+.echo testdata
+
 V1 1 0 sin amplitude=1 frequency=1
 
 .print tran v(1) a(foo)

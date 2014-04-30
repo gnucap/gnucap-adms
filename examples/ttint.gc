@@ -64,12 +64,15 @@ module ager(p,n);
    end
 endmodule
 endadms
+
 load d_ttint.so
 
 paramset myager ager
 	.r0=.1;
 endparamset
 spice
+
+.echo testdata
 
 .verilog
 myager a1 (nout,nin);

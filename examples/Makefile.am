@@ -23,7 +23,7 @@ EXFILES=rc.va
 if VERILOG_EXTERN
 EXT_TESTS = rc.sh ager.sh ttint.sh
 EXT_LA = rc.la ager.la
-rc.test: rc.so
+ager.log rc.log : %.log: %.so
 endif
 
 SENSOR_SO = op.so ldo.so vbg.so sensor.so
@@ -68,6 +68,7 @@ CUSTOM_TESTS = \
 TESTS = $(GC_TESTS) $(CUSTOM_TESTS)
 
 inline.log inline.out: cleantmp
+ttint.log ttint.out: cleantmp
 
 cleantmp:
 	rm -rf .admstmp
@@ -98,17 +99,14 @@ sensor_chip.sh inline.sh opamp.sh $(GC_TESTS): %.sh: %.gc Makefile %.ref
 	@echo "rm $*.out" >> $@
 	@chmod +x $@
 
-# $(TESTS): %.sh: %.out
-
-# %.out %_tr.out: %.gc
-#	$(GNUCAP) $< > $*.out
-
 PREDIFF= \
     '1,/^\#·See·the·file/d' \
     '/^stashing·as/d' \
     '/^@/d' \
     '/:·already.installed,·replacing/d'
 
+# remove cruft from model compiler
+ttint.sh: POSTDIFF='1,/^testdata/d'
 inline.sh: POSTDIFF='1,/^\#Time/d'
 
 $(TESTS:%.sh=%.out): %.out: %.gc
@@ -186,7 +184,6 @@ clean-ex:
 CLEANFILES = .*.adms *.out $(GC_TESTS) *.hxx .*.xml \
     callfunctions.sh \
     inline.sh opamp.sh sensor_chip.sh
-
 
 $(TESTS:%.sh=%.log): .P
 

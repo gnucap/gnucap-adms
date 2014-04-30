@@ -47,8 +47,8 @@ AM_TESTS_ENVIRONMENT = \
 
 AM_TESTS_FD_REDIRECT = 9>&2
 TEST_EXTENSIONS = .sh
-TESTS = $(EXT_TESTS) $(GC_TESTS) $(GCUF_TESTS) $(NOSO_TESTS)
-NOSO_TESTS = abs.sh
+TESTS = $(EXT_TESTS) $(GC_TESTS) $(GCUF_TESTS) $(INLINE_TESTS)
+INLINE_TESTS = abs.sh
 GC_TESTS = \
     if.sh \
     if2.sh coil.sh vs.sh cs.sh cap.sh \
@@ -67,16 +67,19 @@ GC_TESTS = \
 # will only work with -uf
 GCUF_TESTS = rc_uic.sh ddc_rc.sh ddc.2.sh
 
+# remove cruft from model compiler
+abs.sh: POSTDIFF='1,/^testdata/d'
+
 EXTRA_DIST = \
     $(TESTS:%.sh=%.ref) \
     $(GC_TESTS:%.sh=%.gc) \
     $(GCUF_TESTS:%.sh=%.gc) \
-    $(NOSO_TESTS:%.sh=%.gc) \
+    $(INLINE_TESTS:%.sh=%.gc) \
     rc_uic.gc ddc_rc.gc
 
 FILTER = cat
 
-$(NOSO_TESTS) $(GCUF_TESTS) $(GC_TESTS) $(EXT_TESTS): %.sh: %.gc Makefile %.ref
+$(INLINE_TESTS) $(GCUF_TESTS) $(GC_TESTS) $(EXT_TESTS): %.sh: %.gc Makefile %.ref
 	@echo "#!/bin/sh" > $@
 	@echo "set -e" >> $@
 	@echo "GNUCAP=\$${GNUCAP-$(GNUCAP)}" >> $@
@@ -134,15 +137,25 @@ ADMS_GC_XML=../src/gnucap_0.xml
 
 check: $(CHECK:%=%.reg)
 
-clean-local: clean-examples
+clean-local: clean-examples cleantmp
 
 clean-examples:
 	rm -f *.out *.so *.cc *.hxx *.h
 
-CLEANFILES = .*.adms *.out $(GC_TESTS) *.hxx .*.xml \
+abs.log abs.out: cleantmp
+
+cleantmp:
+	rm -rf .admstmp
+
+CLEANFILES = .*.adms *.out \
+    $(GC_TESTS) \
+    $(INLINE_TESTS) \
+    *.hxx .*.xml \
     core \
     rc_uic.sh \
-    ddc_rc.sh
+    ddc_rc.sh \
+    ddc.2.sh
+
 CLEANFILES+= $(check_LTLIBRARIES:%.la=%.h) \
              $(check_LTLIBRARIES:%.la=%.cc)
 
