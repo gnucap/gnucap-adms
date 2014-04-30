@@ -35,13 +35,20 @@ AM_TESTS_ENVIRONMENT = \
     export PATH='../src:$(PATH)'\
            LD_LIBRARY_PATH='../src/.libs'\
            GNUCAP='$(GNUCAP)'\
+           GNUCAP_ADMS_DATADIR='$(PWD)/../src'\
+           GNUCAP_ADMS_INCLUDEDIR='$(abs_top_srcdir)/src'\
+           GNUCAP_ADMS_IMPLICIT='$(abs_top_srcdir)/src/implicit.xml'\
+           GNUCAP_ADMS_CPPFLAGS='-I$(abs_top_srcdir)/src'\
+           GNUCAP_ADMS_LDFLAGS='-L$(abs_top_builddir)/src/.libs'\
+           GNUCAP_ADMS_LIBS='-lgnucap_adms'\
+           GNUCAP_ADMS_TMPDIR='$(PWD)/.admstmp'\
            REDIRECT='exec 2>&9'\
-           GNUCAP_CPPFLAGS='-I$(abs_top_builddir)/src -I$(abs_top_srcdir)/src'\
            srcdir='$(srcdir)';
+
 AM_TESTS_FD_REDIRECT = 9>&2
 TEST_EXTENSIONS = .sh
-TESTS = $(EXT_TESTS) $(GC_TESTS) $(GCUF_TESTS) \
-    abs.sh
+TESTS = $(EXT_TESTS) $(GC_TESTS) $(GCUF_TESTS) $(NOSO_TESTS)
+NOSO_TESTS = abs.sh
 GC_TESTS = \
     if.sh \
     if2.sh coil.sh vs.sh cs.sh cap.sh \
@@ -60,10 +67,16 @@ GC_TESTS = \
 # will only work with -uf
 GCUF_TESTS = rc_uic.sh ddc_rc.sh ddc.2.sh
 
-EXTRA_DIST = $(TESTS:%.sh=%.ref) $(GC_TESTS:%.sh=%.gc) rc_uic.gc ddc_rc.gc
+EXTRA_DIST = \
+    $(TESTS:%.sh=%.ref) \
+    $(GC_TESTS:%.sh=%.gc) \
+    $(GCUF_TESTS:%.sh=%.gc) \
+    $(NOSO_TESTS:%.sh=%.gc) \
+    rc_uic.gc ddc_rc.gc
+
 FILTER = cat
 
-$(GCUF_TESTS) $(GC_TESTS) $(EXT_TESTS): %.sh: %.gc Makefile %.ref
+$(NOSO_TESTS) $(GCUF_TESTS) $(GC_TESTS) $(EXT_TESTS): %.sh: %.gc Makefile %.ref
 	@echo "#!/bin/sh" > $@
 	@echo "set -e" >> $@
 	@echo "GNUCAP=\$${GNUCAP-$(GNUCAP)}" >> $@
@@ -93,7 +106,7 @@ PREDIFF= \
 $(TESTS:%.sh=%.log): Makefile
 
 $(TESTS:%.sh=%.out): %.out: %.gc
-	$(AM_V_at)$(GNUCAP) $(GNUCAP_PLUGINS:%=-a ../plugins/.libs/%) $(GNUCAP_ARGS) $< | \
+	$(AM_V_at)$(AM_TESTS_ENVIRONMENT)$(GNUCAP) $(GNUCAP_PLUGINS:%=-a ../plugins/.libs/%) $(GNUCAP_ARGS) $< | \
 	    sed $(subst ·, ,$(PREDIFF:%=-e %)) \
 	    $(if $(POSTDIFF),| sed) $(subst ·, ,$(POSTDIFF:%=-e %)) > $*.out
 
