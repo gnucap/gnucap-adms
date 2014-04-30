@@ -1,7 +1,5 @@
 spice
 
-.param P -1
-.param I 1
 .param qci1=1
 .param in0=1
 
@@ -14,14 +12,22 @@ paramset mycap cap;
 endparamset
 mycap #(.ic_p_n(qci1)) c1 (n1,0);
 spice
-*c1 n1 0 1m ic=qci1
+c1 n2 0 1m ic=qci1
 
 R1 n1 0 5k
+R2 n2 0 5k
 
+.print dc v(nodes)
 .dc
+.dc uic
+.print tran v(nodes)
+.tran 0 1 1 trace=a cont
+.param qci1 2
 
-.print ddc v(nodes) v(C1) dv(nodes) ddv(nodes) i(C1) iter(0)
-* tr is broken.
-.ddc qci1 0 1 .1 tr trstep=1e-3
-*.ddc dm old
+.print ac v(nodes)
+.ac 1 10 * 2
+
+* BUG: ddv does not work for admscap
+.print ddc v(nodes) dv(nodes) ddv(nodes) qci1
+.ddc tr trstep=1e-3 qci1 0 1 .1
 .end
