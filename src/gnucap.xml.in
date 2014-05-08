@@ -295,6 +295,7 @@
 #define _DERIVATEFORDDX
 
 #define SPICE_LETTER &quot;\\0&quot;
+#define STATIC_RHS 1
 
 #define CONSTCtoK (273.15) // also in gnucap/constans.h P_CELSIUS0
 
@@ -2620,7 +2621,11 @@ void $(DEV_NAME)::tr_accept()
 <admst:for-each select="$(idts)">
 		double keep_%(adms/id(.))=1;
 </admst:for-each>
+#undef STATIC_RHS
+#define STATIC_RHS 0
 #		include "$(filename)_$(module)_tr.hxx"
+#undef STATIC_RHS
+#define STATIC_RHS 1
 #undef NOJAC
 #undef _DDT
 	}else{
@@ -6268,7 +6273,7 @@ return
     </admst:when>
     <admst:otherwise>
 // nonoise contribution: %(.)
-// contribution lhs (type source): %(./lhs)
+// contribution lhs (type source): %(./lhs) dynamic%(dynamic)
 // lhs discipline %(./lhs/discipline) flow %(./lhs/discipline/flow) potential %(./lhs/discipline/potential)
 // lhs type (basicenum) %(./lhs/type) (bug?!)
 <!-- MOVE TO IMPLICIT PREPROCESSOR -->
@@ -8821,7 +8826,7 @@ return
 </admst:template>
 <!-- ---------------------------------------------------------- -->
 <admst:template match="contribution:nonoise">
-// contribution:nonoise %(.)
+// contribution:nonoise %(.) dynamic %(dynamic)
 
   <admst:if test="rhs[not(nilled(function[class='builtin']))]">
 	{ // %(.) 7804
@@ -8837,11 +8842,12 @@ return
 // done ddxfunctioncomp
   </admst:if>
 
+// done res %(dynamic)
+
   <admst:apply-templates select="." match="residual_"/>
 
   <admst:for-each select="rhs/probe">
-    <admst:text format="\t// Rhs/probe: %(.)\n"/>
-    <admst:text format="\t// dynamic: %(../dynamic)\n"/>
+    <admst:text format="\t// Rhs/probe: %(.) ../dynamic: %(../dynamic) ../../dynamic: %(../../dynamic)\n"/>
     <admst:variable name="probepnode" select="%(branch/pnode)"/>
     <admst:variable name="probennode" select="%(branch/nnode)"/>
     <admst:variable name="probepnodename" select="%($probepnode/name)"/>
@@ -8903,10 +8909,12 @@ return
   <admst:variable name="Pn" select="%(lhs/branch/nnode/name)"/>
   <admst:variable name="loss" select=""/>
   <admst:variable name="loss" select="/*lhpot*/-1/OPT::shortckt * " test="[lhs/type='ps']"/>
+  <admst:variable name="static_rhs" select=""/>
+  <admst:variable name="static_rhs" select="STATIC_RHS *" test="[dynamic='no']"/>
 
-	// residual2($(Pp),$(Pn),%(rhs/tree))
+	// residual2($(Pp),$(Pn),%(rhs/tree)), ../dynamic:%(../dynamic) dynamic %(dynamic)
 	{
-		double vx = %(e(rhs/tree)); // %(rhs/tree)
+		double vx = $(static_rhs) %(e(rhs/tree)); // %(rhs/tree)
 		assert(is_number(vx));
     <admst:choose><!-- HACK ... implement later -->
       <admst:when test="[lhs/branch/pnode/discipline/name='degradational']">
@@ -9023,7 +9031,7 @@ return
     </admst:when> <!--degradational-->
     <admst:otherwise>
 	{ // jacobian4($(Sp), $(Sn), $(Pp), $(Pn), $(ep)) - static
-		double ep = $ep;
+		double ep = STATIC_RHS * ($ep);
 		it0[$(cont_prefix)$Sp] += ep*BR($Pp,$Pn);
 <admst:if test="../../lhs/branch/nnode[grounded='no']">
 		it0[$(cont_prefix)$Sn] -= ep*BR($Pp,$Pn);
