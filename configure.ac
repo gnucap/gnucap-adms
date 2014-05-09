@@ -51,7 +51,7 @@ fi
 
 dnl ----------------- admsXml ------------------
 AC_CHECK_PROG(HAVE_ADMSXML, admsXml, true, false)
-if test "x$HAVE_GCCONF" = "xfalse"; then
+if test "x$HAVE_ADMSXML" = "xfalse"; then
 	AC_MSG_ERROR([cannot find admsXml])
 fi
 
