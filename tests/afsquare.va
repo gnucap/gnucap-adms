@@ -1,0 +1,21 @@
+`include "disciplines.h"
+
+module square(p,n,cp,cn);
+	inout p,n,cp,cn;
+	electrical p,n,cp,cn;
+
+   parameter real gain    = 1 from [0:inf);
+   parameter real ex      = 2 from [0:inf);
+
+   real loss;
+
+	analog function real square;
+		input x;
+		begin
+			square = x * x;
+		end
+	endfunction
+   analog begin
+      V(p,n) <+ gain*square(V(cp,cn));
+   end
+endmodule
