@@ -9,6 +9,7 @@ GNUCAP = $(shell echo gnucap | sed -e '$(transform)')
 AM_DEFAULT_SOURCE_EXT = .va
 .va.cc:
 check_LTLIBRARIES = \
+    $(EXT_LIBS) \
     if.la if2.la \
     vs.la cs.la cap.la \
     coil.la ccvs.la vccs.la \
@@ -17,8 +18,8 @@ check_LTLIBRARIES = \
     square.la \
     int.la pid.la vcvs.la \
     diff.la \
-    mul.la \
-    subcoil.la
+    mul.la
+
 
 AM_CPPFLAGS = @GC_CPPFLAGS@ -I$(top_srcdir)/src
 LIBS = ../src/libgnucap_adms.la
@@ -28,7 +29,10 @@ AM_LDFLAGS = -module -avoid-version -rpath /dev/null
 	[ -f $@ ] || $(LN_S) .libs/$@ .
 
 if VERILOG_EXTERN
-EXT_TESTS =
+EXT_TESTS = \
+    subcoil.sh
+EXT_LIBS = \
+    subcoil.la
 endif
 
 AM_TESTS_ENVIRONMENT = \
@@ -61,8 +65,7 @@ GC_TESTS = \
 	 mul.sh \
     ccvs.sh \
     vccs.sh \
-    vcvs.sh \
-    subcoil.sh
+    vcvs.sh
 
 # will only work with -uf
 GCUF_TESTS = rc_uic.sh ddc_rc.sh ddc.2.sh

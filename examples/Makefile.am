@@ -22,7 +22,7 @@ AM_TESTS_ENVIRONMENT = \
 EXFILES=rc.va
 if VERILOG_EXTERN
 EXT_TESTS = rc.sh ager.sh ttint.sh
-EXT_LA = rc.la ager.la
+EXT_LA = rc.la ager.la motor.la
 ager.log rc.log : %.log: %.so
 endif
 
@@ -32,7 +32,7 @@ AM_DEFAULT_SOURCE_EXT = .va
 .va.cc:
 check_LTLIBRARIES = \
     op.la vbg.la ldo.la sensor.la callfunctions.la \
-    lamp.la motor.la $(EXT_LA)
+    lamp.la $(EXT_LA)
 AM_CPPFLAGS = @GC_CPPFLAGS@ -I$(top_srcdir)/src
 LIBS = ../src/libgnucap_adms.la
 AM_LDFLAGS = -module -avoid-version -rpath /dev/null
@@ -57,8 +57,10 @@ AM_TESTS_FD_REDIRECT = 9>&2
 SO_TESTS = \
     op.sh \
     sensor.sh \
-    lamp.sh motor.sh \
+    lamp.sh \
     vbg.sh
+EXT_SO_TESTS = \
+    motor.sh
 GC_TESTS = $(SO_TESTS) $(EXT_TESTS)
 CUSTOM_TESTS = \
     callfunctions.sh \
