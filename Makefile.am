@@ -4,6 +4,10 @@
 
 ACLOCAL_AMFLAGS = -Im4
 SUBDIRS = src tests examples
-EXTRA_DIST = gnuplot.mk
+EXTRA_DIST = \
+    bootstrap \
+    gnuplot.mk \
+    BUGS \
+    NOTES
 
 CLEANFILES = .*.adms .*.xml

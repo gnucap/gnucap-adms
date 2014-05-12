@@ -20,8 +20,8 @@ AM_TESTS_ENVIRONMENT = \
            srcdir='$(srcdir)';
 
 EXFILES=rc.va
-if VERILOG_EXTERN
 EXT_TESTS = rc.sh ager.sh ttint.sh
+if VERILOG_EXTERN
 EXT_LA = rc.la ager.la motor.la
 ager.log rc.log : %.log: %.so
 endif
@@ -61,13 +61,20 @@ SO_TESTS = \
     vbg.sh
 EXT_SO_TESTS = \
     motor.sh
-GC_TESTS = $(SO_TESTS) $(EXT_TESTS)
 CUSTOM_TESTS = \
     callfunctions.sh \
     sensor_chip.sh \
     inline.sh \
     opamp.sh
 TESTS = $(GC_TESTS) $(CUSTOM_TESTS)
+
+DIST_TESTS = $(SO_TESTS) $(EXT_TESTS)
+
+if VERILOG_EXTERN
+GC_TESTS = $(SO_TESTS) $(EXT_TESTS)
+else
+GC_TESTS = $(SO_TESTS)
+endif
 
 inline.log inline.out: cleantmp
 ttint.log ttint.out: cleantmp
@@ -79,7 +86,7 @@ $(SO_TESTS:%.sh=%.log): %.log: %.so
 
 callfunctions.out: callfunctions.so
 
-EXTRA_DIST+= $(GC_TESTS:%.sh=%.gc) $(GC_TESTS:%.sh=%.ref)
+EXTRA_DIST+= $(DIST_TESTS:%.sh=%.gc) $(DIST_TESTS:%.sh=%.ref)
 FILTER=cat
 
 callfunctions.sh: %.sh: %.out
@@ -165,7 +172,16 @@ vbg.out sensor_chip.log sensor_chip.out: \
     $(SENSOR_SO) $(PWD)/sensor_chip.ckt $(PWD)/opvm.core.gc $(PWD)/vbgvm.core.gc $(PWD)/ldovm.core.gc \
     vbg.so ldo.so sensor.so $(PWD)/sensorvm.core.gc
 
-EXTRA_DIST+= opvm.core.gc vbgvm.core.gc ldovm.core.gc sensorvm.core.gc
+EXTRA_DIST+= \
+    opvm.core.gc \
+    vbgvm.core.gc \
+    ldovm.core.gc \
+    sensorvm.core.gc \
+    ldo.gc \
+    ldo.ref \
+    motor.gc \
+    motor.ref \
+    net.va
 
 $(PWD)/%.ckt: %.ckt
 	[ -f $@ ] || $(LN_S) $< .

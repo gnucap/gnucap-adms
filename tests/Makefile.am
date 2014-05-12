@@ -74,11 +74,13 @@ GCUF_TESTS = rc_uic.sh ddc_rc.sh ddc.2.sh
 abs.sh: POSTDIFF='1,/^testdata/d'
 
 EXTRA_DIST = \
+    bug1.va \
     $(TESTS:%.sh=%.ref) \
     $(GC_TESTS:%.sh=%.gc) \
     $(GCUF_TESTS:%.sh=%.gc) \
     $(INLINE_TESTS:%.sh=%.gc) \
-    rc_uic.gc ddc_rc.gc
+    rc_uic.gc ddc_rc.gc \
+    subcoil.gc subcoil.ref
 
 FILTER = cat
 
