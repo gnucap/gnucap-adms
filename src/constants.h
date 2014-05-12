@@ -1,7 +1,7 @@
 /*
-  Copyright C 2007 Accellera Organization, Inc.
-  Standard definitions
-  This file contains the standard definition package constants.vams for Verilog-AMS HDL.
+ WORKAOUND:
+ this file originates from admsXml. adms does not properly install this file,
+ but will generate it in random locations unless it is found.
 */
 
 // Mathematical and physical constants
