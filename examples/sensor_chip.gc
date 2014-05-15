@@ -2,8 +2,11 @@ spice
 * simulating "IMtech_VAC_03" sensor chip
 
 .options numdgt 5
+.options reltol=1e-4
 .parameter piv=0.0001
 .parameter ppv=0.02
+
+*.options noincmode
 
 .include sensor_chip.ckt
 
@@ -20,10 +23,15 @@ spice
 + T(Xsensor1.DR2) v(Xsensor1.DR2.t1)
 * + v(nodes)
 
+
+.options reltol=1e-4
 .store tran v(output)
-.tr 0.000005 80m trace=alltime
+
+*.tr 0.000005 80m trace=alltime
+.tr 0 80m 80m trace=alltime > sensor_chip_tr.out echo
 
 .measure vout at(probe="v(output)" x=40m)
 .mstat
+.status notime
 
 .end
