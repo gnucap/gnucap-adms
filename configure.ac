@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.67])
-AC_INIT([gnucap-adms], [0.0.7-rc4], [felix@salfelder.org])
+AC_INIT([gnucap-adms], [0.0.7-rc5], [felix@salfelder.org])
 AC_CONFIG_SRCDIR([README])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
