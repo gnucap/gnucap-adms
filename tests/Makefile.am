@@ -95,7 +95,7 @@ $(INLINE_TESTS) $(GCUF_TESTS) $(GC_TESTS) $(EXT_TESTS): %.sh: %.gc Makefile %.re
 	@echo "rm $*.out" >> $@
 	@chmod +x $@
 
-vccs.log ccvs.log cap.log: %.log: %.so
+subcoil.log vccs.log ccvs.log cap.log: %.log: %.so
 coil.log: coil.so
 vs.log: vs.so
 cs.log: cs.so
@@ -154,6 +154,7 @@ cleantmp:
 
 CLEANFILES = .*.adms *.out \
     $(GC_TESTS) \
+    $(EXT_TESTS) \
     $(INLINE_TESTS) \
     *.hxx .*.xml \
     core \
