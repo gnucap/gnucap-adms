@@ -1,0 +1,34 @@
+spice
+.load lang_adms.so
+.adms
+`include "discipline.h"
+
+module dtanh (noutp, noutn, ninp, ninn);
+	inout noutn, noutp, ninn, ninp;
+	electrical noutn, noutp, ninn, ninp;
+
+	real th (*ask="yes"*);
+	analog begin
+		th = tanh(V(ninp, ninn));
+		V(noutp, noutn) <+ th;
+		# doesn't work
+		# V(noutp, noutn) <+ tanh(V(ninp, ninn));
+	end
+endmodule
+endadms
+paramset mytanh dtanh;
+endparamset
+
+mytanh foo(2 0 1 0);
+
+spice
+
+.echo testdata
+
+V1 1 0 sin amplitude=1 frequency=1
+
+.print tran v(nodes) th(foo)
+.tran 0 1 .1
+
+.status notime
+.end
