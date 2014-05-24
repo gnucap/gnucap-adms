@@ -3,7 +3,7 @@
 # Copyright 2012 Felix Salfelder
 # License GPLv3+
 
-echo $0 is obsolete. use gnucap.mk instead >&2
+echo $0 is deprecated and broken. use gnucap-adms.mk instead >&2
 
 usage="type $0 some.va to generate some.cc and some.h. \n
 \n
