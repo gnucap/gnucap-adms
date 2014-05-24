@@ -18,13 +18,17 @@ admsdir = $(pkglibdir)
 adms_LTLIBRARIES = libgnucap_adms.la
 libgnucap_adms_la_SOURCES = e_adms.cc
 
+GNUCAP_ADMS_MAKE=$(shell echo gnucap-adms.mk | sed -e '$(transform)')
+
 plugindir = @gnucap_libdir@
 plugin_LTLIBRARIES = lang_adms.la
 lang_adms_la_LDFLAGS = -module -shared
-lang_adms_la_SOURCES = lang_adms.cc md5.c # c_attach.cc
-lang_adms_la_CPPFLAGS = $(AM_CPPFLAGS) -DGNUCAP_ADMS_IMPLICIT=\"$(pkgdatadir)/implicit.xml\"
+lang_adms_la_SOURCES = lang_adms.cc md5.c c_attach.cc
+lang_adms_la_CPPFLAGS = $(AM_CPPFLAGS) \
+    -DGNUCAP_ADMS_IMPLICIT=\"$(pkgdatadir)/implicit.xml\" \
+    -DGNUCAP_ADMS_MAKE=\"$(GNUCAP_ADMS_MAKE)\"
 
-AM_CPPFLAGS = $(GC_CPPFLAGS) -DADD_VERSION
+AM_CPPFLAGS = $(GC_CPPFLAGS)
 
 %_0.xml %_1.xml %_2.xml: %.xml
 	python @srcdir@/split.py

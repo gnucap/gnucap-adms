@@ -10,4 +10,6 @@ EXTRA_DIST = \
     BUGS \
     NOTES
 
+bin_SCRIPTS = gnucap-adms.mk
+
 CLEANFILES = .*.adms .*.xml

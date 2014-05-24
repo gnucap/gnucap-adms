@@ -111,6 +111,9 @@ AC_DEFINE_UNQUOTED(ADMS_CPPFLAGS, ["-I$prefix/include/gnucap-adms"], [pass to cp
 AC_DEFINE_UNQUOTED(ADMS_LDFLAGS, ["-L$prefix/lib/gnucap-adms -Wl,-rpath,$prefix/lib/gnucap-adms"], [pass to ld])
 AC_DEFINE_UNQUOTED(ADMS_LIBS, ["-lgnucap_adms"], [link against])
 
+WHICH_MAKE=`which make`
+AC_SUBST([WHICH_MAKE])
+
 # Checks for library functions.
 
 if test "$enable_debug" = "yes" ; then
@@ -122,6 +125,7 @@ fi
 AC_CONFIG_FILES([Makefile src/Makefile])
 AC_CONFIG_FILES([tests/Makefile examples/Makefile])
 AC_CONFIG_FILES([src/gnucap-adms], [chmod +x src/gnucap-adms])
+AC_CONFIG_FILES([gnucap-adms.mk], [chmod +x gnucap-adms.mk])
 AC_CONFIG_FILES([src/gnucap.xml])
 AC_OUTPUT
 

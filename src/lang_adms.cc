@@ -19,6 +19,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301, USA.
  */
+
+#define ADD_VERSION
+
 #include "c_comand.h"
 #include "d_dot.h"
 #include "d_coment.h"

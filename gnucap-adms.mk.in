@@ -1,0 +1,28 @@
+#!@WHICH_MAKE@ -f
+
+prefix = @prefix@
+datarootdir = ${prefix}/share
+pkglibdir = @pkglibdir@
+pkgdatadir = @datadir@/gnucap-adms
+ADMSXML_FLAGS = @ADMSXML_FLAGS@
+ADMS_RPATH = -Wl,-rpath,$(pkglibdir)
+
+GNUCAP_ADMS_IMPLICIT=$(pkgdatadir)/implicit.xml
+ADMSXML = admsXml
+
+012 = 0 1 2
+XMLS = $(012:%=-e@datarootdir@/gnucap-adms/gnucap_%.xml)
+
+#%.so: %.cc
+#	$(AM_V_CXX)@CC@ $(GNUCAP_CPPFLAGS) $(CPPFLAGS) -DADD_VERSION @CXXFLAGS@ $< -shared -fPIC -DPIC -o $@
+
+%.cc: %.va
+	adms_implicit_transforms=$(GNUCAP_ADMS_IMPLICIT) $(ADMSXML) $(ADMSXML_FLAGS) -I@includedir@/@PACKAGE@ $(XMLS) $< -o $*
+
+%.so: CPPFLAGS+= -I@includedir@/@PACKAGE@
+%.so: CXXFLAGS+= $(ADMS_RPATH)
+%.so: LIBS+= -lgnucap_adms
+%.so: LDFLAGS+= -L${pkglibdir}
+
+include $(dir $(lastword $(MAKEFILE_LIST)))gnucap.mk-uf
+
