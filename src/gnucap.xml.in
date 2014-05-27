@@ -315,8 +315,8 @@ class $(DEV_NAME);
 class $(MODEL_NAME) : public MODEL_CARD {
 	private:
 #ifdef HAVE_PARA_BASE
-		static std::map&lt;string, PARA_BASE $(MODEL_NAME)::*&gt; param_dict;
-		static std::map&lt;string, PARA_BASE $(MODEL_NAME)::*&gt; param_dict_low;
+		static std::map&lt;string, PARA_BASE $(MODEL_NAME)::*&gt; _param_dict;
+		static std::map&lt;string, PARA_BASE $(MODEL_NAME)::*&gt; _param_dict_low;
 #endif
 	protected:
 		explicit $(MODEL_NAME)(const $(MODEL_NAME)&amp; p);	// for clone
@@ -457,8 +457,8 @@ class $(DEV_NAME) : public ADMS_BASE
 		std::string _modelname;
 		node_t _nodes[ %(count(node[grounded='no'])) ];
 #ifdef HAVE_PARA_BASE
-		static std::map&lt;string, PARA_BASE $(DEV_NAME)::*&gt; param_dict;
-		static std::map&lt;string, PARA_BASE $(DEV_NAME)::*&gt; param_dict_low;
+		static std::map&lt;string, PARA_BASE $(DEV_NAME)::*&gt; _param_dict;
+		static std::map&lt;string, PARA_BASE $(DEV_NAME)::*&gt; _param_dict_low;
 #endif
 	private:
 		explicit $(DEV_NAME)(const $(DEV_NAME)&amp; p);
@@ -925,7 +925,7 @@ class $(COMMON_NAME) : public COMMON_COMPONENT
 {
 	friend class $(DEV_NAME);
   private:
-//    static map&lt;string, PARA_BASE $(COMMON_NAME)::*&gt; param_dict;
+//    static map&lt;string, PARA_BASE $(COMMON_NAME)::*&gt; _param_dict;
 	public:
 		void expand(const COMPONENT*);
 		void precalc_first(const CARD_LIST*);
@@ -1508,7 +1508,7 @@ void $(MODEL_NAME)::set_param_by_index(int i, std::string&amp; value, int offset
 }
 // -------------------------------------------------------------------------- //
 #ifdef HAVE_PARA_BASE
-std::map&lt;string, PARA_BASE $(MODEL_NAME)::*&gt; $(MODEL_NAME)::param_dict
+std::map&lt;string, PARA_BASE $(MODEL_NAME)::*&gt; $(MODEL_NAME)::_param_dict
 <admst:if test="[count(variable[input='yes' and scope!='global_instance'])!=0]">
   = boost::assign::map_list_of
 <admst:join select="variable[input='yes' and scope!='global_instance']" separator="">
@@ -1516,7 +1516,7 @@ std::map&lt;string, PARA_BASE $(MODEL_NAME)::*&gt; $(MODEL_NAME)::param_dict
 </admst:join>
 </admst:if>;
 
-std::map&lt;string, PARA_BASE $(MODEL_NAME)::*&gt; $(MODEL_NAME)::param_dict_low
+std::map&lt;string, PARA_BASE $(MODEL_NAME)::*&gt; $(MODEL_NAME)::_param_dict_low
 <admst:if test="[count(variable[input='yes' and scope!='global_instance'])!=0]">
   = boost::assign::map_list_of
 <admst:join select="variable[input='yes' and scope!='global_instance']" separator="">
@@ -1530,7 +1530,7 @@ void $(MODEL_NAME)::set_param_by_name(string Name, string Value)
 {
 #ifdef HAVE_PARA_BASE
 	PARA_BASE $(MODEL_NAME)::* x = (OPT::case_insensitive)?
-		(param_dict_low[toLower(Name)]) : (param_dict[Name]);
+		(_param_dict_low[toLower(Name)]) : (_param_dict[Name]);
 	trace3("$(MODEL_NAME)::set_param_by_name", Name, OPT::case_insensitive, x);
 	if(x) {
 		PARA_BASE* p = &(this->*x);
@@ -1713,7 +1713,7 @@ $(DEV_NAME)::~$(DEV_NAME)()
 <admst:apply-templates select="." match="analogfunctionC"/>
 // -------------------------------------------------------------------------- //
 #ifdef HAVE_PARA_BASE
-std::map&lt;string, PARA_BASE $(DEV_NAME)::*&gt; $(DEV_NAME)::param_dict
+std::map&lt;string, PARA_BASE $(DEV_NAME)::*&gt; $(DEV_NAME)::_param_dict
 <admst:if test="[count(variable[input='yes' and scope='global_instance'])!=0]">
   = boost::assign::map_list_of
 <admst:join select="variable[input='yes' and scope='global_instance']" separator="">
@@ -1721,7 +1721,7 @@ std::map&lt;string, PARA_BASE $(DEV_NAME)::*&gt; $(DEV_NAME)::param_dict
 </admst:join>
 </admst:if>;
 
-std::map&lt;string, PARA_BASE $(DEV_NAME)::*&gt; $(DEV_NAME)::param_dict_low
+std::map&lt;string, PARA_BASE $(DEV_NAME)::*&gt; $(DEV_NAME)::_param_dict_low
 <admst:if test="[count(variable[input='yes' and scope='global_instance'])!=0]">
   = boost::assign::map_list_of
 <admst:join select="variable[input='yes' and scope='global_instance']" separator="">
@@ -1735,7 +1735,7 @@ void $(DEV_NAME)::set_param_by_name(std::string Name, std::string value)
 {
 #ifdef HAVE_PARA_BASE
 	PARA_BASE $(DEV_NAME)::* x = (OPT::case_insensitive)?
-		(param_dict_low[toLower(Name)]) : (param_dict[Name]);
+		(_param_dict_low[toLower(Name)]) : (_param_dict[Name]);
 	trace3("$(DEV_NAME)::set_param_by_name", Name, OPT::case_insensitive, x);
 	if(x) {
 		PARA_BASE* p = &(this->*x);
@@ -2965,7 +2965,7 @@ bool $(COMMON_NAME)::operator==(const COMMON_COMPONENT&amp; x)const
 }
 // -------------------------------------------------------------------------- //
 #if 0
-map&lt;string, PARA_BASE $(COMMON_NAME)::*&gt; $(COMMON_NAME)::param_dict
+map&lt;string, PARA_BASE $(COMMON_NAME)::*&gt; $(COMMON_NAME)::_param_dict
 <admst:if test="[$(_has_states)='true']">
   = boost::assign::map_list_of
 	<admst:join select="$(ddts)" separator="">
@@ -3005,7 +3005,7 @@ void $(COMMON_NAME)::set_param_by_name(std::string name, std::string value)
 
 
 #if 0
-	PARA_BASE $(COMMON_NAME)::* x = (param_dict[Name]);
+	PARA_BASE $(COMMON_NAME)::* x = (_param_dict[Name]);
 
   if(x) {
     PARA_BASE* p = &amp;(this-&gt;*x);
