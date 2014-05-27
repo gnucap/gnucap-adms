@@ -24,5 +24,7 @@ XMLS = $(012:%=-e@datarootdir@/gnucap-adms/gnucap_%.xml)
 %.so: LIBS+= -lgnucap_adms
 %.so: LDFLAGS+= -L${pkglibdir}
 
-include $(dir $(lastword $(MAKEFILE_LIST)))gnucap.mk-uf
-
+program_transform_name = @program_transform_name@
+transform = $(program_transform_name)
+GNUCAP_MAKE=$(shell echo gnucap.mk | sed -e '$(transform)')
+include $(dir $(lastword $(MAKEFILE_LIST)))$(GNUCAP_MAKE)
