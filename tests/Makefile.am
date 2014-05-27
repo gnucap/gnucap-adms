@@ -52,7 +52,7 @@ AM_TESTS_ENVIRONMENT = \
 AM_TESTS_FD_REDIRECT = 9>&2
 TEST_EXTENSIONS = .sh
 TESTS = $(EXT_TESTS) $(GC_TESTS) $(GCUF_TESTS) $(INLINE_TESTS)
-INLINE_TESTS = abs.sh
+INLINE_TESTS = abs.sh instanceparam.sh
 GC_TESTS = \
     if.sh \
     if2.sh coil.sh vs.sh cs.sh cap.sh \
@@ -72,6 +72,7 @@ GCUF_TESTS = rc_uic.sh ddc_rc.sh ddc.2.sh
 
 # remove cruft from model compiler
 abs.sh: POSTDIFF='1,/^testdata/d'
+instanceparam.sh: POSTDIFF='1,/^testdata/d'
 
 EXTRA_DIST = \
     bug1.va \
@@ -148,6 +149,7 @@ clean-examples:
 	rm -f *.out *.so *.cc *.hxx *.h
 
 abs.log abs.out: cleantmp
+instanceparam.log instanceparam.out: cleantmp
 
 cleantmp:
 	rm -rf .admstmp

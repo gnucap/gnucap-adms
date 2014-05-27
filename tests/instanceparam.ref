@@ -1,0 +1,18 @@
+#           v(1)       v(2)       v(3)      
+ 0.         1.         1.         1.        
+#Time       v(1)       v(2)       v(3)      
+ 0.         1.         1.         1.        
+ 0.1        0.9        0.99998    0.99998   
+ 0.2        0.8        0.99995    0.99995   
+ 0.3        0.7        0.99994    0.9999    
+ 0.4        0.6        0.99993    0.99983   
+ 0.5        0.5        0.99992    0.99974   
+ 1.         19.985n    0.99947    0.99899   
+ 2.8        19.913n    0.99589    0.99541   
+ 6.4        19.77n     0.98874    0.98827   
+ 10.        19.628n    0.98165    0.98118   
+Gnucap   System status
+iterations: op=0, dc=4, tran=34, fourier=0, total=48
+transient timesteps: accepted=10, rejected=0, total=10
+nodes: user=3, subckt=0, model=0, total=3
+dctran density=77.8%, ac density=77.8%
