@@ -28,7 +28,7 @@ spice
 .store tran v(output)
 
 *.tr 0.000005 80m trace=alltime
-.tr 0 80m 80m trace=alltime > sensor_chip_tr.out echo
+.tr 0 80m 10m trace=n > sensor_chip_tr.out echo
 
 .measure vout at(probe="v(output)" x=40m)
 .mstat

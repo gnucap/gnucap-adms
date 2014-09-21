@@ -1,6 +1,6 @@
 attach lang_adms.so
 
-options debug
+*options debug
 
 adms
 `include "discipline.h"
@@ -22,6 +22,8 @@ paramset mycap va_cap;
 endparamset
 mycap c1 (0,n1);
 spice
+
+.echo outputstart
 
 v1 nv 0 pulse iv=0 pv=1 rise=1m delay=1m width=3m fall=1m
 r1 nv n1 .3k

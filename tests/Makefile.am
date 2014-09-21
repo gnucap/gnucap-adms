@@ -5,6 +5,8 @@
 GNUCAP_ADMS = ../src/gnucap-adms
 # GNUCAP = LD_LIBRARY_PATH=../src/.libs
 GNUCAP = $(shell echo gnucap | sed -e '$(transform)')
+plugindir = @gnucap_libdir@
+FILTER = $(plugindir)/gnucap-testfilter
 
 sensor_chip.log: $(PWD)/sensor_chip.ckt
 
@@ -38,6 +40,8 @@ $(PWD)/%.gc: %.gc
 DIST_TESTS = $(SO_TESTS) $(EXT_TESTS)
 
 if VERILOG_EXTERN
+EXT_LA = rc.la ager.la motor.la
+ager.log rc.log : %.log: %.so
 EXT_TESTS = \
     subcoil.sh \
     rc.sh \
@@ -69,36 +73,44 @@ TESTS+= $(GC_TESTS) $(CUSTOM_TESTS)
 INLINE_TESTS = abs.sh instanceparam.sh
 GC_TESTS = \
     if.sh \
-    if2.sh coil.sh vs.sh cs.sh cap.sh \
+    if2.sh \
+    coil.sh \
+    vs.sh \
+    cs.sh cap.sh \
     analogfunction.sh \
     afsquare.sh \
     square.sh \
     int.sh \
     pid.sh \
-	 diff.sh \
-	 mul.sh \
+    diff.sh \
+    mul.sh \
     ccvs.sh \
     vccs.sh \
     vcvs.sh
 # from examples
-GC_TESTS+ = $(SO_TESTS) $(EXT_TESTS)
+GC_TESTS+ = $(SO_TESTS)
 
 # will only work with -uf
 GCUF_TESTS = rc_uic.sh ddc_rc.sh ddc.2.sh
 
+POSTDIFF=
 # remove cruft from model compiler
-abs.sh: POSTDIFF='1,/^testdata/d'
-instanceparam.sh: POSTDIFF='1,/^testdata/d'
+$(empty)abs.sh: POSTDIFF='1,/^testdata/d'
+$(empty)instanceparam.sh: POSTDIFF='1,/^testdata/d'
+$(empty)ttint.sh: POSTDIFF='0,/^testdata/d'
+$(empty)inline.sh: POSTDIFF='0,/^outputstart/d'
+
 
 EXTRA_DIST = \
     bug1.va \
-    $(TESTS:%.sh=%.ref) \
     $(GC_TESTS:%.sh=%.gc) \
+    $(GC_TESTS:%.sh=%.ref) \
     $(GCUF_TESTS:%.sh=%.gc) \
+    $(GCUF_TESTS:%.sh=%.ref) \
     $(INLINE_TESTS:%.sh=%.gc) \
+    $(INLINE_TESTS:%.sh=%.ref) \
     rc_uic.gc ddc_rc.gc \
-    subcoil.gc subcoil.ref
-EXTRA_DIST+= \
+    subcoil.gc subcoil.ref \
     lamp.va ager.va rc.va motor.va \
     $(SENSOR_SO:%.so=%.va) \
     $(SENSOR_SO:%.so=%vm.core.gc) \
@@ -136,18 +148,27 @@ vbg.out sensor_chip.log sensor_chip.out: \
     $(SENSOR_SO) $(PWD)/sensor_chip.ckt $(PWD)/opvm.core.gc $(PWD)/vbgvm.core.gc $(PWD)/ldovm.core.gc \
     vbg.so ldo.so sensor.so $(PWD)/sensorvm.core.gc
 
+callfunctions.out: callfunctions.so
+
+callfunctions.sh: %.sh: %.out
+	@echo "#!/bin/sh" > $@
+	@echo "set -e" >> $@
+	@echo "exec 2>&9" >> $@
+	@echo "diff -rup $< $*.out || exit 1" >> $@
+	@echo "rm $*.out" >> $@
+	@chmod +x $@
+
 SENSOR_SO = op.so ldo.so vbg.so sensor.so
 
 AM_DEFAULT_SOURCE_EXT = .va
 .va.cc:
-check_LTLIBRARIES = \
+check_LTLIBRARIES += \
     op.la vbg.la ldo.la sensor.la callfunctions.la \
     lamp.la $(EXT_LA)
 AM_CPPFLAGS = @GC_CPPFLAGS@ -I$(top_srcdir)/src
 LIBS = ../src/libgnucap_adms.la
 AM_LDFLAGS = -module -avoid-version -rpath /dev/null
 
-FILTER = cat
 LT = <
 
 SHS = sensor_chip.sh inline.sh opamp.sh $(INLINE_TESTS) $(GCUF_TESTS) $(GC_TESTS) $(EXT_TESTS)
@@ -181,7 +202,7 @@ PREDIFF= \
 $(TESTS:%.sh=%.log): Makefile
 
 $(TESTS:%.sh=%.out): %.out: %.gc
-	$(AM_V_at)$(AM_TESTS_ENVIRONMENT)$(GNUCAP) $(GNUCAP_PLUGINS:%=-a ../plugins/.libs/%) $(GNUCAP_ARGS) $< | \
+	$(AM_V_at)$(AM_TESTS_ENVIRONMENT)$(GNUCAP) $(GNUCAP_PLUGINS:%=-a ../plugins/.libs/%) $(GNUCAP_ARGS) $(LT) $< | \
 	    sed $(subst ·, ,$(PREDIFF:%=-e %)) \
 	    $(if $(POSTDIFF),| sed) $(subst ·, ,$(POSTDIFF:%=-e %)) > $*.out
 
@@ -201,11 +222,11 @@ ADMS_GC_XML=../src/gnucap_0.xml
 
 %.so: %_tr.hxx %_top.hxx %_ac.hxx %.cc
 
-%.reg: %.test %.ref
-	diff $+
+# %.reg: %.test %.ref
+# 	diff $+
 
-%.test: %.gc
-	$(GNUCAP) $< | grep '^[a-zA-Z0-9]*=' > $@
+# %.test: %.gc
+# 	$(GNUCAP) $< | grep '^[a-zA-Z0-9]*=' > $@
 
 check: $(CHECK:%=%.reg)
 

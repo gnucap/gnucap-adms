@@ -13,6 +13,6 @@ b= 0.
 Gnucap   System status
 iterations: op=0, dc=0, tran=0, fourier=0, total=1728
 transient timesteps: accepted=433, rejected=1, total=433
-twotime timesteps: accepted=4, rejected=0, total=3
+twotime timesteps: accepted=4, rejected=0, total=4
 nodes: user=1, subckt=0, model=0, total=1
 dctran density=100.0%, ac density=100.0%
