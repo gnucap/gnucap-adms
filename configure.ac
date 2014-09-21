@@ -127,7 +127,7 @@ else
 fi
 
 AC_CONFIG_FILES([Makefile src/Makefile])
-AC_CONFIG_FILES([tests/Makefile examples/Makefile])
+AC_CONFIG_FILES([tests/Makefile])
 AC_CONFIG_FILES([src/gnucap-adms], [chmod +x src/gnucap-adms])
 AC_CONFIG_FILES([gnucap-adms.mk], [chmod +x gnucap-adms.mk])
 AC_CONFIG_FILES([src/gnucap.xml])

@@ -6,6 +6,8 @@ GNUCAP_ADMS = ../src/gnucap-adms
 # GNUCAP = LD_LIBRARY_PATH=../src/.libs
 GNUCAP = $(shell echo gnucap | sed -e '$(transform)')
 
+sensor_chip.log: $(PWD)/sensor_chip.ckt
+
 AM_DEFAULT_SOURCE_EXT = .va
 .va.cc:
 check_LTLIBRARIES = \
@@ -27,13 +29,24 @@ AM_LDFLAGS = -module -avoid-version -rpath /dev/null
 
 %.so: %.la
 	[ -f $@ ] || $(LN_S) .libs/$@ .
+$(PWD)/%.ckt: %.ckt
+	[ -f $@ ] || $(LN_S) $< .
+$(PWD)/%.gc: %.gc
+	[ -f $@ ] || $(LN_S) $< .
+	
+
+DIST_TESTS = $(SO_TESTS) $(EXT_TESTS)
 
 if VERILOG_EXTERN
 EXT_TESTS = \
-    subcoil.sh
+    subcoil.sh \
+    rc.sh \
+    ager.sh \
+    ttint.sh
 EXT_LIBS = \
     subcoil.la
 endif
+
 
 AM_TESTS_ENVIRONMENT = \
     export PATH='../src:$(PATH)'\
@@ -52,6 +65,7 @@ AM_TESTS_ENVIRONMENT = \
 AM_TESTS_FD_REDIRECT = 9>&2
 TEST_EXTENSIONS = .sh
 TESTS = $(EXT_TESTS) $(GC_TESTS) $(GCUF_TESTS) $(INLINE_TESTS)
+TESTS+= $(GC_TESTS) $(CUSTOM_TESTS)
 INLINE_TESTS = abs.sh instanceparam.sh
 GC_TESTS = \
     if.sh \
@@ -66,6 +80,8 @@ GC_TESTS = \
     ccvs.sh \
     vccs.sh \
     vcvs.sh
+# from examples
+GC_TESTS+ = $(SO_TESTS) $(EXT_TESTS)
 
 # will only work with -uf
 GCUF_TESTS = rc_uic.sh ddc_rc.sh ddc.2.sh
@@ -82,11 +98,60 @@ EXTRA_DIST = \
     $(INLINE_TESTS:%.sh=%.gc) \
     rc_uic.gc ddc_rc.gc \
     subcoil.gc subcoil.ref
+EXTRA_DIST+= \
+    lamp.va ager.va rc.va motor.va \
+    $(SENSOR_SO:%.so=%.va) \
+    $(SENSOR_SO:%.so=%vm.core.gc) \
+    sensor_chip.ckt \
+    sensor_chip.gc sensor_chip.ref \
+    callfunctions.va callfunctions.gc \
+    opamp.gc opamp.ref \
+    inline.gc inline.ref
+EXTRA_DIST+= $(DIST_TESTS:%.sh=%.gc) $(DIST_TESTS:%.sh=%.ref)
+EXTRA_DIST+= \
+    opvm.core.gc \
+    vbgvm.core.gc \
+    ldovm.core.gc \
+    sensorvm.core.gc \
+    ldo.gc \
+    ldo.ref \
+    motor.gc \
+    motor.ref \
+    net.va
+
+SO_TESTS = \
+    op.sh \
+    sensor.sh \
+    lamp.sh \
+    vbg.sh
+EXT_SO_TESTS = \
+    motor.sh
+CUSTOM_TESTS = \
+    callfunctions.sh \
+    sensor_chip.sh \
+    inline.sh \
+    opamp.sh
+
+vbg.out sensor_chip.log sensor_chip.out: \
+    $(SENSOR_SO) $(PWD)/sensor_chip.ckt $(PWD)/opvm.core.gc $(PWD)/vbgvm.core.gc $(PWD)/ldovm.core.gc \
+    vbg.so ldo.so sensor.so $(PWD)/sensorvm.core.gc
+
+SENSOR_SO = op.so ldo.so vbg.so sensor.so
+
+AM_DEFAULT_SOURCE_EXT = .va
+.va.cc:
+check_LTLIBRARIES = \
+    op.la vbg.la ldo.la sensor.la callfunctions.la \
+    lamp.la $(EXT_LA)
+AM_CPPFLAGS = @GC_CPPFLAGS@ -I$(top_srcdir)/src
+LIBS = ../src/libgnucap_adms.la
+AM_LDFLAGS = -module -avoid-version -rpath /dev/null
 
 FILTER = cat
 LT = <
 
-$(INLINE_TESTS) $(GCUF_TESTS) $(GC_TESTS) $(EXT_TESTS): %.sh: %.gc Makefile %.ref
+SHS = sensor_chip.sh inline.sh opamp.sh $(INLINE_TESTS) $(GCUF_TESTS) $(GC_TESTS) $(EXT_TESTS)
+$(SHS): %.sh: %.gc Makefile %.ref
 	@echo "#!/bin/sh" > $@
 	@echo "set -e" >> $@
 	@echo "GNUCAP=\$${GNUCAP-$(GNUCAP)}" >> $@
@@ -167,6 +232,10 @@ CLEANFILES = .*.adms *.out \
 
 CLEANFILES+= $(check_LTLIBRARIES:%.la=%.h) \
              $(check_LTLIBRARIES:%.la=%.cc)
+CLEANFILES+= .*.adms *.out *.hxx .*.xml \
+    callfunctions.sh \
+    inline.sh opamp.sh sensor_chip.sh
+
 
 $(TESTS:%.sh=%.log): .P
 $(TESTS:%.sh=%.out): .P

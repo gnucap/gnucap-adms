@@ -3,7 +3,7 @@
 # license: GPLv3+
 
 ACLOCAL_AMFLAGS = -Im4
-SUBDIRS = src tests examples
+SUBDIRS = src tests
 EXTRA_DIST = \
     bootstrap \
     gnuplot.mk \
