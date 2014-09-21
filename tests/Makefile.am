@@ -84,6 +84,7 @@ EXTRA_DIST = \
     subcoil.gc subcoil.ref
 
 FILTER = cat
+LT = <
 
 $(INLINE_TESTS) $(GCUF_TESTS) $(GC_TESTS) $(EXT_TESTS): %.sh: %.gc Makefile %.ref
 	@echo "#!/bin/sh" > $@
