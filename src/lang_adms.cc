@@ -22,6 +22,7 @@
 
 #define ADD_VERSION
 
+#include "config.h"
 #include "c_comand.h"
 #include "d_dot.h"
 #include "d_coment.h"
