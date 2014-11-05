@@ -3800,7 +3800,7 @@ currently: only called for eval_mode==accept
             <admst:value-to select="/simulator/tmp" value="m->$(var_prefix)%(name).has_good_value()"/>
           </admst:when>
           <admst:when test="[parametertype='instance']">
-            <admst:value-to select="/simulator/tmp" value="/*instance*/$(var_prefix)%(name).has_good_value()"/>
+            <admst:value-to select="/simulator/tmp" value=" /*instance*/$(var_prefix)%(name).has_good_value()"/>
           </admst:when>
           <admst:otherwise>
             <admst:error format="$given(%s): should not be reached\n"/>
@@ -5211,7 +5211,7 @@ EXIT_IF_ISNAN(__%s_%s); // B
     <admst:value-to select="/simulator/tmp" value="m-&gt;$(var_prefix)%s"/>
   </admst:if>
   <admst:if test="[input='yes' and parametertype='instance']">
-	  <admst:value-to select="/simulator/tmp" value= "/*instance*/d-&gt;$(var_prefix)%s"/>
+	  <admst:value-to select="/simulator/tmp" value= " /*instance*/d-&gt;$(var_prefix)%s"/>
   </admst:if>
   <admst:if test="[input='no' and scope='global_model']">
     <admst:value-to select="/simulator/tmp" value="m-&gt;$(var_prefix)%s"/>
