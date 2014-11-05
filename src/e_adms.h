@@ -412,8 +412,9 @@ inline double ADMS_BASE::tr_c_to_g(double c, double g)const
 #define _circuit_sourceScaleFactor   1.0
 #define _circuit_tnom                (OPT::tnom_c + CONSTCtoK)
 #define _ambient_temp                (OPT::temp_c + CONSTCtoK)
-#define _circuit_temp      (CKT_BASE::_sim->_temp_c + CONSTCtoK)
-#define _scale             1.0
+#define _circuit_temp                (CKT_BASE::_sim->_temp_c + CONSTCtoK)
+#define _vt_nom                      (BOLTZMANN*_ambient_temp/ELECTRON_CHARGE)
+#define _scale                       1.0
 /*--------------------------------------------------------------------------*/
 #define EXP90 1.220403294317841e+039
 #define m00_hypot(v00,x,y)      v00 = sqrt((x)*(x)+(y)*(y));
