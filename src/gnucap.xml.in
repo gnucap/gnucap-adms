@@ -2187,9 +2187,11 @@ void $(DEV_NAME)::tt_advance()
 		for (int i=0; i&lt;OPT::_keep_time_steps-1; ++i) {
 			_time[i] = _time[i+1];
 			//_y[i] = _y[i+1];
+<admst:if test="[$(_has_states)='true']">
 			for( unsigned j=0; j&lt;_num_states; ++j){
 				_states[i][2*j+1] = _states[i+1][2*j+1];
 			}
+</admst:if>
 		}
 		_time[OPT::_keep_time_steps-1] = 0.;
 		// _y[OPT::_keep_time_steps-1] = FPOLY1(0., 0., 0.);
@@ -2352,7 +2354,7 @@ bool $(DEV_NAME)::do_tr()
 	}
 
 
-<admst:if test="[not( count($ddts)=0) ]">
+<admst:if test="[$(_has_states)='true']">
 	for (unsigned ii = 0; ii &lt; _num_states; ++ii) { // similar e_cap.cc do_tr();
 		// BUG: use discipline
 		set_converged(converged() &amp;&amp; ::conchk(_states[0][ii*2], _states_q1[ii]));
