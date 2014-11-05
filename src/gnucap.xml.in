@@ -1457,7 +1457,7 @@ $(MODEL_NAME)::~$(MODEL_NAME)()
 // -------------------------------------------------------------------------- //
 int $(MODEL_NAME)::param_count() const
 {
-	return(%(count(variable[input='yes'])));
+	return(%(count(variable[input='yes' and scope!='global_instance'])));
 }
 // -------------------------------------------------------------------------- //
 bool $(MODEL_NAME)::param_is_printable(int) const
@@ -1469,7 +1469,7 @@ std::string $(MODEL_NAME)::param_name(int i)const
 {
 	switch(i)
 	{
-    <admst:for-each select="variable[input='yes']">
+    <admst:for-each select="variable[input='yes' and scope!='global_instance']">
 		case %(position(.)-1): return(&quot;%(name)&quot;);
     </admst:for-each>
 		default: return(&quot;&quot;);
