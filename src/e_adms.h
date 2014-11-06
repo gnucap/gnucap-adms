@@ -600,7 +600,7 @@ inline string toLower(string s){
 	transform (s.begin(), s.end(), s.begin(), ::tolower);
 	return s;
 }
-#define EXIT_IF_ISNAN(var) assert(is_number(var))
+#define EXIT_IF_ISNAN(var) assert(is_number((double)var))
 
 // -------------------------------------------------------------------------- //
 #endif
