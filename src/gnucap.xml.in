@@ -1859,6 +1859,7 @@ void $(DEV_NAME)::expand()
 			const CARD* p = LANGUAGE::find_proto("%(module)", this);
 			if(!p) throw Exception("cannot find '%(module)'. Load module first?");
 			_%(name) = dynamic_cast&lt;COMPONENT*&gt;(p-&gt;clone_instance());
+			_%(name)->set_dev_type("%(module)");
 			trace2("$(DEV_NAME)::expand", long_label(), _%(name)->has_common());
 			if(_%(name)->has_common()){
 				trace2("$(DEV_NAME)::expand", long_label(),_%(name)->mutable_common()->model());
