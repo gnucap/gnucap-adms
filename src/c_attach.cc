@@ -56,7 +56,7 @@ public:
     CMD::command(command, &CARD_LIST::card_list);
   }
 } p1;
-DISPATCHER<CMD>::INSTALL d1(&command_dispatcher, "load_va", &p1);
+DISPATCHER<CMD>::INSTALL d1(&command_dispatcher, "load_va|ahdl_include", &p1);
 /*--------------------------------------------------------------------------*/
 /*--------------------------------------------------------------------------*/
 }
