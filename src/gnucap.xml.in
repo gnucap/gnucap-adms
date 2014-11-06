@@ -902,10 +902,10 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
 		}
 		// these are never inputs.
   <admst:for-each select="$mydisciplines[.!='' and ./name!='electrical']">
-		bool conchk( Node_electrical a, Node_%(name) b, double reltol=0 ) const {
+		bool conchk( Node_electrical, Node_%(name), double=0 ) const {
 			return true;
 		}
-		bool conchk( Node_%(name) a, Node_electrical b, double reltol=0 ) const {
+		bool conchk( Node_%(name), Node_electrical, double=0 ) const {
 			return true;
 		}
   </admst:for-each>
