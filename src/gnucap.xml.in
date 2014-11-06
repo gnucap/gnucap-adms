@@ -2497,7 +2497,8 @@ void $(DEV_NAME)::tr_load()
     }
   </admst:for-each>
 
-  <admst:for-each select="jacobian">
+  <admst:for-each select="jacobian[row/discipline/name!='degradational' and column/discipline/name!='degradational']">
+
 	  <admst:value-of select="column/name"/>
 	  <admst:value-of select="row/name"/>
 	  <admst:value-of select="column/name"/>
