@@ -509,7 +509,9 @@ class $(DEV_NAME) : public ADMS_BASE
 		bool tr_needs_eval()const;
 		bool do_tr();
 		void tr_load();
-		//void tr_queue_eval();
+<admst:if test="[$has_sckt!=0]">
+		void tr_queue_eval();
+</admst:if>
 		void tr_eval();
 		void tr_eval_kept();
 		bool conv_check()const;
@@ -2427,16 +2429,14 @@ void $(DEV_NAME)::store_values()
 
   // ELEMENT does y[0] -&gt; y_1
 }
+<admst:if test="[$has_sckt!=0]">
 // -------------------------------------------------------------------------- //
-//void $(DEV_NAME)::tr_queue_eval()
-//{
-//	ADMS_BASE::tr_queue_eval();
-//	<admst:if test="[$has_sckt!=0]">
-//		// NO:
-//		// this is only needed in d_subckt
-//		// subckt()-&gt;tr_queue_eval();
-//	</admst:if>
-//}
+void $(DEV_NAME)::tr_queue_eval()
+{
+	ADMS_BASE::tr_queue_eval();
+	subckt()-&gt;tr_queue_eval();
+}
+</admst:if>
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::tr_load()
 {
