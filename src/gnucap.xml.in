@@ -5068,7 +5068,7 @@ EXIT_IF_ISNAN(__%s_%s); // B
     <admst:when test="branch/nnode[grounded='no']">
       <admst:value-of select="branch/nnode/name"/>
       <admst:value-of select="branch/pnode/name"/>
-      <admst:value-to select="/simulator/tmp" value="/* probe */ $loss BP(%s,%s)"/>
+      <admst:value-to select="/simulator/tmp" value=" /*probe*/ $loss BP(%s,%s)"/>
     </admst:when>
     <admst:otherwise>
       <admst:value-of select="branch/pnode/name"/>
