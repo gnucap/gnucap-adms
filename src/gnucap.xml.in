@@ -1830,10 +1830,9 @@ void $(DEV_NAME)::expand()
 					}
 				}
 #ifdef HAVE_ADP_NODE
-			} else if ( !_n[ii].a_()){
+			} else if ( !_n[ii].a_()){ itested();
 				trace0("$(DEV_NAME)::expand node, registering new adpnode");
 				// no external adp nodes, so no unconnected ones.
-				untested();
 				_n[ii].new_model_adp_node(node_name(ii), this);
 				assert(_n[ii].t_()!=INVALID_NODE);
 			} else {
