@@ -534,7 +534,7 @@ inline double _abs(const double& arg){return abs(arg);}
 */
 
 // FIXME: need more of these.
-inline void _strobe(const char* fmt, ... ){}
+inline void _strobe(const char*, ... ){}
 inline void do_strobe(const char* fmt, ... ){
 	if(status.control == 1){
 		va_list arg_ptr;
@@ -545,7 +545,7 @@ inline void do_strobe(const char* fmt, ... ){
 	}
 }
 
-inline void _warning(const char* fmt, ... ){}
+inline void _warning(const char*, ... ){}
 inline void do_warning(const char* fmt, ... ){
 	if(status.control == 1){
 		va_list arg_ptr;
@@ -556,7 +556,7 @@ inline void do_warning(const char* fmt, ... ){
 	}
 }
 
-inline void _error(const char* fmt, ... ){}
+inline void _error(const char*, ... ){}
 inline void do_error(const char* fmt, ... ){
 	if(status.control == 1){
 		va_list arg_ptr;
