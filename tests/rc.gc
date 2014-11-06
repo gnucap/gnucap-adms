@@ -13,7 +13,7 @@ paramset myrc rc; .c=3n; .r=200k; endparamset
 myrc rc1 (nin,nout1,0);
 spice
 
-.print tran v(nodes)
+.print tran v(nodes) hidden(0)
 .store tran v(nodes)
 .print dc v(nodes)
 
@@ -22,4 +22,5 @@ spice
 .tran .05m 1m
 .measure v1 at(probe="v(nout1)", x=500.u)
 
+.status notime
 .end
