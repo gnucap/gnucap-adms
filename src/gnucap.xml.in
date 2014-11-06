@@ -1421,6 +1421,12 @@ using namespace std;
   <admst:variable name="COMMON_NAME" select="COMMON_%(upper-case(name))"/>
   <admst:variable name="_num_stamp_nodes" select="%(count(node[grounded='no' and discipline/name!='degradational']))"/>
 
+  <admst:variable name="_num_states" select="%(count($ddts))+%(count($idts))"/>
+  <admst:variable name="_has_states" select="false"/>
+  <admst:variable name="tmpc" select="%(count($ddts))"/>
+  <admst:variable name="_has_states" select="true" test="[($tmpc!='0')]"/>
+  <admst:variable name="tmpc" select="%(count($idts))"/>
+  <admst:variable name="_has_states" select="true" test="[($tmpc!='0')]"/>
 
 static $(DEV_NAME) p_dev_$(module);
 static DISPATCHER&lt;CARD&gt;::INSTALL d_$(module)_0(&amp;device_dispatcher, "dev_$(module)", &amp;p_dev_$(module));
@@ -2896,6 +2902,9 @@ void $(DEV_NAME)::tr_eval()
 	const $(MODEL_NAME)* m = prechecked_cast&lt;const $(MODEL_NAME)*&gt;(c-&gt;model());
 	USE(m); assert(m);
 
+	// states: $(_has_states)
+	// ddts: %(count($ddts))
+	// idts: %(count($idts))
 <admst:if test="[$(_has_states)='true']">
 	double CKTag0 = tr_c_to_g(1., 1.);
 	assert(_dt == _dt);
