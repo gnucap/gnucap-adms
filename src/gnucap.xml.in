@@ -2474,33 +2474,11 @@ void $(DEV_NAME)::tr_load()
 
           /// BUG: only load dynamic nodes! ?
 
-  <admst:for-each select="jacobian">
-  <admst:value-of select="column/name"/>
-  <admst:value-of select="row/name"/>
-  <admst:value-of select="column/name"/>
-  <admst:value-of select="row/name"/>
-  <admst:value-of select="column/name"/>
-  <admst:value-of select="row/name"/>
-  <admst:value-of select="column/name"/>
-  <admst:value-of select="row/name"/>
-    if( m_required[m_%s_%s] ){
-      trace4("$(DEV_NAME)::tr_load&quot;, &quot;%s&quot;, &quot;%s&quot;, m_entries[m_%s_%s], m_entries_old[m_%s_%s]);
-  <admst:value-of select="column/name"/>
-  <admst:value-of select="row/name"/>
-  <admst:value-of select="column/name"/>
-  <admst:value-of select="row/name"/>
-  <admst:value-of select="column/name"/>
-  <admst:value-of select="row/name"/>
-      tr_load_point(_N(%s), _N(%s), &amp;(m_entries[m_%s_%s]), &amp;(m_entries_old[m_%s_%s]));
-  <admst:value-of select="column/name"/>
-  <admst:value-of select="row/name"/>
-  <admst:value-of select="column/name"/>
-  <admst:value-of select="row/name"/>
-  <admst:value-of select="column/name"/>
-  <admst:value-of select="row/name"/>
-      trace4("$(DEV_NAME)::tr_load done &quot;, &quot;%s&quot;, &quot;%s&quot;, m_entries[m_%s_%s], m_entries_old[m_%s_%s]);
-
-    }
+  <admst:for-each select="jacobian[row/discipline/name!='degradational' and column/discipline/name!='degradational']">
+	if( m_required[m_%(row/name)_%(column/name)] ){
+		trace2("$(DEV_NAME)::tr_load m_%(row/name)_%(column/name)", m_entries[m_%(row/name)_%(column/name)], m_entries_old[m_%(row/name)_%(column/name)]);
+		tr_load_point(_N(%(row/name)), _N(%(column/name)), &amp;(m_entries[m_%(row/name)_%(column/name)]), &amp;(m_entries_old[m_%(row/name)_%(column/name)]));
+	}
   </admst:for-each>
 
   <admst:for-each select="jacobian[row/discipline/name!='degradational' and column/discipline/name!='degradational']">
