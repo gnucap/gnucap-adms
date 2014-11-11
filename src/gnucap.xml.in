@@ -774,7 +774,7 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
 			// shouldnt call DDT at all!
 			return 0;
 		}
-		assert(_dt != 0.0);
+		assert(_dt != 0. || _sim->analysis_is_restore());
 		METHOD method;
 		if( (_time[1]!=0) &amp;&amp; (_method_a==mTRAP)) { untested();
 			method = mTRAP;
