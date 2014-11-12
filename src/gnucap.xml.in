@@ -892,6 +892,9 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
 		bool conchk( Node_degradational a, double reltol=OPT::reltol ) const {
 			return ::conchk(CKT_BASE::_sim->_vt1[_n[a].m_()], _n[a].v0(), abstol_flow_thermal, reltol);
 		}
+		bool conchk( Node_degradational, Node_degradational, double=0) const {
+			return true;
+		}
   </admst:for-each>
 		// relative checks, FIXME: only where needed and keep history...
 		bool conchk( Node_electrical a, Node_electrical b, double reltol=OPT::reltol ) const {
@@ -1128,47 +1131,50 @@ and name!='initializeInstance')]">
           <admst:variable name="pprobe" select="%(branch/pnode)"/>
           <admst:variable name="nprobe" select="%(branch/nnode)"/>
 			 <!-- passing arguments?!?!<admst:apply-templates select="." match="jacobianX"/>-->
-  <admst:choose>
-    <admst:when test="[($(nprobe)/grounded='no')and($nsource/grounded='no')]">
-		 <admst:text format="static_"/>
-      <admst:text format="jacobian4(%($psource/name),%($nsource/name),%($pprobe/name),%($nprobe/name))\n"/>
-    </admst:when>
-    <admst:when test="[($nprobe/grounded='no')and($nsource/grounded='yes')]">
-      <admst:text format="jacobian2p(%($psource/name),%($pprobe/name),%($nprobe/name))\n"/>
-    </admst:when>
-    <admst:when test="[$nsource/grounded='no']">
-      <admst:text format="jacobian2s(%($psource/name),%($nsource/name),%($pprobe/name))\n"/>
-    </admst:when>
-    <admst:when test="[$nsource/grounded='yes']">
-      <admst:text format="jacobian1(%($psource/name),%($pprobe/name))\n"/>
-    </admst:when>
-  </admst:choose>
+// rhs flow ...
+
+          <admst:choose>
+            <admst:when test="[($(nprobe)/grounded='no')and($nsource/grounded='no')]">
+              <admst:text format="//here\nstatic_jacobian4(%($psource/name),%($nsource/name),%($pprobe/name),%($nprobe/name))\n"/>
+            </admst:when>
+            <admst:when test="[($nprobe/grounded='no')and($nsource/grounded='yes')]">
+              <admst:text format="//here\njacobian2p(%($psource/name),%($pprobe/name),%($nprobe/name))\n"/>
+            </admst:when>
+            <admst:when test="[$nsource/grounded='no']">
+              <admst:text format="//here\njacobian2s(%($psource/name),%($nsource/name),%($pprobe/name))\n"/>
+            </admst:when>
+            <admst:when test="[$nsource/grounded='yes']">
+              <admst:text format="//here\njacobian1(%($psource/name),%($pprobe/name))\n"/>
+            </admst:when>
+          </admst:choose>
 	     </admst:if>
 		  <admst:variable name="psource" select="%($contribution/lhs/branch/pnode)"/>
         <admst:variable name="nsource" select="%($contribution/lhs/branch/nnode)"/>
         <admst:variable name="pprobe" select="%(branch/pnode)"/>
         <admst:variable name="nprobe" select="%(branch/nnode)"/>
         <admst:choose>
+          <admst:when test="[$(pprobe)/discipline/name='degradational']">// deg</admst:when>
+          <admst:when test="[$(nprobe)/discipline/name='degradational']">// deg</admst:when>
           <admst:when test="$contribution[static='yes']">static_</admst:when>
           <admst:when test="$contribution[dynamic='yes']">dynamic_</admst:when>
           <admst:when test="$contribution[whitenoise='yes']">whitenoise_</admst:when>
           <admst:when test="$contribution[flickernoise='yes']">flickernoise_</admst:when>
         </admst:choose>
 			 <!-- passing arguments?!?!<admst:apply-templates select="." match="jacobianX"/>-->
-  <admst:choose>
-    <admst:when test="[($(nprobe)/grounded='no')and($nsource/grounded='no')]">
-      <admst:text format="jacobian4(%($psource/name),%($nsource/name),%($pprobe/name),%($nprobe/name))\n"/>
-    </admst:when>
-    <admst:when test="[($nprobe/grounded='no')and($nsource/grounded='yes')]">
-      <admst:text format="jacobian2p(%($psource/name),%($pprobe/name),%($nprobe/name))\n"/>
-    </admst:when>
-    <admst:when test="[$nsource/grounded='no']">
-      <admst:text format="jacobian2s(%($psource/name),%($nsource/name),%($pprobe/name))\n"/>
-    </admst:when>
-    <admst:when test="[$nsource/grounded='yes']">
-      <admst:text format="jacobian1(%($psource/name),%($pprobe/name))\n"/>
-    </admst:when>
-  </admst:choose>
+        <admst:choose>
+          <admst:when test="[($(nprobe)/grounded='no')and($nsource/grounded='no')]">
+            <admst:text format="jacobian4(%($psource/name),%($nsource/name),%($pprobe/name),%($nprobe/name))\n"/>
+          </admst:when>
+          <admst:when test="[($nprobe/grounded='no')and($nsource/grounded='yes')]">
+            <admst:text format="jacobian2p(%($psource/name),%($pprobe/name),%($nprobe/name))\n"/>
+          </admst:when>
+          <admst:when test="[$nsource/grounded='no']">
+            <admst:text format="jacobian2s(%($psource/name),%($nsource/name),%($pprobe/name))\n"/>
+          </admst:when>
+          <admst:when test="[$nsource/grounded='yes']">
+            <admst:text format="jacobian1(%($psource/name),%($pprobe/name))\n"/>
+          </admst:when>
+        </admst:choose>
 
       </admst:for-each>
     </admst:when>
@@ -9017,6 +9023,9 @@ return
 
     </admst:when> <!--dynamic=yes-->
     <admst:when test="../../lhs/branch/pnode[discipline/name='degradational']">
+		//skipping jacobian for degr node
+    </admst:when> <!--degradational-->
+    <admst:when test="branch/pnode[discipline/name='degradational']">
 		//skipping jacobian for degr node
     </admst:when> <!--degradational-->
     <admst:otherwise>
