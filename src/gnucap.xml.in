@@ -2488,15 +2488,8 @@ void $(DEV_NAME)::tr_load()
   </admst:for-each>
 
   <admst:for-each select="jacobian[row/discipline/name!='degradational' and column/discipline/name!='degradational']">
-
-	  <admst:value-of select="column/name"/>
-	  <admst:value-of select="row/name"/>
-	  <admst:value-of select="column/name"/>
-	  <admst:value-of select="row/name"/>
-	  <admst:value-of select="column/name"/>
-	  <admst:value-of select="row/name"/>
-	if( !m_required[m_%s_%s] &amp;&amp; (m_entries[m_%s_%s]!=0) ){
-		error(bWARNING, "*** m_%s_%s=%i: %f\\n", m_%(row/name)_%(column/name), m_entries[m_%(row/name)_%(column/name)]);
+	if( !m_required[m_%(row/name)_%(column/name)] &amp;&amp; (m_entries[m_%(row/name)_%(column/name)]!=0) ){
+		error(bWARNING, "*** m_%(row/name)_%(column/name)=%i: %f\\n", m_%(row/name)_%(column/name), m_entries[m_%(row/name)_%(column/name)]);
 	}
 
   </admst:for-each>
