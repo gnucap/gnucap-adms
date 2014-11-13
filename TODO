@@ -7,6 +7,7 @@ simple
 
 medium
 - get rid of MODULE(?)
+- get rid of bogus #ifdef's
 
 difficult
 - see BUGS

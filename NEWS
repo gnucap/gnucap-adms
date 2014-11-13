@@ -10,3 +10,8 @@
  - support idt
  - add test suite
  - lang_adms plugin
+
+0.0.7
+ - better upstream gnucap compatibility
+ - EXTERN works with vanilla adms
+ - immediate instanciation (bypass paramset)
