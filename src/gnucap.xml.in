@@ -4932,14 +4932,7 @@ EXIT_IF_ISNAN(__%s_%s); // B
 <admst:template match="conditional">
   <admst:message test="[/dbg_xml='yes']" format="*(ngspvers)conditional*\n"/>
   <admst:if test="if[dynamic='yes']">
-    <admst:choose>
-      <admst:when test="[nilled(else)]">
-        <admst:text format="#ifdef _DYNAMIC /*&lt;dynamic_ifthen&gt;*/\n"/>
-      </admst:when>
-      <admst:otherwise>
-        <admst:text format="#ifdef _DYNAMIC /*&lt;dynamic_ifthenelse&gt;*/\n"/>
-      </admst:otherwise>
-    </admst:choose>
+    <admst:text test="[$(_DYNAMIC)='no']" format="#ifdef _DYNAMIC /*&lt;dynamic_if&gt;*/\n"/>
   </admst:if>
   <admst:if test="if[not(nilled(function[class='builtin']))]">
     <admst:text format="{\n"/>
@@ -4979,14 +4972,7 @@ EXIT_IF_ISNAN(__%s_%s); // B
     <admst:text format="}\n"/>
   </admst:if>
   <admst:if test="if[dynamic='yes']">
-    <admst:choose>
-      <admst:when test="[nilled(else)]">
-        <admst:text format="#endif /*&lt;/dynamic_ifthen&gt;*/\n"/>
-      </admst:when>
-      <admst:otherwise>
-        <admst:text format="#endif /*&lt;/dynamic_ifthenelse&gt;*/\n"/>
-      </admst:otherwise>
-    </admst:choose>
+    <admst:text test="[$(_DYNAMIC)='no']" format="#endif // _DYNAMIC /*&lt;dynamic_if&gt;*/\n"/>
   </admst:if>
 </admst:template>
 
@@ -9048,8 +9034,8 @@ return
 <!-- ---------------------------------------------------------- -->
 <!-- analog//conditional -->
 <admst:template match="conditional">
-  <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)conditional*\n"/>
-  <admst:text select="if[dynamic='yes']" format="#ifdef _DYNAMIC // BUG182\n"/>
+  <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)conditional DUPLICATE (see 4960)*\n"/>
+  <admst:text test="[$_DYNAMIC='no']" select="if[dynamic='yes']" format="#ifdef _DYNAMIC // BUG182\n"/>
   <admst:text test="if/function" format="{ // conditional\n"/>
   <admst:apply-templates select="if/function" match="function:precomputation"/>
   <admst:text format="if\n(%(e(if/tree))) //conditional \n"/>
@@ -9063,7 +9049,7 @@ return
     <admst:text test="else/adms[datatypename!='block']" format="} // conditional.\n"/>
   </admst:if>
   <admst:text test="if/function" format="} // conditional\n"/>
-  <admst:text select="if[dynamic='yes']" format="#endif /* if(...) */\n"/>
+  <admst:text test="[$_DYNAMIC='no']" select="if[dynamic='yes']" format="#endif /* if(...) */\n"/>
 </admst:template>
 
 <!-- ---------------------------------------------------------- -->
