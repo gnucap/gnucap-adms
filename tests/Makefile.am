@@ -9,6 +9,7 @@ plugindir = @gnucap_libdir@
 FILTER = $(plugindir)/gnucap-testfilter
 
 sensor_chip.log: $(PWD)/sensor_chip.ckt
+aging_mos.log: $(PWD)/aging_mos.va
 
 AM_DEFAULT_SOURCE_EXT = .va
 .va.cc:
@@ -35,7 +36,8 @@ $(PWD)/%.ckt: %.ckt
 	[ -f $@ ] || $(LN_S) $< .
 $(PWD)/%.gc: %.gc
 	[ -f $@ ] || $(LN_S) $< .
-	
+$(PWD)/%.va: %.va
+	[ -f $@ ] || $(LN_S) $< .
 
 DIST_TESTS = $(SO_TESTS) $(EXT_TESTS)
 
@@ -46,6 +48,7 @@ EXT_TESTS = \
     subcoil.sh \
     rc.sh \
     ager.sh \
+	 aging_mos.sh \
     ttint.sh
 EXT_LIBS = \
     subcoil.la
@@ -99,6 +102,7 @@ $(empty)abs.sh: POSTDIFF='1,/^testdata/d'
 $(empty)instanceparam.sh: POSTDIFF='1,/^testdata/d'
 $(empty)ttint.sh: POSTDIFF='0,/^testdata/d'
 $(empty)inline.sh: POSTDIFF='0,/^outputstart/d'
+$(empty)aging_mos.sh: POSTDIFF='0,/^done·load_va/d'
 
 
 EXTRA_DIST = \
@@ -160,8 +164,6 @@ callfunctions.sh: %.sh: %.out
 
 SENSOR_SO = op.so ldo.so vbg.so sensor.so
 
-AM_DEFAULT_SOURCE_EXT = .va
-.va.cc:
 check_LTLIBRARIES += \
     op.la vbg.la ldo.la sensor.la callfunctions.la \
     lamp.la $(EXT_LA)

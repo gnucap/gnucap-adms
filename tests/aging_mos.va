@@ -1,0 +1,240 @@
+`include "discipline.h"
+`include "constants.h"
+`include "gnucap-adms.h"
+
+// mos level1 from Verilog-A LRM
+
+`define pN 1
+`define pP 0
+
+`define EPS0   8.8541879239442001396789635e-12
+`define EPS_OX 3.9*`EPS0/100.0
+
+// FIXME: cannot instanciate modules defined here (yet).
+// module bti(gate,source,deg);
+// 	electrical gate, source;
+// 	degradational deg;
+// 
+// 	rcd_exp #(.weight(1), .re0(.4), .re1(.003), .rc0(.5), .rc1(-.002)) r(gate,source,deg);
+// endmodule
+
+//--------------------
+// mos_level1
+//
+// -  A basic, level 1, Schichmann-Hodges style model of a MOSFET transistor
+//
+// INSTANCE parameters
+//    width  = [m]
+//    length = [m]
+//    vto    = threshold voltage [V]
+//    gamma  = bulk threshold []
+//    phi    = bulk junction potential [V]
+//    lambda = channel length modulation []
+//    tox    = oxide thickness []
+//    u0     = transconductance factor []
+//    xj     = metallurgical junction depth []
+//    is     = saturation current []
+//    cj     = bulk junction capacitance [F]
+//    vj     = bulk junction voltage [V]
+//    mj     = bulk grading coefficient []
+//    fc     = forward bias capacitance factor []
+//    tau    = parasitic diode factor []
+//    cgbo   = gate-bulk overlap capacitance [F]
+//    cgso   = gate-source overlap capacitance [F]
+//    cgdo   = gate-drain overlap capacitance [F]
+//    dev_type   = the type of mosfet used []
+//
+
+module mos_level1(drain, gate, source, bulk);
+	inout drain, gate, source, bulk;
+	electrical drain, gate, source, bulk;
+	degradational d_s1, d_s2;
+	degradational d_d1;
+
+	parameter real width = 1u    from (0:inf);
+	parameter real length = 1u   from (0:inf);
+	parameter real vto = 1       from (0:inf);
+	parameter real gamma = 0     from [0:inf);
+	parameter real phi = 0.6     from (0:inf);
+	parameter real lambda = 0.05 from [0:inf);
+	parameter real tox = 1e-7    from (0:inf);
+	parameter real u0 = 600      from (0:inf);
+	parameter real xj = 0        from [0:inf);
+	parameter real is = 1e-14    from (0:inf);
+	parameter real cj=0          from [0:inf);
+	parameter real vj=0.75       exclude 0;
+	parameter real mj=0.5        from [0:1);
+	parameter real fc=0.5        from [0:1);
+	parameter real tau = 0       from [0:inf);
+	parameter real cgbo = 0      from [0:inf);
+	parameter real cgso = 0      from [0:inf);
+	parameter real cgdo = 0      from [0:inf);
+	parameter integer dev_type = `pN;
+
+`define F1(m, f, v)     ((v/(1 - m))*(1 - pow((1 - f), m)))
+`define F2(m, f)        (pow((1 - f), (1 + m)))
+`define F3(m, f)        (1 - f*(1 + m))
+
+	real vds,
+	     vgs,
+	     vbs,
+	     vbd,
+	     vgb,
+	     vgd,
+	     vth,
+	     id,
+	     ibs,
+	     ibd,
+	     qgb,
+	     qgs,
+	     qgd,
+	     qbd,
+	     qbs;
+	real dvth_d (* ask="yes" *);
+	real dvth_s (* ask="yes" *);
+	real dvth_eff (* ask="yes" *);
+	real dvth_avg (* ask="yes" *);
+	real dvth_area (* ask="yes" *);
+
+	real kp, fc1, fc2, fc3, fpb, leff;
+	real beta;
+
+	integer dev_type_sign;
+
+	rcd_exp #(.weight(1), .re0(19), .re1(34), .rc0(7), .rc1(-.12)) rcd_d_1(gate,source,d_d1);
+	rcd_exp #(.weight(1), .re0(22), .re1(10), .rc0(9), .rc1(-.5)) rcd_s_1(gate,source,d_s1);
+	rcd_exp #(.weight(1), .re0(19), .re1(34), .rc0(7), .rc1(-.02)) rcd_s_2(gate,source,d_s2);
+
+	analog begin
+		// initial_model?!
+		@ ( initial_step ) begin
+			leff = length - 2*xj;
+			kp = u0*`EPS_OX/tox;
+			fc1 = `F1(mj, fc, vj);
+			fc2 = `F2(mj, fc);
+			fc3 = `F3(mj, fc);
+			fpb = fc*mj;
+			dvth_eff = 0.;
+			dvth_area = 0;
+
+			if( dev_type == `pN )
+				dev_type_sign = 1;
+			else
+				dev_type_sign = -1;
+		end
+
+		vds = dev_type_sign*V(drain, source);
+		vgs = dev_type_sign*V(gate, source);
+		vgb = dev_type_sign*V(gate, bulk);
+		vgd = dev_type_sign*V(gate, drain);
+		vbs = dev_type_sign*V(bulk, source);
+		vbd = dev_type_sign*V(bulk, drain);
+
+		dvth_d = State(d_d1) * 1e3;
+		dvth_s = State(d_s1) * 1e3
+		       + State(d_s2) * 1e3;
+
+ 		dvth_avg = (dvth_d + dvth_s) * .5;
+
+		if (vbs > 2*phi) begin
+			vth = vto + gamma*sqrt(2*phi);
+		end else begin
+			vth = vto - gamma*(sqrt(2*phi - vbs) - sqrt(2*phi));
+		end
+
+		if(vgs<=vth) begin
+			dvth_area = 0;
+		end else if(vgd<=vth) begin
+			real x; x = (vgs-vth)/(vgs-vgd);
+			real all; all = x*(vgs-vth);
+			real s; s = 0;
+			if(dvth_s<(vgs-vth)) begin
+				real y; y = (dvth_s - vgs + vth) / ( vgd - vgs - dvth_d + dvth_s);
+				s = (vgs - vth - dvth_s)*y;
+			end
+			dvth_area = (all-s)*.5;
+		end else begin
+			if((dvth_d - vgd + vth) * (dvth_s - vgs + vth) > 0. ) begin
+				dvth_area = (min(dvth_s,vgs-vth)+min(dvth_d,vgd-vth))*.5;
+			end else begin
+				real t; t = (dvth_s-vgs+vth) /  ( vgd - vgs - dvth_d + dvth_s);
+				real b; b = (max(dvth_s,vgs-vth) + min(dvth_d,vgd-vth))*.5;
+// scope BUG, s does not work
+				real s2; s2 = abs(vgs - vth - dvth_s)*t;
+				dvth_area = b - s2;
+			end
+		end
+// --------------------------
+		real done; done=0.;
+		if(vth < vgd && vgd < dvth_area) begin
+			$strobe("reduce");
+			done = vgd - vth;
+		end
+
+		if(vgs-done<=vth && vgd-done<=vth) begin
+			dvth_eff = done;
+		end else if (vgd-done<=vth) begin
+			real rad; rad = 2*(dvth_area-done)*(vgd-vgs) + (vgs-done-vth)*(vgs-done-vth);
+			real radm; radm = max(1e-12,rad); // URGS
+			dvth_eff = vgs - vth - sqrt(radm);
+		end else if(vgd - done - vth > dvth_area) begin
+			$strobe("untested");
+			dvth_eff = dvth_area + done;
+		end else begin //	 vgd between area and vth
+			$strobe("should not happen");
+		end
+
+// --------------------------
+
+		vth = vth + dvth_eff;
+
+		//
+		// parasitic diodes...
+		//
+		ibd = is*(exp(vbd/$vt) - 1);
+		ibs = is*(exp(vbs/$vt) - 1);
+
+		if (vbd <= fpb) begin
+			qbd = tau*ibd + cj*vj*(1 - pow((1 - vbd/vj), (1 - mj)))/(1 - mj);
+		end else begin
+			qbd = tau*ibd + cj*(fc1 + (1/fc2)*(fc3*(vbd - fpb) +
+			      (0.5*mj/vj)*(vbd*vbd - fpb*fpb)));
+		end
+
+		if (vbs <= fpb) begin
+			qbs = tau*ibs + cj*vj*(1 - pow((1 - vbs/vj), (1 - mj)))/(1 - mj);
+		end else begin
+			qbs = tau*ibs + cj*(fc1 + (1/fc2)*(fc3*(vbs - fpb) +
+			      (0.5*mj/vj)*(vbs*vbs - fpb*fpb)));
+		end
+
+		//
+		// channel component of drain current. (channel charge ignored)...
+		//
+		beta = kp*width/leff;
+		if (vgs <= vth) begin
+			id = 0;
+		end else if (vgs > vth && vds < vgs - vth) begin
+			//
+			// linear region.
+			//
+			id = beta*(vgs - vth - vds/2)*vds*(1 + lambda*vds);
+		end else begin
+			//
+			// saturation region.
+			//
+			id = beta*0.5*(vgs - vth)*(vgs - vth)*(1 + lambda*vds);
+		end
+
+		qgb = cgbo * vgb;
+		qgs = cgso * vgs;
+		qgd = cgdo * vgd;
+
+		I(drain, source) <+ dev_type_sign *  id;
+		I(bulk, drain)   <+ dev_type_sign * (ibd + ddt(qbd));
+		I(bulk, source)  <+ dev_type_sign * (ibs + ddt(qbs));
+		I(gate, bulk)    <+ dev_type_sign *  ddt(qgb);
+		I(gate, source)  <+ dev_type_sign *  ddt(qgs);
+		I(gate, drain)   <+ dev_type_sign *  ddt(qgd);
+	end
+endmodule
