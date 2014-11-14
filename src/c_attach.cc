@@ -50,7 +50,7 @@ public:
     string make = OS::getenv("GNUCAP_ADMS_MAKE", GNUCAP_ADMS_MAKE);
     cmd >> "load_va";
     string command = string("load")
-             + " makefile=" + GNUCAP_ADMS_MAKE
+             + " makefile=" + make
 	     + " " + cmd.tail();
     trace1("attach", command);
     CMD::command(command, &CARD_LIST::card_list);
