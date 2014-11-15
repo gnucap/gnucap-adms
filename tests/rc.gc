@@ -19,7 +19,7 @@ spice
 
 .nodelist
 .dc trace=v
-.tran .05m 1m
+.tran .05m 1m trace=a
 .measure v1 at(probe="v(nout1)", x=500.u)
 
 .status notime
