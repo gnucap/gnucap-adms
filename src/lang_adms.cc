@@ -131,7 +131,7 @@ void LANG_ADMS::admsXml(string path, string file)
     waitpid(p, &childret, 0);
   } else {
     string adms_implicit = OS::getenv("GNUCAP_ADMS_IMPLICIT", GNUCAP_ADMS_IMPLICIT);
-    if (adms_implicit != "") { untested();
+    if (adms_implicit != "") {
       setenv("adms_implicit_transforms", adms_implicit.c_str(), 1);
     } else { untested();
     }
@@ -171,7 +171,7 @@ void LANG_ADMS::attachadms(vector<string> lines, string path, string file)
   trace2("attachadms", path, file);
   struct stat ccattrib;
   int ccstat = stat((path+"/"+file+".va").c_str(), &ccattrib);
-  if (ccstat) { untested();
+  if (ccstat) {
     FILE* f = fopen((path+"/"+file+".va").c_str(),"w");
     for (vector<string>::const_iterator i=lines.begin(); i!=lines.end(); ++i) {
       fprintf(f, i->c_str(), i->size());
@@ -203,17 +203,17 @@ void LANG_ADMS::attachadms(vector<string> lines, string path, string file)
 
   if (cppf_save) { untested();
     setenv("CPPFLAGS", cppf_save, 1);
-  } else { untested();
+  } else {
     unsetenv("CPPFLAGS");
   }
   if (ldfl_save) { untested();
     setenv("LDFLAGS", ldfl_save, 1);
-  } else { untested();
+  } else {
     unsetenv("LDFLAGS");
   }
   if (libs_save) { untested();
     setenv("LIBS", libs_save, 1);
-  } else { untested();
+  } else {
     unsetenv("LIBS");
   }
 }
@@ -234,7 +234,7 @@ static string hexfrommd5(unsigned char* md5)
 }
 /*--------------------------------------------------------------------------*/
 void LANG_ADMS::parse_top_item(CS& cmd, CARD_LIST* Scope)
-{ untested();
+{
   cmd.get_line("gnucap-adms>");
   if( cmd >> "endadms" ) {
     unsigned char md5[16];
@@ -254,7 +254,7 @@ void LANG_ADMS::parse_top_item(CS& cmd, CARD_LIST* Scope)
 class CMD_ADMS : public CMD { //
 public:
   void do_it(CS&, CARD_LIST* Scope)
-  { untested();
+  {
     command("options lang=adms", Scope);
   }
 } p8;

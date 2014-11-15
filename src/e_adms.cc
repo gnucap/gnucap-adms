@@ -108,11 +108,11 @@ void ADMS_BASE::tr_restore()
 }
 /*--------------------------------------------------------------------------*/
 void ADMS_BASE::dc_advance() // from elt.
-{ untested();
+{
 	trace2( "ADMS_BASE::dc_advance " , long_label(), net_nodes());
 	assert(_sim->_time0 == 0.); // DC
 
-	for (int i=OPT::_keep_time_steps-1; i>=0; --i) { itested();
+	for (int i=OPT::_keep_time_steps-1; i>=0; --i) {
 		_time[i] = _sim->_time0;
 	}
 
@@ -146,7 +146,7 @@ void ADMS_BASE::tr_regress()
 	method_t m = _method_u;
 
 	DISCONT d = disNONE;
-	for (unsigned i=0;i < net_nodes(); ++i) { untested();
+	for (unsigned i=0;i < net_nodes(); ++i) {
 		d |= _n[i]->discont();
 	}
 
@@ -157,7 +157,7 @@ void ADMS_BASE::tr_regress()
 #endif
 	{
 		m = meEULER;
-	} else if (d) { untested();
+	} else if (d) {
 		m = meEULER;
 	} else {
 	}
@@ -167,11 +167,9 @@ void ADMS_BASE::tr_regress()
 /*--------------------------------------------------------------------------*/
 double ADMS_BASE::tr_review_trunc_error(const FPOLY1* q)
 {
-	trace1("ADMS_BASE::tr_review_trunc_error", order());
 	int error_deriv = order()+1;
 	double timestep;
-	trace1("ADMS_BASE::tr_review_trunc_error", error_deriv);
-	trace2("ADMS_BASE::tr_review_trunc_error", _time[0], error_deriv);
+	trace3("ADMS_BASE::tr_review_trunc_error", order(), error_deriv, _time[0]);
 	if (_time[0] <= 0.) {
 		// DC, I know nothing
 		timestep = NEVER;
@@ -237,11 +235,11 @@ double ADMS_BASE::tr_review_check_and_convert(double timestep)
 
 		if (timestep < _dt * OPT::trreject) {
 			if (_time[order()] == 0) {
-				error(bWARNING, "initial step rejected:" + long_label() + '\n');
+				error(bWARNING, "initial step rejected: " + long_label() + '\n');
 				error(bWARNING, "new=%g  old=%g  required=%g\n",
 						timestep, _dt, _dt * OPT::trreject);
 			}else{
-				error(bTRACE, "step rejected:" + long_label() + '\n');
+				error(bTRACE, "step rejected: " + long_label() + '\n');
 				error(bTRACE, "new=%g  old=%g  required=%g\n",
 						timestep, _dt, _dt * OPT::trreject);
 			}

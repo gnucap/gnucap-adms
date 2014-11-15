@@ -228,8 +228,8 @@ inline void ADMS_BASE::tr_load_source_point(node_t& no1,
 }
 /*--------------------------------------------------------------------------*/
 inline void ADMS_BASE::ac_load_source_point(node_t& no1, COMPLEX new_value)
-{itested();
-	if (no1.m_() != 0) {itested();
+{
+	if (no1.m_() != 0) {
 		no1->iac() += mfactor() * new_value;
 	}else{itested();
 	}
@@ -343,7 +343,7 @@ inline void ADMS_BASE::tr_advance()
 /*--------------------------------------------------------------------------*/
 inline double ADMS_BASE::tr_probe_num(const std::string& x)const
 {
-	if (Umatch(x, "conv{erged} ")) { untested();
+	if (Umatch(x, "conv{erged} ")) {
 		return converged();
 	} else if (Umatch(x, "met{hod} ")) { untested();
 		return _method_a;
