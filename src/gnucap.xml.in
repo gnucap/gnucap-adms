@@ -2587,7 +2587,7 @@ TIME_PAIR $(DEV_NAME)::tr_review()
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::tr_accept()
 {
-	$(DEV_NAME)* d = this;
+	$(DEV_NAME)* d = this; USE(d);
   <admst:if test="[$has_sckt!=0]">
 	subckt()->tr_accept();
   </admst:if>
@@ -2798,7 +2798,7 @@ bool $(DEV_NAME)::conv_check()const
 // write G and C into matrix and matrix_old
 void $(DEV_NAME)::ac_eval()
 {
-	$(DEV_NAME)* d = this;
+	$(DEV_NAME)* d = this; USE(d);
 	trace0(&quot;$(DEV_NAME)::ac_eval&quot;);
 	std::fill_n(it0, (int)$_num_stamp_nodes, 0);
   <admst:if test="[count(jacobian)!=0]">
@@ -2875,7 +2875,7 @@ double $(DEV_NAME)::tr_c_to_g(double c, double g)const
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::tr_eval()
 {
-	$(DEV_NAME)* d = this;
+	$(DEV_NAME)* d = this; USE(d);
 	trace2("$(DEV_NAME)::tr_eval", _sim->analysis_is_static(), _sim->_time0);
 	std::fill_n(it0, $_num_stamp_nodes, 0);
   <admst:if test="[count(jacobian)!=0]">
