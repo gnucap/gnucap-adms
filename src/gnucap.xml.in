@@ -1005,6 +1005,7 @@ class $(COMMON_NAME) : public COMMON_COMPONENT
   <admst:variable name="DEV_NAME" select="DEV_%(upper-case(name))"/>
   <admst:variable name="MODEL_NAME" select="MODEL_%(upper-case(name))"/>
   <admst:variable name="_num_stamp_nodes" select="%(count(node[grounded='no' and discipline/name!='degradational']))"/>
+  <admst:variable name="have_callfunction" select="no"/>
 
 
   <admst:open file="$(filename)_$(module)_top.hxx">
@@ -2550,8 +2551,11 @@ TIME_PAIR $(DEV_NAME)::tr_review()
 
   </admst:if>
 
-  <admst:if test="[$have_callfunction!='no']">
+  <admst:if test="[$have_callfunction='yes']">
 	q_accept(); //callfunction
+  </admst:if>
+  <admst:if test="[$have_callfunction='no']">
+	// no callfunction
   </admst:if>
 
 #ifdef USE_DTIME
