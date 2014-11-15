@@ -102,8 +102,8 @@ pkglibdir=${prefix}/lib/gnucap-adms
 AC_SUBST([pkglibdir])
 
 libdir=${prefix}/lib
-gnucap_exec_prefix=$(gnucap-conf$_program_suffix --exec-prefix)
-GNUCAP_MAKE=$gnucap_exec_prefix/bin/gnucap.mk$_program_suffix
+gnucap_exec_prefix="$(gnucap-conf$_program_suffix --exec-prefix)"
+GNUCAP_MAKE="$gnucap_exec_prefix/bin/gnucap.mk$_program_suffix"
 AC_SUBST([GNUCAP_MAKE])
 
 AC_SUBST([gnucap_libdir])
