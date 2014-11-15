@@ -2293,11 +2293,13 @@ void $(DEV_NAME)::tr_regress()
 bool $(DEV_NAME)::tr_needs_eval()const
 {
 	trace3(&quot;$(DEV_NAME)::tr_needs_eval&quot;, converged(), is_q_for_eval(), _sim-&gt;is_advance_iteration());
-	if (is_q_for_eval()) return false; // needed?
-	if ( !OPT::lcbypass
+	if (is_q_for_eval()){ untested();
+		return false; // needed?
+	}else if ( !OPT::lcbypass
 	  || !converged()
-	  || _sim->is_advance_or_first_iteration() )
+	  || _sim->is_advance_or_first_iteration() ) { untested();
 		return true;
+	}
   <admst:if test="[$has_sckt!=0]">
 	if( subckt()->tr_needs_eval()){
 		// return true; no (not slave)
@@ -2354,10 +2356,12 @@ bool $(DEV_NAME)::do_tr()
 	assert(_dt == NOT_VALID || ::conchk(_dt, _time[0] - _time[1]));
 #endif
 
-	// convergence check -- gnucap method
   <admst:if test="[$has_sckt!=0]">
-	set_converged( subckt()->do_tr());
+	// if(slave_sckt) {
+	// 	set_converged( subckt()->do_tr());
+	// }
   </admst:if>
+	// convergence check -- gnucap method
   <admst:if test="[$has_sckt=0]">
 	set_converged(true);
   </admst:if>
@@ -2378,7 +2382,6 @@ bool $(DEV_NAME)::do_tr()
 </admst:if>
 
 	bool needs_load = !converged();
-  <admst:text format="\n\tfor(int i=0; converged() && i<%(count(jacobian)); i++)"/>
 
   <admst:if test="[count(jacobian)!=0]">
 	for (int i = 0; !needs_load &amp;&amp; i &lt; $_num_stamp_nodes; i++) {
@@ -2465,7 +2468,7 @@ void $(DEV_NAME)::tr_load()
 #endif
 
   <admst:if test="[$has_sckt!=0]">
-	if( !OPT::traceload || !_sim->is_inc_mode()) {
+	if( !OPT::traceload || !_sim->is_inc_mode()) { untested();
 		subckt()->tr_load();
 	} else {
 		// subdevices have queued themselves if necessary.
