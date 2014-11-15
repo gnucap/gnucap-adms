@@ -3754,9 +3754,9 @@ currently: only called for eval_mode==accept
     </admst:otherwise>
   </admst:choose>
 </admst:template>
+
+<!-- -------------------------------------------------------------- -->
 <admst:template match="function:getname_push">
-  <admst:message format="*function:getname_push %(.)*\n"/>
-  <!--  <admst:value-of select="(%(functiongetname)(.)/[name='functiongetname'])"/> -->
   <admst:apply-templates select="." match="function:getname">
 	  <admst:value-of select="returned('function:getname')/value"/>
   </admst:apply-templates>
@@ -5199,7 +5199,7 @@ EXIT_IF_ISNAN(__%s_%s); // B
     <admst:value-to select="/simulator/tmp" value=" /*gli*/ $(var_prefix)%s"/>
   </admst:if>
   <admst:if test="[parametertype!='analogfunction' and scope='local']">
-    <admst:value-to select="/simulator/tmp" value=" /*else*/ %s"/>
+    <admst:value-to select="/simulator/tmp" value="%s"/>
   </admst:if>
 </admst:template>
 
@@ -7279,7 +7279,7 @@ return
       <admst:variable name="e" select="$(var_prefix)%(name)"/>
     </admst:when>
     <admst:otherwise>
-      <admst:variable name="e" select=" /*e*/ %(name)"/>
+      <admst:variable name="e" select="%(name)"/>
     </admst:otherwise>
   </admst:choose>
 
@@ -8984,18 +8984,18 @@ return
 			ceq = etr * BR($Pp, $Pn);
 		}
 
-    <admst:if test="../../lhs/branch/pnode[grounded='no']">
+      <admst:if test="../../lhs/branch/pnode[grounded='no']">
 		it0[$(node_prefix)$Sp] += ceq;
-    </admst:if>
-    <admst:if test="../../lhs/branch/nnode[grounded='no']">
+      </admst:if>
+      <admst:if test="../../lhs/branch/nnode[grounded='no']">
 		it0[$(node_prefix)$Sn] -= ceq;
-    </admst:if>
+      </admst:if>
 
 		_write_d$(eval_mode)($Sp, $Pp, e$(eval_mode)); // 1
-    <admst:if test="../../lhs/branch/nnode[grounded='no']">
-      <admst:if test="branch/nnode[grounded='no']">
+      <admst:if test="../../lhs/branch/nnode[grounded='no']">
+        <admst:if test="branch/nnode[grounded='no']">
 		_write_d$(eval_mode)($Sn, $Pn, e$(eval_mode)); // 2
-      </admst:if>
+        </admst:if>
 		_write_d$(eval_mode)($Sn, $Pp, -e$(eval_mode)); // 3
       </admst:if>
       <admst:if test="branch/nnode[grounded='no']">

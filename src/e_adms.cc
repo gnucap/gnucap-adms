@@ -251,6 +251,7 @@ double ADMS_BASE::tr_review_check_and_convert(double timestep)
 			trace3("accept", timestep, _dt, time_future);
 		}
 	}
+	trace3("ADMS_BASE::tr_review_check_and_convert", timestep, _dt, time_future);
 	assert(time_future > 0.);
 	assert(time_future > _time[1]);
 	return time_future;
