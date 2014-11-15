@@ -20,6 +20,7 @@
 #include <m_divdiff.h>
 #include <u_xprobe.h>
 #include <e_aux.h>
+#include <globals.h>
 #include "e_adms.h"
 /*--------------------------------------------------------------------------*/
 ADMS_BASE::ADMS_BASE():

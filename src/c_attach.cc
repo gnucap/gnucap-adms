@@ -31,7 +31,7 @@
 #include <libgen.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-
+#include "gcuf_compat.h"
 /*--------------------------------------------------------------------------*/
 namespace {
 
@@ -47,7 +47,7 @@ class CMD_ATTACH : public CMD {
 public:
   void do_it(CS& cmd, CARD_LIST*)
   {
-    string make = OS::getenv("GNUCAP_ADMS_MAKE", GNUCAP_ADMS_MAKE);
+    string make = getenv("GNUCAP_ADMS_MAKE", GNUCAP_ADMS_MAKE);
     cmd >> "load_va";
     string command = string("load")
              + " makefile=" + make

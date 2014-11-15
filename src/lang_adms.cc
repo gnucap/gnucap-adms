@@ -37,6 +37,7 @@ extern "C"{
 #include <unistd.h>
 #include <sys/wait.h>
 }
+#include "gcuf_compat.h"
 /*--------------------------------------------------------------------------*/
 #ifndef GNUCAP_ADMS_IMPLICIT
 #define GNUCAP_ADMS_IMPLICIT ""
@@ -45,6 +46,8 @@ extern "C"{
 namespace { //
 /*--------------------------------------------------------------------------*/
 using std::string;
+using std::vector;
+using std::ostream;
 /*--------------------------------------------------------------------------*/
 class LANG_ADMS : public LANGUAGE { //
 public:
@@ -80,7 +83,7 @@ private: // unnecessary, make compiler hapopy
   virtual MODEL_CARD*	parse_paramset(CS&, MODEL_CARD*){return NULL;}
   virtual MODEL_SUBCKT* parse_module(CS&, MODEL_SUBCKT*){return NULL;}
   virtual COMPONENT*	parse_instance(CS&, COMPONENT*){return NULL;}
-  std::string	find_type_in_string(CS&) const{return "";}
+  std::string	find_type_in_string(CS&) GCUF_CONST {return "";}
 
   md5_ctx _md5_ctx;
   ostream* vastream;
@@ -98,8 +101,8 @@ DISPATCHER<LANGUAGE>::INSTALL
 LANG_ADMS::LANG_ADMS()
 {
   init();
-  string user = OS::getenv("USER", "anonymous");
-  _adms_tmpdir = OS::getenv("GNUCAP_ADMS_TMPDIR", "/tmp/gnucap_adms_" + user);
+  string user = getenv("USER", "anonymous");
+  _adms_tmpdir = getenv("GNUCAP_ADMS_TMPDIR", "/tmp/gnucap_adms_" + user);
   mkdir(_adms_tmpdir.c_str(), 0777);
 }
 /*--------------------------------------------------------------------------*/
@@ -130,14 +133,14 @@ void LANG_ADMS::admsXml(string path, string file)
   if (p) {
     waitpid(p, &childret, 0);
   } else {
-    string adms_implicit = OS::getenv("GNUCAP_ADMS_IMPLICIT", GNUCAP_ADMS_IMPLICIT);
+    string adms_implicit = getenv("GNUCAP_ADMS_IMPLICIT", GNUCAP_ADMS_IMPLICIT);
     if (adms_implicit != "") {
       setenv("adms_implicit_transforms", adms_implicit.c_str(), 1);
     } else { untested();
     }
 
-    string sp = OS::getenv("GNUCAP_ADMS_DATADIR", ADMS_DATADIR);
-    string id = OS::getenv("GNUCAP_ADMS_INCLUDEDIR", ADMS_INCLUDEDIR);
+    string sp = getenv("GNUCAP_ADMS_DATADIR", ADMS_DATADIR);
+    string id = getenv("GNUCAP_ADMS_INCLUDEDIR", ADMS_INCLUDEDIR);
     chdir(path.c_str());
 
     error(bDEBUG, string("calling cd ") + path + "; admsXml "
@@ -185,10 +188,10 @@ void LANG_ADMS::attachadms(vector<string> lines, string path, string file)
   char* libs_save = getenv("LIBS");
   char* ldfl_save = getenv("LDFLAGS");
 
-  string cppf = OS::getenv("GNUCAP_ADMS_CPPFLAGS", string(ADMS_CPPFLAGS));
-  string ldfl = OS::getenv("GNUCAP_ADMS_LDFLAGS", string(ADMS_LDFLAGS));
-//  string libdir = OS::getenv("GNUCAP_ADMS_LIBDIR", string(ADMS_LIBDIR));
-  string libs = OS::getenv("GNUCAP_ADMS_LIBS", string(ADMS_LIBS));
+  string cppf = getenv("GNUCAP_ADMS_CPPFLAGS", string(ADMS_CPPFLAGS));
+  string ldfl = getenv("GNUCAP_ADMS_LDFLAGS", string(ADMS_LDFLAGS));
+//  string libdir = getenv("GNUCAP_ADMS_LIBDIR", string(ADMS_LIBDIR));
+  string libs = getenv("GNUCAP_ADMS_LIBS", string(ADMS_LIBS));
 
   error(bDEBUG, string("setting CPPFLAGS=") + cppf + "\n");
   error(bDEBUG, string("setting LDFLAGS=") + ldfl + "\n");

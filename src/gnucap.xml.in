@@ -1869,7 +1869,7 @@ void $(DEV_NAME)::expand()
 		if (!_%(name)) {
 			trace1("$(DEV_NAME)::expand, instanciating", hp(_%(name)));
 			// FIXME: recycle u_lang or move to e_adms.cc
-			const CARD* p = LANGUAGE::find_proto("%(module)", this);
+			const CARD* p = OPT::language->find_proto("%(module)", this);
 			if(!p) throw Exception("cannot find '%(module)'. Load module first?");
 			_%(name) = dynamic_cast&lt;COMPONENT*&gt;(p-&gt;clone_instance());
 			_%(name)->set_dev_type("%(module)");
@@ -2860,7 +2860,7 @@ double $(DEV_NAME)::tr_c_to_g(double c, double g)const
 			case mTRAPEULER: incomplete();
 			case mEULER: /* g *= 1 */	break;
 			case mTRAP:	 g *= 2;	break;
-			case mINVALID: unreachable();
+			default: unreachable();
 		}
 		return g;
 	}

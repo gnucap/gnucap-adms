@@ -27,34 +27,9 @@
 #include <e_subckt.h>
 #include <u_status.h>
 #include <algorithm>
+#include "gcuf_compat.h"
 /*--------------------------------------------------------------------------*/
 using namespace std;
-/*--------------------------------------------------------------------------*/
-// gnucap-uf transition
-#ifndef USE
-# define USE(x)
-#endif
-#ifndef HAVE_UINT_T
-typedef int uint_t;
-#endif
-#ifndef HAVE_DOUBLE_TYPES
-typedef double voltage_t;
-typedef double current_t;
-typedef double charge_t;
-typedef double conductance_t;
-#endif
-#if !(defined(HAVE_METHOD)) && !(defined(E_STORAGE_H))
-enum METHOD {mTRAPGEAR, mEULER, mTRAP, mGEAR, mTRAPEULER};
-#endif
-#ifndef HAVE_IS_NUMBER
-inline bool is_number(long double x){
-	const double inf = numeric_limits<float>::infinity( );
-	return (( x != inf ) && (x != -inf ) && (x == x)) ;
-}
-#endif
-#ifndef trace6
-# define trace6(a,b,c,d,e,f,g)
-#endif
 /*--------------------------------------------------------------------------*/
 /*--------------------------------------------------------------------------*/
 class ADMS_BASE : public COMPONENT {
