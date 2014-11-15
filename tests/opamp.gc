@@ -26,6 +26,10 @@ endparamset
 myota OTA1 (nout1, nin_p, 0, ndd, ndd_minus, nvbias);
 # unbiased
 myota OTA0 (nout0, nin_p, 0, ndd, ndd_minus);
+# bypass paramset
+opamp OTA2 (nout2, nin_p, 0, ndd, ndd_minus);
+
+list
 
 spice
 
