@@ -59,13 +59,16 @@ AM_TESTS_ENVIRONMENT = \
     export PATH='../src:$(PATH)'\
            LD_LIBRARY_PATH='../src/.libs'\
            GNUCAP='$(GNUCAP)'\
+           GNUCAP_ADMS_CPPFLAGS='-I$(abs_top_srcdir)/src'\
            GNUCAP_ADMS_DATADIR='$(PWD)/../src'\
            GNUCAP_ADMS_INCLUDEDIR='$(abs_top_srcdir)/src'\
            GNUCAP_ADMS_IMPLICIT='$(abs_top_srcdir)/src/implicit.xml'\
-           GNUCAP_ADMS_CPPFLAGS='-I$(abs_top_srcdir)/src'\
            GNUCAP_ADMS_LDFLAGS='-L$(abs_top_builddir)/src/.libs'\
+           GNUCAP_ADMS_LIBDIR='$(abs_top_builddir)/src/.libs'\
            GNUCAP_ADMS_LIBS='-lgnucap_adms'\
+           GNUCAP_ADMS_MAKE='$(abs_top_builddir)/gnucap-adms.mk'\
            GNUCAP_ADMS_TMPDIR='$(PWD)/.admstmp'\
+           GNUCAP_ADMS_XMLDIR='$(abs_top_builddir)/src'\
            REDIRECT='exec 2>&9'\
            srcdir='$(srcdir)';
 
@@ -104,8 +107,9 @@ $(empty)ttint.sh: POSTDIFF='0,/^testdata/d'
 $(empty)inline.sh: POSTDIFF='0,/^outputstart/d'
 $(empty)aging_mos.sh: POSTDIFF='0,/^done·load_va/d'
 
-
+# FIXME: more automatically...?
 EXTRA_DIST = \
+    aging_mos.va \
     bug1.va \
     $(GC_TESTS:%.sh=%.gc) \
     $(GC_TESTS:%.sh=%.ref) \
@@ -114,17 +118,17 @@ EXTRA_DIST = \
     $(INLINE_TESTS:%.sh=%.gc) \
     $(INLINE_TESTS:%.sh=%.ref) \
     rc_uic.gc ddc_rc.gc \
-    subcoil.gc subcoil.ref \
     lamp.va ager.va rc.va motor.va \
     $(SENSOR_SO:%.so=%.va) \
     $(SENSOR_SO:%.so=%vm.core.gc) \
     sensor_chip.ckt \
     sensor_chip.gc sensor_chip.ref \
     callfunctions.va callfunctions.gc \
+    callfunctions.ref \
     opamp.gc opamp.ref \
-    inline.gc inline.ref
-EXTRA_DIST+= $(DIST_TESTS:%.sh=%.gc) $(DIST_TESTS:%.sh=%.ref)
-EXTRA_DIST+= \
+    subcoil.gc subcoil.ref \
+    inline.gc inline.ref \
+    $(DIST_TESTS:%.sh=%.gc) $(DIST_TESTS:%.sh=%.ref) \
     opvm.core.gc \
     vbgvm.core.gc \
     ldovm.core.gc \
@@ -152,30 +156,28 @@ vbg.out sensor_chip.log sensor_chip.out: \
     $(SENSOR_SO) $(PWD)/sensor_chip.ckt $(PWD)/opvm.core.gc $(PWD)/vbgvm.core.gc $(PWD)/ldovm.core.gc \
     vbg.so ldo.so sensor.so $(PWD)/sensorvm.core.gc
 
-callfunctions.out: callfunctions.so
+%.out %.ret 2%.out: %.gc
+	$(GNUCAP) $(lastword $+) 2> 2$*.out | tee $*.out | grep too\ negative ;\
+	[ 0 -ne $$? ]
 
-callfunctions.sh: %.sh: %.out
-	@echo "#!/bin/sh" > $@
-	@echo "set -e" >> $@
-	@echo "exec 2>&9" >> $@
-	@echo "diff -rup $< $*.out || exit 1" >> $@
-	@echo "rm $*.out" >> $@
-	@chmod +x $@
+callfunctions.out: callfunctions.so
 
 SENSOR_SO = op.so ldo.so vbg.so sensor.so
 
 check_LTLIBRARIES += \
     op.la vbg.la ldo.la sensor.la callfunctions.la \
     lamp.la $(EXT_LA)
-AM_CPPFLAGS = @GC_CPPFLAGS@ -I$(top_srcdir)/src
-LIBS = ../src/libgnucap_adms.la
-AM_LDFLAGS = -module -avoid-version -rpath /dev/null
 
 LT = <
 
-SHS = sensor_chip.sh inline.sh opamp.sh $(INLINE_TESTS) $(GCUF_TESTS) $(GC_TESTS) $(EXT_TESTS)
+callfunctions.sh: LT=2> >(tee /dev/fd/2 | grep negative | while read line; do echo "[ERROR] \$$line"; done ) <
+
+SHS = \
+	callfunctions.sh \
+	sensor_chip.sh inline.sh opamp.sh $(INLINE_TESTS) $(GCUF_TESTS) $(GC_TESTS) $(EXT_TESTS)
+
 $(SHS): %.sh: %.gc Makefile %.ref
-	@echo "#!/bin/sh" > $@
+	@echo "#!$(SHELL)" > $@
 	@echo "set -e" >> $@
 	@echo "GNUCAP=\$${GNUCAP-$(GNUCAP)}" >> $@
 	@echo "eval \$$REDIRECT" >> $@
@@ -191,6 +193,7 @@ vs.log: vs.so
 cs.log: cs.so
 if.log: if.so
 if2.log: if2.so
+callfunctions.log: callfunctions.so
 
 $(GC_TESTS:%.sh=%.log): %.log: %.so
 $(GC_TESTS:%.sh=%.out): %.out: %.so
@@ -202,6 +205,8 @@ PREDIFF= \
     '/:·already.installed,·replacing/d'
 
 $(TESTS:%.sh=%.log): Makefile
+
+check_custom: $(CUSTOM_TESTS:%.sh=%.log)
 
 $(TESTS:%.sh=%.out): %.out: %.gc
 	$(AM_V_at)$(AM_TESTS_ENVIRONMENT)$(GNUCAP) $(GNUCAP_PLUGINS:%=-a ../plugins/.libs/%) $(GNUCAP_ARGS) $(LT) $< | \
@@ -239,6 +244,7 @@ clean-examples:
 
 abs.log abs.out: cleantmp
 instanceparam.log instanceparam.out: cleantmp
+inline.log inline.out: cleantmp
 
 cleantmp:
 	rm -rf .admstmp
