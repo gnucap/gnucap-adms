@@ -23,6 +23,18 @@
 #include <globals.h>
 #include "e_adms.h"
 /*--------------------------------------------------------------------------*/
+void COMMON_ADMS::attach_model(const COMPONENT* d)
+{ untested();
+	assert(d);
+	try{
+		COMMON_COMPONENT::attach_model(d);
+	}catch(Exception_Cant_Find){ untested();
+		const MODEL_CARD* p = model_dispatcher[modelname()];
+		attach(p);
+	}
+	assert(model());
+}
+/*--------------------------------------------------------------------------*/
 ADMS_BASE::ADMS_BASE():
 	COMPONENT(),
 	_loaditer(0),

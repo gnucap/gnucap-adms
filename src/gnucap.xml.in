@@ -925,7 +925,7 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
 }; // $(DEV_NAME)
 // ------------------------------------------------------------------------ //
 // ------------------------------------------------------------------------ //
-class $(COMMON_NAME) : public COMMON_COMPONENT
+class $(COMMON_NAME) : public COMMON_ADMS
 {
 	friend class $(DEV_NAME);
   private:
@@ -1435,7 +1435,7 @@ using namespace std;
   <admst:variable name="_has_states" select="true" test="[($tmpc!='0')]"/>
 
 static $(DEV_NAME) p_dev_$(module);
-static DISPATCHER&lt;CARD&gt;::INSTALL d_$(module)_0(&amp;device_dispatcher, "dev_$(module)", &amp;p_dev_$(module));
+// static DISPATCHER&lt;CARD&gt;::INSTALL d_$(module)_0(&amp;device_dispatcher, "dev_$(module)", &amp;p_dev_$(module));
 
 static $(MODEL_NAME) p_$(module)(&amp;p_dev_$(module));
 static DISPATCHER&lt;MODEL_CARD&gt;::INSTALL d_$(module)_1(&amp;model_dispatcher, "$(module)", &amp;p_$(module));
@@ -1453,6 +1453,9 @@ $(MODEL_NAME)::$(MODEL_NAME)(const $(DEV_NAME)* p) :
     _key(&quot;dev_$(module)&quot;),
     _level()
 {
+	// @(initial_model) block
+	$(MODEL_NAME) *m = this; USE(m);
+   <admst:apply-templates select="analog" match="analog:initial_model" required="yes"/>
 }
 // -------------------------------------------------------------------------- //
 $(MODEL_NAME)::$(MODEL_NAME)(const $(MODEL_NAME)&amp; p) :
@@ -2926,8 +2929,7 @@ void $(DEV_NAME)::tr_eval()
 }
 
 // -------------------------------------------------------------------------- //
-$(COMMON_NAME)::$(COMMON_NAME)(const $(COMMON_NAME)&amp; p) :
-    COMMON_COMPONENT(p)
+$(COMMON_NAME)::$(COMMON_NAME)(const $(COMMON_NAME)&amp; p) : COMMON_ADMS(p)
 <admst:for-each select="$(ddts)">,
 	// %(.)
 	ic_state_%(adms/id(.))(p.ic_state_%(adms/id(.)))
@@ -2936,7 +2938,7 @@ $(COMMON_NAME)::$(COMMON_NAME)(const $(COMMON_NAME)&amp; p) :
 }
 // -------------------------------------------------------------------------- //
 $(COMMON_NAME)::$(COMMON_NAME)(int c) :
-    COMMON_COMPONENT(c)
+    COMMON_ADMS(c)
 <admst:for-each select="$(ddts)">,
     ic_state_%(adms/id(.))(NOT_INPUT)
 </admst:for-each>

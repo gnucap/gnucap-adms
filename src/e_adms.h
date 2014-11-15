@@ -32,6 +32,13 @@
 using namespace std;
 /*--------------------------------------------------------------------------*/
 /*--------------------------------------------------------------------------*/
+class COMMON_ADMS : public COMMON_COMPONENT {
+	public:
+		COMMON_ADMS(int i) : COMMON_COMPONENT(i){}
+	protected:
+		void attach_model(const COMPONENT* d); // not const!
+};
+/*--------------------------------------------------------------------------*/
 class ADMS_BASE : public COMPONENT {
 	protected:
 		explicit ADMS_BASE();
