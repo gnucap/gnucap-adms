@@ -23,13 +23,14 @@
 #define ADD_VERSION
 
 #include "config.h"
-#include "c_comand.h"
-#include "d_dot.h"
-#include "d_coment.h"
-#include "d_subckt.h"
-#include "e_model.h"
-#include "u_lang.h"
-#include "l_lib.h"
+#include <c_comand.h>
+#include <d_dot.h>
+#include <d_coment.h>
+#include <d_subckt.h>
+#include <e_model.h>
+#include <u_lang.h>
+#include <l_lib.h>
+#include <globals.h>
 extern "C"{
 #include "md5.h"
 #include <sys/stat.h>

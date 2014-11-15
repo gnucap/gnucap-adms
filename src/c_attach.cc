@@ -20,10 +20,10 @@
  * 02110-1301, USA.
  *------------------------------------------------------------------
  */
-#include "e_cardlist.h"
-#include "c_comand.h"
-#include "constant.h"
-#include "globals.h"
+#include <e_cardlist.h>
+#include <c_comand.h>
+#include <constant.h>
+#include <globals.h>
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
