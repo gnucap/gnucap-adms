@@ -11,7 +11,7 @@ r1 ( nin 0 )  myager
 a= 0.03127583
 b= 0.
 Gnucap   System status
-iterations: op=0, dc=0, tran=0, fourier=0, total=1728
+iterations: op=0, dc=0, tran=0, fourier=0, total=172~
 transient timesteps: accepted=433, rejected=1, total=433
 twotime timesteps: accepted=4, rejected=0, total=4
 nodes: user=1, subckt=0, model=0, total=1
