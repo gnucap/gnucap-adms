@@ -14,21 +14,31 @@ paramset myager ager
 endparamset
 spice
 
+.model my_rcd rcd_exp
+.list
+
+
 .verilog
 myager r1 (nin,0);
+my_rcd #(.weight(1), .re0(4), .re1(3), .rc0(5), .rc1(-2)) rcd1(nin,0);
 spice
 
+.print tran a(r1) P(r1.rcd1) P(rcd1) v(nin)
 
-.print tran s(r1.rcd1) a(r1) E_end(r1.rcd1) tau(r1.rcd1) tt(r1.rcd1) tr(r1.rcd1) i(v1) Eend(r1.rcd1) b(r1)
-+ulo(r1.rcd1) uhi(r1.rcd1) P(r1.rcd1)
-.print tt v(nodes) b(r1) a(r1) tt(r1.rcd1) tr(r1.rcd1)
+.tr 0 12 1.2 trace=a > ager_tr.out echo
+
+.print tt b(r1) a(r1) tt(r1.rcd1) tr(r1.rcd1) P(rcd1) P(r1.rcd1)
 .print dc v(nodes) a(r1)
 .store tw a(r1) b(r1)
 
 .list
-.tw 1 100 500 * 2 new tran > ager_tr.out
+.tw 1 100 500 * 2 new >ager_tt.out echo tran > ager_ttr.out
 .measure a at(probe="a(r1)" x=34)
 .measure b at(probe="b(r1)" x=34)
+
+
+.tw 0 0 new
+.ttr 0 100 20 1 * 2 new >ager_tt.out echo tran > ager_ttr.out
 
 .status notime
 .end
