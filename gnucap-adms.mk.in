@@ -21,7 +21,7 @@ EXMLS = $(012:%=-e$(GNUCAP_ADMS_XMLDIR)/gnucap_%.xml)
 XMLS = $(012:%=$(GNUCAP_ADMS_XMLDIR)/gnucap_%.xml)
 
 %.cc: %.va $(XMLS)
-	adms_implicit_transforms=$(GNUCAP_ADMS_IMPLICIT) $(ADMSXML) $(ADMSXML_FLAGS) -I@includedir@/@PACKAGE@ $(EXMLS) $< -o $*
+	adms_implicit_transforms=$(GNUCAP_ADMS_IMPLICIT) $(ADMSXML) $(ADMSXML_FLAGS) -I${GNUCAP_ADMS_INCLUDEDIR} $(EXMLS) $< -o $*
 
 %.so: override CPPFLAGS+= $(GNUCAP_ADMS_CPPFLAGS)
 %.so: override CXXFLAGS+= $(GNUCAP_ADMS_RPATH)
