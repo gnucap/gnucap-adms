@@ -1,0 +1,15 @@
+#Time       v(V2)     
+ 0.         0.        
+positive 0.587785
+ 100.u      0.58779   
+positive 0.951057
+ 200.u      0.95106   
+positive 0.951057
+ 300.u      0.95106   
+positive 0.587785
+ 400.u      0.58779   
+ 500.u      0.        
+ 600.u     -0.58779   
+[ERROR] negative -0.587785
+[ERROR] negative -0.951057
+[ERROR] too negative -0.951057
