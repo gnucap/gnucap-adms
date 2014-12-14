@@ -9,4 +9,6 @@ V2 1 0 sin freq=1k
 .print tran v(V2)
 
 .tran .1m 1m
+
+.tran .1m 1m trace=a
 .end

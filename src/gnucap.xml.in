@@ -45,7 +45,6 @@
 <admst:variable name="idts"/>
 <admst:variable name="ddts_list"/>
 <admst:variable name="ddts_ic"/>
-<admst:variable name="have_callfunction" select="no"/>
 
 <!-- variables used by tree traverse for hxx -->
 <admst:variable name="_DYNAMIC" select="yes"/>
@@ -135,6 +134,19 @@
   </admst:for-each>
 </admst:template>
 
+<!-- this is complete brainfuck, but there is no obvious way -->
+<admst:template match="print_with_dollar_stripped">
+  <admst:choose>
+    <admst:when test="['%(.)'='\$strobe']">strobe</admst:when>
+    <admst:when test="['%(.)'='\$warning']">warning</admst:when>
+    <admst:when test="['%(.)'='\$error']">error</admst:when>
+    <admst:when test="['%(.)'='\$finish']">finish</admst:when>
+    <admst:when test="['%(.)'='\$stop']">stop</admst:when>
+    <admst:otherwise>
+      <admst:error format="cannot strip dollar from: %(.)\n"/>
+    </admst:otherwise>
+  </admst:choose>
+</admst:template>
 
 <admst:for-each select="/module@ADMSXML_NOEXTERN@">
   <admst:apply-templates select="." match="ddticcollect"/>
@@ -862,8 +874,51 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
 	<admst:text select="$tnoise/item" format="\n\tdouble tnoise%(index($tnoise/item,.));\n"/>
         <admst:text select="$wnoise/item" format="\n\tdouble wnoise%(index($wnoise/item,.));\n"/>
 
-	public:
-		// initial conditions
+<admst:template match="printCtype">
+	<!--<admst:return name="yes" string=""/>-->
+  <admst:choose>
+    <admst:when test="['%(datatypename)'='string']">const char*</admst:when>
+    <admst:otherwise>double</admst:otherwise>
+  </admst:choose>
+</admst:template>
+<admst:template match="callfNumberedArgs">
+  <admst:join select="function/arguments" separator=", ">%(printCtype(tree)) arg_%(position(.))</admst:join>
+</admst:template>
+
+%(print_with_dollar_stripped(.))
+
+//		bool _need_accept;
+<admst:if test="[count(callfunction)!=0]">
+	private: //callfunctions
+		unsigned _callf_seek;
+		void ($(DEV_NAME)::*_callf_q[%(count(callfunction))])();
+		void q_callf_ptr( void ($(DEV_NAME)::*c)()){ untested();
+			_callf_q[_callf_seek++] = c;
+		}
+  <admst:for-each select="callfunction" separator=",">
+    <admst:variable name="cf" select="%(.)"/>
+		struct {
+    <admst:for-each select="function/arguments">
+			%(printCtype(tree)) arg_%(position(.));
+    </admst:for-each>
+		} args_%(adms/id(.)); // %(position(.))
+
+		<!--void DO_CALLF_%(adms/id(.))_%(print_with_dollar_stripped(%(function/name))(){-->
+		void DO_CALLF_%(adms/id(.))_%(print_with_dollar_stripped(function/name))(){
+			do_%(print_with_dollar_stripped(function/name))(<admst:join select="$cf/function/arguments" separator=","> args_%(adms/id($(cf))).arg_%(position(.))</admst:join>);
+		}
+		void Q_CALLF_%(adms/id(.))_%(print_with_dollar_stripped(function/name))(%(callfNumberedArgs(.)))
+		{
+    <admst:for-each select="function/arguments">
+			args_%(adms/id($cf)).arg_%(position(.)) = arg_%(position(.));
+    </admst:for-each>
+			q_callf_ptr(&$(DEV_NAME)::DO_CALLF_%(adms/id(.))_%(print_with_dollar_stripped(function/name)));
+		}
+
+  </admst:for-each>
+</admst:if>
+
+	public: // initial conditions
 		<admst:for-each select="contribution[is_ic_contribution(.)/[name='x']/value='yes']">
 		// PARAMETER&lt;double&gt; ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode);
 		</admst:for-each>
@@ -1005,7 +1060,6 @@ class $(COMMON_NAME) : public COMMON_ADMS
   <admst:variable name="DEV_NAME" select="DEV_%(upper-case(name))"/>
   <admst:variable name="MODEL_NAME" select="MODEL_%(upper-case(name))"/>
   <admst:variable name="_num_stamp_nodes" select="%(count(node[grounded='no' and discipline/name!='degradational']))"/>
-  <admst:variable name="have_callfunction" select="no"/>
 
 
   <admst:open file="$(filename)_$(module)_top.hxx">
@@ -1056,7 +1110,6 @@ and name!='initializeInstance')]">
 
   <admst:choose>
     <admst:when test="[datatypename='callfunction']">
-      <admst:variable name="have_callfunction" select="yes"/>
     </admst:when>
     <admst:when test="[datatypename='whileloop']">
       <admst:apply-templates select="whileblock" match="ngspiseMODULEguesstopology.cevaluatetopology"/>
@@ -1585,8 +1638,7 @@ void $(COMMON_NAME)::precalc_last(const CARD_LIST* scope)
 void $(MODEL_NAME)::precalc_first()
 {
 	MODEL_CARD::precalc_first();
-// -------------------------------------------------------------------------- //
-	const CARD_LIST* par_scope = scope();
+	const CARD_LIST* par_scope = scope(); USE(par_scope);
 	assert(par_scope);
 	MODEL_CARD::precalc_first();
   <admst:for-each select="variable[input='yes' and scope!='global_instance']">
@@ -1923,7 +1975,7 @@ void $(DEV_NAME)::expand()
 void $(DEV_NAME)::precalc_first()
 {
 	ADMS_BASE::precalc_first();
-	const CARD_LIST* par_scope = scope();
+	const CARD_LIST* par_scope = scope(); USE(par_scope);
 	assert(par_scope);
   <admst:for-each select="variable[input='yes' and scope='global_instance']">
     <admst:apply-templates select="default/tree" match="subexpression:stringify:noprobe"/>
@@ -2350,6 +2402,9 @@ void $(DEV_NAME)::tr_eval_kept()
 bool $(DEV_NAME)::do_tr()
 {
 	trace1("$(DEV_NAME)::do_tr", long_label());
+<admst:if test="[count(callfunction)!=0]">
+	_callf_seek = 0;
+</admst:if>
 
 	assert(OPT::_keep_time_steps &lt;= 8);
 #ifndef USE_DTIME
@@ -2557,12 +2612,11 @@ TIME_PAIR $(DEV_NAME)::tr_review()
 
   </admst:if>
 
-  <admst:if test="[$have_callfunction='yes']">
-	q_accept(); //callfunction
-  </admst:if>
-  <admst:if test="[$have_callfunction='no']">
-	// no callfunction
-  </admst:if>
+<admst:if test="[count(callfunction)!=0]">
+	if(_callf_seek){ untested();
+		q_accept();
+	}
+</admst:if>
 
 #ifdef USE_DTIME
 	return  _dt_by;
@@ -2627,12 +2681,16 @@ void $(DEV_NAME)::tr_accept()
 // analog:evaluate
 <admst:variable name="eval_mode" select="accept"/>
 <admst:variable name="_DERIVATE" select="no"/>
-<admst:apply-templates select="analog/code" match="analog:evaluate" required="yes"/>
+<!-- <admst:apply-templates select="analog/code" match="analog:evaluate" required="yes"/> -->
 <admst:variable name="_DERIVATE" select="yes"/> <!-- fixme -->
 	}
 
-	
-}
+<admst:if test="[count(callfunction)!=0]">
+	while(_callf_seek){ untested();
+		(this->*_callf_q[--_callf_seek])();
+	}
+</admst:if>
+} // tr_accept
 // -------------------------------------------------------------------------- //
 double $(DEV_NAME)::tr_probe_num(const std::string&amp; x)const
 {
@@ -3103,42 +3161,6 @@ inline double d_doh(double x)          {return  exp(x)/(exp(x) + 1); }
       </admst:when>
     </admst:choose>
   </admst:if>
-</admst:template>
-
-
-<!-- analog//callfunctions
-FIXME: use eval_mode to choose what to do
-currently: only called for eval_mode==accept
--->
-<admst:template match="callfunction">
-  <admst:choose>
-    <admst:when test="function[name='\$strobe']">
-      <admst:text format="do_strobe("/>
-    </admst:when>
-    <admst:when test="function[name='\$warning']">
-      <admst:text format="do_warning("/>
-    </admst:when>
-    <admst:when test="function[name='\$error']">
-      <admst:text format="do_error("/>
-    </admst:when>
-    <admst:when test="function[name='\$finish']">
-      <admst:text format="do_finish("/>
-    </admst:when>
-    <admst:when test="function[name='\$stop']">
-      <admst:text format="do_stop("/>
-    </admst:when>
-    <admst:otherwise>
-      <admst:value-of select="/simulator/tmp"/>
-      <admst:value-of select="function/name"/>
-      <admst:error format="function not supported: %s(%s)\n"/>
-      <admst:value-of select="function/name"/>
-		<admst:text format="// %s("/>
-    </admst:otherwise>
-  </admst:choose>
-  <admst:reset select="/simulator/tmp"/>
-  <admst:join select="function/arguments" separator=",">
-    <admst:apply-templates select="." match="expression:stringify:noprobe"/>%s</admst:join>
-  <admst:text format=");\n"/>
 </admst:template>
 
 <!-- ----------------------------------------------------------------- -->
@@ -5220,32 +5242,7 @@ EXIT_IF_ISNAN(__%s_%s); // B
 </admst:template>
 
 <!-- ----------------------------------------------------------------- -->
-<!-- handle analog//callfunctions -->
-<admst:template match="callfunction_old">
-  <admst:message format="callfunction: duplicate?! untested\n"/>
-  <admst:choose>
-    <admst:when test="function[name='\$strobe']">
-      <admst:text format="fprintf(stdout"/>
-    </admst:when>
-    <admst:otherwise>
-      <admst:value-of select="function/name"/>
-#warning &quot;%s not supported by this interface&quot;
-// FIXME(
-    </admst:otherwise>
-  </admst:choose>
-  <admst:for-each select="function/arguments">
-    <admst:apply-templates select="./tree" match="expression:stringify:noprobe"/>
-    <admst:text format=",%s"/>
-  </admst:for-each>
-  <admst:text format=");\n"/>
-  <admst:choose>
-    <admst:when test="function[name='\$strobe']">
-      <admst:text format="fprintf(stdout,&quot;\\n&quot;);\n"/>
-    </admst:when>
-  </admst:choose>
-</admst:template>
 
-<!-- ----------------------------------------------------------------- -->
 <admst:template match="generate_c:declare_variable">
   <admst:message test="[/dbg_xml='yes']" format="*generate_c:declare_variable*\n"/>
   <admst:if test="[type='integer']">\tint %(name);</admst:if>
@@ -9086,20 +9083,19 @@ return
 <admst:template match="callfunction">
   <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)callfunction*\n"/>
   <admst:choose>
-    <admst:when test="function[name='\$strobe']">_strobe(</admst:when>
-    <admst:when test="function[name='\$warning']">_warning(</admst:when>
-    <admst:when test="function[name='\$error']">_error(</admst:when>
-    <admst:when test="function[name='\$finish']">_finish(</admst:when>
-    <admst:when test="function[name='\$stop']">_stop(</admst:when>
+    <admst:when test="function[name='\$strobe']"></admst:when>
+    <admst:when test="function[name='\$warning']"></admst:when>
+    <admst:when test="function[name='\$error']"></admst:when>
+    <admst:when test="function[name='\$finish']"></admst:when>
+    <admst:when test="function[name='\$stop']"></admst:when>
     <admst:otherwise>
       <admst:fatal format="function not supported: %(function/name)\n"/>
     </admst:otherwise>
   </admst:choose>
+Q_CALLF_%(adms/id(.))_%(print_with_dollar_stripped(function/name))(
   <admst:join select="function/arguments" separator=",">
     %(e(tree))
-    <admst:if test="[position(.)=1]">&quot;\\n&quot;</admst:if>
-  </admst:join>
-  <admst:text format=");\n"/>
+  </admst:join>);
 </admst:template>
 
 <!-- ---------------------------------------------------------- -->

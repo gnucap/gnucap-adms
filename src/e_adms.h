@@ -136,6 +136,37 @@ class ADMS_BASE : public COMPONENT {
 		static METHOD method_select[meNUM_METHODS][meNUM_METHODS];
 	public: // from storag
 		double   tr_c_to_g(double c, double g)const;
+
+	protected: // callfunctions
+		void do_strobe(const char* fmt, ... )
+		{
+			if(::status.control == 1){  // FIXME: if print_now?!
+				va_list arg_ptr;
+				va_start(arg_ptr,fmt);
+				vfprintf(stdout,fmt,arg_ptr);
+				va_end(arg_ptr);
+				printf("\n");
+			}
+		}
+		void do_warning(const char* fmt, ... )
+		{
+			if(::status.control == 1){  // FIXME: if print_now?!
+				va_list arg_ptr;
+				va_start(arg_ptr,fmt);
+				vfprintf(stderr,fmt,arg_ptr);
+				va_end(arg_ptr);
+				fprintf(stderr,"\n");
+			}
+		}
+		void do_error(const char* fmt, ... )
+		{
+			va_list arg_ptr;
+			va_start(arg_ptr,fmt);
+			vfprintf(stderr,fmt,arg_ptr);
+			va_end(arg_ptr);
+			fprintf(stderr,"\n");
+			throw(Exception("va error"));
+		}
 };
 /*--------------------------------------------------------------------------*/
 void COMPONENT::set_port_by_index(uint_t num, std::string& ext_name)
@@ -515,40 +546,7 @@ inline double _abs(const double& arg){return abs(arg);}
 #define _abs(val)                ((val)<(0) ? (-(val)):(val))
 */
 
-// FIXME: need more of these.
-inline void _strobe(const char*, ... ){}
-inline void do_strobe(const char* fmt, ... ){
-	if(status.control == 1){
-		va_list arg_ptr;
-		va_start(arg_ptr,fmt);
-		vfprintf(stdout,fmt,arg_ptr);
-		va_end(arg_ptr);
-		printf("\n");
-	}
-}
 
-inline void _warning(const char*, ... ){}
-inline void do_warning(const char* fmt, ... ){
-	if(status.control == 1){
-		va_list arg_ptr;
-		va_start(arg_ptr,fmt);
-		vfprintf(stderr,fmt,arg_ptr);
-		va_end(arg_ptr);
-		fprintf(stderr,"\n");
-	}
-}
-
-inline void _error(const char*, ... ){}
-inline void do_error(const char* fmt, ... ){
-	if(status.control == 1){
-		va_list arg_ptr;
-		va_start(arg_ptr,fmt);
-		vfprintf(stderr,fmt,arg_ptr);
-		va_end(arg_ptr);
-		fprintf(stderr,"\n");
-		exit(1); // better throw exception...
-	}
-}
 
 /*--------------------------------------------------------------------------*/
 #define jacobian(a,b) m_required[m_##a##_##b]=true;	
