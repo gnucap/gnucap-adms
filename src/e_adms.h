@@ -167,6 +167,10 @@ class ADMS_BASE : public COMPONENT {
 			fprintf(stderr,"\n");
 			throw(Exception("va error"));
 		}
+		void do_stop()
+		{
+			throw(Exception("va stop"));
+		}
 };
 /*--------------------------------------------------------------------------*/
 void COMPONENT::set_port_by_index(uint_t num, std::string& ext_name)
