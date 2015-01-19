@@ -320,4 +320,12 @@ bool ADMS_BASE::tr_needs_eval()const
 }
 /*--------------------------------------------------------------------------*/
 /*--------------------------------------------------------------------------*/
+void ADMS_BASE::set_param_by_name(string name, string value)
+{
+	if( Umatch(name,"method") ) { untested();
+		_method_u = method_t(atoi(value.c_str())); // HACK
+	}else{ untested();
+		COMPONENT::set_param_by_name(name, value);
+	}
+}
 

@@ -1814,7 +1814,7 @@ void $(DEV_NAME)::set_param_by_name(std::string Name, std::string value)
 #else
 	incomplete();
 #endif
-	COMPONENT::set_param_by_name(Name,value);
+	ADMS_BASE::set_param_by_name(Name,value);
 }
 // -------------------------------------------------------------------------- //
 void $(COMMON_NAME)::expand(const COMPONENT* d)

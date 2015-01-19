@@ -137,6 +137,9 @@ class ADMS_BASE : public COMPONENT {
 	public: // from storag
 		double   tr_c_to_g(double c, double g)const;
 
+	protected:
+		void set_param_by_name(std::string name, std::string value);
+
 	protected: // callfunctions
 		void do_strobe(const char* fmt, ... )
 		{
