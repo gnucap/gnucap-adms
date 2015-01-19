@@ -944,7 +944,7 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
 		}
   <admst:for-each select="$mydisciplines[.!='' and ./name='degradational']">
 		bool conchk( Node_degradational a, double reltol=OPT::reltol ) const {
-			return ::conchk(CKT_BASE::_sim->_vt1[_n[a].m_()], _n[a].v0(), abstol_flow_thermal, reltol);
+			return true;
 		}
 		bool conchk( Node_degradational, Node_degradational, double=0) const {
 			return true;
