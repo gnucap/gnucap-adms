@@ -50,28 +50,6 @@ remarks:
  - indentation in gnucap.xml (two spaces) has been taken over from "adms-mot",
    the generated code should be approximately BSD KNF style.
 
-TODO: cleanup
-=== notes from old implementation ===
-This adms-script generate (analog) gnucap-models from verilog
-
-To use:
-	- configure gnucap with --enable-adms
-	- admsXml(v2.3.0) must be installed
-	$ $EDITOR dev.va
-	$ gnucap-adms dev.va
-	$ gcc -fPIC $(gnucap-conf --cppflags) --shared dev.cc -o dev.so
-	gnucap> load dev.so
-
-Folowing models are built-in in gnucap (with --enable-adms):
-	d_hicum0.va	hicum0
-	d_ota_simpl.va	ota_simpl
-	d_ctest.va	ctest
-	d_rtest.va 	rtest
-	d_dtest.va 	dtest
-	d_opamp.va	opamp
-
-patched adms 2.3.0 is required.
-
 ==== note on split.py ====
 The script gnucap.xml will be modified, before can be used by admsXml:
 
