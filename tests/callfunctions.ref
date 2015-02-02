@@ -10,6 +10,24 @@ positive 0.587785
  400.u      0.58779   
  500.u      0.        
  600.u     -0.58779   
+va error
+#Time       v(V2)     
+ 0.         0.        
+ 1.u        0.0062831 
+positive 0.587785
+ 100.u      0.58779   
+ 199.u      0.9491    
+positive 0.951057
+ 200.u      0.95106   
+ 201.u      0.95298   
+positive 0.951057
+ 300.u      0.95106   
+positive 0.587785
+ 400.u      0.58779   
+ 500.u      0.        
+ 600.u     -0.58779   
+va error
 [ERROR] negative -0.587785
-[ERROR] negative -0.951057
+[ERROR] too negative -0.951057
+[ERROR] negative -0.587785
 [ERROR] too negative -0.951057
