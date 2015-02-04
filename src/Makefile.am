@@ -19,14 +19,16 @@ admsdir = $(pkglibdir)
 adms_LTLIBRARIES = libgnucap_adms.la
 libgnucap_adms_la_SOURCES = e_adms.cc
 
+ADMSXML=admsXml
 GNUCAP_ADMS_MAKE=$(shell echo gnucap-adms.mk | sed -e '$(transform)')
+GNUCAP_ADMS_IMPLICIT=$(pkgdatadir)/implicit.xml
 
 plugindir = @gnucap_libdir@
 plugin_LTLIBRARIES = lang_adms.la
 lang_adms_la_LDFLAGS = -module -shared
 lang_adms_la_SOURCES = lang_adms.cc md5.c c_attach.cc
 lang_adms_la_CPPFLAGS = $(AM_CPPFLAGS) \
-    -DGNUCAP_ADMS_IMPLICIT=\"$(pkgdatadir)/implicit.xml\" \
+    -DGNUCAP_ADMS_IMPLICIT=\"$(GNUCAP_ADMS_IMPLICIT)\" \
     -DGNUCAP_ADMS_MAKE=\"$(GNUCAP_ADMS_MAKE)\"
 
 AM_CPPFLAGS = $(GC_CPPFLAGS)
@@ -37,8 +39,8 @@ AM_CPPFLAGS = $(GC_CPPFLAGS)
 i=0 1 2
 ADMS_GC_XML=$(i:%=gnucap_%.xml)
 ADMS_ES=$(i:%=-e gnucap_%.xml)
-%.cc %.h %_tr.hxx %_top.hxx %_ac.hxx: %.va $(ADMS_GC_XML)
-	admsXml -I$(top_srcdir)/src $< $(ADMS_ES) -o $*
+%.cc %.h %_tr.hxx %_top.hxx %_ac.hxx: %.va $(ADMS_GC_XML) implicit.xml
+	adms_implicit_transforms=$(GNUCAP_ADMS_IMPLICIT) $(ADMSXML) -I$(top_srcdir)/src $< $(ADMS_ES) -o $*
 
 .PRECIOUS: %.cc %.h %.hxx
 

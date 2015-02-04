@@ -150,6 +150,8 @@
 
 <admst:for-each select="/module@ADMSXML_NOEXTERN@">
   <admst:apply-templates select="." match="ddticcollect"/>
+  <admst:variable name="ddts" select="%(expression/function[name='ddt' and class='operator'])"/>
+  <admst:variable name="idts" select="%(expression/function[name='idt' and class='operator'])"/>
 
   <admst:variable name="has_sckt" select="%(count(instance))"/>
 
@@ -171,7 +173,7 @@
       </admst:when>
     </admst:choose>
   </admst:for-each>
-  <admst:for-each select="$(ddts_list)">
+  <admst:for-each select="$(ddts)">
     <admst:message format="ic debug %(..) %(.)\n"/>
   </admst:for-each>
 </admst:for-each>
@@ -298,7 +300,9 @@
   <admst:variable name="MODEL_NAME" select="MODEL_%(upper-case(name))"/>
   <admst:variable name="COMMON_NAME" select="COMMON_%(upper-case(name))"/>
   <admst:variable name="_num_stamp_nodes" select="%(count(node[grounded='no' and discipline/name!='degradational']))"/>
-  <admst:apply-templates select="." match="ddtcollect"/>
+  <admst:variable name="ddts" select="%(expression/function[name='ddt' and class='operator'])"/>
+  <admst:variable name="idts" select="%(expression/function[name='idt' and class='operator'])"/>
+
 
 // customization - gnucap specific constants
 #define VALUE_NAME &quot;#&quot;
@@ -1017,8 +1021,8 @@ class $(COMMON_NAME) : public COMMON_ADMS
 	public: // storage related
 
 		void set_states(double*x){
-		unsigned i=0;
-		<admst:for-each select="$(ddts_list)">
+		unsigned i=0; USE(i);
+		<admst:for-each select="$(ddts)">
 			trace1(&quot;$(COMMON_NAME)::set_states ic_state_%(adms/id(.))&quot;, x[i]);
 			ic_state_%(adms/id(.)) = x[i++];
 		</admst:for-each>
@@ -1053,7 +1057,8 @@ class $(COMMON_NAME) : public COMMON_ADMS
 <!-- *********************************************************************************** -->
 
 <admst:for-each select="/module@ADMSXML_NOEXTERN@">
-  <admst:apply-templates select="." match="ddtcollect"/>
+  <admst:variable name="ddts" select="%(expression/function[name='ddt' and class='operator'])"/>
+  <admst:variable name="idts" select="%(expression/function[name='idt' and class='operator'])"/>
 
   <admst:value-of select="attribute[name='ngspicename']/value"/>
   <admst:variable name="module" select="%s"/>
@@ -1468,7 +1473,8 @@ and name!='initializeInstance')]">
 using namespace std;
 <admst:for-each select="/module@ADMSXML_NOEXTERN@">
   <admst:apply-templates select="." match="ddticcollect"/>
-  <admst:apply-templates select="." match="ddtcollect"/>
+  <admst:variable name="ddts" select="%(expression/function[name='ddt' and class='operator'])"/>
+  <admst:variable name="idts" select="%(expression/function[name='idt' and class='operator'])"/>
   <admst:variable name="_num_states" select="%(count($ddts)) + %(count($idts))"/>
 
 //analog function stuff
@@ -1630,7 +1636,7 @@ void $(COMMON_NAME)::precalc_last(const CARD_LIST* scope)
 #if 0 // hmm wrong place
   <admst:apply-templates select="analog" match="analog:initial_instance" required="yes"/>
 #endif
-  <admst:for-each select="$(ddts_list)">
+  <admst:for-each select="$(ddts)">
 	ic_state_%(adms/id(.)).e_val(NOT_INPUT, scope);
   </admst:for-each>
 }
@@ -1739,12 +1745,15 @@ bool $(DEV_NAME)::uic_now(unsigned stateno)const
 
 	// incomplete();
 	switch(stateno){
+<admst:for-each select="$(idts)">
+USE(c); // incomplete();
+</admst:for-each>
 <admst:for-each select="$(ddts)">
    // %(.)
 			case _ddt_%(adms/id(.)):
 				return c-&gt;ic_state_%(adms/id(.)).has_good_value();
 </admst:for-each>
-<admst:for-each select="$(ddts_list)">
+<admst:for-each select="$(ddts)">
 	// %(.)
 	// new?	case _ddt_%(adms/id(.)):
 	// new?		return c-&gt;ic_state_%(adms/id(.)).has_good_value();
@@ -2139,13 +2148,10 @@ void $(DEV_NAME)::tr_begin()
 
 <admst:if test="[$(_has_states)='true']">
 	unsigned k = 0;
-  <admst:for-each select="$(ddts)">
-	  // old	if(c-&gt;ic_state_%(adms/id(.)).has_good_value()){
-	  // old		trace1(&quot;$(DEV_NAME)::tr_begin&quot;, c-&gt;ic_state_%(adms/id(.)));
-	  // old		_states[1][2*k++] = c-&gt;ic_state_%(adms/id(.));
-	  // old	}
+  <admst:for-each select="$(idts)">
+		USE(k); //incomplete();
   </admst:for-each>
-  <admst:for-each select="$(ddts_list)">
+  <admst:for-each select="$(ddts)">
 	if(c-&gt;ic_state_%(adms/id(.)).has_good_value()){
 		trace1(&quot;$(DEV_NAME)::tr_begin&quot;, c-&gt;ic_state_%(adms/id(.)));
 		_states[1][2*k++] = c-&gt;ic_state_%(adms/id(.));
@@ -2648,7 +2654,11 @@ void $(DEV_NAME)::tr_accept()
   <admst:apply-templates select="." match="commonmodel"/>
 
   trace0(&quot;$(DEV_NAME)::tr_accept&quot;);
-  double CKTga0 = 0; // incomplete?
+
+  <admst:if test="[count($ddts)!=0]">
+	double CKTga0 = 0; // incomplete?
+  </admst:if>
+
   if (_sim-&gt;analysis_is_dcop() || _sim-&gt;analysis_is_ac()) {
     assert(_dt == NOT_VALID || ::conchk(_dt, _time[0] - _time[1]));
     // int mode;
@@ -2951,15 +2961,20 @@ void $(DEV_NAME)::tr_eval()
 	// ddts: %(count($ddts))
 	// idts: %(count($idts))
 <admst:if test="[$(_has_states)='true']">
-	double CKTag0 = tr_c_to_g(1., 1.);
 	assert(_dt == _dt);
 
+  <admst:if test="[count($ddts)!=0]">
+	double CKTag0 = tr_c_to_g(1., 1.);
+  </admst:if>
+
+  <admst:if test="[count($idts)!=0]">
 	double CKTga0;
 	if( _sim->analysis_is_static() ) {
 		CKTga0 = 0;
 	} else {
 		CKTga0 = _dt/2;
 	}
+  </admst:if>
 
   <admst:for-each select="$(ddts)">
 	double keep_%(adms/id(.))=1;
@@ -3036,7 +3051,7 @@ void $(COMMON_NAME)::set_param_by_name(std::string name, std::string value)
 {
 	USE(value);
 
-  <admst:for-each select="$(ddts_list)">
+  <admst:for-each select="$(ddts)">
 	  // new/better? %(adms/id(.)) %(.)
   </admst:for-each>
   <admst:for-each select="$(ddts)">
@@ -3046,7 +3061,7 @@ void $(COMMON_NAME)::set_param_by_name(std::string name, std::string value)
 	// %(.), %(adms/id(.))
   </admst:for-each>
 
-<admst:for-each select="$(ddts_list)">
+<admst:for-each select="$(ddts)">
 	// %(.), %(adms/id(.))
 	<admst:apply-templates select="." match="ic_probe_names"/>
 
@@ -3965,7 +3980,7 @@ inline double d_doh(double x)          {return  exp(x)/(exp(x) + 1); }
       </admst:if>
     </admst:when>
     <admst:when test="[name='pow' or name='hypot' or name='min' or name='max']">
-      <admst:value-of select="index(./subexpression/expression/function,.)"/>
+      <admst:value-of select="index(./subexpression/expression/function[class='builtin'],.)"/>
       <admst:variable name="index" select="%s"/>
       <admst:if test="/simulator/probe">
         <admst:for-each select="arguments">
@@ -4012,7 +4027,7 @@ inline double d_doh(double x)          {return  exp(x)/(exp(x) + 1); }
       <admst:value-to select="/simulator/tmp" value="__%s_$index"/>
     </admst:when>
     <admst:when test="[name='div']">
-      <admst:value-of select="index(./subexpression/expression/function,.)"/>
+      <admst:value-of select="index(./subexpression/expression/function[class='builtin'],.)"/>
       <admst:variable name="index" select="%s"/>
       <admst:if test="/simulator/probe">
         <admst:for-each select="arguments">
@@ -4055,7 +4070,7 @@ inline double d_doh(double x)          {return  exp(x)/(exp(x) + 1); }
       <admst:value-to select="/simulator/tmp" value="__%s_$index"/>
     </admst:when>
     <admst:when test="[class='builtin']">
-      <admst:value-of select="index(./subexpression/expression/function,.)"/>
+      <admst:value-of select="index(./subexpression/expression/function[class='builtin'],.)"/>
       <admst:variable name="index" select="%s"/>
       <admst:if test="/simulator/probe">
         <admst:for-each select="arguments">
@@ -4468,7 +4483,7 @@ EXIT_IF_ISNAN(__%s_%s); // B
     <!-- <admst:if test="lhs[insource='yes']"> -->
     <admst:if test="rhs[hasVoltageDependentFunction='yes']">
       <admst:text format="#if defined(_DERIVATE)\n"/>
-      <admst:for-each select="rhs/function">
+      <admst:for-each select="rhs/function[class='builtin']">
         <admst:if test="arguments[count(.)=1]">
           <admst:for-each select="arguments[position(.)=1]">
             <admst:if test="math[dependency!='constant']">
@@ -4500,7 +4515,7 @@ EXIT_IF_ISNAN(__%s_%s); // B
       </admst:for-each>
       <admst:text format="#endif /* _DERIVATE */\n"/>
       <admst:text format="#if defined(_DERIVATE)\n"/>
-      <admst:for-each select="rhs/function">
+      <admst:for-each select="rhs/function[class='builtin']">
         <admst:if test="arguments[count(.)=1]">
           <admst:for-each select="arguments[position(.)=1]">
             <admst:apply-templates select="." match="subexpression:stringify:noprobe"/>
@@ -4625,7 +4640,7 @@ EXIT_IF_ISNAN(__%s_%s); // B
     <admst:if test="[$_DERIVATE='yes']">
       /* derivate stuff */
 
-      <admst:for-each select="rhs/function">
+      <admst:for-each select="rhs/function[class='builtin']">
         <admst:if test="arguments[count(.)=1]">
           <admst:for-each select="arguments[position(.)=1]">
             <admst:if test="math[dependency!='constant']">
@@ -4658,7 +4673,7 @@ EXIT_IF_ISNAN(__%s_%s); // B
     <admst:if test="[$_DERIVATE!='yes']">/*no _DERIVATE*/</admst:if>
     <admst:if test="[$_DERIVATE='yes']"> // derivate... %(.)
 
-      <admst:for-each select="rhs/function">
+      <admst:for-each select="rhs/function[class='builtin']">
         <admst:if test="arguments[count(.)=1]">
           <admst:for-each select="arguments[position(.)=1]">
             <admst:apply-templates select="." match="subexpression:stringify:noprobe"/>
@@ -4766,7 +4781,7 @@ EXIT_IF_ISNAN(__%s_%s); // B
 
   <admst:text test="rhs[not(nilled(function[class='builtin']))]" format="{\n"/>
 
-  <admst:for-each select="rhs/function">
+  <admst:for-each select="rhs/function[class='builtin']">
     <admst:value-of select="position(.)-1"/>
     <admst:apply-templates select="." match="function:getname_push"/>
     <admst:text format="double __%s_%s=0.0;\n"/>
@@ -4967,7 +4982,7 @@ EXIT_IF_ISNAN(__%s_%s); // B
   </admst:if>
   <admst:if test="if[not(nilled(function[class='builtin']))]">
     <admst:text format="{\n"/>
-    <admst:for-each select="if/function">
+    <admst:for-each select="if/function[class='builtin']">
       <admst:value-of select="position(.)-1"/>
       <admst:apply-templates select="." match="function:getname_push"/>
       <admst:text format="double __%s_%s=0.0;\n"/>
@@ -5031,7 +5046,7 @@ EXIT_IF_ISNAN(__%s_%s); // B
   </admst:if>
   <admst:if test="while[not(nilled(function[class='builtin']))]">
     <admst:text format="{\n"/>
-    <admst:for-each select="while/function">
+    <admst:for-each select="while/function[class='builtin']">
       <admst:value-of select="position(.)-1"/>
       <admst:apply-templates select="." match="function:getname_push"/>
       <admst:text format="double __%s_%s=0.0;\n"/>
@@ -6112,7 +6127,8 @@ return
 <!-- ------------------ create hxx for tr ---------------------------- -->
 <admst:variable name="eval_mode" select="tr"/>
 <admst:for-each select="/module@ADMSXML_NOEXTERN@">
-  <admst:apply-templates select="." match="ddtcollect"/>
+  <admst:variable name="ddts" select="%(expression/function[name='ddt' and class='operator'])"/>
+  <admst:variable name="idts" select="%(expression/function[name='idt' and class='operator'])"/>
 
   <admst:value-of select="attribute[name='ngspicename']/value"/>
   <admst:variable name="module" select="%s"/>
@@ -6151,7 +6167,8 @@ return
   <admst:variable name="DEV_NAME" select="DEV_%(upper-case(name))"/>
   <admst:variable name="MODEL_NAME" select="MODEL_%(upper-case(name))"/>
 
-  <admst:apply-templates select="." match="ddtcollect"/>
+  <admst:variable name="ddts" select="%(expression/function[name='ddt' and class='operator'])"/>
+  <admst:variable name="idts" select="%(expression/function[name='idt' and class='operator'])"/>
 
   <admst:open file="$(filename)_$(module)_ac.hxx">
     <admst:apply-templates select="analog/code" match="analog:evaluate" required="yes"/>
@@ -6179,7 +6196,7 @@ return
 
   <admst:if test="rhs[not(nilled(function[class='builtin']))]">
   <admst:text format="{ // 5206 \n"/>
-    <admst:for-each select="rhs/function">
+    <admst:for-each select="rhs/function[class='builtin']">
       <admst:value-of select="position(.)-1"/>
       <admst:apply-templates select="." match="function:getCid"/>
       <admst:text format="double __%s_%s=0.0;\n"/>
@@ -8162,7 +8179,7 @@ return
                     or name='limexp' or name='ln' or name='log' or name='sin'
                     or name='sinh' or name='sqrt' or name='tan' or name='tanh']">
       <admst:assert test="arguments[count(.)=1]" format="%(name): should have one argument exactly\n"/>
-      <admst:variable name="index" select="%(index(subexpression/expression/function,.))"/>
+      <admst:variable name="index" select="%(index(subexpression/expression/function[class='builtin'],.))"/>
       <admst:variable name="fname" select="%(funcname(.)/[name='fname']/value)"/>
       <admst:apply-templates select="arguments[1]" match="ddx"/>
       <admst:variable name="x" select="$e"/>
@@ -8173,7 +8190,7 @@ return
     </admst:when>
     <admst:when test="[name='div' or name='pow' or name='hypot' or name='min' or name='max']">
       <admst:assert test="arguments[count(.)=2]" format="%(name): should have two argument exactly\n"/>
-      <admst:variable name="index" select="%(index(./subexpression/expression/function,.))"/>
+      <admst:variable name="index" select="%(index(./subexpression/expression/function[class='builtin'],.))"/>
       <admst:variable name="fname" select="%(funcname(.)/[name='fname']/value)"/>
       <admst:apply-templates select="arguments[1]" match="ddx"/>
       <admst:variable name="x" select="$e"/>
@@ -8253,7 +8270,7 @@ return
                     or name='cos' or name='cosh' or name='exp' or name='hypot'
                     or name='limexp' or name='ln' or name='log' or name='sin'
                     or name='sinh' or name='sqrt' or name='tan' or name='tanh']">
-      <admst:variable name="index" select="%(index(subexpression/expression/function,.))"/>
+      <admst:variable name="index" select="%(index(subexpression/expression/function[class='builtin'],.))"/>
       <admst:choose>
         <admst:when test="[$xp='0.0']">
           <admst:variable name="ep" select="0.0"/>
@@ -8264,7 +8281,7 @@ return
       </admst:choose>
     </admst:when>
     <admst:when test="[name='div' or name='pow' or name='hypot' or name='min' or name='max']">
-      <admst:variable name="index" select="%(index(./subexpression/expression/function,.))"/>
+      <admst:variable name="index" select="%(index(./subexpression/expression/function[class='builtin'],.))"/>
       <admst:choose>
         <admst:when test="[$xp='0.0' and $yp='0.0']">
           <admst:variable name="ep" select="0.0"/>
@@ -8328,7 +8345,7 @@ return
                        or name='cos' or name='cosh' or name='exp' or name='hypot'
                        or name='limexp' or name='ln' or name='log' or name='sin' or name='sinh'
                        or name='sqrt' or name='tan' or name='tanh']">
-      <admst:variable name="index" select="%(index(subexpression/expression/function,.))"/>
+      <admst:variable name="index" select="%(index(subexpression/expression/function[class='builtin'],.))"/>
       <admst:choose>
         <admst:when test="[$xq='0.0']">
           <admst:variable name="eq" select="0.0"/>
@@ -8339,7 +8356,7 @@ return
       </admst:choose>
     </admst:when>
     <admst:when test="[name='div' or name='pow' or name='hypot' or name='min' or name='max']">
-      <admst:variable name="index" select="%(index(./subexpression/expression/function,.))"/>
+      <admst:variable name="index" select="%(index(./subexpression/expression/function[class='builtin'],.))"/>
       <admst:choose>
         <admst:when test="[$xq='0.0' and $yq='0.0']">
           <admst:variable name="eq" select="0.0"/>
@@ -8365,7 +8382,7 @@ return
                        or name='cos' or name='cosh' or name='exp' or name='hypot'
                        or name='limexp' or name='ln' or name='log' or name='sin'
                        or name='sinh' or name='sqrt' or name='tan' or name='tanh']">
-      <admst:variable name="index" select="%(index(./subexpression/expression/function,.))"/>
+      <admst:variable name="index" select="%(index(./subexpression/expression/function[class='builtin'],.))"/>
       <admst:variable name="fname" select="%(funcname(.)/[name='fname']/value)"/>
       <admst:choose>
         <admst:when test="[$x='0.0']">
@@ -8456,7 +8473,7 @@ return
 <admst:template match="function:precomputationyes">
   <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)function:precomputationyes*\n"/>
   <admst:text format="//precq\n"/>
-  <admst:variable name="index" select="%(index(../function,.))"/>
+  <admst:variable name="index" select="%(index(../function[class='builtin'],.))"/>
   <admst:variable name="fname" select="%(funcname(.)/[name='fname']/value)"/>
   //precompyes
   %(e(.))
@@ -8465,7 +8482,7 @@ return
 <admst:template match="function:precomputation">
   <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)function:precomputation*\n"/>
   <admst:text format="//prec \n"/>
-  <admst:variable name="index" select="%(index(../function,.))"/>
+  <admst:variable name="index" select="%(index(../function[class='builtin'],.))"/>
   <admst:variable name="fname" select="%(funcname(.)/[name='fname']/value)"/>
   <admst:choose>
     <admst:when test="[name='add']">
@@ -8490,8 +8507,8 @@ return
   <admst:if test="[hasVoltageDependentFunction='yes']">
     <admst:if test="[($ddxinsidederivate='yes' and $_DERIVATEFORDDX='yes'  )
                   or ($ddxinsidederivate='no'  and $_DERIVATE='yes' )]">
-      <admst:for-each select="function">
-        <admst:variable name="index" select="%(index(../function,.))"/>
+      <admst:for-each select="function[class='builtin']">
+        <admst:variable name="index" select="%(index(../function[class='builtin'],.))"/>
         <admst:variable name="fname" select="%(funcname(.)/[name='fname']/value)"/>
         <admst:choose>
           <admst:when test="[name='exp']">
@@ -8535,8 +8552,8 @@ return
     </admst:choose> FIXME -->
     <admst:if test="[($ddxinsidederivate='yes' and $_DERIVATEFORDDX='yes'  )
                   or ($ddxinsidederivate='no'  and $_DERIVATE='yes' )]">
-      <admst:for-each select="function">
-        <admst:variable name="index" select="%(index(../function,.))"/>
+      <admst:for-each select="function[class='builtin']">
+        <admst:variable name="index" select="%(index(../function[class='builtin'],.))"/>
         <admst:variable name="fname" select="%(funcname(.)/[name='fname']/value)"/>
         <admst:choose>
           <admst:when test="[name='exp']">
@@ -8591,7 +8608,7 @@ return
   <admst:variable name="lhs" select="%(lhs)"/>
   <!--  <admst:text test="[dynamic='yes']" format="#if defined(_DYNAMIC)\n"/> -->
   <admst:if test="[dynamic='no' or $_DYNAMIC='yes']" >
-    <admst:text test="rhs/function" format="{ // rhs function \n"/>
+    <admst:text test="rhs/function[class='builtin']" format="{ // rhs function \n"/>
     <admst:for-each select="lhs/probe">
       <admst:variable name="pprobe" select="%(.)"/>
       <admst:if test="$lhs/ddxprobe/branch/pnode[.=$pprobe/branch/pnode or .=$pprobe/branch/nnode]">
@@ -8599,7 +8616,7 @@ return
       </admst:if>
     </admst:for-each>
     <admst:text format="// rhsf %(rhs/function) \n"/>
-    <admst:apply-templates select="rhs/function" match="function:precomputation"/>
+    <admst:apply-templates select="rhs/function[class='builtin']" match="function:precomputation"/>
     <admst:text format="/// rhsf %(rhs/function)\n"/>
     <admst:if test="lhs[insource='yes']">
       <admst:text format="// fixme: 7581 dprec %(rhs[not(nilled(function))])\n"/>
@@ -8729,7 +8746,7 @@ return
         <!--<admst:text format="EXIT_IF_ISNAN($e)\n"/>-->
       </admst:otherwise>
     </admst:choose>
-    <admst:text test="rhs/function" format="} //rhs \n"/>
+    <admst:text test="rhs/function[class='builtin']" format="} //rhs \n"/>
     <!--   <admst:text test="[dynamic='yes']" format="#endif // _DYNAMIC \n"/> -->
   </admst:if>
   <admst:text format="// FIXME done here\n"/>
@@ -8738,8 +8755,8 @@ return
 <admst:template match="contribution:nonoise:mint">
   <admst:message format="*(tr_eval)contribution:nonoise:mint in use?*\n"/>
   <admst:text test="[dynamic='yes']" format="#if defined(_DYNAMIC) // fixm4\n"/>
-  <admst:text test="rhs/function" format="{\n"/>
-  <admst:apply-templates select="rhs/function" match="function:precomputation"/>
+  <admst:text test="rhs/function[class='builtin']" format="{\n"/>
+  <admst:apply-templates select="rhs/function[class='builtin']" match="function:precomputation"/>
   <admst:apply-templates select="rhs[not(nilled(function))]" match="function:derivate:precomputation"/>
   <admst:variable name="sourcepnode" select="%(lhs/branch/pnode)"/>
   <admst:variable name="sourcennode" select="%(lhs/branch/nnode)"/>
@@ -8802,7 +8819,7 @@ return
     </admst:choose>
   </admst:for-each>
   <admst:text format="#endif //88\n"/>
-  <admst:text test="rhs/function" format="}\n"/>
+  <admst:text test="rhs/function[class='builtin']" format="}\n"/>
   <admst:text select="[dynamic='yes']" format="#endif //98\n"/>
 </admst:template>
 <!-- ---------------------------------------------------------- -->
@@ -8812,7 +8829,7 @@ return
   <admst:if test="rhs[not(nilled(function[class='builtin']))]">
 	{ // %(.) 7804
 
-    <admst:for-each select="rhs/function">
+    <admst:for-each select="rhs/function[class='builtin']">
       <admst:value-of select="position(.)-1"/>
 		<admst:apply-templates select="." match="function:getname_push"/>
 		<admst:text format="double __%s_%s = 0.0; // forward declaration...?\n"/>
@@ -9042,8 +9059,8 @@ return
 <admst:template match="conditional">
   <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)conditional DUPLICATE (see 4960)*\n"/>
   <admst:text test="[$_DYNAMIC='no']" select="if[dynamic='yes']" format="#ifdef _DYNAMIC // BUG182\n"/>
-  <admst:text test="if/function" format="{ // conditional\n"/>
-  <admst:apply-templates select="if/function" match="function:precomputation"/>
+  <admst:text test="if/function[class='builtin']" format="{ // conditional\n"/>
+  <admst:apply-templates select="if/function[class='builtin']" match="function:precomputation"/>
   <admst:text format="if\n(%(e(if/tree))) //conditional \n"/>
   <admst:text select="then/adms[datatypename!='block']" format="{\n"/>
   <admst:apply-templates select="then" match="%(adms/datatypename)"/>
@@ -9054,7 +9071,7 @@ return
     <admst:apply-templates select="else" match="%(adms/datatypename)"/>
     <admst:text test="else/adms[datatypename!='block']" format="} // conditional.\n"/>
   </admst:if>
-  <admst:text test="if/function" format="} // conditional\n"/>
+  <admst:text test="if/function[class='builtin']" format="} // conditional\n"/>
   <admst:text test="[$_DYNAMIC='no']" select="if[dynamic='yes']" format="#endif /* if(...) */\n"/>
 </admst:template>
 
