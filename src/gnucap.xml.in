@@ -1732,7 +1732,8 @@ $(DEV_NAME)::$(DEV_NAME)(const $(DEV_NAME)&amp; p) :
 }
 // -------------------------------------------------------------------------- //
 <admst:if test="[$(_has_states)='true']">
-bool $(DEV_NAME)::uic_now(unsigned stateno)const{
+bool $(DEV_NAME)::uic_now(unsigned stateno)const
+{
 	if(!_sim-&gt;uic_now()) return 0;
 	const $(COMMON_NAME)* c = static_cast&lt;const $(COMMON_NAME)*&gt;(common());
 
@@ -2152,10 +2153,9 @@ void $(DEV_NAME)::tr_begin()
   </admst:for-each>
 </admst:if>
 
-	// like d_vs.
-	// &lt;admst:text format=&quot;\\n\\tfor(int i=0; i&lt;$_num_stamp_nodes; i++)&quot;/&gt;
-	for(int i=0; i&lt;$_num_stamp_nodes; i++)
+	for(int i=0; i&lt;$_num_stamp_nodes; i++) {
 		it0[i] = it1[i]=0;
+	}
 
         //     in storag:
         // _m1 = _m0 = CPOLY1(0., 0., 0.);
