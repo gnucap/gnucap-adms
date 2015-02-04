@@ -4,10 +4,14 @@ simple
 - more devices/tests
 - fix portability of gnucap-adms.so
 - dont convert module names to caps in class names.
+- should pass -DGNUCAP (or similar) to adms.
 
 medium
 - get rid of MODULE(?)
 - get rid of bogus #ifdef's
+
+missing features
+- instaciate modules in spice using X
 
 difficult
 - see BUGS

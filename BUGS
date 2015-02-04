@@ -4,4 +4,3 @@
 - some scopes are chosen terribly wrong (c->, m->, etc.)
 - V(..)<+ is experimental
 - no nested function calls (only missing in obsolete parts?)
-- $strobe etc are broken
