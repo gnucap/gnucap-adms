@@ -148,6 +148,7 @@ EXT_SO_TESTS = \
     motor.sh
 CUSTOM_TESTS = \
     callfunctions.sh \
+    diff.2.sh \
     sensor_chip.sh \
     inline.sh \
     opamp.sh
