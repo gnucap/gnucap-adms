@@ -5,25 +5,14 @@ License: GPL3+
 This package helps compiling verilog-a models to gnucap devices.
 
 synopsis:
-    gnucap-adms [options] file.va
+    gnucap-adms.mk [target]
 
     generates c++ code distributed over file.cc file.h file_top.hxx ...
     containing a gnucap device
 
--v  verbose output
--c  compile shared object (file.so)
--t  compile with -DDO_TRACE
--g  compile with -g
--o  compile optimized and NDEBUG
--d  debug admsXml
-
 installation prerequisites:
- - patched admsXml 2.3.0, available at
-   git://tool.em.cs.uni-frankfurt.de/git/adms
- - gnucap-uf or gnucap 0.36+dev, available at
-   git://tool.em.cs.uni-frankfurt.de/git/gnucap
-   or (debian package)
-   git://tool.em.cs.uni-frankfurt.de/git/gnucap_deb
+ - admsXml 2.3.2 works. 2.3.5 might not work.
+ - gnucap-uf or gnucap. this is under construction. see mailing lists.
 
 configuration:
  --enable-local install plugins to $HOME/.gnucap/lib (in case you have no write
@@ -31,6 +20,7 @@ configuration:
                 you then will have to invoke gnucap like
                 LD_LIBRARY_PATH=$HOME/.gnucap/lib
                 in order to load the plugins
+                (untested in newer versions)
 
 features:
  - simple user interface
@@ -42,8 +32,7 @@ features:
  - under active development
 
 bugs:
- - should use Makefile for translate/compile rules
- - ... lots. lets fix the serious ones first
+ see BUGS
 
 remarks:
  - some details don't work with gnucap 0.36, cf. examples
