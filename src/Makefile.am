@@ -21,7 +21,7 @@ libgnucap_adms_la_SOURCES = e_adms.cc
 
 ADMSXML=admsXml
 GNUCAP_ADMS_MAKE=$(shell echo gnucap-adms.mk | sed -e '$(transform)')
-GNUCAP_ADMS_IMPLICIT=$(pkgdatadir)/implicit.xml
+GNUCAP_ADMS_IMPLICIT=$(srcdir)/implicit.xml
 
 plugindir = @gnucap_libdir@
 plugin_LTLIBRARIES = lang_adms.la
