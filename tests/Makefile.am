@@ -17,7 +17,11 @@ check_LTLIBRARIES = \
     $(EXT_LIBS) \
     if.la if2.la \
     vs.la cs.la cap.la \
-    coil.la ccvs.la vccs.la \
+    coil.la \
+    ccvs.la \
+    cccs.la \
+    res.la \
+    vccs.la \
     analogfunction.la \
     afsquare.la \
     square.la \
@@ -90,7 +94,9 @@ GC_TESTS = \
     pid.sh \
     diff.sh \
     mul.sh \
+    cccs.sh \
     ccvs.sh \
+    res.sh \
     vccs.sh \
     vcvs.sh
 # from examples
@@ -98,6 +104,8 @@ GC_TESTS+ = $(SO_TESTS)
 
 # will only work with -uf
 GCUF_TESTS = rc_uic.sh ddc_rc.sh ddc.2.sh
+
+XFAIL_TESTS = cccs.sh res.sh
 
 POSTDIFF=
 # remove cruft from model compiler

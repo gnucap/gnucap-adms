@@ -1,0 +1,18 @@
+// Copyright 2013 Felix
+// resistor
+
+`include "discipline.h"
+`include "constants.h"
+
+module resva(p,n);
+	inout p,n;
+	electrical p,n;
+
+	parameter real R = 100;
+
+	real i (*ask="yes"*);
+	real v (*ask="yes"*);
+	analog begin	
+ 		V(p,n) <+ I(p,n) * R;
+   end
+endmodule

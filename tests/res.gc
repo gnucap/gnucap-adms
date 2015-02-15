@@ -1,0 +1,15 @@
+load ./res.so
+
+verilog
+
+resva  r1  (p, 0);
+spice
+
+v1 p 0 1
+
+.print dc v(noutp) i(r1) v(r1)
+.print tran v(nodes) i(r1) v(r1)
+
+.dc trace=i
+.tran 0 1 .1 trace=n
+.end

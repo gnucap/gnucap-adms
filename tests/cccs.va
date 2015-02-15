@@ -1,0 +1,21 @@
+// Copyright 2015 Felix
+// cccs
+
+`include "discipline.h"
+`include "constants.h"
+
+module ccvsva(p,n,cp,cn);
+	inout p,n,cp,cn;
+	electrical p,n,cp,cn;
+
+	parameter real gain    = 2 from [0:inf);
+	parameter real offset  = 0;
+
+	real i (*ask="yes"*);
+	analog begin	
+// 		i = I(cp,cn);
+// 		I(p,n) <+ gain * i + offset;
+
+ 		//I(p,n) <+ I(cp,cn) * .888;
+   end
+endmodule
