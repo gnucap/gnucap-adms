@@ -1,7 +1,7 @@
 // 'aging' resistor. dataflow demonstrator
 
-`include "gnucap-adms.h"
 `include "discipline.h"
+`include "gnucap-adms.h"
 
 module ager(p,n);
    inout p,n;

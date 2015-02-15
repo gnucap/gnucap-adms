@@ -1060,6 +1060,10 @@ class $(COMMON_NAME) : public COMMON_ADMS
   <admst:variable name="ddts" select="%(expression/function[name='ddt' and class='operator'])"/>
   <admst:variable name="idts" select="%(expression/function[name='idt' and class='operator'])"/>
 
+  <admst:variable name="_has_states" select="false"/>
+  <admst:variable name="_has_states" select="true" test="$ddts"/>
+  <admst:variable name="_has_states" select="true" test="$idts"/>
+
   <admst:value-of select="attribute[name='ngspicename']/value"/>
   <admst:variable name="module" select="%s"/>
   <admst:variable name="DEV_NAME" select="DEV_%(upper-case(name))"/>
@@ -1412,41 +1416,6 @@ and name!='initializeInstance')]">
 <!-- *********************************** Make d_*.cc *********************************** -->
 <!-- *********************************************************************************** -->
 
-<admst:template match="ddtcollect">
-  <admst:reset select="$(ddts)"/>
-  <admst:reset select="$(idts)"/>
-  <admst:for-each select="assignment">
-    <admst:apply-templates select="rhs/tree" match="_ddtcollect"/>
-  </admst:for-each>
-  <admst:for-each select="contribution">
-    <admst:apply-templates select="rhs/tree" match="_ddtcollect"/>
-  </admst:for-each>
-</admst:template>
-
-<admst:template match="_ddtcollect">
-  <admst:message test="[/dbg_xml='yes']" format="*_ddtcollect*\n"/>
-  <admst:if test="[(adms/datatypename)='function' and name='ddt']">
-    <admst:push into="$ddts" select="." onduplicate="ignore"/>
-  </admst:if>
-  <admst:if test="[(adms/datatypename)='function' and name='idt']">
-    <admst:push into="$idts" select="." onduplicate="ignore"/>
-  </admst:if>
-
-  <admst:if test="[datatypename='mapply_unary'
-    or datatypename='mapply_binary' or datatypename='mapply_ternary']">
-    <admst:apply-templates select="arg1" match="_ddtcollect"/>
-  </admst:if>
-  <admst:if test="[datatypename='mapply_binary' or datatypename='mapply_ternary']">
-    <admst:apply-templates select="arg2" match="_ddtcollect"/>
-  </admst:if>
-  <admst:if test="[datatypename='mapply_ternary']">
-    <admst:apply-templates select="arg3" match="_ddtcollect"/>
-  </admst:if>
-  <!-- <admst:if test="[datatypename='variable']">
-    <admst:message format="fo2o %(name)"/>
-    <admst:apply-templates select="module/assignment[lhs=%(.)]" match="_ddtcollect"/>
-  </admst:if> -->
-</admst:template>
 <!-- -------------------------------------------------- -->
 <admst:template match="e0">
   <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)e*\n"/>

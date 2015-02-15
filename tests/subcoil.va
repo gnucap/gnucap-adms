@@ -1,5 +1,5 @@
-`include "gnucap-adms.h"
 `include "discipline.h"
+`include "gnucap-adms.h"
 
 module subcoil(p,n);
    inout p,n;
