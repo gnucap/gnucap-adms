@@ -74,6 +74,23 @@ AC_SUBST([ADMSXML_FLAGS])
 AC_SUBST([ADMSXML_NOEXTERN])
 AM_CONDITIONAL([VERILOG_EXTERN], [test x"$ADMSXML_NOEXTERN" != x] )
 
+dnl ----------------- qucs ------------------
+AC_MSG_CHECKING([qucs])
+AC_ARG_ENABLE([qucs],
+[  --enable-qucs            try to build qucs models (experimental). [[default: disabled]]],
+[
+if test "X$enable_qucs" = "Xno" ; then
+	AC_MSG_RESULT([no])
+else
+	AC_MSG_RESULT([yes])
+	enable_qucs=yes
+fi
+],
+[
+	AC_MSG_RESULT([no])
+	enable_qucs=no
+])
+AM_CONDITIONAL([QUCS], [test x"$enable_qucs" != xno])
 dnl ----------------- plugindir ------------------
 AC_MSG_CHECKING([local])
 AC_ARG_ENABLE([local],
@@ -129,6 +146,7 @@ fi
 
 AC_CONFIG_FILES([Makefile src/Makefile])
 AC_CONFIG_FILES([tests/Makefile])
+AC_CONFIG_FILES([qucs/Makefile])
 AC_CONFIG_FILES([src/gnucap-adms], [chmod +x src/gnucap-adms])
 AC_CONFIG_FILES([gnucap-adms.mk], [chmod +x gnucap-adms.mk])
 AC_CONFIG_FILES([src/gnucap.xml])
@@ -141,4 +159,5 @@ AC_MSG_RESULT([
    CPPFLAGS:   $CPPFLAGS
    plugindir:  $gnucap_libdir
    pkglibdir:  $pkglibdir
+   qucs:       $enable_qucs
 ])

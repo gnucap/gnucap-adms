@@ -3,7 +3,10 @@
 # license: GPLv3+
 
 ACLOCAL_AMFLAGS = -Im4
-SUBDIRS = src tests
+if QUCS
+QUCS=qucs
+endif
+SUBDIRS = src tests $(QUCS)
 EXTRA_DIST = \
     bootstrap \
     gnuplot.mk \
