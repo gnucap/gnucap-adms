@@ -6202,7 +6202,8 @@ return
 <!-- ----------------------------------------------------------------- -->
 <!-- -------------------- analog//contribution ------------------------ -->
 <admst:template match="contribution">
-// MODULE contribution %(.) static:%(static) dynamic:%(dynamic)
+  <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)contribution*\n"/>
+  <admst:apply-templates select="rhs[not(nilled(function))]" match="function:derivate:precomputation"/>
 <!-- MOVE TO IMPLICIT PREPROCESSOR -->
 <admst:value-to test="[lhs/discipline/potential=lhs/nature]" select="lhs/type" string="ps"/>
 <!-- UNTIL HERE -->
@@ -8510,6 +8511,8 @@ return
 <!-- ------------ -->
 <admst:template match="function:derivate:precomputation">
   <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)function:derivate:precomputation*\n"/>
+  <admst:apply-templates select="function[class='builtin']" match="function:precomputation"/>
+
   <admst:if test="[hasVoltageDependentFunction='yes']">
     <!--  <admst:choose>
       <admst:when test="[$ddxinsidederivate='yes']">
@@ -8584,8 +8587,9 @@ return
         <admst:variable name="ddxinsidederivate" select="yes"/>
       </admst:if>
     </admst:for-each>
-    <admst:text format="// rhsf %(rhs/function) \n"/>
-    <admst:apply-templates select="rhs/function[class='builtin']" match="function:precomputation"/>
+    <admst:if test="[0=count(lhs[insource='yes'])]">
+      <admst:apply-templates select="rhs/function[class='builtin']" match="function:precomputation"/>
+    </admst:if>
     <admst:text format="/// rhsf %(rhs/function)\n"/>
     <admst:if test="lhs[insource='yes']">
       <admst:text format="// fixme: 7581 dprec %(rhs[not(nilled(function))])\n"/>
@@ -8803,10 +8807,6 @@ return
 		<admst:apply-templates select="." match="function:getname_push"/>
 		<admst:text format="double __%s_%s = 0.0; // forward declaration...?\n"/>
     </admst:for-each>
-// calling ddx:function:computation %(.)
-
-    <admst:apply-templates select="." match="ddx:function:computation"/>
-// done ddxfunctioncomp
   </admst:if>
 
 // done res %(dynamic)
