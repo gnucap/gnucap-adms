@@ -16,3 +16,15 @@ module square(p,n,cp,cn);
       // V(p,n) <+ gain*pow(V(cp,cn),ex);
    end
 endmodule
+
+module square2(p,n,cp,cn);
+	inout p,n,cp,cn;
+	electrical p,n,cp,cn;
+
+   parameter real gain    = 1 from [0:inf);
+   parameter real ex      = 2 from [0:inf);
+
+   analog begin
+      V(p,n) <+ gain*pow(V(cp,cn),ex);
+   end
+endmodule

@@ -1,18 +1,17 @@
-name   ...
-have 2 nodes. model: 0 sckt: 0 adp 0
-
-nin      nin matrix_number 1, user_number 2 nm[t]  vdc  0.
-nout     nout matrix_number 2, user_number 1 nm[t]  vdc  0.
--c1
-#Time       v(nin)     v(nout)   
- 0.         0.         0.        
- 0.1        0.58779    0.34546   
- 0.2        0.95106    0.90442   
- 0.3        0.95106    0.90442   
- 0.4        0.58779    0.34546   
- 0.5        0.         0.        
- 0.6       -0.58779    0.34546   
- 0.7       -0.95106    0.90442   
- 0.8       -0.95106    0.90442   
- 0.9       -0.58779    0.34546   
- 1.         0.         0.        
+#Time       v(nin)     v(nout)    v(nout2)  
+ 0.         0.         0.         0.        
+ 0.1        0.58779    0.34546    0.34549   
+ 0.2        0.95106    0.90442    0.90451   
+ 0.3        0.95106    0.90442    0.90451   
+ 0.4        0.58779    0.34546    0.34549   
+ 0.5        0.         0.         0.        
+ 0.6       -0.58779    0.34546    0.34549   
+ 0.7       -0.95106    0.90442    0.90451   
+ 0.8       -0.95106    0.90442    0.90451   
+ 0.9       -0.58779    0.34546    0.34549   
+ 1.         0.         0.         0.        
+Gnucap   System status
+iterations: op=0, dc=0, tran=54, fourier=0, total=68
+transient timesteps: accepted=14, rejected=0, total=14
+nodes: user=3, subckt=0, model=0, total=3
+dctran density=77.8%, ac density=77.8%
