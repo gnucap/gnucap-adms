@@ -31,6 +31,7 @@ check_LTLIBRARIES = \
 
 
 AM_CPPFLAGS = @GC_CPPFLAGS@ -I$(top_srcdir)/src
+
 LIBS = ../src/libgnucap_adms.la
 AM_LDFLAGS = -module -avoid-version -rpath /dev/null
 
@@ -174,6 +175,7 @@ callfunctions.out: callfunctions.so
 SENSOR_SO = op.so ldo.so vbg.so sensor.so
 
 check_LTLIBRARIES += \
+    aging_mos.la \
     op.la vbg.la ldo.la sensor.la callfunctions.la \
     lamp.la $(EXT_LA)
 
@@ -282,5 +284,7 @@ $(TESTS:%.sh=%.out): .P
 	@:
 
 .PHONY: %.reg clean-examples .P
+
+include ../adms.mk
 
 @am__include@ @top_srcdir@/gnuplot.mk
