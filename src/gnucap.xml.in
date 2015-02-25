@@ -341,6 +341,7 @@ class $(MODEL_NAME) : public MODEL_CARD {
 		MODEL_CARD* clone()const {return new $(MODEL_NAME)(*this);}
 	public:
 		void precalc_first();
+		void precalc_last();
 
 	public: // type
 		void set_dev_type(const std::string&amp; nt);
@@ -1625,6 +1626,31 @@ void $(MODEL_NAME)::precalc_first()
 	// @(initial_model) block
 	$(MODEL_NAME) *m = this; USE(m);
    <admst:apply-templates select="analog" match="analog:initial_model" required="yes"/>
+}
+// -------------------------------------------------------------------------- //
+void $(MODEL_NAME)::precalc_last()
+{
+	MODEL_CARD::precalc_last();
+	const CARD_LIST* par_scope = scope(); USE(par_scope);
+	assert(par_scope);
+	MODEL_CARD::precalc_last();
+  <admst:for-each select="variable[input='yes' and scope!='global_instance']">
+    <admst:apply-templates select="default/tree" match="subexpression:stringify:noprobe"/>
+    <admst:choose>
+      <admst:when test="[type='real']">
+        <admst:text format="\te_val(&amp;(this->$(var_prefix)%(name)), (double)%s, par_scope);\n"/>
+      </admst:when>
+      <admst:when test="[type='integer']">
+        <admst:text format="\te_val(&amp;(this-&gt;$(var_prefix)%(name)), (int)%s, par_scope);\n"/>
+      </admst:when>
+    </admst:choose>
+  </admst:for-each>
+
+	// @(initial_model) block
+	$(MODEL_NAME) *m = this; USE(m);
+   <admst:apply-templates select="analog" match="analog:initial_model" required="yes"/>
+	// analog block global_model assignments
+   <admst:apply-templates select="analog" match="model:precalc_last" required="yes"/>
 }
 // -------------------------------------------------------------------------- //
 void $(MODEL_NAME)::set_dev_type(const std::string&amp; new_type)
@@ -4339,6 +4365,22 @@ inline double d_doh(double x)          {return  exp(x)/(exp(x) + 1); }
         <admst:if test="adms[datatypename='block']">
          <admst:apply-templates select="[name='initial_instance' or name='initializeInstance']"
            match="block:initial"/>
+        </admst:if>
+      </admst:for-each>
+    </admst:if>
+  </admst:if>
+</admst:template>
+
+<!-- ----------------------------------------------------------------- -->
+<!-- this is incomplete.
+     actually need to expand all global_model assignments here         -->
+<!-- maybe merge into initial_model below                              -->
+<admst:template match="model:precalc_last">
+  <admst:if test="code">
+    <admst:if test="code/adms[datatypename='block']">
+      <admst:for-each select="code/item">
+        <admst:if test="adms[datatypename='assignment']">
+          <admst:apply-templates select="[lhs/scope='global_model']" match="assignment"/>
         </admst:if>
       </admst:for-each>
     </admst:if>
