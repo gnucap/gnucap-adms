@@ -477,6 +477,8 @@ inline double ADMS_BASE::tr_c_to_g(double c, double g)const
 #define m10_asin(v10,v00,x)     v10 = (+1.0/sqrt(1-x*x));
 #define m00_atan(v00,x)         v00 = atan(x);
 #define m10_atan(v10,v00,x)     v10 = (+1.0/(1+x*x));
+#define m00_atanh(v00,x)        v00 = atanh(x);
+#define m10_atanh(v10,v00,x)    v10 = (1.0/(1-x*x));
 #define m00_logE(v00,x)         v00 = log(x);
 #define m10_logE(v10,v00,x)     v10 = (1.0/x);
 #define m00_log10(v00,x)        v00 = log10(x);
