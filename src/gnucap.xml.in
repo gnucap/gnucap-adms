@@ -330,10 +330,8 @@
 class $(DEV_NAME);
 class $(MODEL_NAME) : public MODEL_CARD {
 	private:
-#ifdef HAVE_PARA_BASE
 		static std::map&lt;string, PARA_BASE $(MODEL_NAME)::*&gt; _param_dict;
 		static std::map&lt;string, PARA_BASE $(MODEL_NAME)::*&gt; _param_dict_low;
-#endif
 	protected:
 		explicit $(MODEL_NAME)(const $(MODEL_NAME)&amp; p);	// for clone
 	public:
@@ -472,10 +470,8 @@ class $(DEV_NAME) : public ADMS_BASE
 	private:
 		std::string _modelname;
 		node_t _nodes[ %(count(node[grounded='no'])) ];
-#ifdef HAVE_PARA_BASE
 		static std::map&lt;string, PARA_BASE $(DEV_NAME)::*&gt; _param_dict;
 		static std::map&lt;string, PARA_BASE $(DEV_NAME)::*&gt; _param_dict_low;
-#endif
 	private:
 		explicit $(DEV_NAME)(const $(DEV_NAME)&amp; p);
 	public:
@@ -1557,7 +1553,6 @@ void $(MODEL_NAME)::set_param_by_index(int i, std::string&amp; value, int offset
 	}
 }
 // -------------------------------------------------------------------------- //
-#ifdef HAVE_PARA_BASE
 std::map&lt;string, PARA_BASE $(MODEL_NAME)::*&gt; $(MODEL_NAME)::_param_dict
 <admst:if test="[count(variable[input='yes' and scope!='global_instance'])!=0]">
   = boost::assign::map_list_of
@@ -1574,11 +1569,9 @@ std::map&lt;string, PARA_BASE $(MODEL_NAME)::*&gt; $(MODEL_NAME)::_param_dict_lo
         (&amp;$(MODEL_NAME)::$(var_prefix)%(name)))
 </admst:join>
 </admst:if>;
-#endif
 // -------------------------------------------------------------------------- //
 void $(MODEL_NAME)::set_param_by_name(string Name, string Value)
 {
-#ifdef HAVE_PARA_BASE
 	PARA_BASE $(MODEL_NAME)::* x = (OPT::case_insensitive)?
 		(_param_dict_low[toLower(Name)]) : (_param_dict[Name]);
 	trace3("$(MODEL_NAME)::set_param_by_name", Name, OPT::case_insensitive, x);
@@ -1588,10 +1581,6 @@ void $(MODEL_NAME)::set_param_by_name(string Name, string Value)
 		return;
 	}
 	throw Exception_No_Match(Name);
-#else
-	// fall back to linear search
-	MODEL_CARD::set_param_by_name(Name,Value);
-#endif
 }
 // -------------------------------------------------------------------------- //
 void $(COMMON_NAME)::precalc_first(const CARD_LIST* scope)
@@ -1765,7 +1754,6 @@ $(DEV_NAME)::~$(DEV_NAME)()
 
 <admst:apply-templates select="." match="analogfunctionC"/>
 // -------------------------------------------------------------------------- //
-#ifdef HAVE_PARA_BASE
 std::map&lt;string, PARA_BASE $(DEV_NAME)::*&gt; $(DEV_NAME)::_param_dict
 <admst:if test="[count(variable[input='yes' and scope='global_instance'])!=0]">
   = boost::assign::map_list_of
@@ -1782,11 +1770,9 @@ std::map&lt;string, PARA_BASE $(DEV_NAME)::*&gt; $(DEV_NAME)::_param_dict_low
         (&amp;$(DEV_NAME)::$(var_prefix)%(name)))
 </admst:join>
 </admst:if>;
-#endif
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::set_param_by_name(std::string Name, std::string value)
 {
-#ifdef HAVE_PARA_BASE
 	PARA_BASE $(DEV_NAME)::* x = (OPT::case_insensitive)?
 		(_param_dict_low[toLower(Name)]) : (_param_dict[Name]);
 	trace3("$(DEV_NAME)::set_param_by_name", Name, OPT::case_insensitive, x);
@@ -1795,9 +1781,6 @@ void $(DEV_NAME)::set_param_by_name(std::string Name, std::string value)
 		*p = value;
 		return;
 	}
-#else
-	incomplete();
-#endif
 	ADMS_BASE::set_param_by_name(Name,value);
 }
 // -------------------------------------------------------------------------- //
