@@ -9200,6 +9200,12 @@ Q_CALLF_%(adms/id(.))_%(print_with_dollar_stripped(function/name))(
   <admst:reset select="module/evaluation/variable"/>
   <admst:for-each select="item">
     <admst:choose>
+      <admst:when test="adms[datatypename='assignment']">
+        <!-- cannot assign global_model here -->
+        <admst:if test="[lhs/scope!='global_model']">
+          <admst:apply-templates select="." match="%(adms/datatypename)"/>
+        </admst:if>
+      </admst:when>
       <admst:when test="adms[datatypename!='block']">
         <admst:apply-templates select="." match="%(adms/datatypename)"/>
       </admst:when>
