@@ -6204,6 +6204,8 @@ return
 <!-- ----------------------------------------------------------------- -->
 <!-- -------------------- analog//contribution ------------------------ -->
 <admst:template match="contribution">
+	{ // contribution
+
   <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)contribution*\n"/>
   <admst:apply-templates select="rhs[not(nilled(function))]" match="function:derivate:precomputation"/>
 <!-- MOVE TO IMPLICIT PREPROCESSOR -->
@@ -6255,6 +6257,8 @@ return
       <admst:apply-templates select="." match="contribution:nonoise"/>
     </admst:otherwise>
   </admst:choose>
+	} // contribution
+
 </admst:template>
 <!-- compute node arguments of noise routines -->
 <admst:template match="noisebranch">
