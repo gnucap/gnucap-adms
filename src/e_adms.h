@@ -174,6 +174,11 @@ class ADMS_BASE : public COMPONENT {
 		{
 			throw(Exception("va stop"));
 		}
+		void do_finish(int)
+		{
+			incomplete(); // what does the standard say?
+			throw(Exception("va finish"));
+		}
 };
 /*--------------------------------------------------------------------------*/
 void COMPONENT::set_port_by_index(uint_t num, std::string& ext_name)
@@ -464,8 +469,8 @@ inline double ADMS_BASE::tr_c_to_g(double c, double g)const
 #define m10_cosh(v10,v00,x)     v10 = (sinh(x));
 #define m00_sinh(v00,x)         v00 = sinh(x);
 #define m10_sinh(v10,v00,x)     v10 = (cosh(x));
-#define m00_tanh(v00,x)         v00 = tanh(x);
-#define m10_tanh(v10,v00,x)     v10 = (1.0/cosh(x)/cosh(x));
+#define m00_tanh(v00,x)         v00 = tanh(x)
+#define m10_tanh(v10,v00,x)     v10 = (1.0/cosh(x)/cosh(x))
 #define m00_acos(v00,x)         v00 = acos(x);
 #define m10_acos(v10,v00,x)     v10 = (-1.0/sqrt(1-x*x));
 #define m00_asin(v00,x)         v00 = asin(x);
