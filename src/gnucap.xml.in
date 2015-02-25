@@ -1124,6 +1124,11 @@ and name!='initializeInstance')]">
       <admst:apply-templates select="whileblock" match="ngspiseMODULEguesstopology.cevaluatetopology"/>
       <admst:apply-templates select="while" match="ngspiseMODULEguesstopology.cevaluatetopology"/>
     </admst:when>
+    <admst:when test="[datatypename='case']">
+      <admst:error format="case statement: please implement me! (local declaration)\n"/>
+		{ // conditional. incomplete?
+		}
+    </admst:when>
     <admst:when test="[datatypename='conditional']">
       <admst:if test="if[nilled(variable[OPdependent='yes'])]">
         <admst:apply-templates select="if" match="ngspiseMODULEguesstopology.cevaluatetopology"/>
@@ -9176,6 +9181,11 @@ Q_CALLF_%(adms/id(.))_%(print_with_dollar_stripped(function/name))(
     <admst:when test="adms[datatypename='callfunction']"/>
     <admst:when test="adms[datatypename='nilled']"/>
     <admst:when test="adms[datatypename='blockvariable']"/>
+    <admst:when test="adms[datatypename='case']">
+      <admst:for-each select="caseitem">
+        <admst:apply-templates select="code" match="block:local:declaration"/>
+      </admst:for-each>
+    </admst:when>
     <admst:otherwise>
       <admst:fatal format="'datatypename=%(adms/datatypename)': should not be reached %s\n"/>
     </admst:otherwise>
