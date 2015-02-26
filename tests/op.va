@@ -1,6 +1,8 @@
 `include "discipline.h"
 `include "constants.h"
 `define PI  	3.14159265358979323846264338327950288419716939937511
+`define Gmin            1.0e-12
+//`define Gmin      $simparam("gmin",1e-12) // not yet
 
 //    gain           = gain []
 //    freq_unitygain = unity gain frequency [Hz]
@@ -51,7 +53,6 @@ module someop(out, vref, inp, inn, vddp, vddn);
 	real vvout; (*ask="yes"*)
 
 	real i_unlim; (*ask="yes"*)
-   real _circuit_gmin;
 
 	electrical v1;
  	analog begin
@@ -95,7 +96,7 @@ module someop(out, vref, inp, inn, vddp, vddn);
 	vvout = V(v1, vref)+sup/2; // Asymetrisch um zw. die Vdd und vss zu kommen
 //	vvout = tanh(V(v1, vref)-sup/2)*sup/2+sup/2;
 	I(vref, out) <+ gm2 * vvout; //  * V(vddp,vddn);
-	I(vref, out) <+ V(vref, out) * gm2 + _circuit_gmin;
+	I(vref, out) <+ V(vref, out) * gm2 + `Gmin;
 
 
 	// finite output swing

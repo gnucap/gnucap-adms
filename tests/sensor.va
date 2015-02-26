@@ -1,5 +1,7 @@
 `include "discipline.h"
 `include "constants.h"
+`define Gmin            1.0e-12
+//`define Gmin      $simparam("gmin",1e-12) // not yet
 
 module drucksensor(nout, pout, p_in, ndd, ngnd);
 	inout nout, pout, p_in, ndd, ngnd ;
@@ -33,7 +35,6 @@ module drucksensor(nout, pout, p_in, ndd, ngnd);
 	real PSonst (*ask="yes"*);  // Waermeleistung
 	real lquer (*ask="yes"*); // mittlere freie Weglänge
 	real t4 (*ask="yes"*);
-   real _circuit_gmin;
 
    thermal t1;
 
@@ -83,14 +84,14 @@ module drucksensor(nout, pout, p_in, ndd, ngnd);
  		Pwr(t1) <+ up*up/(R_p);             // Heizung
  		Pwr(t1) <+ -( G_b + Gp )*deltaT;    // Waermeleitung 
  		Pwr(t1) <+ - PStr;                  // Strahlung
-                Pwr(t1) <+  _circuit_gmin*deltaT;   // zur Herbeifuehrung der Konvergenz
+                Pwr(t1) <+  `Gmin*deltaT;   // zur Herbeifuehrung der Konvergenz
 		Pwr(t1) <+ - C_waerm * ddt(deltaT); // W"armekapazit"at
 
 // die hier nur zum debuggen... 
-                PSum = up*up/(R_p) - ( G_b + Gp )*deltaT - PStr + _circuit_gmin*deltaT;;
+                PSum = up*up/(R_p) - ( G_b + Gp )*deltaT - PStr + `Gmin*deltaT;;
                 PHeiz = up*up/(R_p);
                 PLeit = ( G_b + Gp )*deltaT;
-                PSonst =_circuit_gmin*deltaT ;
+                PSonst = `Gmin*deltaT ;
 
 
 		I(ndd) <+ -1*V(ndd,nout)/Rnull - V(ndd,pout)/R_k ;

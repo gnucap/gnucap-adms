@@ -10,6 +10,7 @@ FILTER = $(plugindir)/gnucap-testfilter
 
 sensor_chip.log: $(PWD)/sensor_chip.ckt
 aging_mos.log: $(PWD)/aging_mos.va
+diff.2.log: $(PWD)/diff.va
 
 AM_DEFAULT_SOURCE_EXT = .va
 .va.cc:
@@ -31,6 +32,7 @@ check_LTLIBRARIES = \
 
 
 AM_CPPFLAGS = @GC_CPPFLAGS@ -I$(top_srcdir)/src
+AM_CXXFLAGS = -Wno-unused-variable -Wno-unused-but-set-variable
 
 LIBS = ../src/libgnucap_adms.la
 AM_LDFLAGS = -module -avoid-version -rpath /dev/null
@@ -83,6 +85,7 @@ TESTS = $(EXT_TESTS) $(GC_TESTS) $(GCUF_TESTS) $(INLINE_TESTS)
 TESTS+= $(CUSTOM_TESTS)
 INLINE_TESTS = abs.sh instanceparam.sh
 GC_TESTS = \
+    $(SO_TESTS) \
     if.sh \
     if2.sh \
     coil.sh \
@@ -100,8 +103,6 @@ GC_TESTS = \
     res.sh \
     vccs.sh \
     vcvs.sh
-# from examples
-GC_TESTS+ = $(SO_TESTS)
 
 # will only work with -uf
 GCUF_TESTS = rc_uic.sh ddc_rc.sh ddc.2.sh
@@ -184,8 +185,8 @@ LT = <
 callfunctions.sh: LT=2> >(tee /dev/fd/2 | grep negative | while read line; do echo "[ERROR] \$$line"; done ) <
 
 SHS = \
-	callfunctions.sh \
-	sensor_chip.sh inline.sh opamp.sh $(INLINE_TESTS) $(GCUF_TESTS) $(GC_TESTS) $(EXT_TESTS)
+	$(CUSTOM_TESTS) \
+   $(INLINE_TESTS) $(GCUF_TESTS) $(GC_TESTS) $(EXT_TESTS)
 
 $(SHS): %.sh: %.gc Makefile %.ref
 	@echo "#!$(SHELL)" > $@
