@@ -1053,38 +1053,6 @@ class $(COMMON_NAME) : public COMMON_ADMS
 <!-- *********************** tree traverse - guesstopology ***************************** -->
 <!-- *********************************************************************************** -->
 
-<admst:for-each select="/module@ADMSXML_NOEXTERN@">
-  <admst:variable name="ddts" select="%(expression/function[name='ddt' and class='operator'])"/>
-  <admst:variable name="idts" select="%(expression/function[name='idt' and class='operator'])"/>
-
-  <admst:variable name="_has_states" select="false"/>
-  <admst:variable name="_has_states" select="true" test="$ddts"/>
-  <admst:variable name="_has_states" select="true" test="$idts"/>
-
-  <admst:value-of select="attribute[name='ngspicename']/value"/>
-  <admst:variable name="module" select="%s"/>
-  <admst:variable name="DEV_NAME" select="DEV_%(upper-case(name))"/>
-  <admst:variable name="MODEL_NAME" select="MODEL_%(upper-case(name))"/>
-  <admst:variable name="_num_stamp_nodes" select="%(count(node[grounded='no' and discipline/name!='degradational']))"/>
-
-
-  <admst:open file="$(filename)_$(module)_top.hxx">
-// topology for $(module)
-
-    <admst:apply-templates select="analog/code[datatypename='block']/variable"
-      match="generate_c:declare_variable"/>
-
-    <admst:for-each select="analog/code[datatypename='block']/item">
-      <admst:if test="[(datatypename!='block') or (datatypename='block'
-              and name!='initial_model'
-              and name!='initializeModel'
-              and name!='initial_instance'
-              and name!='initializeInstance')]">
-        <admst:apply-templates select="." match="ngspiseMODULEguesstopology.cevaluatetopology"/>
-      </admst:if>
-    </admst:for-each>
-  </admst:open>
-</admst:for-each>
 
 
 <!--admst:for-each select="analog/code[datatypename='block']/item">
@@ -2803,13 +2771,30 @@ void $(DEV_NAME)::guesstopology ()
 	USE(c); assert(c);
 	const $(MODEL_NAME)* m = prechecked_cast&lt;const $(MODEL_NAME)*&gt;(c-&gt;model());
 	USE(m); assert(m);
+	$(DEV_NAME)* d = this; USE(d);
 
   <admst:if test="[count(jacobian)!=0]">
 	for(int i=0; i&lt;%(count(jacobian)); i++)
         	m_required[i] = false;
   </admst:if>
 
-	#include "$(filename)_$(module)_top.hxx"
+//	#include "$(filename)_$(module)_top.hxx"
+{ /* -------------------- */
+    <admst:apply-templates select="variable"
+      match="generate_c:declare_variable"/>
+    <admst:apply-templates select="analog/code[datatypename='block']/variable"
+      match="generate_c:declare_variable"/>
+
+    <admst:for-each select="analog/code[datatypename='block']/item">
+      <admst:if test="[(datatypename!='block') or (datatypename='block'
+              and name!='initial_model'
+              and name!='initializeModel'
+              and name!='initial_instance'
+              and name!='initializeInstance')]">
+        <admst:apply-templates select="." match="ngspiseMODULEguesstopology.cevaluatetopology"/>
+      </admst:if>
+    </admst:for-each>
+} /* -------------------- */
 
   <admst:if test="[count(jacobian)!=0]">
 	for(int i=0; i&lt;%(count(jacobian)); i++){
@@ -4332,6 +4317,11 @@ inline double d_doh(double x)          {return  exp(x)/(exp(x) + 1); }
     <admst:if test="[type='string']">char* $(var_prefix)%(name);\n</admst:if>
     <admst:text test="[insource='yes']" select="probe" format="double %(../name)_%(nature/access)%(branch/pnode/name)_%(branch/nnode/name);\n"/>
   </admst:for-each>
+</admst:template>
+
+<!-- ----------------------------------------------------------------- -->
+<admst:template match="callfunction">
+	/* callfunction not available yet. */
 </admst:template>
 
 <!-- ----------------------------------------------------------------- -->
