@@ -4252,7 +4252,7 @@ inline double d_doh(double x)          {return  exp(x)/(exp(x) + 1); }
 </admst:template>
 
 <!-- ----------------------------------------------------------------- -->
-<admst:template match="variable:declaration">
+<admst:template match="variable:declaration:weird">
   <admst:message test="[/dbg_xml='yes']" format="*(ngspvers)variable:declaration*\n"/>
   <admst:for-each select="module/evaluation/variable">
     <admst:assert test="adms[datatypename='variable']" format="expecting datatypename=variable\n"/>
@@ -4372,7 +4372,7 @@ inline double d_doh(double x)          {return  exp(x)/(exp(x) + 1); }
   <admst:message test="[/dbg_xml='yes']" format="*(ngspvers)block:initial*\n"/>
   <admst:assert test="adms[datatypename='block']" format="expecting datatypename=block\n"/>
   <admst:apply-templates select="." match="block:local:declaration"/>
-  <admst:apply-templates select="." match="variable:declaration"/>
+  <admst:apply-templates select="." match="variable:declaration:weird"/>
   <admst:apply-templates select="." match="block" required="yes"/>
 </admst:template>
 <admst:template match="analog:initial_instance">
