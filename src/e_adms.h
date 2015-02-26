@@ -443,6 +443,7 @@ inline double ADMS_BASE::tr_c_to_g(double c, double g)const
 #define _ambient_temp                (OPT::temp_c + CONSTCtoK)
 #define _circuit_temp                (CKT_BASE::_sim->_temp_c + CONSTCtoK)
 #define _vt_nom                      (BOLTZMANN*_ambient_temp/ELECTRON_CHARGE)
+#define _vt(t)                       (BOLTZMANN*t/ELECTRON_CHARGE)
 #define _scale                       1.0
 /*--------------------------------------------------------------------------*/
 #define EXP90 1.220403294317841e+039
