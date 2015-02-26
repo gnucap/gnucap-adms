@@ -4468,6 +4468,7 @@ inline double d_doh(double x)          {return  exp(x)/(exp(x) + 1); }
         <admst:value-of select="position(.)-1"/>
         <admst:apply-templates select="." match="function:getname_push"/>
 EXIT_IF_ISNAN(__%s_%s); // A
+
       </admst:when>
       <admst:when test="arguments[count(.)=2]">
         <admst:value-of select="position(.)-1"/>
@@ -4484,6 +4485,7 @@ EXIT_IF_ISNAN(__%s_%s); // A
         <admst:value-of select="position(.)-1"/>
         <admst:apply-templates select="." match="function:getname_push"/>
 EXIT_IF_ISNAN(__%s_%s); // B
+
       </admst:when>
       <admst:otherwise>
         <admst:value-of select="name"/>
@@ -6264,6 +6266,7 @@ return
     </admst:when>
     <admst:otherwise>
 		 // noloss
+
     </admst:otherwise>
   </admst:choose>
   <admst:choose>
