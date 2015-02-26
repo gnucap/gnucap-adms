@@ -258,6 +258,22 @@
 	</admst:for-each>
 </admst:template>
 
+<!--
+* Returns the type of a variable. The returned type
+* is either int, double, or char *. This template is
+* used to create the mint:instance and model data structures.
+-->
+<admst:template match="vtype">
+<admst:message test="[/dbg_xml='yes']" format="*(tr_eval)vtype*\n"/>
+  <admst:choose>
+    <admst:when test="[type='integer']">int</admst:when>
+    <admst:when test="[type='real']">double</admst:when>
+    <admst:when test="[type='string']">char*</admst:when>
+    <admst:otherwise>
+      <admst:fatal format="variable type unknown\n"/>
+    </admst:otherwise>
+  </admst:choose>
+</admst:template>
 
 <!-- *********************************************************************************** -->
 <!-- ************************************** Make File .h ******************************* -->
@@ -3065,6 +3081,18 @@ void $(COMMON_NAME)::set_param_by_name(std::string name, std::string value)
 <!-- *********************************************************************************** -->
 
 <!-- ----------------------------------------------------------------- -->
+<admst:template match="ddxname">
+  <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)ddxname*\n"/>
+  <admst:return name="ddxname"
+    value="%(name)_%($pprobe/nature/access)%($pprobe/branch/pnode/name)_%($pprobe/branch/nnode/name)_%($qprobe/nature/access)%($qprobe/branch/pnode/name)_%($qprobe/branch/nnode/name)"/>
+</admst:template>
+<!-- -------------------------------------------------- -->
+<admst:template match="dxname">
+  <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)dxname*\n"/>
+  <admst:return name="dxname"
+    value="%(name)_%($pprobe/nature/access)%($pprobe/branch/pnode/name)_%($pprobe/branch/nnode/name)"/>
+</admst:template>
+<!-- -------------------------------------------------- -->
 <admst:template match="c:myfunc:math_h">
 <admst:message test="[/dbg_xml='yes']" format="*c:myfunc:math_h*\n"/>
 inline double doh(double x)            {return  log(1+exp(x)); }
@@ -7148,22 +7176,6 @@ return
   </admst:choose>
 </admst:template>
 
-<!--
-* Returns the type of a variable. The returned type
-* is either int, double, or char *. This template is
-* used to create the mint:instance and model data structures.
--->
-<admst:template match="vtype">
-<admst:message test="[/dbg_xml='yes']" format="*(tr_eval)vtype*\n"/>
-  <admst:choose>
-    <admst:when test="[type='integer']">int</admst:when>
-    <admst:when test="[type='real']">double</admst:when>
-    <admst:when test="[type='string']">char*</admst:when>
-    <admst:otherwise>
-      <admst:fatal format="variable type unknown\n"/>
-    </admst:otherwise>
-  </admst:choose>
-</admst:template>
 <!-- ----------------------------------------- -->
 <admst:template match="bname">
 <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)bname*\n"/>
@@ -7262,18 +7274,6 @@ return
 <admst:template match="idx">
   <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)idx*\n"/>
   <admst:apply-templates select="." match="%(adms/datatypename)"/>
-</admst:template>
-<!-- -------------------------------------------------- -->
-<admst:template match="ddxname">
-  <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)ddxname*\n"/>
-  <admst:return name="ddxname"
-    value="%(name)_%($pprobe/nature/access)%($pprobe/branch/pnode/name)_%($pprobe/branch/nnode/name)_%($qprobe/nature/access)%($qprobe/branch/pnode/name)_%($qprobe/branch/nnode/name)"/>
-</admst:template>
-<!-- -------------------------------------------------- -->
-<admst:template match="dxname">
-  <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)dxname*\n"/>
-  <admst:return name="dxname"
-    value="%(name)_%($pprobe/nature/access)%($pprobe/branch/pnode/name)_%($pprobe/branch/nnode/name)"/>
 </admst:template>
 <!-- -------------------------------------------------- -->
 <!-- variable:rhs IMPLEMENTED TWICE (2) -->
