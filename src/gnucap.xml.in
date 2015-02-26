@@ -8676,7 +8676,7 @@ return
             </admst:when>
           </admst:choose>
         </admst:for-each>
-        <admst:text format="%(lhs/name) = $allep; //allep\n"/>
+        %(variable:lhs($lhs)) = $allep;
         <admst:text format="EXIT_IF_ISNAN(%(lhs/name)); //7622\n"/>
 		  <admst:text format="// #endif _DDX\n"/>
       </admst:when>
