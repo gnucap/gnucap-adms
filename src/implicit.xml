@@ -167,12 +167,37 @@
           <admst:push into="$globalexpression/function" select="."/>
           <admst:value-to select="class" string="operator"/>
         </admst:when>
+
+        <!-- Table 4-14 - Standard Functions -->
+        <!-- Table 4-15 - Trigonometric and Hyperbolic Functions-->
         <admst:when
           test="[name='analysis' or name='\$analysis' or name='\$simparam' or name='simparam' or
-          name='\$shrinka' or name='\$shrinkl' or name='\$limexp' or
-          name='abs' or name='acos' or name='asin' or name='atan' or name='cos' or name='cosh' or name='exp' or
-          name='hypot' or name='limexp' or name='ln' or name='log' or name='max' or name='min' or name='pow' or
-          name='sin' or name='sinh' or name='sqrt' or name='tan' or name='tanh' or name='atanh' or name='floor' or name='ceil']">
+          name='\$shrinka' or name='\$shrinkl' or name='\$limexp' or name='limexp' or name='\$limit' or
+          name='ln' or
+          name='log' or
+          name='exp' or
+          name='sqrt' or
+          name='min' or
+          name='max' or
+          name='abs' or
+          name='pow' or
+          name='floor' or
+          name='ceil' or
+          name='sin' or
+          name='cos' or
+          name='tan' or
+          name='asin' or
+          name='acos' or
+          name='atan' or
+          name='atan2' or
+          name='hypot' or
+          name='sinh' or
+          name='cosh' or
+          name='tanh' or
+          name='asinh' or
+          name='acosh' or
+          name='atanh'
+          ]">
           <admst:push into="$globalexpression/function" select="."/>
           <admst:value-to select="class" string="builtin"/>
         </admst:when>
@@ -187,9 +212,11 @@
           <admst:value-to select="math/value" path="value"/>
         </admst:when>
         <admst:when test="[scalingunit='E']">
+          <admst:warning format="%(lexval/(f|':'|l|':'|c)): non-standard scale factor: %(scalingunit)\n"/>
           <admst:value-to select="math/value" string="%(value)e+18"/>
         </admst:when>
         <admst:when test="[scalingunit='P']">
+          <admst:warning format="%(lexval/(f|':'|l|':'|c)): non-standard scale factor: %(scalingunit)\n"/>
           <admst:value-to select="math/value" string="%(value)e+15"/>
         </admst:when>
         <admst:when test="[scalingunit='T']">
@@ -201,16 +228,22 @@
         <admst:when test="[scalingunit='M']">
           <admst:value-to select="math/value" string="%(value)e+6"/>
         </admst:when>
+        <admst:when test="[scalingunit='K']">
+          <admst:value-to select="math/value" string="%(value)e+3"/>
+        </admst:when>
         <admst:when test="[scalingunit='k']">
           <admst:value-to select="math/value" string="%(value)e+3"/>
         </admst:when>
         <admst:when test="[scalingunit='h']">
           <admst:value-to select="math/value" string="%(value)e+2"/>
+          <admst:warning format="%(lexval/(f|':'|l|':'|c)): non-standard scale factor: %(scalingunit)\n"/>
         </admst:when>
         <admst:when test="[scalingunit='D']">
           <admst:value-to select="math/value" string="%(value)e+1"/>
+          <admst:warning format="%(lexval/(f|':'|l|':'|c)): non-standard scale factor: %(scalingunit)\n"/>
         </admst:when>
         <admst:when test="[scalingunit='d']">
+          <admst:warning format="%(lexval/(f|':'|l|':'|c)): non-standard scale factor: %(scalingunit)\n"/>
           <admst:value-to select="math/value" string="%(value)e-1"/>
         </admst:when>
         <admst:when test="[scalingunit='c']">
@@ -226,6 +259,7 @@
           <admst:value-to select="math/value" string="%(value)e-9"/>
         </admst:when>
         <admst:when test="[scalingunit='A']">
+          <admst:warning format="%(lexval/(f|':'|l|':'|c)): non-standard scale factor: %(scalingunit)\n"/>
           <admst:value-to select="math/value" string="%(value)e-10"/>
         </admst:when>
         <admst:when test="[scalingunit='p']">
