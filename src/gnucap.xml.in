@@ -8458,7 +8458,8 @@ return
                                      or .=$pprobe/branch/nnode]/$pprobe" onduplicate="ignore"/>
         </admst:for-each>
       </admst:new>
-      <admst:text test="$ddxprobes/item" format="#if defined(_DERIVATE) // FIXME C\n"/>
+		<admst:text test="$ddxprobes/item" format="// #if defined(_DERIVATE) // FIXME C\n"/>
+      <admst:if test="[$_DERIVATE='yes']">
       <admst:for-each select="$ddxprobes/item">
         <admst:variable name="pprobe" select="%(.)"/>
         <admst:for-each select="$myvariable/probe">
@@ -8466,7 +8467,8 @@ return
           <admst:text format="  double %(ddxname($myvariable)/[name='ddxname']/value);\n"/>
         </admst:for-each>
       </admst:for-each>
-      <admst:text test="$ddxprobes/item" format="#endif\n"/>
+      </admst:if>
+		<admst:text test="$ddxprobes/item" format="// #endif\n"/>
     </admst:for-each>
  </admst:if>
 
