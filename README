@@ -11,7 +11,7 @@ synopsis:
     containing a gnucap device
 
 installation prerequisites:
- - admsXml 2.3.2 works. 2.3.5 might not work.
+ - admsXml (>= 2.3.2) + "operator keyword" patch should work
  - gnucap-uf or gnucap. this is under construction. see mailing lists.
 
 configuration:
