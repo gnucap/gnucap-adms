@@ -225,10 +225,6 @@ $(TESTS:%.sh=%.out): %.out: %.gc
 	    sed $(subst ·, ,$(PREDIFF:%=-e %)) \
 	    $(if $(POSTDIFF),| sed) $(subst ·, ,$(POSTDIFF:%=-e %)) > $*.out
 
-i=0 1 2
-ADMS_ES=$(i:%=-e ../src/gnucap_%.xml)
-ADMS_GC_XML=../src/gnucap_0.xml
-
 # ugh, also creates some hxx files!
 %.cc %.h: %.va $(ADMS_GC_XML)
 	adms_implicit_transforms=$(top_srcdir)/src/implicit.xml admsXml @ADMSXML_FLAGS@ -I$(top_srcdir)/src $< $(ADMS_ES) -o $(notdir $*)
