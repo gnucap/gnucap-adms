@@ -20,6 +20,7 @@
 #include <m_divdiff.h>
 #include <u_xprobe.h>
 #include <e_aux.h>
+#include <e_model.h>
 #include <globals.h>
 #include "e_adms.h"
 /*--------------------------------------------------------------------------*/
