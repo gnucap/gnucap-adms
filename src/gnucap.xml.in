@@ -2636,6 +2636,9 @@ void $(DEV_NAME)::tr_accept()
 
 	// hmmm
 	if(_sim-&gt;uic_now()){
+<admst:if test="[count(callfunction)!=0]">
+		_callf_seek = 0;
+</admst:if>
 		std::fill_n(it0, (int)$_num_stamp_nodes, 0);
 #define NOJAC
 #ifdef HAVE_KEEPCOEFF
