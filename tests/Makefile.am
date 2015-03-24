@@ -213,7 +213,7 @@ $(GC_TESTS:%.sh=%.log): %.log: %.so
 $(GC_TESTS:%.sh=%.out): %.out: %.so
 
 PREDIFF= \
-    '1,/^\#·See·the·file/d' \
+    '1,/^core-lib·version/d' \
     '/^stashing·as/d' \
     '/^@/d' \
     '/:·already.installed,·replacing/d'
