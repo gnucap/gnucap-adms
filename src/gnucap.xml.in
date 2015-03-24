@@ -889,8 +889,6 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
   <admst:join select="function/arguments" separator=", ">%(printCtype(tree)) arg_%(position(.))</admst:join>
 </admst:template>
 
-%(print_with_dollar_stripped(.))
-
 //		bool _need_accept;
 <admst:if test="[count(callfunction)!=0]">
 	private: //callfunctions
