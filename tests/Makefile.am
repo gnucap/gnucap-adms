@@ -16,6 +16,7 @@ AM_DEFAULT_SOURCE_EXT = .va
 .va.cc:
 check_LTLIBRARIES = \
     subcoil.la \
+    subcoil.1.la \
     if.la if2.la \
     vs.la cs.la cap.la \
     coil.la \
@@ -94,6 +95,7 @@ SO_TESTS = \
     lamp.sh \
     vbg.sh \
     subcoil.sh \
+    subcoil.1.sh \
     rc.sh \
     rc_emb.sh \
     motor.sh
@@ -201,7 +203,7 @@ $(SHS): %.sh: %.gc Makefile %.ref
 	@echo "rm $*.out" >> $@
 	@chmod +x $@
 
-subcoil.log vccs.log ccvs.log cap.log: %.log: %.so
+subcoil.log subcoil.1.log vccs.log ccvs.log cap.log: %.log: %.so
 coil.log: coil.so
 vs.log: vs.so
 cs.log: cs.so
