@@ -15,7 +15,7 @@ diff.2.log: $(PWD)/diff.va
 AM_DEFAULT_SOURCE_EXT = .va
 .va.cc:
 check_LTLIBRARIES = \
-    $(EXT_LIBS) \
+    subcoil.la \
     if.la if2.la \
     vs.la cs.la cap.la \
     coil.la \
@@ -28,7 +28,18 @@ check_LTLIBRARIES = \
     square.la \
     int.la pid.la vcvs.la \
     diff.la \
-    mul.la
+    mul.la \
+    rc.la \
+    ager.la \
+    motor.la \
+    vbg.la ldo.la sensor.la callfunctions.la \
+    op.la \
+    lamp.la
+
+## if AGING
+check_LTLIBRARIES += \
+    aging_mos.la
+## endif
 
 
 AM_CPPFLAGS = @GC_CPPFLAGS@ -I$(top_srcdir)/src
@@ -46,19 +57,10 @@ $(PWD)/%.gc: %.gc
 $(PWD)/%.va: %.va
 	[ -f $@ ] || $(LN_S) $< .
 
-DIST_TESTS = $(SO_TESTS) $(EXT_TESTS)
+DIST_TESTS = $(SO_TESTS)
 
 if VERILOG_EXTERN
-EXT_LA = rc.la ager.la motor.la
 ager.log rc.log : %.log: %.so
-EXT_TESTS = \
-    subcoil.sh \
-    rc.sh \
-    ager.sh \
-	 aging_mos.sh \
-    ttint.sh
-EXT_LIBS = \
-    subcoil.la
 endif
 
 
@@ -81,9 +83,24 @@ AM_TESTS_ENVIRONMENT = \
 
 AM_TESTS_FD_REDIRECT = 9>&2
 TEST_EXTENSIONS = .sh
-TESTS = $(EXT_TESTS) $(GC_TESTS) $(GCUF_TESTS) $(INLINE_TESTS)
+TESTS = $(GC_TESTS) $(GCUF_TESTS) $(INLINE_TESTS)
 TESTS+= $(CUSTOM_TESTS)
 INLINE_TESTS = abs.sh instanceparam.sh
+# tests that require an .so
+SO_TESTS = \
+    op.sh \
+    sensor.sh \
+    lamp.sh \
+    vbg.sh \
+    subcoil.sh \
+    rc.sh \
+    motor.sh
+CUSTOM_TESTS = \
+    callfunctions.sh \
+    diff.2.sh \
+    sensor_chip.sh \
+    inline.sh \
+    opamp.sh
 GC_TESTS = \
     $(SO_TESTS) \
     if.sh \
@@ -103,9 +120,14 @@ GC_TESTS = \
     res.sh \
     vccs.sh \
     vcvs.sh
-
 # will only work with -uf
-GCUF_TESTS = rc_uic.sh ddc_rc.sh ddc.2.sh
+GCUF_TESTS = \
+    ager.sh \
+	 aging_mos.sh \
+    rc_uic.sh \
+    ddc_rc.sh \
+    ddc.2.sh \
+    ttint.sh
 
 XFAIL_TESTS = cccs.sh res.sh
 
@@ -132,13 +154,9 @@ EXTRA_DIST = \
     $(SENSOR_SO:%.so=%.va) \
     $(SENSOR_SO:%.so=%vm.core.gc) \
     sensor_chip.ckt \
-    sensor_chip.gc sensor_chip.ref \
-    callfunctions.va callfunctions.gc \
-    callfunctions.ref \
-    opamp.gc opamp.ref \
-    subcoil.gc subcoil.ref \
-    inline.gc inline.ref \
+    callfunctions.va \
     $(DIST_TESTS:%.sh=%.gc) $(DIST_TESTS:%.sh=%.ref) \
+    $(CUSTOM_TESTS:%.sh=%.gc) $(CUSTOM_TESTS:%.sh=%.ref) \
     opvm.core.gc \
     vbgvm.core.gc \
     ldovm.core.gc \
@@ -148,20 +166,6 @@ EXTRA_DIST = \
     motor.gc \
     motor.ref \
     net.va
-
-SO_TESTS = \
-    op.sh \
-    sensor.sh \
-    lamp.sh \
-    vbg.sh
-EXT_SO_TESTS = \
-    motor.sh
-CUSTOM_TESTS = \
-    callfunctions.sh \
-    diff.2.sh \
-    sensor_chip.sh \
-    inline.sh \
-    opamp.sh
 
 vbg.out sensor_chip.log sensor_chip.out: \
     $(SENSOR_SO) $(PWD)/sensor_chip.ckt $(PWD)/opvm.core.gc $(PWD)/vbgvm.core.gc $(PWD)/ldovm.core.gc \
@@ -175,10 +179,6 @@ callfunctions.out: callfunctions.so
 
 SENSOR_SO = op.so ldo.so vbg.so sensor.so
 
-check_LTLIBRARIES += \
-    aging_mos.la \
-    op.la vbg.la ldo.la sensor.la callfunctions.la \
-    lamp.la $(EXT_LA)
 
 LT = <
 
@@ -186,7 +186,7 @@ callfunctions.sh: LT=2> >(tee /dev/fd/2 | grep negative | while read line; do ec
 
 SHS = \
 	$(CUSTOM_TESTS) \
-   $(INLINE_TESTS) $(GCUF_TESTS) $(GC_TESTS) $(EXT_TESTS)
+   $(INLINE_TESTS) $(GCUF_TESTS) $(GC_TESTS)
 
 $(SHS): %.sh: %.gc Makefile %.ref
 	@echo "#!$(SHELL)" > $@
@@ -259,7 +259,6 @@ cleantmp:
 
 CLEANFILES = .*.adms *.out \
     $(GC_TESTS) \
-    $(EXT_TESTS) \
     $(INLINE_TESTS) \
     *.hxx .*.xml \
     core \
