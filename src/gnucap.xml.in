@@ -2384,11 +2384,6 @@ bool $(DEV_NAME)::do_tr()
 	assert(_dt == NOT_VALID || ::conchk(_dt, _time[0] - _time[1]));
 #endif
 
-  <admst:if test="[$has_sckt!=0]">
-	// if(slave_sckt) {
-	// 	set_converged( subckt()->do_tr());
-	// }
-  </admst:if>
 	// convergence check -- gnucap method
   <admst:if test="[$has_sckt=0]">
 	set_converged(true);
@@ -2399,6 +2394,13 @@ bool $(DEV_NAME)::do_tr()
 		tr_eval(); // if needed??
 	} else {
 		tr_eval(); // if needed??
+	}
+
+  <admst:if test="[$has_sckt!=0]">
+	set_converged(subckt()->do_tr());
+  </admst:if>
+	if(converged()){ untested();
+		set_converged(conv_check());
 	}
 
 
