@@ -1,0 +1,50 @@
+V1 ( nin 0 ) pulse iv= 1. pv= 0. delay=NA( 0.) rise= 200.u fall=NA( 0.) width=NA( Inf) period=NA( Inf)
+.model myrc rc ( r=200k c=3n)
+rc1 ( nin nout1 0 )  myrc 
+name   ...
+have 2 nodes. model: 0 sckt: 0 adp 0
+
+nin      nin matrix_number 2, user_number 1 nm[t]  vdc  0.
+nout1    nout1 matrix_number 1, user_number 2 nm[t]  vdc  0.
+-rc1
+-rc1.c1
+-rc1.r1
+#           v(nin)     v(nout1)  
+ 0.         0.         0.        
+-1.         1.         1.        
+-2.         1.         1.        
+-3.         1.         1.        
+ 0.         1.         1.        
+#Time       v(nin)     v(nout1)   hidden(0) 
+ 0.         1.         1.         1.        
+ 500.n      0.9975     1.         1.        
+ 1.u        0.995      0.99999    1.        
+ 1.5u       0.9925     0.99999    1.        
+ 2.u        0.99       0.99999    1.        
+ 2.5u       0.9875     0.99999    1.        
+ 50.u       0.75       0.99057    1.        
+ 100.u      0.5        0.96132    1.        
+ 150.u      0.25       0.91442    1.        
+ 200.u      42.563p    0.85126    1.        
+ 250.u      39.158p    0.78316    1.        
+ 300.u      36.025p    0.72051    1.        
+ 350.u      33.143p    0.66287    1.        
+ 400.u      30.492p    0.60984    1.        
+ 450.u      28.053p    0.56105    1.        
+ 500.u      25.808p    0.51617    1.        
+ 550.u      23.744p    0.47487    1.        
+ 600.u      21.844p    0.43688    1.        
+ 650.u      20.097p    0.40193    1.        
+ 700.u      18.489p    0.36978    1.        
+ 750.u      17.01p     0.3402     1.        
+ 800.u      15.649p    0.31298    1.        
+ 850.u      14.397p    0.28794    1.        
+ 900.u      13.245p    0.26491    1.        
+ 950.u      12.186p    0.24371    1.        
+ 0.001      11.211p    0.22422    1.        
+v1= 0.5161677
+Gnucap   System status
+iterations: op=0, dc=4, tran=99, fourier=0, total=129
+transient timesteps: accepted=26, rejected=0, total=26
+nodes: user=2, subckt=0, model=0, total=2
+dctran density=100.0%, ac density=50.0%

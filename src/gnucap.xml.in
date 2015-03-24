@@ -304,6 +304,7 @@
   <admst:variable name="_num_stamp_nodes" select="%(count(node[grounded='no' and discipline/name!='degradational']))"/>
   <admst:variable name="ddts" select="%(expression/function[name='ddt' and class='operator'])"/>
   <admst:variable name="idts" select="%(expression/function[name='idt' and class='operator'])"/>
+  <admst:variable name="has_sckt" select="%(count(instance))"/>
 
 
 // customization - gnucap specific constants
@@ -1433,6 +1434,7 @@ using namespace std;
   <admst:variable name="_num_states" select="%(count($ddts)) + %(count($idts))"/>
 
 //analog function stuff
+  <admst:variable name="has_sckt" select="%(count(instance))"/>
 
   <admst:value-of select="attribute[name='ngspicename']/value"/>
   <admst:variable name="module" select="%s"/>

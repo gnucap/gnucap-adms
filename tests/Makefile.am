@@ -30,6 +30,7 @@ check_LTLIBRARIES = \
     diff.la \
     mul.la \
     rc.la \
+    rc_emb.la \
     ager.la \
     motor.la \
     vbg.la ldo.la sensor.la callfunctions.la \
@@ -94,6 +95,7 @@ SO_TESTS = \
     vbg.sh \
     subcoil.sh \
     rc.sh \
+    rc_emb.sh \
     motor.sh
 CUSTOM_TESTS = \
     callfunctions.sh \
