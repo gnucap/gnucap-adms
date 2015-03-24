@@ -2625,6 +2625,9 @@ void $(DEV_NAME)::tr_accept()
   trace0(&quot;$(DEV_NAME)::tr_accept&quot;);
 
   <admst:if test="[count($ddts)!=0]">
+	double CKTag0 = 0; // incomplete?
+  </admst:if>
+  <admst:if test="[count($idts)!=0]">
 	double CKTga0 = 0; // incomplete?
   </admst:if>
 
