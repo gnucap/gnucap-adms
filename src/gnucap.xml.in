@@ -148,7 +148,7 @@
   </admst:choose>
 </admst:template>
 
-<admst:for-each select="/module@ADMSXML_NOEXTERN@">
+<admst:for-each select="/module[not (nilled(analog) and nilled(instance))]">
   <admst:apply-templates select="." match="ddticcollect"/>
   <admst:variable name="ddts" select="%(expression/function[name='ddt' and class='operator'])"/>
   <admst:variable name="idts" select="%(expression/function[name='idt' and class='operator'])"/>
@@ -179,7 +179,7 @@
 </admst:for-each>
 
 <!-- create attribute with module name -->
-<admst:for-each select="/module@ADMSXML_NOEXTERN@">
+<admst:for-each select="/module[not (nilled(analog) and nilled(instance))]">
   <admst:new datatype="attribute" arguments="ngspicename">
   <admst:push into="../attribute" select="." onduplicate="abort"/>
   <admst:value-of select="../name"/>
@@ -293,7 +293,7 @@
 
 #ifndef _$(filename)_header__
 #define _$(filename)_header__
-<admst:for-each select="/module@ADMSXML_NOEXTERN@">
+<admst:for-each select="/module[not (nilled(analog) and nilled(instance))]">
   <admst:apply-templates select="." match="ddticcollect"/>
 
   <admst:value-of select="attribute[name='ngspicename']/value"/>
@@ -1425,7 +1425,7 @@ namespace {
 #include &quot;$(filename).h&quot;
 
 using namespace std;
-<admst:for-each select="/module@ADMSXML_NOEXTERN@">
+<admst:for-each select="/module[not (nilled(analog) and nilled(instance))]">
   <admst:apply-templates select="." match="ddticcollect"/>
   <admst:variable name="ddts" select="%(expression/function[name='ddt' and class='operator'])"/>
   <admst:variable name="idts" select="%(expression/function[name='idt' and class='operator'])"/>
@@ -6156,7 +6156,7 @@ return
 <!-- ----------------------------------------------------------------- -->
 <!-- ------------------ create hxx for tr ---------------------------- -->
 <admst:variable name="eval_mode" select="tr"/>
-<admst:for-each select="/module@ADMSXML_NOEXTERN@">
+<admst:for-each select="/module[not (nilled(analog) and nilled(instance))]">
   <admst:variable name="ddts" select="%(expression/function[name='ddt' and class='operator'])"/>
   <admst:variable name="idts" select="%(expression/function[name='idt' and class='operator'])"/>
 
@@ -6191,7 +6191,7 @@ return
 <!-- ----------------------------------------------------------------- -->
 <!-- ------------------ create hxx for ac ---------------------------- -->
 <admst:variable name="eval_mode" select="ac"/>
-<admst:for-each select="/module@ADMSXML_NOEXTERN@">
+<admst:for-each select="/module[not (nilled(analog) and nilled(instance))]">
   <admst:value-of select="attribute[name='ngspicename']/value"/>
   <admst:variable name="module" select="%s"/>
   <admst:variable name="DEV_NAME" select="DEV_%(upper-case(name))"/>
