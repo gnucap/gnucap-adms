@@ -61,10 +61,7 @@ $(PWD)/%.va: %.va
 
 DIST_TESTS = $(SO_TESTS)
 
-if VERILOG_EXTERN
 ager.log rc.log : %.log: %.so
-endif
-
 
 AM_TESTS_ENVIRONMENT = \
     export PATH='../src:$(PATH)'\
