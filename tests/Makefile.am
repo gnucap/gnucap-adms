@@ -132,6 +132,9 @@ GCUF_TESTS = \
 
 XFAIL_TESTS = cccs.sh res.sh
 
+# not implemented yet
+XFAIL_TESTS += diff.2.sh
+
 POSTDIFF=
 # remove cruft from model compiler
 $(empty)abs.sh: POSTDIFF='1,/^testdata/d'
