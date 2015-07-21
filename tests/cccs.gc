@@ -1,22 +1,44 @@
 load ./cccs.so
+options nopicky
 
 verilog
+paramset myf cccsva;
+	.gain = {3/1m};
+	.offset = 10;
+endparamset
 
-cccsva  h1  (noutp,noutn,ninp,ninn);
+myf f1 (noutn1,noutp1,ninp1,ninn1);
 spice
 
 *.nodelist
 
-i1 ninp ninn pulse iv=-1m pv=1m rise=1
-rp ninp ninn 1
+*    ninn    ->        ninp
+*     o-----------------o          o-----------------o
+*     |    current I    |          |                 |
+* i1 [ ]               [ ] r3     [ ] 5k*I          [ ] rload
+*     |                 |          |                 |
+*     V                 V          o-----------------o
+*                                  |
+*                                  V
 
-* h1 noutp noutn i1 5k
-rload noutp noutn 1
-r2 noutn 0 1
-r3 ninn 0 1
+.dc dm
+i1 ninn1 0 pulse iv=-1m pv=1m rise=1
+rin1 ninp1 0 1
+rout11 noutn1 0 1
 
-.print dc v(noutp) i(i1)
-.print tran v(nodes) v(r1) i(h1) i(rp)
+rload1 noutp1 noutn1 1
+
+**  spice style ccvs  **
+
+rgnd2 noutn2 0 1
+rin2 ninp2 0 1m
+i2 ninn2 0 pulse iv=-1m pv=1m rise=1
+rb1 ninp1 ninn1 0
+f2 noutn2 noutp2 rb1 {3/1m}
+rload2 noutp2 noutn2 1
+
+.print dc v(nodes)
+.print tran v(nodes)
 
 .dc trace=i
 .tran 0 1 .1 trace=n

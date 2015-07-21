@@ -1,22 +1,41 @@
-.print dc v(nodes) v(r1) i(h1) i(rp) i(i1) 
-                     ^ ? no match
-.print tran v(nodes) v(r1) i(h1) i(rp) 
-                       ^ ? no match
-#           v(ninn)    v(ninp)    v(noutn)   v(noutp)   i(h1)      i(rp)      i(i1)     
- 0.         0.         0.         0.         0.         0.         0.         0.        
--1.         0.         9.9999n   -1.521p     0.99999    0.         9.9999n   -0.001     
--2.         0.         9.9999n    2.903p     2.         999.99u    9.9999n   -0.001     
--3.         0.         9.9999n    2.903p     2.         999.99u    9.9999n   -0.001     
- 0.         0.         9.9999n    2.903p     2.         999.99u    9.9999n   -0.001     
-#Time       v(ninn)    v(ninp)    v(noutn)   v(noutp)   i(h1)      i(rp)     
- 0.         0.         9.9999n    2.903p     2.         999.99u    9.9999n   
- 0.1        0.         7.9999n    2.391p     1.8        799.99u    7.9999n   
- 0.2        0.         5.9999n    1.88p      1.6        599.99u    5.9999n   
- 0.3        0.         4.n        1.368p     1.4        400.u      4.n       
- 0.4        0.         2.n        857.f      1.2        200.u      2.n       
- 0.5        0.         0.         345.f      0.99999    0.         0.        
- 0.6        0.        -2.n       -166.f      0.79999   -200.u     -2.n       
- 0.7        0.        -4.n       -678.f      0.6       -400.u     -4.n       
- 0.8        0.        -5.9999n   -1.189p     0.4       -599.99u   -5.9999n   
- 0.9        0.        -7.9999n    1.938p     0.20001   -799.99u   -7.9999n   
- 1.         0.        -9.9999n    0.         9.9998u   -999.99u   -9.9999n   
+.print dc v(noutp*) i(h1) i(rp) i(i1) v(h1.v_p_n) i(h1.v_p_n) 
+                            ^ ? no match
+.print tran v(noutn*) v(noutp*) v(r1) i(h1) i(rp) 
+                                  ^ ? no match
+.print tran v(n ... utp*) v(r1) i(h1) i(rp) 
+                                        ^ ? no match
+name   ...
+have 9 nodes. model: 1 sckt: 0 adp 0
+
+ninn1    ninn1 matrix_number 6, user_number 4 nm[t]  vdc  0.
+ninn2    ninn2 matrix_number 4, user_number 6 nm[t]  vdc  0.
+ninp1    ninp1 matrix_number 7, user_number 3 nm[t]  vdc  0.
+ninp2    ninp2 matrix_number 5, user_number 5 nm[t]  vdc  0.
+noutn1   noutn1 matrix_number 8, user_number 2 nm[t]  vdc  0.
+noutn2   noutn2 matrix_number 2, user_number 8 nm[t]  vdc  0.
+noutp1   noutp1 matrix_number 9, user_number 1 nm[t]  vdc  0.
+noutp2   noutp2 matrix_number 3, user_number 7 nm[t]  vdc  0.
+-h1
+-h1.v_p_n
+br h1.v_p_n.br matrix_number 1, user_number 9 nm[t]  vdc  0.
+#           v(noutp1)  v(noutp2)  i(h1)      i(i1)      v(h1.v_p_n) i(h1.v_p_n) i(r2)      i(h1.i_cp_cn)
+h1.i_cp_cn: short circuit
+ 0.         0.         0.         0.         0.         0.         0.         0.         0.        
+open circuit: internal node 7
+-1.         9.6668     0.33333    0.        -0.001      9.6667    -0.031738   0.001      0.001     
+-2.         9.6668     0.33333    0.001     -0.001      9.6667    -0.031738   0.001      0.001     
+ 0.         9.6668     0.33333    0.001     -0.001      9.6667    -0.031738   0.001      0.001     
+#Time       v(noutn1)  v(noutn2)  v(noutp1)  v(noutp2)  i(h1)     
+h1.i_cp_cn: short circuit
+open circuit: internal node 7
+ 0.         122.06u    1.097p     9.6668     0.33333    0.001     
+ 0.1       -0.0020~    878.f      9.73~      0.26667    800.u     
+ 0.2       -414.9~u    658.f      9.79~      0.2        600.u     
+ 0.3       -683.5~u    439.f      9.86~      0.13333    400.u     
+ 0.4       -95~.~u     219.f      9.93~      0.066667   200.u     
+ 0.5       -0.001~u    0.         9.99~      0.         0.        
+ 0.6       -0.0014~   -219.f      10.0~     -0.066667  -200.u     
+ 0.7       -0.~017u   -439.f      10.1~     -0.13333   -400.u     
+ 0.8       -0.0020~   -658.f      10.1~     -0.2       -600.u     
+ 0.9       -341.7~u   -878.f      10.2~     -0.26667   -800.u     
+ 1.        -0.002~u   -1.097p     10.331    -0.33333   -0.001     

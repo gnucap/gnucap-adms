@@ -5,7 +5,7 @@ endparmset
 mymos #() m (.drain(nd),.gate(ng),.source(0),.bulk(0));
 vsource #(.dc(2)) v1 (.p(ndd),.n(0));
 #TTime      dummy(0)   dvth_eff(m) dvth_avg(m) hidden(0) 
- 0.         ??         0.         0.         0.        
+ 0.         ??         0.         5.567E228  0.        
 #TTime      time       v(nin)     v(nd)      dvth_avg(m) dvth_area(m) dvth_eff(m) hidden(0)  control(0) method(m) 
  0.         0.         1.01       1.9886     0.         0.         0.         1.         1.         2.        
  0.         50.E-6     1.0409     1.9841     313.E-12   5.965E-12  309.3E-12  16.        1.         2.        

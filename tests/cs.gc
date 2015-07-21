@@ -2,7 +2,7 @@ spice
 
 .load ./cs.so
 
-.options nobypass
+.options nopicky
 
 .parameter current=2
 .verilog
@@ -17,6 +17,14 @@ R1 n1 0 1
 .print dc v(nodes)
 .print tran v(nodes)
 
+
+.dc
+.parameter current=3
+.tran 0 1 1
+
+.options nobypass
+
+.parameter current=1
 .dc
 .parameter current=3
 .tran 0 1 1

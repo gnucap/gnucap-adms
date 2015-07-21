@@ -1,8 +1,7 @@
-spice
+load ./cap.so
+options nopicky
 
-.load ./cap.so
-
-.verilog
+verilog
 paramset mycap va_cap;
 	.capacitance = 4;
 endparamset

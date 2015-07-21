@@ -39,11 +39,12 @@ R1 ndd np 10
 .tr 2 trace=n
 .measure t2 at(probe="omega(M1)" x=1.5)
 .measure s2 at(probe="v(nsens)" x=1.5)
-.end
 
 .param iv=-1
 .param pv=0
 .param delay=2
 .tr 5 trace=n
 .measure t3 at(probe="omega(M1)" x=3.5)
+
+.status notime
 .end

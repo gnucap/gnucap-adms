@@ -17,6 +17,6 @@ module integrator(p,n,cp,cn);
 
 	analog begin
 		V(p,n) <+ idt(V(cp,cn)) * gain;
-		I(p,n) <+ V(cp,cn) * 0; // guesstop BUG
+//		I(p,n) <+ V(cp,cn) * 0; // guesstop BUG
    end
 endmodule

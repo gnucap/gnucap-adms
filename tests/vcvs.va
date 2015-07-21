@@ -4,15 +4,31 @@
 `include "discipline.h"
 `include "constants.h"
 
-module vavcvs(p,n,cp,cn);
+// BUG: "vcvs" doesnt work?
+module va_vcvs(p,n,cp,cn);
 	inout p,n,cp,cn;
 	electrical p,n,cp,cn;
+
+   parameter real gain    = 1 from [0:inf);
+   parameter real offset  = 0;
+
+   real loss;
+   analog begin
+      V(p,n) <+ gain*V(cp,cn) + offset;
+   end
+endmodule
+
+module brvavcvs(p,n,cp,cn);
+	inout p,n,cp,cn;
+	electrical p,n,cp,cn;
+
+	branch (cp, cn) bin;
+	branch (p, n) bout;
 
    parameter real gain    = 1 from [0:inf);
 
    real loss;
    analog begin
-      V(p,n) <+ gain*V(cp,cn);
-      I(p,n) <+ 0*V(cp,cn); // BUG
+      V(bout) <+ gain*V(bin);
    end
 endmodule

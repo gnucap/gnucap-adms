@@ -92,13 +92,11 @@ R1 nout 0 1
 
 .print tt v(nodes)
 + a(a1)
-+ tr(a1.nage)
-+ tt(a1.nage)
 + tr(a1.int1)
 + tt(a1.int1)
 
 .print dc v(nodes) a(a1)
-.store tw a(a1) b(a1) tr(a1.nage)
+.store tw a(a1) b(a1)
 
 .ttr 0 1000 .1 .6 * 2 new > ttint_tt.out echo tran > ttint_tr.out
 .measure a at(probe="a(a1)" x=34)

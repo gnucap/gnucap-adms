@@ -2,13 +2,18 @@ load ./res.so
 
 verilog
 
-resva  r1  (p, 0);
+resva  r1  (n, p);
 spice
+.dc dm
 
-v1 p 0 1
+rgnd n 0 1
+v1 p n 1
+r2 n p 100
 
-.print dc v(noutp) i(r1) v(r1)
-.print tran v(nodes) i(r1) v(r1)
+*.dc dm
+
+.print dc v(nodes) v(r1) v(r2) i(r*) i(r1.v_p_n)
+.print tran v(nodes) i(r1) v(r1) i(v1)
 
 .dc trace=i
 .tran 0 1 .1 trace=n

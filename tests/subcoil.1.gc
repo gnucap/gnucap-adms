@@ -1,6 +1,7 @@
 spice
 
 .load ./subcoil.1.so
+.options nopicky
 
 .verilog
 paramset mycoil subcoil;

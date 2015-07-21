@@ -40,7 +40,7 @@ n1       n1 matrix_number 1, user_number 1 nm[t]  vdc  0.
  65.536     0.0060706 -89.652    
  131.07     0.0030353 -89.826    
 Gnucap   System status
-iterations: op=2, dc=0, tran=53, fourier=0, total=87
+iterations: op=3, dc=0, tran=53, fourier=0, total=88
 transient timesteps: accepted=14, rejected=0, total=14
 nodes: user=4, subckt=0, model=0, total=4
 dctran density=62.5%, ac density=62.5%

@@ -1,0 +1,15 @@
+// Copyright 2015 Felix Salfelder
+// checking if a voltage source correctly acts as a current probe
+
+`include "discipline.h"
+`include "constants.h"
+
+module chainvs(p,n,cp,cn);
+	inout p,n,cp,cn;
+	electrical p,n,cp,cn;
+
+	analog begin	
+		V(cp,cn) <+ 5;
+		V(p,n) <+ I(cp,cn);
+	end
+endmodule

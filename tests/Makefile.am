@@ -7,6 +7,7 @@ GNUCAP_ADMS = ../src/gnucap-adms
 GNUCAP = $(shell echo gnucap | sed -e '$(transform)')
 plugindir = @gnucap_libdir@
 FILTER = $(plugindir)/gnucap-testfilter
+GNUCAP_PLUGINS = d_adms_i.so d_adms_vbr.so
 
 sensor_chip.log: $(PWD)/sensor_chip.ckt
 aging_mos.log: $(PWD)/aging_mos.va
@@ -18,11 +19,17 @@ check_LTLIBRARIES = \
     subcoil.la \
     subcoil.1.la \
     if.la if2.la \
-    vs.la cs.la cap.la \
+    chainvs.la \
+    vs.la \
+    vs1.la \
+    vs2.la \
+    cs.la cap.la \
     coil.la \
+    coil1.la \
     ccvs.la \
     cccs.la \
     res.la \
+    short.la \
     vccs.la \
     analogfunction.la \
     afsquare.la \
@@ -51,7 +58,7 @@ LIBS = ../src/libgnucap_adms.la
 AM_LDFLAGS = -module -avoid-version -rpath /dev/null
 
 %.so: %.la
-	[ -f $@ ] || $(LN_S) .libs/$@ .
+	[ -f $@ ] || [ -L $@ ] || $(LN_S) .libs/$@ .
 $(PWD)/%.ckt: %.ckt
 	[ -f $@ ] || $(LN_S) $< .
 $(PWD)/%.gc: %.gc
@@ -94,25 +101,39 @@ SO_TESTS = \
     subcoil.sh \
     subcoil.1.sh \
     rc.sh \
+    short.sh \
     rc_emb.sh \
     motor.sh
 CUSTOM_TESTS = \
     callfunctions.sh \
+    coil_auto.sh \
+    coil_br.sh \
     diff.2.sh \
     sensor_chip.sh \
+    vsstamp.sh \
+    csstamp.sh \
+    vcvsstamp.sh \
+    ccvsstamp.sh \
+    cccsstamp.sh \
     inline.sh \
+    adms_res.sh \
     opamp.sh
 GC_TESTS = \
     $(SO_TESTS) \
     if.sh \
     if2.sh \
     coil.sh \
+    coil1.sh \
+    chainvs.sh \
     vs.sh \
+    vs1.sh \
+    vs2.sh \
     cs.sh cap.sh \
     analogfunction.sh \
     afsquare.sh \
     square.sh \
     int.sh \
+    ldo.sh \
     pid.sh \
     diff.sh \
     mul.sh \
@@ -123,6 +144,7 @@ GC_TESTS = \
     vcvs.sh
 # will only work with -uf
 GCUF_TESTS = \
+    bvs.sh \
     ager.sh \
 	 aging_mos.sh \
     rc_uic.sh \
@@ -130,10 +152,13 @@ GCUF_TESTS = \
     ddc.2.sh \
     ttint.sh
 
-XFAIL_TESTS = cccs.sh res.sh
+XFAIL_TESTS =
 
 # not implemented yet
 XFAIL_TESTS += diff.2.sh
+
+# does not work.
+XFAIL_TESTS += coil_br.sh
 
 POSTDIFF=
 # remove cruft from model compiler
@@ -176,7 +201,7 @@ vbg.out sensor_chip.log sensor_chip.out: \
     vbg.so ldo.so sensor.so $(PWD)/sensorvm.core.gc
 
 %.out %.ret 2%.out: %.gc
-	$(GNUCAP) $(lastword $+) 2> 2$*.out | tee $*.out | grep too\ negative ;\
+	$(GNUCAP) < $(lastword $+) 2> 2$*.out | tee $*.out | grep too\ negative ;\
 	[ 0 -ne $$? ]
 
 callfunctions.out: callfunctions.so
@@ -197,7 +222,7 @@ $(SHS): %.sh: %.gc Makefile %.ref
 	@echo "set -e" >> $@
 	@echo "GNUCAP=\$${GNUCAP-$(GNUCAP)}" >> $@
 	@echo "eval \$$REDIRECT" >> $@
-	@echo "\$$GNUCAP \$$GNUCAP_ARGS $(LT) $< | sed $(subst ·, ,$(PREDIFF:%=-e %)) \\" >> $@
+	@echo "\$$GNUCAP -a ../src/.libs/d_adms_i.so -a ../src/.libs/d_adms_vbr.so \$$GNUCAP_ARGS $(LT) $< | sed $(subst ·, ,$(PREDIFF:%=-e %)) \\" >> $@
 	@echo "$(if $(POSTDIFF),| sed) $(subst ·, ,$(POSTDIFF:%=-e %)) > $*.out" >> $@
 	@echo "$(FILTER) $*.out < $(lastword $+) | diff -rup $(lastword $+) - || exit 1" >> $@
 	@echo "rm $*.out" >> $@
@@ -225,7 +250,7 @@ $(TESTS:%.sh=%.log): Makefile
 check_custom: $(CUSTOM_TESTS:%.sh=%.log)
 
 $(TESTS:%.sh=%.out): %.out: %.gc
-	$(AM_V_at)$(AM_TESTS_ENVIRONMENT)$(GNUCAP) $(GNUCAP_PLUGINS:%=-a ../plugins/.libs/%) $(GNUCAP_ARGS) $(LT) $< | \
+	$(AM_V_at)$(AM_TESTS_ENVIRONMENT)$(GNUCAP) $(GNUCAP_PLUGINS:%=-a ../src/.libs/%) $(GNUCAP_ARGS) $(LT) $< | \
 	    sed $(subst ·, ,$(PREDIFF:%=-e %)) \
 	    $(if $(POSTDIFF),| sed) $(subst ·, ,$(POSTDIFF:%=-e %)) > $*.out
 

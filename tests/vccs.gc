@@ -1,8 +1,8 @@
-spice
 
-.load ./vccs.so
+load ./vccs.so
+options nopicky
 
-.verilog
+verilog
 paramset myg vavccs;
 	.gain = 5;
 endparamset
@@ -10,13 +10,22 @@ endparamset
 myg  g1  (np,nn,nin,nd);
 spice
 
+v1 nin nd 2
+
 rd 0 nd 1
-v1 nin nd 1m
 r1 np nn 1
+rout 0 nn 10
+
+
+g2  np2 nn2 nin nd 5
+
+r2 np2 nn2 1
+rout 0 nn2 10
 
 
 .print dc v(nodes) i(r1)
+.print tran v(nodes) i(r1)
 
-.dc trace=i dm
-.end
+.dc trace=i
 .tran 0 1 1
+.end

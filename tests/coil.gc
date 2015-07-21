@@ -15,7 +15,7 @@ paramset mycoil_mag coil_mag;
 endparamset
 
 mycoil_int lint (nint,0);
-mycoil_br lbr (nbr,0);
+// mycoil_br lbr (nbr,0);
 mycoil_mag lm (nm,0);
 spice
 

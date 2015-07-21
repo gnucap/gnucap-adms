@@ -4,7 +4,7 @@
 `include "discipline.h"
 `include "constants.h"
 
-module ccvsva(p,n,cp,cn);
+module cccsva(p,n,cp,cn);
 	inout p,n,cp,cn;
 	electrical p,n,cp,cn;
 
@@ -13,9 +13,21 @@ module ccvsva(p,n,cp,cn);
 
 	real i (*ask="yes"*);
 	analog begin	
-// 		i = I(cp,cn);
-// 		I(p,n) <+ gain * i + offset;
-
- 		//I(p,n) <+ I(cp,cn) * .888;
-   end
+		I(p,n) <+ gain * I(cp,cn) + offset;
+		I(p,n) <+ 0 * V(cp,cn); // top bug
+	end
 endmodule
+
+`ifdef notyet
+module prbtest(p,n,cp,cn);
+	inout p,n,cp,cn;
+	electrical p,n,cp,cn;
+
+	electrical t1, t2;
+
+	analog begin	
+		I(p,n) <+ I(cp,cn);
+		I(t1,t2) <+ I(p,n);
+	end
+endmodule
+`endif

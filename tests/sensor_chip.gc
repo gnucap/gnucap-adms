@@ -6,12 +6,13 @@ spice
 .parameter piv=0.0001
 .parameter ppv=0.02
 
-*.options noincmode
+.options noincmode
+.options nobypass
 
 .include sensor_chip.ckt
 
 .print dc
-+ v(v_pin) v(output)
++ v(v_pin) v(nodes)
 + dxm(0) gmin(0) damp(0)
 
 .dc Vpin 1e-8 1e-8 0 trace=v > sensor_net_debug.out
