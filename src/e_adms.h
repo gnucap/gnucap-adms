@@ -26,6 +26,7 @@
 #include <l_denoise.h>
 #include <e_subckt.h>
 #include <u_status.h>
+#include <e_elemnt.h>
 #include <algorithm>
 #include "gcuf_compat.h"
 /*--------------------------------------------------------------------------*/
@@ -565,7 +566,7 @@ inline double _abs(const double& arg){return abs(arg);}
 #define _abs(val)                ((val)<(0) ? (-(val)):(val))
 */
 
-
+#define AMPS(p) (assert(p),prechecked_cast<ELEMENT const*>(p)->tr_amps())
 
 /*--------------------------------------------------------------------------*/
 #define jacobian(a,b) m_required[m_##a##_##b]=true;	
@@ -587,6 +588,7 @@ inline double _abs(const double& arg){return abs(arg);}
 #define flickernoise_jacobian1(p)
 /*--------------------------------------------------------------------------*/
 
+#define _nGND node_t(&ground_node)
 
 // temp hacks
 #define _stop() assert(false)
@@ -601,5 +603,6 @@ inline string toLower(string s){
 }
 #define EXIT_IF_ISNAN(var) assert(is_number((double)var))
 
-// -------------------------------------------------------------------------- //
 #endif
+
+// vim:ts=8:sw=2:noet
