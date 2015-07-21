@@ -153,7 +153,7 @@
   <admst:variable name="ddts" select="%(expression/function[name='ddt' and class='operator'])"/>
   <admst:variable name="idts" select="%(expression/function[name='idt' and class='operator'])"/>
 
-  <admst:variable name="has_sckt" select="%(count(instance))"/>
+  <admst:variable name="sckt_size" select="%(count(instance))"/>
 
   <admst:new datatype="list" arguments="fnoise"><admst:variable name="fnoise" select="%(.)"/></admst:new>
   <admst:new datatype="list" arguments="tnoise"><admst:variable name="tnoise" select="%(.)"/></admst:new>
@@ -304,7 +304,7 @@
   <admst:variable name="_num_stamp_nodes" select="%(count(node[grounded='no' and discipline/name!='degradational']))"/>
   <admst:variable name="ddts" select="%(expression/function[name='ddt' and class='operator'])"/>
   <admst:variable name="idts" select="%(expression/function[name='idt' and class='operator'])"/>
-  <admst:variable name="has_sckt" select="%(count(instance))"/>
+  <admst:variable name="sckt_size" select="%(count(instance))"/>
 
 
 // customization - gnucap specific constants
@@ -525,7 +525,7 @@ class $(DEV_NAME) : public ADMS_BASE
 		bool tr_needs_eval()const;
 		bool do_tr();
 		void tr_load();
-<admst:if test="[$has_sckt!=0]">
+<admst:if test="[$sckt_size!=0]">
 		void tr_queue_eval();
 </admst:if>
 		void tr_eval();
@@ -1432,7 +1432,7 @@ using namespace std;
   <admst:variable name="_num_states" select="%(count($ddts)) + %(count($idts))"/>
 
 //analog function stuff
-  <admst:variable name="has_sckt" select="%(count(instance))"/>
+  <admst:variable name="sckt_size" select="%(count(instance))"/>
 
   <admst:value-of select="attribute[name='ngspicename']/value"/>
   <admst:variable name="module" select="%s"/>
@@ -1941,7 +1941,7 @@ void $(DEV_NAME)::expand()
 </admst:for-each>
 	}else{ untested();
 	}
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	assert(subckt());
 	trace0("$(DEV_NAME)::expand: expanding netlist");
 	subckt()->expand();
@@ -1965,7 +1965,7 @@ void $(DEV_NAME)::precalc_first()
       </admst:when>
     </admst:choose>
   </admst:for-each>
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	if(subckt()) subckt()-&gt;precalc_first();
   </admst:if>
 // 	&lt;admst:for-each select=&quot;variable[input='yes']&quot;&gt;
@@ -1976,7 +1976,7 @@ void $(DEV_NAME)::precalc_first()
 void $(DEV_NAME)::precalc_last()
 {
 	ADMS_BASE::precalc_last();
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	if(subckt()) subckt()-&gt;precalc_last();
   </admst:if>
 }
@@ -2001,7 +2001,7 @@ void $(DEV_NAME)::tr_iwant_matrix()
 {
 	trace0("$(DEV_NAME)::tr_iwant_matrix()");
 	assert(is_device());
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	if (subckt()) {
       subckt()->tr_iwant_matrix();
 	}else{ // untested();
@@ -2090,7 +2090,7 @@ void $(DEV_NAME)::ac_iwant_matrix()
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::tr_begin()
 {
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	subckt()->tr_begin();
   </admst:if>
 	const $(COMMON_NAME)* c = prechecked_cast&lt;const $(COMMON_NAME)*&gt;(common());
@@ -2166,7 +2166,7 @@ void $(DEV_NAME)::tr_begin()
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::dc_advance()
 {
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	subckt()-&gt;dc_advance();
   </admst:if>
 	trace0(&quot;$(DEV_NAME)::dc_advance&quot;);
@@ -2197,7 +2197,7 @@ void $(DEV_NAME)::dc_advance()
 #ifdef HAVE_TT
 void $(DEV_NAME)::tt_accept()
 {
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	subckt()->tt_accept();
   </admst:if>
 }
@@ -2205,14 +2205,14 @@ void $(DEV_NAME)::tt_accept()
 #if HAVE_TT + 0 == 2
 void $(DEV_NAME)::do_tt()
 {
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	subckt()->do_tt();
   </admst:if>
 }
 #else
 void $(DEV_NAME)::stress_apply()
 {
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	subckt()->stress_apply();
   </admst:if>
 }
@@ -2220,7 +2220,7 @@ void $(DEV_NAME)::stress_apply()
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::tt_advance()
 {
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	subckt()->tt_advance();
   </admst:if>
 	trace3("$(DEV_NAME)::tt_advance", short_label(), _sim->_time0, _sim->_dt0);
@@ -2250,7 +2250,7 @@ void $(DEV_NAME)::tt_begin()
 {
 	trace1("$(DEV_NAME)::tt_begin", _sim->_Time0);
 	ADMS_BASE::tt_begin();
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	subckt()-&gt;tt_begin();
   </admst:if>
 }
@@ -2259,7 +2259,7 @@ void $(DEV_NAME)::tr_stress_last()
 {
 	trace1("$(DEV_NAME)::tr_stress_last", _sim->_Time0);
 	ADMS_BASE::tr_stress_last();
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	subckt()-&gt;tr_stress_last();
   </admst:if>
 }
@@ -2268,14 +2268,14 @@ void $(DEV_NAME)::tr_stress_last()
 void $(DEV_NAME)::tr_restore()
 {
 	ADMS_BASE::tr_restore(); internal_precalc();
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	subckt()-&gt;tr_restore();
   </admst:if>
 }
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::tr_advance()
 {
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	subckt()->tr_advance();
   </admst:if>
   trace3("$(DEV_NAME)::tr_advance", _sim->_time0, _time[0], _time[1]);
@@ -2310,7 +2310,7 @@ void $(DEV_NAME)::tr_advance()
 void $(DEV_NAME)::tr_regress()
 {
 	ADMS_BASE::tr_regress();
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	assert(subckt()); subckt()->tr_regress();
   </admst:if>
 }
@@ -2325,7 +2325,7 @@ bool $(DEV_NAME)::tr_needs_eval()const
 	  || _sim->is_advance_or_first_iteration() ) { untested();
 		return true;
 	}
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	if( subckt()->tr_needs_eval()){
 		// return true; no (not slave)
 	}
@@ -2385,7 +2385,7 @@ bool $(DEV_NAME)::do_tr()
 #endif
 
 	// convergence check -- gnucap method
-  <admst:if test="[$has_sckt=0]">
+  <admst:if test="[$sckt_size=0]">
 	set_converged(true);
   </admst:if>
 	if (_sim-&gt;analysis_is_tran_dynamic())
@@ -2396,7 +2396,7 @@ bool $(DEV_NAME)::do_tr()
 		tr_eval(); // if needed??
 	}
 
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	set_converged(subckt()->do_tr());
   </admst:if>
 	if(converged()){ untested();
@@ -2437,7 +2437,7 @@ bool $(DEV_NAME)::do_tr()
 void $(DEV_NAME)::keep_ic()
 {
 #ifdef HAVE_KEEPCOEFF
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	subckt()-&gt;keep_ic();
   </admst:if>
 #endif
@@ -2475,7 +2475,7 @@ void $(DEV_NAME)::store_values()
 
   // ELEMENT does y[0] -&gt; y_1
 }
-<admst:if test="[$has_sckt!=0]">
+<admst:if test="[$sckt_size!=0]">
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::tr_queue_eval()
 {
@@ -2497,7 +2497,7 @@ void $(DEV_NAME)::tr_load()
   _loaditer = _sim->iteration_tag();
 #endif
 
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	if( !OPT::traceload || !_sim->is_inc_mode()) { untested();
 		subckt()->tr_load();
 	} else {
@@ -2576,7 +2576,7 @@ TIME_PAIR $(DEV_NAME)::tr_review()
 	_time_by._event = NEVER;
 #endif
 
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	assert(subckt());
 #ifdef USE_DTIME
 	_dt_by.
@@ -2617,7 +2617,7 @@ TIME_PAIR $(DEV_NAME)::tr_review()
 void $(DEV_NAME)::tr_accept()
 {
 	$(DEV_NAME)* d = this; USE(d);
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	subckt()->tr_accept();
   </admst:if>
   <admst:apply-templates select="." match="commonmodel"/>
@@ -2766,7 +2766,7 @@ void $(DEV_NAME)::do_ac()
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::ac_load()
 {
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	subckt()-&gt;ac_load();
   </admst:if>
 	for(int i=0; i&lt;$_num_stamp_nodes; i++)
