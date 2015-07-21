@@ -84,6 +84,19 @@
 <admst:value-to select="/simulator/package_string" value="@PACKAGE_STRING@"/>
 <admst:value-to select="/simulator/package_bugreport" value="@PACKAGE_BUGREPORT@"/>
 
+<admst:template match="findshorts">
+  <admst:variable name="modulehere" path="."/>
+  <!-- these ought to be the "I" branches on rhs -->
+  <admst:for-each select="$modulehere/probe[nature=discipline/flow]/branch">
+    <admst:variable name="Pn" path="pnode"/>
+    <admst:variable name="Nn" path="nnode"/>
+    <!-- filter out those not occuring on lhs -->
+    <admst:if test="[0=count($modulehere/source/branch[pnode=$(Pn) and nnode=$(Nn)])]">
+      <admst:push into="$(short)" select="." onduplicate="ignore"/>
+    </admst:if>
+  </admst:for-each>
+</admst:template>
+
 <!-- create list for initial conditions, for now. only very specific patterns are supported -->
 <!-- maybe can be cleared with: <admst:variable select="adms_ic_list" value="" /> -->
 <!-- fixme: what is ddts_ic, what is ddts_list?
@@ -153,7 +166,12 @@
   <admst:variable name="ddts" select="%(expression/function[name='ddt' and class='operator'])"/>
   <admst:variable name="idts" select="%(expression/function[name='idt' and class='operator'])"/>
 
-  <admst:variable name="sckt_size" select="%(count(instance))"/>
+  <admst:new datatype="list" arguments="branch">
+	  <admst:variable name="short"/>
+  </admst:new>
+  <admst:apply-templates select="." match="findshorts"/>
+
+  <admst:variable name="sckt_size" select="%(count(instance) + count($(short)) + count(contribution[lhs/nature=lhs/discipline/potential]))"/>
 
   <admst:new datatype="list" arguments="fnoise"><admst:variable name="fnoise" select="%(.)"/></admst:new>
   <admst:new datatype="list" arguments="tnoise"><admst:variable name="tnoise" select="%(.)"/></admst:new>
@@ -294,6 +312,12 @@
 #ifndef _$(filename)_header__
 #define _$(filename)_header__
 <admst:for-each select="/module[not (nilled(analog) and nilled(instance))]">
+
+  <admst:new datatype="list" arguments="branch">
+	  <admst:variable name="short"/>
+  </admst:new>
+  <admst:apply-templates select="." match="findshorts"/>
+
   <admst:apply-templates select="." match="ddticcollect"/>
 
   <admst:value-of select="attribute[name='ngspicename']/value"/>
@@ -304,7 +328,7 @@
   <admst:variable name="_num_stamp_nodes" select="%(count(node[grounded='no' and discipline/name!='degradational']))"/>
   <admst:variable name="ddts" select="%(expression/function[name='ddt' and class='operator'])"/>
   <admst:variable name="idts" select="%(expression/function[name='idt' and class='operator'])"/>
-  <admst:variable name="sckt_size" select="%(count(instance))"/>
+  <admst:variable name="sckt_size" select="%(count(instance) + count($(short)) + count(contribution[lhs/nature=lhs/discipline/potential]))"/>
 
 
 // customization - gnucap specific constants
@@ -1427,12 +1451,16 @@ namespace {
 using namespace std;
 <admst:for-each select="/module[not (nilled(analog) and nilled(instance))]">
   <admst:apply-templates select="." match="ddticcollect"/>
+  <admst:new datatype="list" arguments="branch">
+	  <admst:variable name="short"/>
+  </admst:new>
+  <admst:apply-templates select="." match="findshorts"/>
   <admst:variable name="ddts" select="%(expression/function[name='ddt' and class='operator'])"/>
   <admst:variable name="idts" select="%(expression/function[name='idt' and class='operator'])"/>
   <admst:variable name="_num_states" select="%(count($ddts)) + %(count($idts))"/>
 
-//analog function stuff
-  <admst:variable name="sckt_size" select="%(count(instance))"/>
+  //analog function stuff
+  <admst:variable name="sckt_size" select="%(count(instance) + count($(short)) + count(contribution[lhs/nature=lhs/discipline/potential]))"/>
 
   <admst:value-of select="attribute[name='ngspicename']/value"/>
   <admst:variable name="module" select="%s"/>
