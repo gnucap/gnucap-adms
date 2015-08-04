@@ -2058,6 +2058,7 @@ void $(DEV_NAME)::expand()
 				%(brp(.)) = dynamic_cast&lt;COMPONENT*&gt;(p->clone());
 				assert(%(brp(.)));
 				assert(%(brp(.))->has_inode() || %(brp(.))->has_iv_probe());
+				// %(brp(.))->set_slave(); hmmm...
 				subckt()->push_front(%(brp(.)));
 			}
 			assert(p);
@@ -2083,6 +2084,7 @@ void $(DEV_NAME)::expand()
 			}else{ untested();
 				%(brp(.)) = dynamic_cast&lt;COMPONENT*&gt;(p->clone());
 				assert(%(brp(.)));
+				%(brp(.))->set_slave();
 				subckt()->push_front(%(brp(.)));
 			}
 		}else{ untested();
@@ -2097,6 +2099,7 @@ void $(DEV_NAME)::expand()
 			}else{ untested();
 				%(brp(.)) = dynamic_cast&lt;COMPONENT*&gt;(p->clone());
 				assert(%(brp(.)));
+				%(brp(.))->set_slave();
 				subckt()->push_front(%(brp(.)));
 			}
 		}else{ untested();
@@ -2169,7 +2172,7 @@ void $(DEV_NAME)::expand()
 			}
 			assert(_%(name));
 			trace0("$(DEV_NAME)::expand, pushing");
-			subckt()-&gt;push_front(_%(name));
+			subckt()->push_front(_%(name));
 		}
 		{
 			node_t nodes[] = {
@@ -9143,30 +9146,44 @@ return
     <admst:variable name="probepnodename" select="%($probepnode/name)"/>
     <admst:variable name="probennodename" select="%($probennode/name)"/>
     <admst:variable name="pprobe" select="%(.)"/>
-	 <admst:if test="[$eval_mode='ac' and ../../dynamic='yes']">
-		 <admst:variable name="contrib" select="%(brp($(S)))_xxx_old"/>
-	 </admst:if>
-
-	 <admst:apply-templates select="../tree" match="subexpression:differentiate"/>
-
-	 // e: $e
-	 // ep: $ep
-
-			{ // ?&lt;+ V in %(.) %(../dynamic)
-				double e = $ep;
-				double ceq;
-				ceq = e * BR($probepnodename, $probennodename);
-				$contrib[0] -= ceq; // offset
-				$contrib[P_%(brp($(S)))_%(brp(.))_%(nature/access)] += e; // transconductance
-				//       lhs  ^^^  rhs ^^^
-		   }
-
-	  <admst:if test="branch/pnode[grounded!='no']">
-      <admst:warning format="untested: excluding Pp == GND"/>
+    <admst:if test="[$eval_mode='ac' and ../../dynamic='yes']">
+      <admst:variable name="contrib" select="%(brp($(S)))_xxx_old"/>
     </admst:if>
-	  <admst:if test="[../../lhs/branch/pnode[grounded!='no']]">
-      <admst:warning format="untested: excluding Sp == GND"/>
-    </admst:if>
+
+    <admst:apply-templates select="../tree" match="subexpression:differentiate"/>
+
+    <admst:choose>
+      <admst:when test="..[dynamic='yes']">
+#ifndef NOJAC
+	{ // ?&lt;+ V in %(.) %(../dynamic)
+		double e = $ep;
+		double ceq;
+		ceq = e * BR($probepnodename, $probennodename);
+		$contrib[0] -= ceq; // offset
+#ifdef HAVE_KEEPCOEFF
+		if (uic_now( $keepstatename )) { // /* HACK. argh.*/
+			$keepstatevar = 1;
+			double e = $ep;
+			$contrib[P_%(brp($(S)))_%(brp(.))_%(nature/access)] += e * OPT::keepcoeff;
+		} else
+#endif
+		{
+			$contrib[P_%(brp($(S)))_%(brp(.))_%(nature/access)] += e;
+		}
+	}
+#endif
+      </admst:when>
+      <admst:when test="..[dynamic='no']">
+	{ // ?&lt;+ V in %(.) %(../dynamic)
+		double e = $ep;
+		double ceq;
+		ceq = e * BR($probepnodename, $probennodename);
+		$contrib[0] -= ceq; // offset
+		$contrib[P_%(brp($(S)))_%(brp(.))_%(nature/access)] += e;
+	}
+      </admst:when>
+    </admst:choose>
+
   </admst:for-each>
 
   // I &lt+ I and V &lt+ I is the same eventually?
@@ -9321,6 +9338,7 @@ return
   <admst:choose>
     <admst:when test="..[dynamic='yes']">
 #ifndef NOJAC
+assert(false); // obsolete code.
 	{ // jacobian4($(Sp), $(Sn), $(Pp), $(Pn)) - dynamic
 		double eac = $ep $flowcoeff;
 		double etr = eac;
