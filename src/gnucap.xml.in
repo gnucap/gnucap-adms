@@ -3284,7 +3284,7 @@ void $(DEV_NAME)::tr_eval()
 	trace2("tr_eval", long_label(), converged());
 
   <admst:for-each select="source">
-	  %(brp(.))->do_tr();
+	  // %(brp(.))->do_tr();
   </admst:for-each>
 }
 
