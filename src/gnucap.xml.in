@@ -9139,7 +9139,8 @@ return
   <admst:variable  name="S" select="%(lhs/branch)"/>
 
   // iterating rhs potential probes for %(.)
-  <admst:for-each select="rhs/probe[nature=../../lhs/discipline/potential]">
+  <!--<admst:for-each select="rhs/probe[nature=../../lhs/discipline/potential]">-->
+  <admst:for-each select="rhs/probe[nature=discipline/potential]">
     <admst:text format="\t// Rhs/probe: %(.) ../dynamic: %(../dynamic) ../../dynamic: %(../../dynamic)\n"/>
     <admst:variable name="probepnode" select="%(branch/pnode)"/>
     <admst:variable name="probennode" select="%(branch/nnode)"/>
@@ -9296,10 +9297,10 @@ return
 		assert(is_number(vx));
     <admst:choose><!-- HACK ... cleanup later -->
       <admst:when test="[lhs/branch/pnode/discipline='degradational']">
-			_n[$node_prefix$Pp]->tr() += vx;
+		_n[$node_prefix$Pp]->tr() += vx;
       </admst:when>
       <admst:otherwise>
-			it0[$node_prefix$Pp] -= vx;
+		it0[$node_prefix$Pp] -= vx;
       </admst:otherwise>
     </admst:choose>
 	}
