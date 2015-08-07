@@ -16,10 +16,11 @@ spice
 *  |                 |
 *  V                 V
 
-.print dc v(nodes)
+.print dc v(nodes) _val0(c1.v*) _val1(c1.v*)
 .print TRAN  v(nodes) conv(c1)
 
-.dc uic
+.dc uic trace=i
+
 .TRAN 0 200u 10u cont
 *.tran 0 200u 10u uic // undesired because of SPICE compatibility
 

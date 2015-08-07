@@ -12,7 +12,7 @@ paramset mycap cap;
 endparamset
 mycap #(.ic_p_n(qci1)) c1 (n1,0);
 spice
-c1 n2 0 1m ic=qci1
+c2 n2 0 1m ic=qci1
 
 R1 n1 0 5k
 R2 n2 0 5k
@@ -27,7 +27,8 @@ R2 n2 0 5k
 .print ac v(nodes)
 .ac 1 10 * 2
 
-* BUG: ddv does not work for admscap
 .print ddc v(nodes) dv(nodes) ddv(nodes) qci1
 .ddc tr trstep=1e-3 qci1 0 1 .1
+
+.stat notime
 .end

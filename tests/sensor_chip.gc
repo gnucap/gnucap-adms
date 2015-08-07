@@ -1,13 +1,15 @@
 spice
 * simulating "IMtech_VAC_03" sensor chip
 
+.options debug
+
 .options numdgt 5
 .options reltol=1e-4
 .parameter piv=0.0001
 .parameter ppv=0.02
 
-.options noincmode
-.options nobypass
+*.options noincmode
+*.options nobypass
 
 .include sensor_chip.ckt
 
@@ -15,7 +17,7 @@ spice
 + v(v_pin) v(nodes)
 + dxm(0) gmin(0) damp(0)
 
-.dc Vpin 1e-8 1e-8 0 trace=v > sensor_net_debug.out
+.dc Vpin 10e-9 10e-9 0 trace=v > sensor_net_debug.out
 
 .dc Vpin 1e-8 1000 * 1.3 > sensor_net_dc.out
 

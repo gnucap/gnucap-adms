@@ -1,5 +1,5 @@
 load ./cap.so
-options nopicky
+options debug
 
 verilog
 paramset mycap va_cap;

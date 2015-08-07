@@ -25,7 +25,6 @@ check_LTLIBRARIES = \
     vs2.la \
     cs.la cap.la \
     coil.la \
-    coil1.la \
     ccvs.la \
     cccs.la \
     res.la \
@@ -116,6 +115,10 @@ CUSTOM_TESTS = \
     ccvsstamp.sh \
     cccsstamp.sh \
     inline.sh \
+    rc1.sh \
+    tr.sh \
+    int_cont.sh \
+    motor1.sh \
     adms_res.sh \
     opamp.sh
 GC_TESTS = \
@@ -123,7 +126,6 @@ GC_TESTS = \
     if.sh \
     if2.sh \
     coil.sh \
-    coil1.sh \
     chainvs.sh \
     vs.sh \
     vs1.sh \
@@ -230,6 +232,8 @@ $(SHS): %.sh: %.gc Makefile %.ref
 
 subcoil.log subcoil.1.log vccs.log ccvs.log cap.log: %.log: %.so
 coil.log: coil.so
+coil_auto.log: coil.so
+coil_br.log: coil.so
 vs.log: vs.so
 cs.log: cs.so
 if.log: if.so
