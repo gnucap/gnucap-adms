@@ -2577,7 +2577,7 @@ bool $(DEV_NAME)::tr_needs_eval()const
 		return false; // needed?
 	}else if ( !OPT::lcbypass
 	  || !converged()
-	  || _sim->is_advance_or_first_iteration() ) { untested();
+	  || _sim->is_advance_or_first_iteration() ) { itested();
 		return true;
 	}
   <admst:if test="[$sckt_size!=0]">

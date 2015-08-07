@@ -71,6 +71,7 @@ public:
   }
   void expand_last();
   bool do_tr_last();
+//  void tr_restore();
   double tr_probe_num(const std::string&) const;
 
   uint_t max_nodes()const	{return net_nodes();}
@@ -148,11 +149,9 @@ inline void ADMS_SOURCE::set_parameters_va(const std::string& Label, CARD *Owner
     }else{
       // use the default node list, already set
     }
-  }else{ untested();
+  }else{ itested();
     assert(_n_ports + _n_iports == n_states - 1);// ?
-//    assert(_old_values);
     assert(net_nodes() == n_nodes);
-    // assert could fail if changing the number of nodes after a run
   }
   assert(matrix_nodes() == 2*n_states + _boff - 2); // used by iwant_matrix.
   assert(ext_nodes() == 2*n_states - 2); // used by map_nodes
@@ -230,16 +229,10 @@ inline void ADMS_SOURCE::tr_iwant_matrix_active()
     _sim->_lu.iwant(_n[OUT2+_boff].m_(),_n[2*i+1+_boff].m_());
   }
 }
+/*--------------------------------------------------------------------------*/
 
 inline bool ADMS_SOURCE::do_tr_last()
-{ incomplete();
-  //cccs do_tr_last.
-  // if(_input->has_iv_probe()){
-  //        _m0.c0 += _y[0].f1 * _input->_m0.c0;
-  //        _m0.c1  = _y[0].f1 * (_input->_loss0 + _input->_m0.c1);
-  // }
-  // store_values() // _y1=_y[0];
-  //
+{ itested();
   double* ival = _values+2+_n_vports;
   double* ctrl = _values+2+_n_vports+_n_iports;
 
@@ -249,8 +242,10 @@ inline bool ADMS_SOURCE::do_tr_last()
       ELEMENT const* ie = prechecked_cast<ELEMENT* const>(_inputs[i]);
       trace3("ADMS_SOURCE::do_tr_last", long_label(), _inputs[i]->long_label(), ie->_m0);
       assert(ie);
-      ival[i] = ctrl[i] * ie->_m0.c1; // FIXME: sign.
-    }else{ incomplete();
+      //cccs do_tr_last.
+      // _m0.c1  = _y[0].f1 * (_input->_loss0 + _input->_m0.c1); ?
+      ival[i] = ctrl[i] * ie->_m0.c1;
+    }else{ untested();
       assert(_inputs[i]->has_inode());
       ival[i] = - ctrl[i] *.5 ;
     }

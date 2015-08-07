@@ -100,7 +100,7 @@ class ADMS_BASE : public COMPONENT {
 		void	   ac_load_point(const node_t& no1, const node_t& no2,
 				COMPLEX value);
 
-		bool	   conv_check()const;
+		virtual bool conv_check()const;
 		bool	   has_tr_eval()const;
 		bool	   has_ac_eval()const;
 		bool	   using_tr_eval()const;
@@ -304,6 +304,7 @@ inline bool ADMS_BASE::conv_check()const
 {
 	incomplete();
 	unreachable();
+	assert(false);
 	return false;
 }
 /*--------------------------------------------------------------------------*/
