@@ -320,6 +320,25 @@ bool ADMS_BASE::tr_needs_eval()const
 #endif
 }
 /*--------------------------------------------------------------------------*/
+double ADMS_BASE::tr_probe_num(const std::string& x)const
+{
+	if (Umatch(x, "dt ")) {
+		return _dt;
+	}else if (Umatch(x, "dtr{equired} ")) {
+		return ((_time_by._error_estimate - _time[0]) > 0)
+			? _time_by._error_estimate - _time[0]
+			: _time_by._error_estimate - _time[1];
+	}else if (Umatch(x, "time ")) {untested();
+		return _time[0];
+	}else if (Umatch(x, "conv{erged} ")) {
+		return converged() + 10*conv_check();
+	} else if (Umatch(x, "met{hod} ")) { untested();
+		return _method_a;
+	}
+
+	return COMPONENT::tr_probe_num(x);
+}
+/*--------------------------------------------------------------------------*/
 /*--------------------------------------------------------------------------*/
 void ADMS_BASE::set_param_by_name(string name, string value)
 {

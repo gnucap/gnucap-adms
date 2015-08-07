@@ -371,17 +371,6 @@ inline void ADMS_BASE::tr_advance()
 
 }
 /*--------------------------------------------------------------------------*/
-inline double ADMS_BASE::tr_probe_num(const std::string& x)const
-{
-	if (Umatch(x, "conv{erged} ")) {
-		return converged();
-	} else if (Umatch(x, "met{hod} ")) { untested();
-		return _method_a;
-	}
-
-	return COMPONENT::tr_probe_num(x);
-}
-/*--------------------------------------------------------------------------*/
 inline double ADMS_BASE::tr_c_to_g(double c, double g)const
 {
 	if (_sim->analysis_is_static()) {
