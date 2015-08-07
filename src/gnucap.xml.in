@@ -1105,6 +1105,13 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
 #ifndef NDEBUG
 		unsigned _loaditer;
 #endif
+	private: // ops
+<admst:if test="[count($ddts)!=0]">
+		double _CKTag0;
+</admst:if>
+<admst:if test="[count($idts)!=0]">
+		double _CKTga0;
+</admst:if>
 }; // $(DEV_NAME)
 // ------------------------------------------------------------------------ //
 // ------------------------------------------------------------------------ //
@@ -2654,8 +2661,9 @@ bool $(DEV_NAME)::do_tr()
   <admst:if test="[$sckt_size!=0]">
 	set_converged(subckt()->do_tr());
   </admst:if>
-	if(converged()){ untested();
+	if(converged()){ itested();
 		set_converged(conv_check());
+	}else{ untested();
 	}
 
 
@@ -2803,16 +2811,15 @@ TIME_PAIR $(DEV_NAME)::tr_review()
 	double timestep = NEVER;
 
     //----- (DEVtrunc)
-	<admst:for-each select="$(ddts)">
+  <admst:for-each select="$(ddts)">
 	{
 		std::valarray&lt;FPOLY1&gt; q(OPT::_keep_time_steps);
 
-		for (int ii = 0; ii &lt; OPT::_keep_time_steps; ++ii)
-		{
-		assert(_states[ii]);
-		q[ii].x  = NOT_VALID;
-		q[ii].f0 = _states[ii][ _ddt_%(adms/id(.)) ];
-		q[ii].f1 = NOT_VALID;
+		for (int ii = 0; ii &lt; OPT::_keep_time_steps; ++ii) {
+			assert(_states[ii]);
+			q[ii].x  = NOT_VALID;
+			q[ii].f0 = _states[ii][ _ddt_%(adms/id(.)) ];
+			q[ii].f1 = NOT_VALID;
 		}
 
 		timestep = std::min(tr_review_trunc_error(&amp;q[0]), timestep);
@@ -2821,8 +2828,8 @@ TIME_PAIR $(DEV_NAME)::tr_review()
 		   _states[0][ _ddt_%(adms/id(.)) + 1 ]
 	  );
 	}
-	</admst:for-each>
-    //-----
+  </admst:for-each>
+	//-----
 
 #ifdef USE_DTIME
 	_dt_by._error_estimate = tr_review_check_and_convert(timestep);
@@ -2881,7 +2888,7 @@ void $(DEV_NAME)::tr_accept()
   trace0(&quot;$(DEV_NAME)::tr_accept&quot;);
 
   <admst:if test="[count($ddts)!=0]">
-	double CKTag0 = 0; // incomplete?
+	_CKTag0 = 0; // incomplete? BUG
   </admst:if>
   <admst:if test="[count($idts)!=0]">
 	double CKTga0 = 0; // incomplete?
@@ -3101,14 +3108,16 @@ void $(DEV_NAME)::guesstopology ()
 bool $(DEV_NAME)::conv_check()const
 {
 
-	return true; // use subdevices.
-
 <admst:if test="[$(_has_states)='true']">
-	for (unsigned ii = 0; ii &lt; _num_states; ++ii) {
-		if (!::conchk(_states[0][2*ii], _states_q1[ii])) // BUG: use discipline
+	for (unsigned ii = 0; ii &lt; _num_states; ++ii) { untested();
+		if (!::conchk(_states[0][2*ii], _states_q1[ii])) { untested();
+			// BUG: use discipline
 			return false;
+		}
 	}
 </admst:if>
+
+	return true; // use subdevices.
 
 	for(unsigned i=0; converged() &amp;&amp; i&lt;$_num_stamp_nodes; i++) {
 		bool conv = ::conchk(it0[i], it1[i]); // BUG: use discipline
@@ -3148,7 +3157,9 @@ void $(DEV_NAME)::ac_eval()
 	const $(MODEL_NAME)* m = prechecked_cast&lt;const $(MODEL_NAME)*&gt;(c-&gt;model());
 	USE(m); assert(m);
 
-	double CKTag0 = 1.; USE(CKTag0); // BUG (necessary?)
+<admst:if test="[count($ddts)!=0]">
+	_CKTag0 = 1.; USE(_CKTag0); // BUG (necessary?)
+</admst:if>
 	double CKTga0 = 1.; USE(CKTga0); // BUG (necessary?)
 	double ddtone = 1.; USE(ddtone); // not necessary in the end?
 
@@ -3243,12 +3254,16 @@ void $(DEV_NAME)::tr_eval()
 	assert(_dt == _dt);
 
   <admst:if test="[count($ddts)!=0]">
-	double CKTag0 = tr_c_to_g(1., 1.);
+	if(_sim->analysis_is_tran_restore()){
+	}else{
+		_CKTag0 = tr_c_to_g(1., 1.);
+	}
   </admst:if>
 
   <admst:if test="[count($idts)!=0]">
 	double CKTga0;
-	if( _sim->analysis_is_static() ) {
+	if(_sim->analysis_is_tran_restore()){ incomplete();
+	}else if( _sim->analysis_is_static() ) {
 		CKTga0 = 0;
 	} else {
 		CKTga0 = _dt/2;
@@ -6474,6 +6489,14 @@ return
   <admst:variable name="idts" select="%(expression/function[name='idt' and class='operator'])"/>
 
   <admst:open file="$(filename)_$(module)_ac.hxx">
+    <admst:for-each select="source">
+	  std::fill_n(%(brp(.))_xxx,
+		    + 2 // constant and self admittance
+		    + %(count(probe[nature=discipline/potential])) // V
+			 + %(count(probe[nature=discipline/flow and branch!=$B])) // I val (unnecessary?)
+			 + %(count(probe[nature=discipline/flow and branch!=$B])) // I raw
+	  , 0.);
+    </admst:for-each>
     <admst:apply-templates select="analog/code" match="analog:evaluate" required="yes"/>
   </admst:open>
 </admst:for-each>
@@ -8547,7 +8570,7 @@ return
     <admst:when test="[$SkipFVariable='y']">
     </admst:when>
     <admst:when test="[name='ddt']">
-      <admst:variable name="ep" select="CKTag0 * ($xp)"/> <!-- ??? -->
+      <admst:variable name="ep" select="_CKTag0 * ($xp)"/> <!-- ??? -->
     </admst:when>
     <admst:when test="[name='idt']">
       <admst:variable name="ep" select="CKTga0 * ($xp)"/> <!-- ??? -->
@@ -9137,6 +9160,7 @@ return
   <admst:apply-templates select="." match="residual_"/>
   <admst:variable name="contrib" select="%(brp(.))_xxx"/>
   <admst:variable  name="S" select="%(lhs/branch)"/>
+  <!--<admst:apply-templates select="." match="jacobian_"/>-->
 
   // iterating rhs potential probes for %(.)
   <!--<admst:for-each select="rhs/probe[nature=../../lhs/discipline/potential]">-->
@@ -9154,13 +9178,20 @@ return
     <admst:apply-templates select="../tree" match="subexpression:differentiate"/>
 
     <admst:choose>
-      <admst:when test="..[dynamic='yes']">
-#ifndef NOJAC
+      <admst:when test="../../lhs/branch/pnode[discipline/name='degradational']">
+		//skipping jacobian for degr node
+      </admst:when> <!--degradational-->
+      <admst:when test="branch/pnode[discipline/name='degradational']">
+		//skipping jacobian for degr node
+      </admst:when> <!--degradational-->
+		<admst:when test="..[dynamic='yes']">
+
 	{ // ?&lt;+ V in %(.) %(../dynamic)
 		double e = $ep;
 		double ceq;
 		ceq = e * BR($probepnodename, $probennodename);
 		$contrib[0] -= ceq; // offset
+#ifndef NOJAC
 #ifdef HAVE_KEEPCOEFF
 		if (uic_now( $keepstatename )) { // /* HACK. argh.*/
 			$keepstatevar = 1;
@@ -9171,8 +9202,8 @@ return
 		{
 			$contrib[P_%(brp($(S)))_%(brp(.))_%(nature/access)] += e;
 		}
-	}
 #endif
+	}
       </admst:when>
       <admst:when test="..[dynamic='no']">
 	{ // ?&lt;+ V in %(.) %(../dynamic)
@@ -9189,7 +9220,8 @@ return
 
   // I &lt+ I and V &lt+ I is the same eventually?
   // I &lt+ I might not work yet (?)
-  <admst:for-each select="rhs/probe[nature=../../lhs/discipline/flow]">
+  <!--<admst:for-each select="rhs/probe[nature=../../lhs/discipline/flow]">-->
+  <admst:for-each select="rhs/probe[nature=discipline/flow]">
     <admst:text format="\t// Rhs/probe: %(.) ../dynamic: %(../dynamic) ../../dynamic: %(../../dynamic)\n"/>
     <admst:variable name="probepnode" select="%(branch/pnode)"/>
     <admst:variable name="probennode" select="%(branch/nnode)"/>
@@ -9347,7 +9379,7 @@ assert(false); // obsolete code.
 
 #ifdef HAVE_KEEPCOEFF
 		if (uic_now( $keepstatename ) /* HACK. argh.*/) {
-			double CKTag0 = 1.;
+			_CKTag0 = 1.;
 			eac = $ep $flowcoeff;
 			ceq = eac * BR($Pp, $Pn);
 			//#undef CKTag0
