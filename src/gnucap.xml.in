@@ -9186,24 +9186,29 @@ return
       </admst:when> <!--degradational-->
 		<admst:when test="..[dynamic='yes']">
 
+#ifndef NOJAC
 	{ // ?&lt;+ V in %(.) %(../dynamic)
 		double e = $ep;
 		double ceq;
 		ceq = e * BR($probepnodename, $probennodename);
-		$contrib[0] -= ceq; // offset
-#ifndef NOJAC
 #ifdef HAVE_KEEPCOEFF
-		if (uic_now( $keepstatename )) { // /* HACK. argh.*/
-			$keepstatevar = 1;
+		if (uic_now( $keepstatename )) { untested();
+			/* HACK. argh.*/
+			double _CKTag0 = 1.;
 			double e = $ep;
-			$contrib[P_%(brp($(S)))_%(brp(.))_%(nature/access)] += e * OPT::keepcoeff;
+			$contrib[0] -= e * BR($probepnodename, $probennodename);
+
+			$keepstatevar = 1;
+			e = $ep;
+			$contrib[P_%(brp($(S)))_%(brp(.))_%(nature/access)] -= e * OPT::keepcoeff;
 		} else
 #endif
-		{
+		{ untested();
+			$contrib[0] -= ceq;
 			$contrib[P_%(brp($(S)))_%(brp(.))_%(nature/access)] += e;
 		}
-#endif
 	}
+#endif
       </admst:when>
       <admst:when test="..[dynamic='no']">
 	{ // ?&lt;+ V in %(.) %(../dynamic)
