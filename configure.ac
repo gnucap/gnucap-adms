@@ -56,23 +56,8 @@ if test "x$HAVE_ADMSXML" = "xfalse"; then
 fi
 
 AC_MSG_CHECKING([extern support])
-ADMSXML_FLAGS=-DUSE_EXTERN
-ADMSXML_NOEXTERN=["[not (nilled(analog) and nilled(instance))]"]
-# BUG in admsXml
-# if admsXml -DUSE_EXTERN src/gnucap-adms.h 2>/dev/null >/dev/null; then
-# doesnt work. using ugly check
-if echo "extern module foo();endmodule" | admsXml /dev/stdin 2>/dev/null >/dev/null; then
-	AC_MSG_RESULT([yes])
-	AC_DEFINE([VERILOG_EXTERN], [1], [admsXml understands 'extern'])
-	ADMSXML_FLAGS=-DUSE_EXTERN
-#	ADMSXML_NOEXTERN=[\[extern=\'no\'\]]
-else
-	AC_MSG_RESULT([no])
-fi
 # FIXME: check gnucap capabilities...
 AC_SUBST([ADMSXML_FLAGS])
-AC_SUBST([ADMSXML_NOEXTERN])
-AM_CONDITIONAL([VERILOG_EXTERN], [test x"$ADMSXML_NOEXTERN" != x] )
 
 dnl ----------------- qucs ------------------
 AC_MSG_CHECKING([qucs])

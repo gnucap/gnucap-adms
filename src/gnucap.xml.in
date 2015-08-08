@@ -148,7 +148,7 @@
   </admst:choose>
 </admst:template>
 
-<admst:for-each select="/module@ADMSXML_NOEXTERN@">
+<admst:for-each select="/module[not (nilled(analog) and nilled(instance))]">
   <admst:apply-templates select="." match="ddticcollect"/>
   <admst:variable name="ddts" select="%(expression/function[name='ddt' and class='operator'])"/>
   <admst:variable name="idts" select="%(expression/function[name='idt' and class='operator'])"/>
@@ -179,7 +179,7 @@
 </admst:for-each>
 
 <!-- create attribute with module name -->
-<admst:for-each select="/module@ADMSXML_NOEXTERN@">
+<admst:for-each select="/module[not (nilled(analog) and nilled(instance))]">
   <admst:new datatype="attribute" arguments="ngspicename">
   <admst:push into="../attribute" select="." onduplicate="abort"/>
   <admst:value-of select="../name"/>
@@ -293,7 +293,7 @@
 
 #ifndef _$(filename)_header__
 #define _$(filename)_header__
-<admst:for-each select="/module@ADMSXML_NOEXTERN@">
+<admst:for-each select="/module[not (nilled(analog) and nilled(instance))]">
   <admst:apply-templates select="." match="ddticcollect"/>
 
   <admst:value-of select="attribute[name='ngspicename']/value"/>
@@ -304,6 +304,7 @@
   <admst:variable name="_num_stamp_nodes" select="%(count(node[grounded='no' and discipline/name!='degradational']))"/>
   <admst:variable name="ddts" select="%(expression/function[name='ddt' and class='operator'])"/>
   <admst:variable name="idts" select="%(expression/function[name='idt' and class='operator'])"/>
+  <admst:variable name="has_sckt" select="%(count(instance))"/>
 
 
 // customization - gnucap specific constants
@@ -888,8 +889,6 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
   <admst:join select="function/arguments" separator=", ">%(printCtype(tree)) arg_%(position(.))</admst:join>
 </admst:template>
 
-%(print_with_dollar_stripped(.))
-
 //		bool _need_accept;
 <admst:if test="[count(callfunction)!=0]">
 	private: //callfunctions
@@ -1426,13 +1425,14 @@ namespace {
 #include &quot;$(filename).h&quot;
 
 using namespace std;
-<admst:for-each select="/module@ADMSXML_NOEXTERN@">
+<admst:for-each select="/module[not (nilled(analog) and nilled(instance))]">
   <admst:apply-templates select="." match="ddticcollect"/>
   <admst:variable name="ddts" select="%(expression/function[name='ddt' and class='operator'])"/>
   <admst:variable name="idts" select="%(expression/function[name='idt' and class='operator'])"/>
   <admst:variable name="_num_states" select="%(count($ddts)) + %(count($idts))"/>
 
 //analog function stuff
+  <admst:variable name="has_sckt" select="%(count(instance))"/>
 
   <admst:value-of select="attribute[name='ngspicename']/value"/>
   <admst:variable name="module" select="%s"/>
@@ -2384,11 +2384,6 @@ bool $(DEV_NAME)::do_tr()
 	assert(_dt == NOT_VALID || ::conchk(_dt, _time[0] - _time[1]));
 #endif
 
-  <admst:if test="[$has_sckt!=0]">
-	// if(slave_sckt) {
-	// 	set_converged( subckt()->do_tr());
-	// }
-  </admst:if>
 	// convergence check -- gnucap method
   <admst:if test="[$has_sckt=0]">
 	set_converged(true);
@@ -2399,6 +2394,13 @@ bool $(DEV_NAME)::do_tr()
 		tr_eval(); // if needed??
 	} else {
 		tr_eval(); // if needed??
+	}
+
+  <admst:if test="[$has_sckt!=0]">
+	set_converged(subckt()->do_tr());
+  </admst:if>
+	if(converged()){ untested();
+		set_converged(conv_check());
 	}
 
 
@@ -2623,6 +2625,9 @@ void $(DEV_NAME)::tr_accept()
   trace0(&quot;$(DEV_NAME)::tr_accept&quot;);
 
   <admst:if test="[count($ddts)!=0]">
+	double CKTag0 = 0; // incomplete?
+  </admst:if>
+  <admst:if test="[count($idts)!=0]">
 	double CKTga0 = 0; // incomplete?
   </admst:if>
 
@@ -6151,7 +6156,7 @@ return
 <!-- ----------------------------------------------------------------- -->
 <!-- ------------------ create hxx for tr ---------------------------- -->
 <admst:variable name="eval_mode" select="tr"/>
-<admst:for-each select="/module@ADMSXML_NOEXTERN@">
+<admst:for-each select="/module[not (nilled(analog) and nilled(instance))]">
   <admst:variable name="ddts" select="%(expression/function[name='ddt' and class='operator'])"/>
   <admst:variable name="idts" select="%(expression/function[name='idt' and class='operator'])"/>
 
@@ -6186,7 +6191,7 @@ return
 <!-- ----------------------------------------------------------------- -->
 <!-- ------------------ create hxx for ac ---------------------------- -->
 <admst:variable name="eval_mode" select="ac"/>
-<admst:for-each select="/module@ADMSXML_NOEXTERN@">
+<admst:for-each select="/module[not (nilled(analog) and nilled(instance))]">
   <admst:value-of select="attribute[name='ngspicename']/value"/>
   <admst:variable name="module" select="%s"/>
   <admst:variable name="DEV_NAME" select="DEV_%(upper-case(name))"/>

@@ -1,5 +1,6 @@
 // these devices are provided by the simulator and need
 // not be implemented
+`include "discipline.h"
 
 module R(p,n);
    inout p,n;

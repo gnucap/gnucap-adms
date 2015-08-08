@@ -23,7 +23,7 @@ V1 ( nin 0 ) pulse iv= 0. pv= 1. delay= 1. rise= 500.u fall=NA( 0.) width= 10. p
 .model myager ager ( r0=20k)
 .model my_rcd rcd ( tnom=NA( 27.) anneal=NA(1) rem=NA( 1.Meg) Re=NA( 1.) Rc=NA( 1.))
 r1 ( nin 0 )  myager 
-rcd1 ( nin 0 )  my_rcd  weight=1 rc1=3 rc0=4 re1=-2 re0=5 mu= 0.
+rcd1 ( nin 0 )  my_rcd  weight=1 rc1=-2 rc0=5 re1=3 re0=4 mu= 0. rcdummy= 1. uref= 0.
 #TTime      b(r1)      a(r1)      tt(r1.rcd1) tr(r1.rcd1) P(rcd1)    P(r1.rcd1)
  0.         0.         0.30482    0.        -Inf        0.         0.        
  100.       0.         0.030502   0.030502   0.032971   0.030502   0.030502  

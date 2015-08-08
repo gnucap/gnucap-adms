@@ -1,0 +1,25 @@
+spice
+
+.param vdd 1.7
+
+V1 nin 0 pulse iv=1 pv=0 rise=200u
+
+.verilog
+load ./rc_emb.so
+paramset myrc rc; .c=3n; .r=200k; endparamset
+
+myrc rc1 (nin,nout1,0);
+spice
+.list
+
+.print tran v(nodes) hidden(0)
+.store tran v(nodes)
+.print dc v(nodes)
+
+.nodelist
+.dc trace=v
+.tran .05m 1m trace=a
+.measure v1 at(probe="v(nout1)", x=500.u)
+
+.status notime
+.end
