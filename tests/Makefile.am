@@ -29,6 +29,7 @@ check_LTLIBRARIES = \
     cccs.la \
     res.la \
     short.la \
+    collapse.la \
     vccs.la \
     analogfunction.la \
     afsquare.la \
@@ -101,6 +102,7 @@ SO_TESTS = \
     subcoil.1.sh \
     rc.sh \
     short.sh \
+    collapse.sh \
     rc_emb.sh \
     motor.sh
 CUSTOM_TESTS = \

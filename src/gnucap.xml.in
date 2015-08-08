@@ -2054,7 +2054,7 @@ void $(DEV_NAME)::expand()
 			assert(_n[ii].n_());
 #endif
 		}
-		// short circuits as in V(a) &lt;+ I(b)
+		// current probes as in V(a) &lt;+ I(b)
 <admst:for-each select="$(short)">
 		if (!%(brp(.))) { untested();
 
@@ -2388,10 +2388,6 @@ void $(DEV_NAME)::tr_begin()
   </admst:for-each>
 </admst:if>
 
-	for(int i=0; i&lt;$_num_stamp_nodes; i++) {
-		it0[i] = it1[i]=0;
-	}
-
         //     in storag:
         // _m1 = _m0 = CPOLY1(0., 0., 0.);
   <admst:if test="[count(jacobian)!=0]">
@@ -2400,11 +2396,6 @@ void $(DEV_NAME)::tr_begin()
   </admst:if>
 
 	internal_precalc();
-
-	// load static ??
-        //&lt;admst:text format=&quot;\\n\\tfor(int i=0; i&lt;$_num_stamp_nodes; i++)&quot;/&gt;
-		  //	tr_load_source_point(_n[i], &amp;(it0[i]), &amp;(it1[i]));
-        //
 
 #ifdef load_in_begin
 
@@ -2676,20 +2667,6 @@ bool $(DEV_NAME)::do_tr()
 
 	bool needs_load = !converged();
 
-  <admst:if test="[count(jacobian)!=0]">
-	for (int i = 0; !needs_load &amp;&amp; i &lt; $_num_stamp_nodes; i++) {
-		if (m_required[i]){
-			needs_load = !::conchk(it0[i], it1[i], 0, OPT::reltol*OPT::loadtol); // BUG: use discipline
-		}
-	}
-
-	for(int i=0; !needs_load &amp;&amp; i&lt;%(count(jacobian)); i++) {
-		if (m_required[i]){
-			needs_load = !::conchk(m_entries[i], m_entries_old[i], 0, OPT::reltol * OPT::loadtol); // BUG: use discipline
-		}
-	}
-  </admst:if>
-
   store_values();
 
   //  if (needs_load) q_load();
@@ -2722,7 +2699,6 @@ void $(DEV_NAME)::keep_ic()
 	c-&gt;set_states(s);
 </admst:if>
 	trace1(&quot;$(DEV_NAME)::keep_ic&quot;, long_label() );
-	notstd::copy_n(it0, $_num_stamp_nodes , i_kept);
 }
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::store_values()
@@ -2769,15 +2745,6 @@ void $(DEV_NAME)::tr_load()
 	</admst:if>
 	trace0(&quot;$(DEV_NAME)::tr_load&quot;);
           /// BUG: only dynamic!
-	for(int i=0; i&lt;$_num_stamp_nodes; i++){
-		trace3(&quot;$(DEV_NAME)::tr_load&quot;, i,  (it0[i]),  (it1[i]));
-		//		tr_load_source_point(_n[i], &(it0[i]), &amp;(it1[i]));
-		  it1[i] = it0[i];
-
-		trace3("$(DEV_NAME)::tr_load done&quot;, &quot;i&quot;,     (it0[i]),  (it1[i]));
-	}
-
-          /// BUG: only load dynamic nodes! ?
 
   <admst:for-each select="jacobian[row/discipline/name!='degradational' and column/discipline/name!='degradational']">
 	if( m_required[m_%(row/name)_%(column/name)] ){
@@ -2907,7 +2874,6 @@ void $(DEV_NAME)::tr_accept()
 <admst:if test="[count(callfunction)!=0]">
 		_callf_seek = 0;
 </admst:if>
-		std::fill_n(it0, (int)$_num_stamp_nodes, 0);
 #define NOJAC
 #ifdef HAVE_KEEPCOEFF
 # define _DDT( qq, stateno) (( _states[0][stateno*2] - _states[1][stateno*2] ) * OPT::keepcoeff)
@@ -2950,7 +2916,6 @@ double $(DEV_NAME)::tr_probe_num(const std::string&amp; x)const
 		return _method_a;
 	}
 </admst:if>
-	static std::string contr_names[$_num_stamp_nodes];
 
   <admst:apply-templates select="." match="commonmodel"/>
 
@@ -2964,12 +2929,6 @@ double $(DEV_NAME)::tr_probe_num(const std::string&amp; x)const
 		state_names[i] = &quot;state&quot; + ss.str();
 	}
 </admst:if>
-	for(int i=0; i&lt;$_num_stamp_nodes; i++)
-	{
-		std::stringstream ss;
-		ss &lt;&lt; i;
-		contr_names[i] = &quot;cont&quot; + ss.str();
-	}
 
 <admst:if test="[$(_has_states)='true']">
 	// states probes
@@ -2980,11 +2939,6 @@ double $(DEV_NAME)::tr_probe_num(const std::string&amp; x)const
 	}
 </admst:if>
 	// node probes
-	for(int i=0; i&lt;$_num_stamp_nodes; i++) {
-		if( Umatch(x, contr_names[i] + ' ') ) {
-			return it0[i];
-		}
-	}
 
 	// verilog-variables ('global_...' eq. with 'ask' field)
   <admst:for-each select="variable[input='no' and scope='global_instance']">
@@ -3010,13 +2964,6 @@ void $(DEV_NAME)::do_ac()
   assert(OPT::_keep_time_steps &lt;= 8);
   assert(_dt == NOT_VALID || ::conchk(_dt, _time[0] - _time[1]));
 
-	std::fill_n(it0, (int)$_num_stamp_nodes, 0);
-	std::fill_n(it1, (int)$_num_stamp_nodes, 0);
-
-  <admst:if test="[count(jacobian)!=0]">
-	std::fill_n(m_entries, %(count(jacobian)), 0);
-	std::fill_n(m_entries_old, %(count(jacobian)), 0);
-  </admst:if>
   <admst:for-each select="source">
 	  std::fill_n(%(brp(.))_xxx,
 		    + 2 // constant and self admittance
@@ -3058,9 +3005,6 @@ void $(DEV_NAME)::ac_load()
   <admst:value-of select="row/name"/>
   <admst:value-of select="column/name"/>
   <admst:value-of select="row/name"/>
-  //	if( m_required[m_%s_%s] ) {
-  //	ac_load_point(_N(%s), _N(%s), COMPLEX(m_entries[m_%s_%s], m_entries_old[m_%s_%s] * _sim-&gt;_jomega.imag()));
-  //	}
   </admst:for-each>
 }
 
@@ -3118,26 +3062,6 @@ bool $(DEV_NAME)::conv_check()const
 </admst:if>
 
 	return true; // use subdevices.
-
-	for(unsigned i=0; converged() &amp;&amp; i&lt;$_num_stamp_nodes; i++) {
-		bool conv = ::conchk(it0[i], it1[i]); // BUG: use discipline
-		if (!conv) {
-			trace4("conv check: not converged", i, it0[i], it1[i], _sim-&gt;iteration_number() );
-			return false;
-		}
-	}
-
-  <admst:if test="[count(jacobian)!=0]">
-   // FIXME: use only used entries.
-	for(unsigned i=0; converged() &amp;&amp; i&lt;%(count(jacobian)); i++) {
-		bool conv = ::conchk(m_entries[i], m_entries_old[i]); // BUG: use discipline
-		if (!conv) {
-			trace4("conv check: not converged", i, m_entries[i], m_entries_old[i], _sim-&gt;iteration_number() );
-			return false;
-		}
-	}
-  </admst:if>
-	return true;
 }
 
 // -------------------------------------------------------------------------- //
@@ -9160,7 +9084,6 @@ return
   <admst:apply-templates select="." match="residual_"/>
   <admst:variable name="contrib" select="%(brp(.))_xxx"/>
   <admst:variable  name="S" select="%(lhs/branch)"/>
-  <!--<admst:apply-templates select="." match="jacobian_"/>-->
 
   // iterating rhs potential probes for %(.)
   <!--<admst:for-each select="rhs/probe[nature=../../lhs/discipline/potential]">-->
@@ -9344,110 +9267,8 @@ return
 
 </admst:template>
 
-<!-- ----------------------  loss left stamp ------------------ -->
-<admst:template match="lossleft">
-  <admst:variable name="Sp" select="%(./lhs/branch/pnode/name)"/>
-  <admst:variable name="Sn" select="%(./lhs/branch/nnode/name)"/>
-	{
-		double loss = 1./OPT::shortckt;
-<admst:if test="./lhs/branch/nnode[grounded='no']">
-		_write_d$(eval_mode)($Sn, $Sn,  loss);
-		_write_d$(eval_mode)($Sn, $Sp, -loss);
-		_write_d$(eval_mode)($Sp, $Sn, -loss);
-</admst:if>
-		_write_d$(eval_mode)($Sp, $Sp,  loss);
-	}
-</admst:template>
-<!-- ----------------------  jacobian stamp ------------------ -->
-<admst:template match="jacobian_">
-  <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)jacobian_*\n"/>
-  <admst:variable name="Sp" select="%(../../lhs/branch/pnode/name)"/>
-  <admst:variable name="Sn" select="%(../../lhs/branch/nnode/name)"/>
-  <admst:variable name="Pp" select="%(branch/pnode/name)"/>
-  <admst:variable name="Pn" select="%(branch/nnode/name)"/>
-
-  <admst:variable name="flowcoeff" select=""/>
-  <admst:if test="[discipline/flow=nature]">
-                // RHS flow, incomplete, %(.)
-                // will only work for flowprobe->potential source (?)
-    <admst:variable name="flowcoeff" select="* (-1/OPT::shortckt/OPT::shortckt)"/>
-  </admst:if>
-
-  <admst:choose>
-    <admst:when test="..[dynamic='yes']">
-#ifndef NOJAC
-assert(false); // obsolete code.
-	{ // jacobian4($(Sp), $(Sn), $(Pp), $(Pn)) - dynamic
-		double eac = $ep $flowcoeff;
-		double etr = eac;
-		double ceq;
-
-#ifdef HAVE_KEEPCOEFF
-		if (uic_now( $keepstatename ) /* HACK. argh.*/) {
-			_CKTag0 = 1.;
-			eac = $ep $flowcoeff;
-			ceq = eac * BR($Pp, $Pn);
-			//#undef CKTag0
-
-			$keepstatevar = 1;
-			eac = $ep;
-			etr = - eac * OPT::keepcoeff;
-		} else
-#endif
-		{
-			ceq = etr * BR($Pp, $Pn);
-		}
-
-
-      <admst:if test="../../lhs/branch/pnode[grounded='no']">
-		it0[$(node_prefix)$Sp] += ceq;
-      </admst:if>
-      <admst:if test="../../lhs/branch/nnode[grounded='no']">
-		it0[$(node_prefix)$Sn] -= ceq;
-      </admst:if>
-
-		_write_d$(eval_mode)($Sp, $Pp, e$(eval_mode)); // 1
-      <admst:if test="../../lhs/branch/nnode[grounded='no']">
-        <admst:if test="branch/nnode[grounded='no']">
-		_write_d$(eval_mode)($Sn, $Pn, e$(eval_mode)); // 2
-        </admst:if>
-		_write_d$(eval_mode)($Sn, $Pp, -e$(eval_mode)); // 3
-      </admst:if>
-      <admst:if test="branch/nnode[grounded='no']">
-		_write_d$(eval_mode)($Sp, $Pn, -e$(eval_mode)); // 4
-      </admst:if>
-	}
-#endif
-
-    </admst:when> <!--dynamic=yes-->
-    <admst:when test="../../lhs/branch/pnode[discipline/name='degradational']">
-		//skipping jacobian for degr node
-    </admst:when> <!--degradational-->
-    <admst:when test="branch/pnode[discipline/name='degradational']">
-		//skipping jacobian for degr node
-    </admst:when> <!--degradational-->
-    <admst:otherwise>
-	{ // jacobian4($(Sp), $(Sn), $(Pp), $(Pn), $(ep)) - static
-		double ep = STATIC_RHS * ($ep);
-		it0[$(cont_prefix)$Sp] += ep*BR($Pp,$Pn);
-<admst:if test="../../lhs/branch/nnode[grounded='no']">
-		it0[$(cont_prefix)$Sn] -= ep*BR($Pp,$Pn);
-</admst:if>
-
-		_write_p$(eval_mode)($Sp, $Pp, ep); // 1
-<admst:if test="../../lhs/branch/nnode[grounded='no']">
-	<admst:if test="branch/nnode[grounded='no']">
-		_write_p$(eval_mode)($Sn, $Pn, ep); // 2
-	</admst:if>
-		_write_p$(eval_mode)($Sn, $Pp, -ep); // 3
-</admst:if>
-<admst:if test="branch/nnode[grounded='no']">
-		_write_p$(eval_mode)($Sp, $Pn, -ep); // 4
-</admst:if>
-	}
-    </admst:otherwise>
-
-  </admst:choose>
+<!-- ---------------------- set values ------------------ -->
+<admst:template match="values_">
 </admst:template>
 
 <!-- ---------------------------------------------------------- -->
