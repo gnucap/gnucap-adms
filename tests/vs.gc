@@ -1,8 +1,8 @@
-spice
 
-.load ./vs.so
+load ./vs.so
+options nopicky
 
-.verilog
+verilog
 paramset myvsauto vsauto;
 	.voltage = 5;
 endparamset
@@ -16,19 +16,22 @@ paramset myvsideal vsideal;
 	.voltage = 5;
 endparamset
 
-myvsreal   v1 (nreal,0);
-myvsideal  v2 (nideal,0);
-myvsauto   v3 (nauto,0);
+myvsreal   v1 (nreal,ngnd);
+myvsideal  v2 (nideal,ngnd);
+myvsauto   v3 (nauto,ngnd);
 spice
 
 .param rload=.1
+vb nb ngnd 5
 
-r1 nreal 0 rload
-r2 nideal 0 rload
-r3 nauto 0 rload
+r0 0 ngnd 1u
+rb nb ngnd rload
+r1 nreal ngnd rload
+r2 nideal ngnd rload
+r3 nauto ngnd rload
 
-.print dc v(nodes) v(v2.q) i(v1)
-.print tran v(nodes) v(v2.q) i(v1)
+.print dc  v(nauto)   v(nideal)  v(nreal) i(v1) i(vb) i(r*)
+.print tran  v(nauto)   v(nideal)  v(nreal) i(v1) i(vb) i(r*)
 
 .dc trace=i
 .tran 0 1 1

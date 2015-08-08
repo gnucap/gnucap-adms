@@ -3,25 +3,31 @@ spice
 
 .verilog
 paramset myccvs ccvsva;
-	.gain = 1k;
-	.offset = 1;
+	.gain = {1k/3};
+	.offset = 10;
 endparamset
 
-myccvs  h1  (noutp,noutn,ninp,ninn);
+myccvs  h1  (noutp1,noutn1,ninp1,ninn1);
 spice
 
 *.nodelist
 
-i1 ninp ninn pulse iv=-1m pv=1m rise=1
-rp ninp ninn 1
+i1 ninp1 ninn1 pulse iv=-1m pv=1m rise=1
+rl1 noutp1 noutn1 300
+rg1 noutn1 0 1
 
-* h1 noutp noutn i1 5k
-rload noutp noutn 1
-r2 noutn 0 1
-r3 ninn 0 1
+* same in spice
+i2 ninp2 ninn2 pulse iv=-1m pv=1m rise=1
+r2 ninp2 ninn2 1
+h2 noutp2 noutn2 r2 {1k/3}
+rl2 noutp2 noutn2 300
+rg2 noutn2 0 1
 
-.print dc v(nodes) v(r1) i(h1) i(rp) i(i1)
-.print tran v(nodes) v(r1) i(h1) i(rp)
+.print dc v(noutp*) i(h1) i(rp) i(i1) v(h1.v_p_n) i(h1.v_p_n)
+.print dc + i(r2) i(h1.i_cp_cn)
+.print tran v(noutn*) v(noutp*) v(r1) i(h1) i(rp)
+
+.nodelist
 
 .dc trace=i
 .tran 0 1 .1 trace=n

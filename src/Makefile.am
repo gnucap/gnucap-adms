@@ -46,6 +46,18 @@ clean-manually:
 # fix the serious ones first.
 PLUGIN_CXXFLAGS = -Wno-unused-variable -Wno-unused-but-set-variable
 
+plugin_LTLIBRARIES += d_adms_vbr.la
+d_adms_vbr_la_LDFLAGS = $(ADMSLDFLAGS)
+d_adms_vbr_la_CXXFLAGS = $(PLUGIN_CXXFLAGS)
+d_adms_vbr_la_SOURCES = d_adms_vbr.cc
+d_adms_vbr_la_CPPFLAGS = $(AM_CPPFLAGS) -DADD_VERSION
+
+plugin_LTLIBRARIES += d_adms_i.la
+d_adms_i_la_LDFLAGS = $(ADMSLDFLAGS)
+d_adms_i_la_CXXFLAGS = $(PLUGIN_CXXFLAGS)
+d_adms_i_la_SOURCES = d_adms_i.cc
+d_adms_i_la_CPPFLAGS = $(AM_CPPFLAGS) -DADD_VERSION
+
 plugin_LTLIBRARIES += adms_res.la
 adms_res_la_LDFLAGS = $(ADMSLDFLAGS)
 adms_res_la_CXXFLAGS = $(PLUGIN_CXXFLAGS)

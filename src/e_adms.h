@@ -26,6 +26,7 @@
 #include <l_denoise.h>
 #include <e_subckt.h>
 #include <u_status.h>
+#include <e_elemnt.h>
 #include <algorithm>
 #include "gcuf_compat.h"
 /*--------------------------------------------------------------------------*/
@@ -99,7 +100,7 @@ class ADMS_BASE : public COMPONENT {
 		void	   ac_load_point(const node_t& no1, const node_t& no2,
 				COMPLEX value);
 
-		bool	   conv_check()const;
+		virtual bool conv_check()const;
 		bool	   has_tr_eval()const;
 		bool	   has_ac_eval()const;
 		bool	   using_tr_eval()const;
@@ -303,6 +304,7 @@ inline bool ADMS_BASE::conv_check()const
 {
 	incomplete();
 	unreachable();
+	assert(false);
 	return false;
 }
 /*--------------------------------------------------------------------------*/
@@ -368,17 +370,6 @@ inline void ADMS_BASE::tr_advance()
 	_method_a = method_select[OPT::method][m];
 #endif
 
-}
-/*--------------------------------------------------------------------------*/
-inline double ADMS_BASE::tr_probe_num(const std::string& x)const
-{
-	if (Umatch(x, "conv{erged} ")) {
-		return converged();
-	} else if (Umatch(x, "met{hod} ")) { untested();
-		return _method_a;
-	}
-
-	return COMPONENT::tr_probe_num(x);
 }
 /*--------------------------------------------------------------------------*/
 inline double ADMS_BASE::tr_c_to_g(double c, double g)const
@@ -565,7 +556,7 @@ inline double _abs(const double& arg){return abs(arg);}
 #define _abs(val)                ((val)<(0) ? (-(val)):(val))
 */
 
-
+#define AMPS(p) (assert(p),prechecked_cast<ELEMENT const*>(p)->tr_amps())
 
 /*--------------------------------------------------------------------------*/
 #define jacobian(a,b) m_required[m_##a##_##b]=true;	
@@ -587,6 +578,7 @@ inline double _abs(const double& arg){return abs(arg);}
 #define flickernoise_jacobian1(p)
 /*--------------------------------------------------------------------------*/
 
+#define _nGND node_t(&ground_node)
 
 // temp hacks
 #define _stop() assert(false)
@@ -601,5 +593,6 @@ inline string toLower(string s){
 }
 #define EXIT_IF_ISNAN(var) assert(is_number((double)var))
 
-// -------------------------------------------------------------------------- //
 #endif
+
+// vim:ts=8:sw=2:noet

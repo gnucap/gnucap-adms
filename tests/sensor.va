@@ -75,23 +75,23 @@ module drucksensor(nout, pout, p_in, ndd, ngnd);
 		//1E-9 eingefuegt um Division durch 0 zu vermeiden
 		Gp = k*(lambda0/(1+2*(2-a)/a*lquer/d1)*Area/d1
                        +lambda0/(1+2*(2-a)/a*lquer/d2)*Area/d2);
-                 
+
 		R_p = Rnull*(1.0+beta*deltaT);
 		if ( deltaT < 0 ) R_p = Rnull;
-// wichtig um zweiten hinrissigen stabilen Arbeitspunkt bei negativer Temperatur zu verhindern und dann hier negativem Widerstand 
+// wichtig um zweiten hinrissigen stabilen Arbeitspunkt bei negativer
+// Temperatur zu verhindern und dann hier negativem Widerstand
 
+		Pwr(t1) <+ up*up/(R_p);             // Heizung
+		Pwr(t1) <+ -( G_b + Gp )*deltaT;    // Waermeleitung
+		Pwr(t1) <+ -PStr;                   // Strahlung
+		Pwr(t1) <+ `Gmin*deltaT;            // convergence...
+		Pwr(t1) <+ -C_waerm * ddt(deltaT);  // W"armekapazit"at
 
- 		Pwr(t1) <+ up*up/(R_p);             // Heizung
- 		Pwr(t1) <+ -( G_b + Gp )*deltaT;    // Waermeleitung 
- 		Pwr(t1) <+ - PStr;                  // Strahlung
-                Pwr(t1) <+  `Gmin*deltaT;   // zur Herbeifuehrung der Konvergenz
-		Pwr(t1) <+ - C_waerm * ddt(deltaT); // W"armekapazit"at
-
-// die hier nur zum debuggen... 
-                PSum = up*up/(R_p) - ( G_b + Gp )*deltaT - PStr + `Gmin*deltaT;;
-                PHeiz = up*up/(R_p);
-                PLeit = ( G_b + Gp )*deltaT;
-                PSonst = `Gmin*deltaT ;
+// die hier nur zum debuggen...
+		PSum = up*up/(R_p) - ( G_b + Gp )*deltaT - PStr + `Gmin*deltaT;;
+		PHeiz = up*up/(R_p);
+		PLeit = ( G_b + Gp )*deltaT;
+		PSonst = `Gmin*deltaT ;
 
 
 		I(ndd) <+ -1*V(ndd,nout)/Rnull - V(ndd,pout)/R_k ;

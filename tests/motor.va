@@ -44,7 +44,7 @@ module motor(p1,p3,sens);
 		I(res) <+ (V(res) - Omega(t1) * k_m) / r_m;
 		Tau(t1) <+ - I(res) + 0*V(res); // BUG
 		Tau(t1) <+ - P_fric;
-		Tau(t1) <+ - ddt(R_inertia*Omega(t1)); // BUG (see BUGS)
+		Tau(t1) <+ - 1e3* ddt(1e-3*R_inertia*Omega(t1)); // BUG (see BUGS)
 		omega = Omega(t1);
 
 		V(sens) <+ Omega(t1)/500;

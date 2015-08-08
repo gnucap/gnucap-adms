@@ -77,12 +77,48 @@
 <admst:variable name="str_res_version" select=""/>
 <admst:variable name="str_res_hxx_ac" select=""/>
 <admst:variable name="str_res_hxx_tr" select=""/>
+<admst:variable name="sourcebranch" select="UNSET"/>
 
 <admst:value-to select="/simulator/package_name" value="@PACKAGE_NAME@"/>
 <admst:value-to select="/simulator/package_tarname" value="@PACKAGE_TARNAME@"/>
 <admst:value-to select="/simulator/package_version" value="@PACKAGE_VERSION@"/>
 <admst:value-to select="/simulator/package_string" value="@PACKAGE_STRING@"/>
 <admst:value-to select="/simulator/package_bugreport" value="@PACKAGE_BUGREPORT@"/>
+
+<!-- a run time pointer to the corresponding source or probe -->
+<admst:template match="brp">
+  <admst:return test="adms[datatypename='branch']" string="yes"
+                name="_br_%(pnode)_%(nnode)"/>
+  <admst:return test="adms[datatypename='source']" string="yes"
+                name="_br_%(branch/pnode)_%(branch/nnode)"/>
+  <admst:return test="adms[datatypename='probe'] " string="yes"
+                name="_br_%(branch/pnode)_%(branch/nnode)"/>
+  <admst:return test="adms[datatypename='contribution'] " string="yes"
+                name="_br_%(lhs/branch/pnode)_%(lhs/branch/nnode)"/>
+</admst:template>
+
+<!-- a run time "iterator" (node_t) to a node -->
+<admst:template match="nnn">
+  <admst:return test="[grounded='yes']" string="yes"
+            	 name="_nGND"/>
+  <admst:return test="[grounded='no']" string="yes"
+            	 name="_n[n_%(.)]"/>
+</admst:template>
+
+
+
+<admst:template match="findshorts">
+  <admst:variable name="modulehere" path="."/>
+  <!-- these ought to be the "I" branches on rhs -->
+  <admst:for-each select="$modulehere/probe[nature=discipline/flow]/branch">
+    <admst:variable name="Pn" path="pnode"/>
+    <admst:variable name="Nn" path="nnode"/>
+    <!-- filter out those not occuring on lhs -->
+    <admst:if test="[0=count($modulehere/source/branch[pnode=$(Pn) and nnode=$(Nn)])]">
+      <admst:push into="$(short)" select="." onduplicate="ignore"/>
+    </admst:if>
+  </admst:for-each>
+</admst:template>
 
 <!-- create list for initial conditions, for now. only very specific patterns are supported -->
 <!-- maybe can be cleared with: <admst:variable select="adms_ic_list" value="" /> -->
@@ -153,7 +189,12 @@
   <admst:variable name="ddts" select="%(expression/function[name='ddt' and class='operator'])"/>
   <admst:variable name="idts" select="%(expression/function[name='idt' and class='operator'])"/>
 
-  <admst:variable name="has_sckt" select="%(count(instance))"/>
+  <admst:new datatype="list" arguments="branch">
+	  <admst:variable name="short"/>
+  </admst:new>
+  <admst:apply-templates select="." match="findshorts"/>
+
+  <admst:variable name="sckt_size" select="%(count(instance) + count($(short)) + count(source))"/>
 
   <admst:new datatype="list" arguments="fnoise"><admst:variable name="fnoise" select="%(.)"/></admst:new>
   <admst:new datatype="list" arguments="tnoise"><admst:variable name="tnoise" select="%(.)"/></admst:new>
@@ -294,6 +335,13 @@
 #ifndef _$(filename)_header__
 #define _$(filename)_header__
 <admst:for-each select="/module[not (nilled(analog) and nilled(instance))]">
+
+
+  <admst:new datatype="list" arguments="branch">
+	  <admst:variable name="short"/>
+  </admst:new>
+  <admst:apply-templates select="." match="findshorts"/>
+
   <admst:apply-templates select="." match="ddticcollect"/>
 
   <admst:value-of select="attribute[name='ngspicename']/value"/>
@@ -304,7 +352,7 @@
   <admst:variable name="_num_stamp_nodes" select="%(count(node[grounded='no' and discipline/name!='degradational']))"/>
   <admst:variable name="ddts" select="%(expression/function[name='ddt' and class='operator'])"/>
   <admst:variable name="idts" select="%(expression/function[name='idt' and class='operator'])"/>
-  <admst:variable name="has_sckt" select="%(count(instance))"/>
+  <admst:variable name="sckt_size" select="%(count(instance) + count($(short)) + count(source))"/>
 
 
 // customization - gnucap specific constants
@@ -471,6 +519,18 @@ class $(MODEL_NAME) : public MODEL_CARD {
 
 class $(DEV_NAME) : public ADMS_BASE
 {
+	private: // branches
+    <admst:for-each select="branch">
+      // %(.)
+    </admst:for-each>
+	private: // sources
+    <admst:for-each select="source">
+      // %(.)
+    </admst:for-each>
+	private: // probes
+    <admst:for-each select="probe">
+      // %(.)
+    </admst:for-each>
 	private:
 		std::string _modelname;
 		node_t _nodes[ %(count(node[grounded='no'])) ];
@@ -525,7 +585,7 @@ class $(DEV_NAME) : public ADMS_BASE
 		bool tr_needs_eval()const;
 		bool do_tr();
 		void tr_load();
-<admst:if test="[$has_sckt!=0]">
+<admst:if test="[$sckt_size!=0]">
 		void tr_queue_eval();
 </admst:if>
 		void tr_eval();
@@ -970,15 +1030,88 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
 			return true;
 		}
   </admst:for-each>
-// -------------------------------------------------------------------------- //
+// ----- netlist ------------ //
 	private: // subdevices
 <admst:for-each select="instance">
 		COMPONENT* _%(name);
 </admst:for-each>
+  <admst:if test="[(count($(short)))!=0]">
+	private: // short %(count($(short)))
+	 <admst:for-each select="$(short)">
+		COMPONENT* %(brp(.)); // %(.)
+    </admst:for-each>
+  </admst:if>
+	private: // controlled potential sources
+  <admst:for-each select="source[nature=discipline/potential]">
+    <admst:variable  name="B" select="%(branch)"/>
+		COMPONENT* %(brp(.));
+		double %(brp(.))_xxx[
+		    + 2 // constant and self admittance
+		    + %(count(probe[nature=discipline/potential])) // V transadmittance
+		    + 2*%(count(probe[nature=discipline/flow and branch!=$B])) // I transadmittance
+      ];
+		double %(brp(.))_xxx_old[
+		    + 2 // constant and self admittance
+		    + %(count(probe[nature=discipline/potential])) // V transadmittance
+		    + 2*%(count(probe[nature=discipline/flow and branch!=$B])) // I transadmittance
+      ];
+		enum{
+			P_%(brp($(B)))_const,
+			P_%(brp($(B)))_%(brp($(B)))_%(discipline/flow/access)
+      <admst:for-each select="probe[branch!=$B and nature=discipline/potential]">,
+			P_%(brp($(B)))_%(brp(.))_%(nature/access) /* %(adms/id(.)) */
+      </admst:for-each>
+      <admst:for-each select="probe[branch!=$B and nature=discipline/flow]">,
+			P_%(brp($(B)))_%(brp(.))_%(nature/access)_val_
+      </admst:for-each>
+      <admst:for-each select="probe[branch!=$B and nature=discipline/flow]">,
+			P_%(brp($(B)))_%(brp(.))_%(nature/access) /* %(adms/id(.)) */
+      </admst:for-each>
+		};
+    <admst:if test="[count(probe[branch!=$B])!=0]">
+// ...
+    </admst:if>
+  </admst:for-each>
+// ==========================================
+	private: // controlled current sources BUG: repeating the above, really?
+  <admst:for-each select="source[nature=discipline/flow]">
+    <admst:variable  name="B" select="%(branch)"/>
+		COMPONENT* %(brp(.)); // %(.)
+		double %(brp(.))_xxx[
+		    + 2 // constant and self admittance
+		    + %(count(probe[nature=discipline/potential])) // V transadmittance
+		    + 2*%(count(probe[nature=discipline/flow])) // I transadmittance
+      ];
+		double %(brp(.))_xxx_old[
+		    + 2 // constant and self admittance
+		    + %(count(probe[nature=discipline/potential])) // V transadmittance
+		    + 2*%(count(probe[nature=discipline/flow])) // I transadmittance
+      ];
+		enum{
+			P_%(brp($(B)))_const,
+			P_%(brp($(B)))_%(brp($(B)))_%(discipline/potential/access)
+      <admst:for-each select="probe[branch!=$B and nature=discipline/potential]">,
+			P_%(brp($(B)))_%(brp(.))_%(nature/access) /* %(adms/id(.)) */
+      </admst:for-each>
+      <admst:for-each select="probe[branch!=$B and nature=discipline/flow]">,
+			P_%(brp($(B)))_%(brp(.))_%(nature/access)_val_
+      </admst:for-each>
+      <admst:for-each select="probe[branch!=$B and nature=discipline/flow]">,
+			P_%(brp($(B)))_%(brp(.))_%(nature/access) /* %(adms/id(.)) */
+      </admst:for-each>
+		};
+    </admst:for-each>
 
 #ifndef NDEBUG
 		unsigned _loaditer;
 #endif
+	private: // ops
+<admst:if test="[count($ddts)!=0]">
+		double _CKTag0;
+</admst:if>
+<admst:if test="[count($idts)!=0]">
+		double _CKTga0;
+</admst:if>
 }; // $(DEV_NAME)
 // ------------------------------------------------------------------------ //
 // ------------------------------------------------------------------------ //
@@ -1421,18 +1554,24 @@ and name!='initializeInstance')]">
 #include &lt;e_compon.h&gt;
 #include &lt;e_adms.h&gt;
 #include &lt;u_parameter.h&gt;
+#include &lt;e_admsrc.h&gt;
+
 namespace {
 #include &quot;$(filename).h&quot;
 
 using namespace std;
 <admst:for-each select="/module[not (nilled(analog) and nilled(instance))]">
   <admst:apply-templates select="." match="ddticcollect"/>
+  <admst:new datatype="list" arguments="branch">
+	  <admst:variable name="short"/>
+  </admst:new>
+  <admst:apply-templates select="." match="findshorts"/>
   <admst:variable name="ddts" select="%(expression/function[name='ddt' and class='operator'])"/>
   <admst:variable name="idts" select="%(expression/function[name='idt' and class='operator'])"/>
   <admst:variable name="_num_states" select="%(count($ddts)) + %(count($idts))"/>
 
-//analog function stuff
-  <admst:variable name="has_sckt" select="%(count(instance))"/>
+  //analog function stuff
+  <admst:variable name="sckt_size" select="%(count(instance) + count($(short)) + count(source))"/>
 
   <admst:value-of select="attribute[name='ngspicename']/value"/>
   <admst:variable name="module" select="%s"/>
@@ -1654,7 +1793,13 @@ $(DEV_NAME)::$(DEV_NAME)()
 </admst:for-each>
     _states_q1(NULL)
 <admst:for-each select="instance">,
-    _%(name)(0)
+    _%(name)(NULL)
+</admst:for-each>
+<admst:for-each select="$(short)">,
+	%(brp(.))(NULL) /* %(.) */
+</admst:for-each>
+<admst:for-each select="source">,
+	%(brp(.))(NULL) /* %(.) */
 </admst:for-each>
 {
   <admst:if test="[count(jacobian)!=0]">
@@ -1687,6 +1832,18 @@ $(DEV_NAME)::$(DEV_NAME)(const $(DEV_NAME)&amp; p) :
     _states_q1(NULL)
 <admst:for-each select="instance">,
     _%(name)(0)
+</admst:for-each>
+<admst:for-each select="$(short)">,
+	%(brp(.))(NULL) /* short */
+</admst:for-each>
+<admst:for-each select="contribution[lhs/nature=lhs/discipline/potential]">,
+	// %(brp(.))(NULL)
+</admst:for-each>
+<admst:for-each select="contribution[lhs/nature=lhs/discipline/flow]">,
+	//	%(brp(.))(NULL)
+</admst:for-each>
+<admst:for-each select="source">,
+	%(brp(.))(NULL) /* %(.) */
 </admst:for-each>
 {
   <admst:if test="[count(jacobian)!=0]">
@@ -1897,6 +2054,107 @@ void $(DEV_NAME)::expand()
 			assert(_n[ii].n_());
 #endif
 		}
+		// short circuits as in V(a) &lt;+ I(b)
+<admst:for-each select="$(short)">
+		if (!%(brp(.))) { untested();
+
+			const CARD* p = device_dispatcher["resistor"];
+			if(!p){
+				error(bDANGER, "cannot instanciate resistor. load module?");
+			}else{
+				%(brp(.)) = dynamic_cast&lt;COMPONENT*&gt;(p->clone());
+				assert(%(brp(.)));
+				assert(%(brp(.))->has_inode() || %(brp(.))->has_iv_probe());
+				// %(brp(.))->set_slave(); hmmm...
+				subckt()->push_front(%(brp(.)));
+			}
+			assert(p);
+		}else{ untested();
+		}
+		{ untested();
+			unsigned c = %(count(rhs/probe[nature=discipline/potential]));
+			node_t nodes[] = {
+				%(nnn(lhs/branch/pnode)), %(nnn(lhs/branch/nnode))
+			};
+			%(brp(.))->set_parameters(
+			    "i_%(branch/pnode/name)_%(branch/nnode/name)", this, NULL, /*value*/ 0.,
+			    0, NULL, 2, nodes); // %(.)
+			%(brp(.))->set_param_by_name("r", "0.");
+		}
+</admst:for-each>
+		// voltage contributions
+<admst:for-each select="source[nature=discipline/potential]">
+		if (!%(brp(.))) { untested();
+			const CARD* p = device_dispatcher["adms_v"];
+			if(!p){ untested();
+				error(bDANGER, "cannot instanciate voltage source adms_v. load module?");
+			}else{ untested();
+				%(brp(.)) = dynamic_cast&lt;COMPONENT*&gt;(p->clone());
+				assert(%(brp(.)));
+				%(brp(.))->set_slave();
+				subckt()->push_front(%(brp(.)));
+			}
+		}else{ untested();
+		}
+</admst:for-each>
+		// current contributions as in I &lt;+ ...
+<admst:for-each select="source[nature=discipline/flow]">
+		if (!%(brp(.))) { untested();
+			const CARD* p = device_dispatcher["adms_i"];
+			if(!p){ untested();
+				error(bDANGER, "cannot instanciate current source adms_i. load module?");
+			}else{ untested();
+				%(brp(.)) = dynamic_cast&lt;COMPONENT*&gt;(p->clone());
+				assert(%(brp(.)));
+				%(brp(.))->set_slave();
+				subckt()->push_front(%(brp(.)));
+			}
+		}else{ untested();
+		}
+</admst:for-each>
+		// contributions, setup
+<admst:for-each select="source">
+  <admst:variable name="B" select="%(branch)"/>
+		assert(%(brp(.)));
+		{ // %(.) $(B)
+  <admst:for-each select="rhs/probe">
+			// rhs: %(.) %(nature) %(discipline/flow)
+  </admst:for-each>
+			unsigned c = %(count(rhs/probe[nature=discipline/potential and branch!=$B]));
+			unsigned f = %(count(rhs/probe[nature=discipline/flow and branch!=$B]));
+			node_t nodes[] = {
+				%(nnn(lhs/branch/pnode)), %(nnn(lhs/branch/nnode))
+  <admst:for-each select="rhs/probe[nature=discipline/potential and branch!=$B]">,
+				%(nnn(branch/pnode)), %(nnn(branch/nnode))
+  </admst:for-each>
+  <admst:for-each select="rhs/probe[nature=discipline/flow]">
+	  // _n[n_%(branch/pnode/name)], _n[n_%(branch/nnode/name)] // no. use the probes directly
+  </admst:for-each>
+			};
+  <admst:for-each select="rhs/probe[nature=discipline/flow]">
+    <admst:variable  name="BB" select="%(branch)"/>
+			assert(%(brp(.)));
+  </admst:for-each>
+			// n_curr %(count(rhs/probe[nature=discipline/flow and branch!=$B]))
+			COMPONENT*
+  <admst:text format="*brs=NULL;" test="[0=count(rhs/probe[nature=discipline/flow and branch!=$B])]"/>
+  <admst:if test="[0!=count(rhs/probe[nature=discipline/flow and branch!=$B])]">
+			brs[] = {
+    <admst:join separator="," select="rhs/probe[nature=discipline/flow and branch!=$B]">
+				%(brp(.)) /* %(.) me: $B */
+    </admst:join>
+			};
+  </admst:if>
+			ADMS_SOURCE* B = prechecked_cast&lt;ADMS_SOURCE*&gt;(%(brp(.)));
+			assert(B);
+			B->set_parameters_va(
+			    "v_%(lhs/branch/pnode/name)_%(lhs/branch/nnode/name)",
+			    this, NULL, 0., 2+c+f,
+			    %(brp(.))_xxx, %(brp(.))_xxx_old,
+			    2*(1+c), nodes, f, brs); // %(.)
+		}
+</admst:for-each>
+		// netlist
 <admst:for-each select="instance">
 		if (!_%(name)) {
 			trace1("$(DEV_NAME)::expand, instanciating", hp(_%(name)));
@@ -1921,7 +2179,7 @@ void $(DEV_NAME)::expand()
 			}
 			assert(_%(name));
 			trace0("$(DEV_NAME)::expand, pushing");
-			subckt()-&gt;push_front(_%(name));
+			subckt()->push_front(_%(name));
 		}
 		{
 			node_t nodes[] = {
@@ -1941,7 +2199,8 @@ void $(DEV_NAME)::expand()
 </admst:for-each>
 	}else{ untested();
 	}
-  <admst:if test="[$has_sckt!=0]">
+	// sckt_size $sckt_size
+  <admst:if test="[$sckt_size!=0]">
 	assert(subckt());
 	trace0("$(DEV_NAME)::expand: expanding netlist");
 	subckt()->expand();
@@ -1965,18 +2224,21 @@ void $(DEV_NAME)::precalc_first()
       </admst:when>
     </admst:choose>
   </admst:for-each>
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	if(subckt()) subckt()-&gt;precalc_first();
   </admst:if>
 // 	&lt;admst:for-each select=&quot;variable[input='yes']&quot;&gt;
 // 	 %(name).e_val(0,scope());
 // 	&lt;/admst:for-each&gt;
+  <admst:for-each select="source">
+	  //	%(brp(.))->precalc_first();
+  </admst:for-each>
 }
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::precalc_last()
 {
 	ADMS_BASE::precalc_last();
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	if(subckt()) subckt()-&gt;precalc_last();
   </admst:if>
 }
@@ -2001,7 +2263,7 @@ void $(DEV_NAME)::tr_iwant_matrix()
 {
 	trace0("$(DEV_NAME)::tr_iwant_matrix()");
 	assert(is_device());
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	if (subckt()) {
       subckt()->tr_iwant_matrix();
 	}else{ // untested();
@@ -2090,7 +2352,7 @@ void $(DEV_NAME)::ac_iwant_matrix()
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::tr_begin()
 {
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	subckt()->tr_begin();
   </admst:if>
 	const $(COMMON_NAME)* c = prechecked_cast&lt;const $(COMMON_NAME)*&gt;(common());
@@ -2141,7 +2403,7 @@ void $(DEV_NAME)::tr_begin()
 
 	// load static ??
         //&lt;admst:text format=&quot;\\n\\tfor(int i=0; i&lt;$_num_stamp_nodes; i++)&quot;/&gt;
-        //	tr_load_source_point(_n[i], &amp;(it0[i]), &amp;(it1[i]));
+		  //	tr_load_source_point(_n[i], &amp;(it0[i]), &amp;(it1[i]));
         //
 
 #ifdef load_in_begin
@@ -2166,7 +2428,7 @@ void $(DEV_NAME)::tr_begin()
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::dc_advance()
 {
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	subckt()-&gt;dc_advance();
   </admst:if>
 	trace0(&quot;$(DEV_NAME)::dc_advance&quot;);
@@ -2197,7 +2459,7 @@ void $(DEV_NAME)::dc_advance()
 #ifdef HAVE_TT
 void $(DEV_NAME)::tt_accept()
 {
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	subckt()->tt_accept();
   </admst:if>
 }
@@ -2205,14 +2467,14 @@ void $(DEV_NAME)::tt_accept()
 #if HAVE_TT + 0 == 2
 void $(DEV_NAME)::do_tt()
 {
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	subckt()->do_tt();
   </admst:if>
 }
 #else
 void $(DEV_NAME)::stress_apply()
 {
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	subckt()->stress_apply();
   </admst:if>
 }
@@ -2220,7 +2482,7 @@ void $(DEV_NAME)::stress_apply()
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::tt_advance()
 {
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	subckt()->tt_advance();
   </admst:if>
 	trace3("$(DEV_NAME)::tt_advance", short_label(), _sim->_time0, _sim->_dt0);
@@ -2250,7 +2512,7 @@ void $(DEV_NAME)::tt_begin()
 {
 	trace1("$(DEV_NAME)::tt_begin", _sim->_Time0);
 	ADMS_BASE::tt_begin();
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	subckt()-&gt;tt_begin();
   </admst:if>
 }
@@ -2259,7 +2521,7 @@ void $(DEV_NAME)::tr_stress_last()
 {
 	trace1("$(DEV_NAME)::tr_stress_last", _sim->_Time0);
 	ADMS_BASE::tr_stress_last();
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	subckt()-&gt;tr_stress_last();
   </admst:if>
 }
@@ -2268,14 +2530,14 @@ void $(DEV_NAME)::tr_stress_last()
 void $(DEV_NAME)::tr_restore()
 {
 	ADMS_BASE::tr_restore(); internal_precalc();
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	subckt()-&gt;tr_restore();
   </admst:if>
 }
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::tr_advance()
 {
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	subckt()->tr_advance();
   </admst:if>
   trace3("$(DEV_NAME)::tr_advance", _sim->_time0, _time[0], _time[1]);
@@ -2310,7 +2572,7 @@ void $(DEV_NAME)::tr_advance()
 void $(DEV_NAME)::tr_regress()
 {
 	ADMS_BASE::tr_regress();
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	assert(subckt()); subckt()->tr_regress();
   </admst:if>
 }
@@ -2322,10 +2584,10 @@ bool $(DEV_NAME)::tr_needs_eval()const
 		return false; // needed?
 	}else if ( !OPT::lcbypass
 	  || !converged()
-	  || _sim->is_advance_or_first_iteration() ) { untested();
+	  || _sim->is_advance_or_first_iteration() ) { itested();
 		return true;
 	}
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	if( subckt()->tr_needs_eval()){
 		// return true; no (not slave)
 	}
@@ -2385,7 +2647,7 @@ bool $(DEV_NAME)::do_tr()
 #endif
 
 	// convergence check -- gnucap method
-  <admst:if test="[$has_sckt=0]">
+  <admst:if test="[$sckt_size=0]">
 	set_converged(true);
   </admst:if>
 	if (_sim-&gt;analysis_is_tran_dynamic())
@@ -2396,11 +2658,12 @@ bool $(DEV_NAME)::do_tr()
 		tr_eval(); // if needed??
 	}
 
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	set_converged(subckt()->do_tr());
   </admst:if>
-	if(converged()){ untested();
+	if(converged()){ itested();
 		set_converged(conv_check());
+	}else{ untested();
 	}
 
 
@@ -2429,7 +2692,7 @@ bool $(DEV_NAME)::do_tr()
 
   store_values();
 
-  if (needs_load) q_load();
+  //  if (needs_load) q_load();
   trace2(&quot;$(DEV_NAME)::do_tr done &quot;, converged(), needs_load );
   return converged();
 }
@@ -2437,7 +2700,7 @@ bool $(DEV_NAME)::do_tr()
 void $(DEV_NAME)::keep_ic()
 {
 #ifdef HAVE_KEEPCOEFF
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	subckt()-&gt;keep_ic();
   </admst:if>
 #endif
@@ -2475,7 +2738,7 @@ void $(DEV_NAME)::store_values()
 
   // ELEMENT does y[0] -&gt; y_1
 }
-<admst:if test="[$has_sckt!=0]">
+<admst:if test="[$sckt_size!=0]">
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::tr_queue_eval()
 {
@@ -2497,7 +2760,7 @@ void $(DEV_NAME)::tr_load()
   _loaditer = _sim->iteration_tag();
 #endif
 
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	if( !OPT::traceload || !_sim->is_inc_mode()) { untested();
 		subckt()->tr_load();
 	} else {
@@ -2508,7 +2771,8 @@ void $(DEV_NAME)::tr_load()
           /// BUG: only dynamic!
 	for(int i=0; i&lt;$_num_stamp_nodes; i++){
 		trace3(&quot;$(DEV_NAME)::tr_load&quot;, i,  (it0[i]),  (it1[i]));
-		tr_load_source_point(_n[i], &(it0[i]), &amp;(it1[i]));
+		//		tr_load_source_point(_n[i], &(it0[i]), &amp;(it1[i]));
+		  it1[i] = it0[i];
 
 		trace3("$(DEV_NAME)::tr_load done&quot;, &quot;i&quot;,     (it0[i]),  (it1[i]));
 	}
@@ -2518,7 +2782,7 @@ void $(DEV_NAME)::tr_load()
   <admst:for-each select="jacobian[row/discipline/name!='degradational' and column/discipline/name!='degradational']">
 	if( m_required[m_%(row/name)_%(column/name)] ){
 		trace2("$(DEV_NAME)::tr_load m_%(row/name)_%(column/name)", m_entries[m_%(row/name)_%(column/name)], m_entries_old[m_%(row/name)_%(column/name)]);
-		tr_load_point(_N(%(row/name)), _N(%(column/name)), &amp;(m_entries[m_%(row/name)_%(column/name)]), &amp;(m_entries_old[m_%(row/name)_%(column/name)]));
+		// tr_load_point(_N(%(row/name)), _N(%(column/name)), &amp;(m_entries[m_%(row/name)_%(column/name)]), &amp;(m_entries_old[m_%(row/name)_%(column/name)]));
 	}
   </admst:for-each>
 
@@ -2547,16 +2811,15 @@ TIME_PAIR $(DEV_NAME)::tr_review()
 	double timestep = NEVER;
 
     //----- (DEVtrunc)
-	<admst:for-each select="$(ddts)">
+  <admst:for-each select="$(ddts)">
 	{
 		std::valarray&lt;FPOLY1&gt; q(OPT::_keep_time_steps);
 
-		for (int ii = 0; ii &lt; OPT::_keep_time_steps; ++ii)
-		{
-		assert(_states[ii]);
-		q[ii].x  = NOT_VALID;
-		q[ii].f0 = _states[ii][ _ddt_%(adms/id(.)) ];
-		q[ii].f1 = NOT_VALID;
+		for (int ii = 0; ii &lt; OPT::_keep_time_steps; ++ii) {
+			assert(_states[ii]);
+			q[ii].x  = NOT_VALID;
+			q[ii].f0 = _states[ii][ _ddt_%(adms/id(.)) ];
+			q[ii].f1 = NOT_VALID;
 		}
 
 		timestep = std::min(tr_review_trunc_error(&amp;q[0]), timestep);
@@ -2565,8 +2828,8 @@ TIME_PAIR $(DEV_NAME)::tr_review()
 		   _states[0][ _ddt_%(adms/id(.)) + 1 ]
 	  );
 	}
-	</admst:for-each>
-    //-----
+  </admst:for-each>
+	//-----
 
 #ifdef USE_DTIME
 	_dt_by._error_estimate = tr_review_check_and_convert(timestep);
@@ -2576,7 +2839,7 @@ TIME_PAIR $(DEV_NAME)::tr_review()
 	_time_by._event = NEVER;
 #endif
 
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	assert(subckt());
 #ifdef USE_DTIME
 	_dt_by.
@@ -2617,7 +2880,7 @@ TIME_PAIR $(DEV_NAME)::tr_review()
 void $(DEV_NAME)::tr_accept()
 {
 	$(DEV_NAME)* d = this; USE(d);
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	subckt()->tr_accept();
   </admst:if>
   <admst:apply-templates select="." match="commonmodel"/>
@@ -2625,7 +2888,7 @@ void $(DEV_NAME)::tr_accept()
   trace0(&quot;$(DEV_NAME)::tr_accept&quot;);
 
   <admst:if test="[count($ddts)!=0]">
-	double CKTag0 = 0; // incomplete?
+	_CKTag0 = 0; // incomplete? BUG
   </admst:if>
   <admst:if test="[count($idts)!=0]">
 	double CKTga0 = 0; // incomplete?
@@ -2754,6 +3017,20 @@ void $(DEV_NAME)::do_ac()
 	std::fill_n(m_entries, %(count(jacobian)), 0);
 	std::fill_n(m_entries_old, %(count(jacobian)), 0);
   </admst:if>
+  <admst:for-each select="source">
+	  std::fill_n(%(brp(.))_xxx,
+		    + 2 // constant and self admittance
+		    + %(count(probe[nature=discipline/potential])) // V
+			 + %(count(probe[nature=discipline/flow and branch!=$B])) // I val (unnecessary?)
+			 + %(count(probe[nature=discipline/flow and branch!=$B])) // I raw
+	  , 0.);
+	  std::fill_n(%(brp(.))_xxx_old,
+		    + 2 // constant and self admittance
+		    + %(count(probe[nature=discipline/potential])) // V
+			 + %(count(probe[nature=discipline/flow and branch!=$B])) // I val (unnecessary?)
+			 + %(count(probe[nature=discipline/flow and branch!=$B])) // I raw
+	  , 0.);
+  </admst:for-each>
 
   //pzLoad(_sim-&gt;_jomega);
 
@@ -2766,11 +3043,11 @@ void $(DEV_NAME)::do_ac()
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::ac_load()
 {
-  <admst:if test="[$has_sckt!=0]">
+  <admst:if test="[$sckt_size!=0]">
 	subckt()-&gt;ac_load();
   </admst:if>
-	for(int i=0; i&lt;$_num_stamp_nodes; i++)
-		ac_load_source_point(_n[i], COMPLEX(it0[i], it1[i]));
+  //	for(int i=0; i&lt;$_num_stamp_nodes; i++)
+  //		ac_load_source_point(_n[i], COMPLEX(it0[i], it1[i]));
 
   <admst:for-each select="jacobian">
   <admst:value-of select="column/name"/>
@@ -2781,8 +3058,9 @@ void $(DEV_NAME)::ac_load()
   <admst:value-of select="row/name"/>
   <admst:value-of select="column/name"/>
   <admst:value-of select="row/name"/>
-	if( m_required[m_%s_%s] )
-		ac_load_point(_N(%s), _N(%s), COMPLEX(m_entries[m_%s_%s], m_entries_old[m_%s_%s] * _sim-&gt;_jomega.imag()));
+  //	if( m_required[m_%s_%s] ) {
+  //	ac_load_point(_N(%s), _N(%s), COMPLEX(m_entries[m_%s_%s], m_entries_old[m_%s_%s] * _sim-&gt;_jomega.imag()));
+  //	}
   </admst:for-each>
 }
 
@@ -2829,16 +3107,24 @@ void $(DEV_NAME)::guesstopology ()
 // -------------------------------------------------------------------------- //
 bool $(DEV_NAME)::conv_check()const
 {
+
 <admst:if test="[$(_has_states)='true']">
-	for (unsigned ii = 0; ii &lt; _num_states; ++ii) {
-		if (!::conchk(_states[0][2*ii], _states_q1[ii])) // BUG: use discipline
+	for (unsigned ii = 0; ii &lt; _num_states; ++ii) { untested();
+		if (!::conchk(_states[0][2*ii], _states_q1[ii])) { untested();
+			// BUG: use discipline
 			return false;
+		}
 	}
 </admst:if>
 
+	return true; // use subdevices.
+
 	for(unsigned i=0; converged() &amp;&amp; i&lt;$_num_stamp_nodes; i++) {
 		bool conv = ::conchk(it0[i], it1[i]); // BUG: use discipline
-		if (!conv) return false;
+		if (!conv) {
+			trace4("conv check: not converged", i, it0[i], it1[i], _sim-&gt;iteration_number() );
+			return false;
+		}
 	}
 
   <admst:if test="[count(jacobian)!=0]">
@@ -2846,7 +3132,7 @@ bool $(DEV_NAME)::conv_check()const
 	for(unsigned i=0; converged() &amp;&amp; i&lt;%(count(jacobian)); i++) {
 		bool conv = ::conchk(m_entries[i], m_entries_old[i]); // BUG: use discipline
 		if (!conv) {
-			trace4(&quot;conv check: not converged&quot;, i, m_entries[i], m_entries_old[i], _sim-&gt;iteration_number() );
+			trace4("conv check: not converged", i, m_entries[i], m_entries_old[i], _sim-&gt;iteration_number() );
 			return false;
 		}
 	}
@@ -2871,7 +3157,9 @@ void $(DEV_NAME)::ac_eval()
 	const $(MODEL_NAME)* m = prechecked_cast&lt;const $(MODEL_NAME)*&gt;(c-&gt;model());
 	USE(m); assert(m);
 
-	double CKTag0 = 1.; USE(CKTag0); // BUG (necessary?)
+<admst:if test="[count($ddts)!=0]">
+	_CKTag0 = 1.; USE(_CKTag0); // BUG (necessary?)
+</admst:if>
 	double CKTga0 = 1.; USE(CKTga0); // BUG (necessary?)
 	double ddtone = 1.; USE(ddtone); // not necessary in the end?
 
@@ -2942,6 +3230,16 @@ void $(DEV_NAME)::tr_eval()
 	std::fill_n(m_entries, %(count(jacobian)), 0);
   </admst:if>
 
+  <admst:for-each select="source">
+	  std::fill_n(%(brp(.))_xxx,
+		    + 2 // constant and self admittance
+		    + %(count(probe[nature=discipline/potential])) // V
+			 + %(count(probe[nature=discipline/flow and branch!=$B])) // I val (unnecessary?)
+			 + %(count(probe[nature=discipline/flow and branch!=$B])) // I raw
+	  , 0.);
+  </admst:for-each>
+
+
 <admst:apply-templates select="analog/code[datatypename='block']/variable" match="generate_c:declare_variable"/>
 
 	const $(COMMON_NAME)* c = prechecked_cast&lt;const $(COMMON_NAME)*&gt;(common());
@@ -2956,12 +3254,16 @@ void $(DEV_NAME)::tr_eval()
 	assert(_dt == _dt);
 
   <admst:if test="[count($ddts)!=0]">
-	double CKTag0 = tr_c_to_g(1., 1.);
+	if(_sim->analysis_is_tran_restore()){
+	}else{
+		_CKTag0 = tr_c_to_g(1., 1.);
+	}
   </admst:if>
 
   <admst:if test="[count($idts)!=0]">
 	double CKTga0;
-	if( _sim->analysis_is_static() ) {
+	if(_sim->analysis_is_tran_restore()){ incomplete();
+	}else if( _sim->analysis_is_static() ) {
 		CKTga0 = 0;
 	} else {
 		CKTga0 = _dt/2;
@@ -2994,6 +3296,11 @@ void $(DEV_NAME)::tr_eval()
 
 	// this is what cap does.
 	set_converged(conv_check());
+	trace2("tr_eval", long_label(), converged());
+
+  <admst:for-each select="source">
+	  // %(brp(.))->do_tr();
+  </admst:for-each>
 }
 
 // -------------------------------------------------------------------------- //
@@ -5106,15 +5413,14 @@ EXIT_IF_ISNAN(__%s_%s); // B
   <!-- MOVE TO IMPLICIT PREPROCESSOR  (does not even work, why?!) -->
   <admst:if test="[branch/discipline/flow=nature]">
     <admst:value-to select="source/type" string="fs"/>
+    <admst:value-to select="hint" string="fs"/>
   </admst:if>
   <!-- UNTIL HERE -->
-  <admst:variable name="loss" select=""/>
-  <admst:variable name="loss" select="/*flowp*/ 1/OPT::shortckt * " test="[nature=discipline/flow]"/>
   <admst:choose>
     <admst:when test="branch/nnode[grounded='no']">
       <admst:value-of select="branch/nnode/name"/>
       <admst:value-of select="branch/pnode/name"/>
-      <admst:value-to select="/simulator/tmp" value=" /*probe*/ $loss BP(%s,%s)"/>
+		<admst:value-to select="/simulator/tmp" value=" /*probe*/ /*$(hint)*/ BP(%s,%s)"/>
     </admst:when>
     <admst:otherwise>
       <admst:value-of select="branch/pnode/name"/>
@@ -6166,24 +6472,6 @@ return
   <admst:variable name="MODEL_NAME" select="MODEL_%(upper-case(name))"/>
 
   <admst:open file="$(filename)_$(module)_tr.hxx">
-    <admst:for-each select="source[nature=discipline/potential]">
-		 // lossleft for pot  %(.)
-      <admst:apply-templates select="." match="lossleft" required="yes"/>
-
-    </admst:for-each>
-    <admst:for-each select="probe[nature=discipline/flow]">
-		 // probe %(.)
-
-      <admst:variable name="Pp" select="%(branch/pnode/name)"/>
-      <admst:variable name="Pn" select="%(branch/nnode/name)"/>
-
-		<admst:text test="[$eval_mode='tr']" format="\t\t_write_ptr($Pp, $Pp, 1/OPT::shortckt);\n"/>
-		<admst:text test="[$eval_mode='tr']" format="\t\t_write_ptr($Pn, $Pn, 1/OPT::shortckt);\n"/>
-		<admst:text test="[$eval_mode='tr']" format="\t\t_write_ptr($Pp, $Pn, -1/OPT::shortckt);\n"/>
-		<admst:text test="[$eval_mode='tr']" format="\t\t_write_ptr($Pn, $Pp, -1/OPT::shortckt);\n"/>
-
-    </admst:for-each>
-
     <admst:apply-templates select="analog/code" match="analog:evaluate" required="yes"/>
   </admst:open>
 </admst:for-each>
@@ -6201,6 +6489,14 @@ return
   <admst:variable name="idts" select="%(expression/function[name='idt' and class='operator'])"/>
 
   <admst:open file="$(filename)_$(module)_ac.hxx">
+    <admst:for-each select="source">
+	  std::fill_n(%(brp(.))_xxx,
+		    + 2 // constant and self admittance
+		    + %(count(probe[nature=discipline/potential])) // V
+			 + %(count(probe[nature=discipline/flow and branch!=$B])) // I val (unnecessary?)
+			 + %(count(probe[nature=discipline/flow and branch!=$B])) // I raw
+	  , 0.);
+    </admst:for-each>
     <admst:apply-templates select="analog/code" match="analog:evaluate" required="yes"/>
   </admst:open>
 </admst:for-each>
@@ -6263,7 +6559,7 @@ return
 <!-- ----------------------------------------------------------------- -->
 <!-- -------------------- analog//contribution ------------------------ -->
 <admst:template match="contribution">
-	{ // contribution
+	{ // contribution %(.)
 
   <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)contribution*\n"/>
   <admst:apply-templates select="rhs[not(nilled(function))]" match="function:derivate:precomputation"/>
@@ -7340,14 +7636,17 @@ return
 <!-- -------------------------------------------------- -->
 <admst:template match="probe">
   <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)probe*\n"/>
-<!-- MOVE TO IMPLICIT PREPROCESSOR  (does not even work, why?!) -->
-<admst:if test="[branch/discipline/flow=nature]">
-  <admst:value-to select="source/type" string="fs"/>
-</admst:if>
-<!-- UNTIL HERE -->
   <admst:variable name="loss" select=""/>
-  <admst:variable name="loss" select="/*flowp*/ 1/OPT::shortckt * " test="[nature=discipline/flow]"/>
+  <!-- breaks V(b)<+I(b) <admst:variable name="loss" select="/*flowp*/ 1/OPT::shortckt * " test="[nature=discipline/flow]"/> -->
+  <admst:variable name="loss" select="/*flowp*/" test="[nature=discipline/flow]"/>
   <admst:choose>
+    <admst:when test="[nature=discipline/flow]">
+    <admst:variable  name="B" select="%(branch)"/>
+	 <admst:variable name="e" select="AMPS(%(brp(.)))"/>
+    </admst:when>
+    <admst:when test="[nature=discipline/flow and source/nature=discipline/potential]">
+      <admst:variable name="e" select="(/* HERE */ BP(%(branch/pnode/name), %(branch/nnode/name)))"/>
+    </admst:when>
     <admst:when test="branch/nnode[grounded='no']">
       <admst:variable name="e" select="(/* treval */ $(loss) BP(%(branch/pnode/name), %(branch/nnode/name)))"/>
     </admst:when>
@@ -8271,7 +8570,7 @@ return
     <admst:when test="[$SkipFVariable='y']">
     </admst:when>
     <admst:when test="[name='ddt']">
-      <admst:variable name="ep" select="CKTag0 * ($xp)"/> <!-- ??? -->
+      <admst:variable name="ep" select="_CKTag0 * ($xp)"/> <!-- ??? -->
     </admst:when>
     <admst:when test="[name='idt']">
       <admst:variable name="ep" select="CKTga0 * ($xp)"/> <!-- ??? -->
@@ -8688,7 +8987,7 @@ return
           </admst:choose>
         </admst:for-each>
         %(variable:lhs($lhs)) = $allep;
-        <admst:text format="EXIT_IF_ISNAN(%(lhs/name)); //7622\n"/>
+        <admst:text format="EXIT_IF_ISNAN(%(variable:lhs(lhs))); //7622\n"/>
 		  <admst:text format="// #endif _DDX\n"/>
       </admst:when>
       <admst:otherwise>
@@ -8776,6 +9075,7 @@ return
   <admst:text test="rhs/function[class='builtin']" format="{\n"/>
   <admst:apply-templates select="rhs/function[class='builtin']" match="function:precomputation"/>
   <admst:apply-templates select="rhs[not(nilled(function))]" match="function:derivate:precomputation"/>
+  <admst:variable name="sourcebranch" select="%(lhs/branch)"/>
   <admst:variable name="sourcepnode" select="%(lhs/branch/pnode)"/>
   <admst:variable name="sourcennode" select="%(lhs/branch/nnode)"/>
   <admst:variable name="sourcepnodename" select="%($sourcepnode/name)"/>
@@ -8845,7 +9145,7 @@ return
 // contribution:nonoise %(.) dynamic %(dynamic)
 
   <admst:if test="rhs[not(nilled(function[class='builtin']))]">
-	{ // %(.) 7804
+	{ // builtin
 
     <admst:for-each select="rhs/function[class='builtin']">
       <admst:value-of select="position(.)-1"/>
@@ -8856,9 +9156,77 @@ return
 
 // done res %(dynamic)
 
+  <admst:variable name="sourcebranch" select="SET"/>
   <admst:apply-templates select="." match="residual_"/>
+  <admst:variable name="contrib" select="%(brp(.))_xxx"/>
+  <admst:variable  name="S" select="%(lhs/branch)"/>
+  <!--<admst:apply-templates select="." match="jacobian_"/>-->
 
-  <admst:for-each select="rhs/probe">
+  // iterating rhs potential probes for %(.)
+  <!--<admst:for-each select="rhs/probe[nature=../../lhs/discipline/potential]">-->
+  <admst:for-each select="rhs/probe[nature=discipline/potential]">
+    <admst:text format="\t// Rhs/probe: %(.) ../dynamic: %(../dynamic) ../../dynamic: %(../../dynamic)\n"/>
+    <admst:variable name="probepnode" select="%(branch/pnode)"/>
+    <admst:variable name="probennode" select="%(branch/nnode)"/>
+    <admst:variable name="probepnodename" select="%($probepnode/name)"/>
+    <admst:variable name="probennodename" select="%($probennode/name)"/>
+    <admst:variable name="pprobe" select="%(.)"/>
+    <admst:if test="[$eval_mode='ac' and ../../dynamic='yes']">
+      <admst:variable name="contrib" select="%(brp($(S)))_xxx_old"/>
+    </admst:if>
+
+    <admst:apply-templates select="../tree" match="subexpression:differentiate"/>
+
+    <admst:choose>
+      <admst:when test="../../lhs/branch/pnode[discipline/name='degradational']">
+		//skipping jacobian for degr node
+      </admst:when> <!--degradational-->
+      <admst:when test="branch/pnode[discipline/name='degradational']">
+		//skipping jacobian for degr node
+      </admst:when> <!--degradational-->
+		<admst:when test="..[dynamic='yes']">
+
+#ifndef NOJAC
+	{ // ?&lt;+ V in %(.) %(../dynamic)
+		double e = $ep;
+		double ceq;
+		ceq = e * BR($probepnodename, $probennodename);
+#ifdef HAVE_KEEPCOEFF
+		if (uic_now( $keepstatename )) { untested();
+			/* HACK. argh.*/
+			double _CKTag0 = 1.;
+			double e = $ep;
+			$contrib[0] -= e * BR($probepnodename, $probennodename);
+
+			$keepstatevar = 1;
+			e = $ep;
+			$contrib[P_%(brp($(S)))_%(brp(.))_%(nature/access)] -= e * OPT::keepcoeff;
+		} else
+#endif
+		{ untested();
+			$contrib[0] -= ceq;
+			$contrib[P_%(brp($(S)))_%(brp(.))_%(nature/access)] += e;
+		}
+	}
+#endif
+      </admst:when>
+      <admst:when test="..[dynamic='no']">
+	{ // ?&lt;+ V in %(.) %(../dynamic)
+		double e = $ep;
+		double ceq;
+		ceq = e * BR($probepnodename, $probennodename);
+		$contrib[0] -= ceq; // offset
+		$contrib[P_%(brp($(S)))_%(brp(.))_%(nature/access)] += e;
+	}
+      </admst:when>
+    </admst:choose>
+
+  </admst:for-each>
+
+  // I &lt+ I and V &lt+ I is the same eventually?
+  // I &lt+ I might not work yet (?)
+  <!--<admst:for-each select="rhs/probe[nature=../../lhs/discipline/flow]">-->
+  <admst:for-each select="rhs/probe[nature=discipline/flow]">
     <admst:text format="\t// Rhs/probe: %(.) ../dynamic: %(../dynamic) ../../dynamic: %(../../dynamic)\n"/>
     <admst:variable name="probepnode" select="%(branch/pnode)"/>
     <admst:variable name="probennode" select="%(branch/nnode)"/>
@@ -8867,26 +9235,28 @@ return
     <admst:variable name="pprobe" select="%(.)"/>
 
 	 <admst:apply-templates select="../tree" match="subexpression:differentiate"/>
-
-	 // e: $e
-	 // ep: $ep
-
-    <admst:if test="branch/pnode[grounded='no']"> <!-- Pp != GND, but why?-->
-      <admst:if test="../../lhs/branch/pnode[grounded='no']"> <!-- Sp != GND, but why? -->
-        <admst:apply-templates select="." match="jacobian_"/>
+			{ // I&lt;+ in %(.)
+				double e = $ep;
+				$contrib[P_%(brp($(S)))_%(brp(.))_%(nature/access)] += e; // transconductance
+				double ceq;
+      <admst:if test="[lhs/nature=discipline/potential]">
+				// the d_mos+d_poly_g case...
+				/// volts_limited maybe?
+				ceq = e * BR($probepnodename, $probennodename);
       </admst:if>
-    </admst:if>
-
-	  <admst:if test="branch/pnode[grounded!='no']">
-      <admst:warning format="untested: excluding Pp == GND"/>
-    </admst:if>
-	  <admst:if test="[../../lhs/branch/pnode[grounded!='no']]">
-      <admst:warning format="untested: excluding Sp == GND"/>
-    </admst:if>
-	</admst:for-each>
+      <admst:if test="[lhs/nature=discipline/flow]">
+				if(%(brp(.))->has_iv_probe()){
+				}else{ incomplete();
+					assert(%(brp(.))->has_inode());
+				}
+				ceq = e * AMPS(%(brp(.)));
+     </admst:if>
+				$contrib[0] -= ceq; // offset
+		   } // I&lt;+ in %(.)
+  </admst:for-each>
 
   <admst:if test="rhs[not(nilled(function[class='builtin']))]">
-	}
+		} // builtin
   </admst:if>
 
   <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)contribution:nonoise<-*\n"/>
@@ -8933,6 +9303,16 @@ return
 			assert(_n[$node_prefix$Pp].a_());
 			_n[$node_prefix$Pp].a_()->tr() = vx; // hack, should be +=
       </admst:when>
+      <admst:when test="[lhs/nature=lhs/discipline/potential]">
+			%(brp(.))_xxx[0] += vx; // %(.)
+      </admst:when>
+      <admst:when test="[lhs/nature=lhs/discipline/flow]">
+			%(brp(.))_xxx[0] += vx; // %(.)
+			it0[$(node_prefix)$(Pp)] -= $(loss) vx;
+        <admst:if test="lhs/branch/nnode[grounded='no']">
+			it0[$(node_prefix)$(Pn)] += $(loss) vx;
+        </admst:if>
+      </admst:when>
       <admst:otherwise>
 			it0[$(node_prefix)$(Pp)] -= $(loss) vx;
         <admst:if test="lhs/branch/nnode[grounded='no']">
@@ -8954,10 +9334,10 @@ return
 		assert(is_number(vx));
     <admst:choose><!-- HACK ... cleanup later -->
       <admst:when test="[lhs/branch/pnode/discipline='degradational']">
-			_n[$node_prefix$Pp]->tr() += vx;
+		_n[$node_prefix$Pp]->tr() += vx;
       </admst:when>
       <admst:otherwise>
-			it0[$node_prefix$Pp] -= vx;
+		it0[$node_prefix$Pp] -= vx;
       </admst:otherwise>
     </admst:choose>
 	}
@@ -8996,6 +9376,7 @@ return
   <admst:choose>
     <admst:when test="..[dynamic='yes']">
 #ifndef NOJAC
+assert(false); // obsolete code.
 	{ // jacobian4($(Sp), $(Sn), $(Pp), $(Pn)) - dynamic
 		double eac = $ep $flowcoeff;
 		double etr = eac;
@@ -9003,7 +9384,7 @@ return
 
 #ifdef HAVE_KEEPCOEFF
 		if (uic_now( $keepstatename ) /* HACK. argh.*/) {
-			double CKTag0 = 1.;
+			_CKTag0 = 1.;
 			eac = $ep $flowcoeff;
 			ceq = eac * BR($Pp, $Pn);
 			//#undef CKTag0
@@ -9016,6 +9397,7 @@ return
 		{
 			ceq = etr * BR($Pp, $Pn);
 		}
+
 
       <admst:if test="../../lhs/branch/pnode[grounded='no']">
 		it0[$(node_prefix)$Sp] += ceq;

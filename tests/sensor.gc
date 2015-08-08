@@ -1,11 +1,10 @@
-spice
-.load ./sensor.so
 * this file is part of gnucap-adms
 * Copyright (C) 2013 Felix Salfelder
 * License GPLv3 (or later)
 
+load ./sensor.so
 
-.verilog
+verilog
 paramset mydruck drucksensor;
 .beta=0.0054;
 .Rnull=6.2e3;
@@ -26,4 +25,6 @@ vin ninp 0 pulse iv=0 pv=10 rise=1
 .tran 0 1 1 trace=a
 .print dc v(nodes) T(DR2)
 .dc vin 1n 10k * 2
+
+.stat notime
 .end

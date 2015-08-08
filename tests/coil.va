@@ -37,7 +37,6 @@ module coil_br(p,n);
 		i = I(e1,n);
 		v = ddt(inductance * I(e1,n));
 		V(p,e1) <+ ddt(inductance * I(e1,n));
-	//	I(p) <+ 0*V(n); // BUG
 	end
 endmodule
 
@@ -52,8 +51,6 @@ module coil_idt(p,n);
    end
 endmodule
 
-`ifdef foo
-
 // this cannot work, a flow probe shortcuts the potential
 module coil_auto(p,n);
 	inout p,n;
@@ -65,6 +62,8 @@ module coil_auto(p,n);
 		V(p,n) <+ ddt(inductance * I(p,n));
    end
 endmodule
+
+`ifdef foo
 
 module coilideal(p,n);
 	inout p,n;

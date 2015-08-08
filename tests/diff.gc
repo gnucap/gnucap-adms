@@ -21,7 +21,7 @@ C1 n2 0 1u
 .dc
 
 .list
-.print tran v(nodes) state0(ddt1) hidden(0) dis(n*) v(C1) hidden(0)
+.print tran v(nodes) hidden(0)
 .tran 0 10m .05m basic trace=n
 
 .stat notime

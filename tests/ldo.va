@@ -41,10 +41,10 @@ module ldo(vbg, vro, vrs, vdd, vss);
 		u_out = fak * V(vbg, vss);
 		i_out = ( V(vro,vss) - u_out ) /rout  - psrr*(V(vdd,vss)-Vddmin)/rout;
 
-		if (i_out < -1*   Imax )
+		if (i_out < -Imax)
 			i_out = -0.89*Imax + 0.70*(V(vro,vss)-u_out) /rdegout  - 2500*psrr*(V(vdd,vss)-Vddmin)/rdegout;
 
-		I(vro, vss) <+  i_out;
+		I(vro, vss) <+ i_out;
 
 //		if ( (V(vdd)-V(vro)) < Vdrop ) $strobe("Vdrop too small");
 //		I(vbg, vss) <+ C1 *ddt(V(vbg, vss) );

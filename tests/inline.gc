@@ -1,6 +1,6 @@
 attach lang_adms.so
 
-*options debug
+options nopicky
 
 adms
 `include "discipline.h"

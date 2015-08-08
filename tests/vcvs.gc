@@ -1,10 +1,10 @@
-spice
 
-.load ./vcvs.so
+load ./vcvs.so
 
-.verilog
-paramset mye vavcvs;
-	.gain = 5;
+verilog
+paramset mye va_vcvs;
+	.gain = 2;
+	.offset = 10;
 endparamset
 
 mye  e1  (nout,0,nin,0);
@@ -12,11 +12,14 @@ spice
 
 .nodelist
 
-v1 nin 0 1
+v1 nin 0 sin amplitude=1 dc 1
+r1 nout 0 1
 
 
 .print dc v(nodes) i(r1)
 
-.dc trace=i dm
+.dc trace=i
+
+.print tran v(nodes) i(r1)
+.tran 0 1 .1 trace=a
 .end
-.tran 0 1 1
