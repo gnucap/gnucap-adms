@@ -1,0 +1,29 @@
+// Copyright 2015 Felix Salfelder
+// collapse nodes test
+
+`include "discipline.h"
+`include "constants.h"
+
+module cond(p,n);
+	inout p,n;
+	electrical p,n;
+
+	analog begin	
+ 		I(p,n) <+ V(p,n);
+   end
+endmodule
+
+module collr(p,n);
+	inout p,n;
+	electrical p,n,i,j,k;
+	parameter real pp = 1 from [0:inf);
+
+	analog begin	
+ 		V(n,i) <+ 0.; // collapse (unconditionally)
+ 		V(k,p) <+ 1.; // don't collapse (unconditionally)
+		if(0) V(i,j) <+ 0.; // collapse (maybe)
+		if(pp) V(n,j) <+ 0.; // collapse (maybe?)
+		if(V(p,n)) V(n,j) <+ 0.; // collapse (maybe?)
+ 		I(k,j) <+ V(k,j);
+   end
+endmodule

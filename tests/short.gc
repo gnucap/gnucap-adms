@@ -1,0 +1,18 @@
+load ./short.so
+
+verilog
+
+short1 s1 (q1, p);
+short2 s2 (q2, p);
+spice
+
+v1 p 0 1
+r1 q1 0 1
+r2 q2 0 1
+
+.print dc i(s1) v(nodes) ev(s1.i_p_n) i(s1.i_p_n) i(r1)
+.print tran i(s1) v(nodes) v(s1)
+
+.dc trace=i
+.tran 0 1 1
+.end
