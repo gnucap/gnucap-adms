@@ -221,14 +221,15 @@ void DEV_CPOLY_V::tr_load()
   double* ioval = _old_values+2+_n_vports;
   node_t* ni = _n+2*_n_ports + boff; // start of current input ports.
 
+  trace4("loading control", long_label(), _n_iports, _n_vports, _n_ports);
   for (uint_t i=0; i<_n_iports; ++i) { untested();
     // something like tr_load_active
+    trace4("loading control", i, ival[i], ioval[i], _inputs[i]->has_iv_probe());
     if (_inputs[i]->has_iv_probe()) { untested();
       ELEMENT const* ie = prechecked_cast<ELEMENT* const>(_inputs[i]);
       assert(ie);
 
       double d = dampdiff(&(ival[i]), ioval[i]);
-      trace3("loading current control", i, ival[i], ioval[i]);
       if(d!=0.){
 	_sim->_aa.load_asymmetric(_n[BR].m_(), 0,  ni[2*i].m_(), ni[2*i+1].m_(), d);
       }

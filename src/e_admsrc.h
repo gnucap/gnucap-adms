@@ -237,17 +237,17 @@ inline bool ADMS_SOURCE::do_tr_last()
   double* ctrl = _values+2+_n_vports+_n_iports;
 
   for (uint_t i=0; i<_n_iports; ++i) { untested();
-    // something like tr_load_active
+    trace3("ADMS_SOURCE::do_tr_last", long_label(), _inputs[i]->long_label(), _inputs[i]->has_iv_probe());
+    trace1("ADMS_SOURCE::do_tr_last", ival[i]);
     if (_inputs[i]->has_iv_probe()) { untested();
       ELEMENT const* ie = prechecked_cast<ELEMENT* const>(_inputs[i]);
-      trace3("ADMS_SOURCE::do_tr_last", long_label(), _inputs[i]->long_label(), ie->_m0);
       assert(ie);
       //cccs do_tr_last.
       // _m0.c1  = _y[0].f1 * (_input->_loss0 + _input->_m0.c1); ?
       ival[i] = ctrl[i] * ie->_m0.c1;
-    }else{ untested();
+    }else{ itested();
       assert(_inputs[i]->has_inode());
-      ival[i] = - ctrl[i] *.5 ;
+      ival[i] = - ctrl[i];
     }
   }
   trace1("ADMS_SOURCE::do_tr_last", converged());

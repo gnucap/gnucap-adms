@@ -2304,6 +2304,8 @@ void $(DEV_NAME)::tr_begin()
         // _m1 = _m0 = CPOLY1(0., 0., 0.);
 	internal_precalc();
 
+	tr_eval();
+
 	q_load();
 }
 // -------------------------------------------------------------------------- //
@@ -2841,6 +2843,7 @@ void $(DEV_NAME)::do_ac()
   assert(_dt == NOT_VALID || ::conchk(_dt, _time[0] - _time[1]));
 
   <admst:for-each select="source">
+    <admst:variable  name="B" select="%(branch)"/>
 	  std::fill_n(%(brp(.))_xxx,
 		    + 2 // constant and self admittance
 		    + %(count(probe[nature=discipline/potential])) // V
@@ -2999,6 +3002,7 @@ void $(DEV_NAME)::tr_eval()
 	trace2("$(DEV_NAME)::tr_eval", _sim->analysis_is_static(), _sim->_time0);
 
   <admst:for-each select="source">
+    <admst:variable  name="B" select="%(branch)"/>
 	  std::fill_n(%(brp(.))_xxx,
 		    + 2 // constant and self admittance
 		    + %(count(probe[nature=discipline/potential])) // V
