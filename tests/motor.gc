@@ -8,7 +8,7 @@ verilog
 load ./motor.so
 paramset mymotor motor;
 	.R_inertia=1;
-	.R_fric=1e-2;
+	.R_fric=1;
 endparamset
 
 mymotor M1 (0,np,nsens);

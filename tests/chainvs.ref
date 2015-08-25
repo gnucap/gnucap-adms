@@ -1,7 +1,7 @@
 #           v(ninn1)   v(ninp1)   v(noutn1)  v(noutp1) 
 
 --- aa -------
- 1.p -0.5  0.  0. -1.  1. 
+ 1.p -1.  0.  0. -1.  1. 
  0.  1.p -1.  1.  0.  0. 
  0. -1.  1. -1.  0.  0. 
  0.  1. -1.  1.  0.  0. 
@@ -22,5 +22,4 @@ open circuit: internal node 4
 --- i ----
  0.,  5.,  0.,  0.,  0.,  0., 
 -----
-open circuit: internal node 4
  0.        -5.         0.         0.         4.9993    

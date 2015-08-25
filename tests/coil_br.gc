@@ -22,7 +22,6 @@ Lb nb 0 100m
 
 .list
 .print tran v(nodes) i(ll) v(ll) v(lb)
-.end
 .tran 0 10m .1m trace=n basic
 + trace=i > /tmp/dbgtr
 .stat notime

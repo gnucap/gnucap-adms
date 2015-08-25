@@ -159,6 +159,9 @@ GCUF_TESTS = \
 XFAIL_TESTS =
 
 # not implemented yet
+XFAIL_TESTS += collapse.sh
+
+# not implemented yet
 XFAIL_TESTS += diff.2.sh
 
 # does not work.
@@ -240,6 +243,7 @@ vs.log: vs.so
 cs.log: cs.so
 if.log: if.so
 if2.log: if2.so
+motor1.log: motor.so
 callfunctions.log: callfunctions.so
 
 $(GC_TESTS:%.sh=%.log): %.log: %.so
