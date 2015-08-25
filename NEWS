@@ -15,6 +15,7 @@
  - better upstream gnucap compatibility
  - EXTERN works with vanilla adms
  - immediate instanciation (bypass paramset)
+ - proper callfunction queueing
 
 0.0.8 (WIP)
  - turn sources/probes into subdevices
