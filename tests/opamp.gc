@@ -22,11 +22,11 @@ paramset myota opamp;
 	.Sr   = 5e5
 endparamset
 
-# biased by 1V
+// biased by 1V
 myota OTA1 (nout1, nin_p, 0, ndd, ndd_minus, nvbias);
-# unbiased
+// unbiased
 myota OTA0 (nout0, nin_p, 0, ndd, ndd_minus);
-# bypass paramset
+// bypass paramset
 opamp OTA2 (nout2, nin_p, 0, ndd, ndd_minus);
 
 list

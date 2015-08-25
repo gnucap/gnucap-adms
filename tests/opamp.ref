@@ -10,13 +10,13 @@ paramset myota opamp;
  .Rf=NA( 10.); .r1=NA( 100.Meg); .f0dB=1e6; .Sr=5e5; .Rout=NA( 75.); .Rinn=NA( 2.G); .Rinp=NA( 2.G); .Rin=NA( 2.Meg); .A0=2e5;
 endparmset
 
-//# biased by 1V
+// biased by 1V
 
 myota #() OTA1 (.out(nout1),.inp(nin_p),.inn(0),.vddp(ndd),.vddn(ndd_minus),.vref(nvbias));
-//# unbiased
+// unbiased
 
 myota #() OTA0 (.out(nout0),.inp(nin_p),.inn(0),.vddp(ndd),.vddn(ndd_minus));
-//# bypass paramset
+// bypass paramset
 
 opamp #() OTA2 (.out(nout2),.inp(nin_p),.inn(0),.vddp(ndd),.vddn(ndd_minus));
 #Time       v(ndd)     v(ndd_minus) v(nin_p)   v(nout0)   v(nout1)   v(nout2)   v(nvbias) 
