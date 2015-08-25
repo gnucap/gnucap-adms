@@ -25,7 +25,7 @@
 #include "e_adms.h"
 /*--------------------------------------------------------------------------*/
 void COMMON_ADMS::attach_model(const COMPONENT* d)
-{ untested();
+{
 	assert(d);
 	try{
 		COMMON_COMPONENT::attach_model(d);

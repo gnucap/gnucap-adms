@@ -941,7 +941,7 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
 	private: //callfunctions
 		unsigned _callf_seek;
 		void ($(DEV_NAME)::*_callf_q[%(count(callfunction))])();
-		void q_callf_ptr( void ($(DEV_NAME)::*c)()){ untested();
+		void q_callf_ptr( void ($(DEV_NAME)::*c)()){
 			_callf_q[_callf_seek++] = c;
 		}
   <admst:for-each select="callfunction" separator=",">
@@ -2074,11 +2074,11 @@ void $(DEV_NAME)::expand()
 </admst:for-each>
 		// current contributions as in I &lt;+ ...
 <admst:for-each select="source[nature=discipline/flow]">
-		if (!%(brp(.))) { untested();
+		if (!%(brp(.))) {
 			const CARD* p = device_dispatcher["adms_i"];
 			if(!p){ untested();
 				error(bDANGER, "cannot instanciate current source adms_i. load module?");
-			}else{ untested();
+			}else{
 				%(brp(.)) = dynamic_cast&lt;COMPONENT*&gt;(p->clone());
 				assert(%(brp(.)));
 				%(brp(.))->set_slave();
@@ -2696,7 +2696,7 @@ TIME_PAIR $(DEV_NAME)::tr_review()
   </admst:if>
 
 <admst:if test="[count(callfunction)!=0]">
-	if(_callf_seek){ untested();
+	if(_callf_seek){
 		q_accept();
 	}
 </admst:if>
@@ -2778,7 +2778,7 @@ void $(DEV_NAME)::tr_accept()
 	}
 
 <admst:if test="[count(callfunction)!=0]">
-	while(_callf_seek){ untested();
+	while(_callf_seek){
 		(this->*_callf_q[--_callf_seek])();
 	}
 </admst:if>

@@ -34,7 +34,7 @@ public:
    _n_iports(0),
    _inputs(NULL),
    _boff(0)
-  { untested(); }
+  { }
   ADMS_SOURCE(const ADMS_SOURCE& p) :
    ELEMENT(p),
    _values(NULL),
@@ -44,7 +44,7 @@ public:
    _n_iports(p._n_iports),
    _inputs(NULL),
    _boff(0)
-  { untested(); }
+  { }
 
   ~ADMS_SOURCE(){
 //    delete [] _old_values;
@@ -201,7 +201,7 @@ void ADMS_SOURCE::expand_last()
 /*--------------------------------------------------------------------------*/
 // the current controlled current part...
 inline void ADMS_SOURCE::tr_iwant_matrix_active()
-{ untested();
+{
   assert(matrix_nodes() == 2+_boff+2*(_n_vports + _n_iports));
   assert(is_device());
   assert(!subckt());
