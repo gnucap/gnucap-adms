@@ -235,6 +235,7 @@ $(SHS): %.sh: %.gc Makefile %.ref
 	@echo "rm $*.out" >> $@
 	@chmod +x $@
 
+aging_mos.log: aging_mos.so
 subcoil.log subcoil.1.log vccs.log ccvs.log cap.log: %.log: %.so
 coil.log: coil.so
 coil_auto.log: coil.so
