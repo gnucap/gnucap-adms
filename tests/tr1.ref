@@ -23,3 +23,11 @@
  1.9        0.35794    0.35794    71.574E-6 
  2.         0.27841    0.27841    55.672E-6 
 
+#Time       v(n1)      v(nb)      v(nv)     
+//BUG// restore time mismatch.  t0=1.900000000000, s->t=1.000000000000
+//BUG// c1.v_p_n restore time mismatch.  t0=1.900000000000, s->t=1.000000000000
+//BUG// v1 restore time mismatch.  t0=1.900000000000, s->t=1.000000000000
+//BUG// r1 restore time mismatch.  t0=1.900000000000, s->t=1.000000000000
+//BUG// rb restore time mismatch.  t0=1.900000000000, s->t=1.000000000000
+//BUG// cb restore time mismatch.  t0=1.900000000000, s->t=1.000000000000
+... assertion should fail here

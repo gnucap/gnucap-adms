@@ -33,6 +33,6 @@ cb 0 nb 4
 .echo
 .param pv=-1
 
-* .tran 2 basic
+.tran 2 basic
 
 .end

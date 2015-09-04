@@ -119,6 +119,7 @@ CUSTOM_TESTS = \
     inline.sh \
     rc1.sh \
     tr.sh \
+    tr1.sh \
     int_cont.sh \
     motor1.sh \
     adms_res.sh \
@@ -166,6 +167,9 @@ XFAIL_TESTS += diff.2.sh
 
 # does not work.
 XFAIL_TESTS += coil_br.sh
+
+# time restore mismatch
+XFAIL_TESTS += tr1.sh
 
 POSTDIFF=
 # remove cruft from model compiler
