@@ -3,7 +3,6 @@
 * License GPLv3 (or later) 
 .model myota someop ( Rf=NA( 10.) R1=NA( 100.Meg) output_range=NA( 0.7) f0dB=1e6 Sr=5e5 Rout=NA( 75.) Rinn=NA( 2.G) Rinp=NA( 2.G) Rin=NA( 2.Meg) gain=1820000)
 *// myota OTA0 (nout, nss, ninp, nout, ndd, nss);
-
 .subckt op103b ( 0 0 0 0 0 )
 OTA0 ( 0 0 0 0 0 0 )  myota 
 .ends op103b

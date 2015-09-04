@@ -2,7 +2,6 @@
  0.         0.         0.         0.         0.         0.         0.         0.        
 .model mycoil_int coil_idt ( inductance=1)
 *// BUG: breaks with smaller value?!
-
 .model mycoil_mag coil_mag ( inductance=1)
 lint ( nint 0 )  mycoil_int 
 lm ( nm 0 )  mycoil_mag 
