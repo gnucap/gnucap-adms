@@ -96,7 +96,7 @@ ADMS_I::ADMS_I()
 }
 /*--------------------------------------------------------------------------*/
 bool ADMS_I::do_tr_con_chk_and_q()
-{ itested();
+{
   q_load();
 
   assert(_old_values);
@@ -119,7 +119,7 @@ void ADMS_I::tr_iwant_matrix()
 }
 /*--------------------------------------------------------------------------*/
 bool ADMS_I::do_tr()
-{ itested();
+{
   trace5("ADMS_I::do_tr", long_label(),
       _values[0], _old_values[0],
       _values[1], _old_values[1]);
@@ -143,7 +143,7 @@ bool ADMS_I::do_tr()
 }
 /*--------------------------------------------------------------------------*/
 void ADMS_I::tr_load()
-{ itested();
+{
   trace4("ADMS_I::tr_load", _values[0], _old_values[0],
                             _values[1], _old_values[1]);
   trace4("ADMS_I::tr_load", _m0, _m1, _n_vports, _n_iports);
