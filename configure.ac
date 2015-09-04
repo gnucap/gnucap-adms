@@ -14,7 +14,7 @@ AS_IF([ test x$program_suffix = xNONE ],,[_program_suffix=$program_suffix])
 dnl ------------------- debugging -------------------
 AC_MSG_CHECKING([if debug code should be compiled in])
 AC_ARG_ENABLE([debug],
-[  --enable-debug            Enable building of debug code. [[default: disabled]]],
+[  --enable-debug          Enable building of debug code. [[default: disabled]]],
 [
 if test "X$enable_debug" = "Xno" ; then
 	AC_MSG_RESULT([no])
@@ -62,7 +62,7 @@ AC_SUBST([ADMSXML_FLAGS])
 dnl ----------------- qucs ------------------
 AC_MSG_CHECKING([qucs])
 AC_ARG_ENABLE([qucs],
-[  --enable-qucs            try to build qucs models (experimental). [[default: disabled]]],
+[  --enable-qucs           try to build qucs models (experimental). [[default: disabled]]],
 [
 if test "X$enable_qucs" = "Xno" ; then
 	AC_MSG_RESULT([no])
@@ -79,7 +79,7 @@ AM_CONDITIONAL([QUCS], [test x"$enable_qucs" != xno])
 dnl ----------------- plugindir ------------------
 AC_MSG_CHECKING([local])
 AC_ARG_ENABLE([local],
-[  --enable-local            install plugins locally. [[default: disabled]]],
+[  --enable-local          install plugins locally. [[default: disabled]]],
 [
 if test "X$enable_local" = "Xno" ; then
 	AC_MSG_RESULT([no])
