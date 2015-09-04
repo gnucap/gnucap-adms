@@ -2304,7 +2304,7 @@ void $(DEV_NAME)::tr_begin()
         // _m1 = _m0 = CPOLY1(0., 0., 0.);
 	internal_precalc();
 
-	tr_eval();
+	//	tr_eval();
 
 	q_load();
 }
@@ -2969,8 +2969,7 @@ double $(DEV_NAME)::tr_c_to_g(double c, double g)const
 		// assert(_time[0] &gt; 0); not necessarily in rc_uic.gc
 		return g;
 		// no change, fake
-	}else{
-		assert(_sim-&gt;analysis_is_tran_dynamic());
+	}else if(_sim-&gt;analysis_is_tran_dynamic()){
 		METHOD method; USE(method);
 #ifdef USE_DTIME
 		if (_time[1] == _time[0])
@@ -2992,6 +2991,9 @@ double $(DEV_NAME)::tr_c_to_g(double c, double g)const
 			default: unreachable();
 		}
 		return g;
+	}else{ unreachable();
+		trace3("$(DEV_NAME)::tr_c_to_g", _sim->phase(), _sim->sim_mode(), _sim->_time0);
+		return 0.;
 	}
 }
 </admst:if>
