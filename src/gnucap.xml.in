@@ -2031,8 +2031,7 @@ void $(DEV_NAME)::expand()
 		}
 		// current probes as in V(a) &lt;+ I(b)
 <admst:for-each select="$(short)">
-		if (!%(brp(.))) { untested();
-
+		if (!%(brp(.))) {
 			const CARD* p = device_dispatcher["resistor"];
 			if(!p){
 				error(bDANGER, "cannot instanciate resistor. load module?");
@@ -2046,7 +2045,7 @@ void $(DEV_NAME)::expand()
 			assert(p);
 		}else{ untested();
 		}
-		{ untested();
+		{
 			unsigned c = %(count(rhs/probe[nature=discipline/potential]));
 			node_t nodes[] = {
 				%(nnn(lhs/branch/pnode)), %(nnn(lhs/branch/nnode))
@@ -2059,9 +2058,9 @@ void $(DEV_NAME)::expand()
 </admst:for-each>
 		// voltage contributions
 <admst:for-each select="source[nature=discipline/potential]">
-		if (!%(brp(.))) { untested();
+		if (!%(brp(.))) {
 			const CARD* p = device_dispatcher["adms_v"];
-			if(!p){ untested();
+			if(!p){
 				error(bDANGER, "cannot instanciate voltage source adms_v. load module?");
 			}else{ untested();
 				%(brp(.)) = dynamic_cast&lt;COMPONENT*&gt;(p->clone());
@@ -2069,7 +2068,7 @@ void $(DEV_NAME)::expand()
 				%(brp(.))->set_slave();
 				subckt()->push_front(%(brp(.)));
 			}
-		}else{ untested();
+		}else{
 		}
 </admst:for-each>
 		// current contributions as in I &lt;+ ...
@@ -2546,9 +2545,8 @@ bool $(DEV_NAME)::do_tr()
   </admst:if>
 	if(converged()){ itested();
 		set_converged(conv_check());
-	}else{ untested();
+	}else{
 	}
-
 
 <admst:if test="[$(_has_states)='true']">
 	for (unsigned ii = 0; ii &lt; _num_states; ++ii) { // similar e_cap.cc do_tr();
@@ -2559,11 +2557,11 @@ bool $(DEV_NAME)::do_tr()
 
 	bool needs_load = !converged();
 
-  store_values();
+	store_values();
 
-  //  if (needs_load) q_load();
-  trace2(&quot;$(DEV_NAME)::do_tr done &quot;, converged(), needs_load );
-  return converged();
+	//  if (needs_load) q_load();
+	trace2(&quot;$(DEV_NAME)::do_tr done &quot;, converged(), needs_load );
+	return converged();
 }
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::keep_ic()
@@ -2629,7 +2627,7 @@ void $(DEV_NAME)::tr_load()
 #endif
 
   <admst:if test="[$sckt_size!=0]">
-	if( !OPT::traceload || !_sim->is_inc_mode()) { untested();
+	if( !OPT::traceload || !_sim->is_inc_mode()) {
 		subckt()->tr_load();
 	} else {
 		// subdevices have queued themselves if necessary.
@@ -2909,8 +2907,8 @@ bool $(DEV_NAME)::conv_check()const
 {
 
 <admst:if test="[$(_has_states)='true']">
-	for (unsigned ii = 0; ii &lt; _num_states; ++ii) { untested();
-		if (!::conchk(_states[0][2*ii], _states_q1[ii])) { untested();
+	for (unsigned ii = 0; ii &lt; _num_states; ++ii) {
+		if (!::conchk(_states[0][2*ii], _states_q1[ii])) {
 			// BUG: use discipline
 			return false;
 		}
