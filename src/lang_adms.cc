@@ -178,7 +178,7 @@ void LANG_ADMS::attachadms(vector<string> lines, string path, string file)
   if (ccstat) {
     FILE* f = fopen((path+"/"+file+".va").c_str(),"w");
     for (vector<string>::const_iterator i=lines.begin(); i!=lines.end(); ++i) {
-      fprintf(f, i->c_str(), i->size());
+      fprintf(f, "%s\n", i->c_str());
     }
     fclose(f);
     admsXml(path, file);
