@@ -1,0 +1,25 @@
+load ./vccs.so
+
+verilog
+paramset vccs vavccs;
+	.gain = .333;
+endparamset
+
+spice
+
+
+.echo ====== built in vccs ======================
+
+g1 noutn1 noutp1 ninp1 ninn1 .333
+.dc dm
+
+.echo ====== adms vccs ======================
+
+.delete g1
+
+.verilog
+vccs f1 (noutn1,noutp1,ninp1,ninn1);
+spice
+
+.dc dm
+.end

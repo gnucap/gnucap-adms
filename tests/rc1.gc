@@ -1,0 +1,32 @@
+spice
+
+.param vdd 1.7
+.param iv 0.
+.param pv 1.
+.param delay 0.
+
+V1 nin 0 pulse iv=iv pv=pv rise=200u delay=delay
+*sin(frequency=1k, amplitude=1, offset=1)
+
+.verilog
+load ./rc.so
+paramset myrc rc; .c=3n; .r=200k; endparamset
+
+myrc rc1 (nin,nout1,0);
+spice
+
+.print tran v(nodes) hidden(0)
+.store tran v(nodes)
+.print dc v(nodes)
+
+.dc trace=v > /dev/null
+.tran .05m 1m trace=a basic
+
+.param iv=1
+.param pv=0
+.param delay=1m
+
+.tran 2m trace=a basic
+
+.status notime
+.end

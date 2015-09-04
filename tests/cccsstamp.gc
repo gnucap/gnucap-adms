@@ -1,0 +1,38 @@
+load ./cccs.so
+
+verilog
+paramset myf cccsva;
+	.gain = 333;
+	.offset = 0;
+endparamset
+
+spice
+
+*.nodelist
+
+*    ninn    ->        ninp
+*     o-----------------o          o-----------------o
+*     |    current I    |          |                 |
+* i1 [ ]               [ ] r3     [ ] 5k*I          [ ] rload
+*     |                 |          |                 |
+*     V                 V          o-----------------o
+*                                  |
+*                                  V
+
+.echo ====== built in cccs ======================
+
+rb1 ninp1 ninn1 0
+f1 noutn1 noutp1 rb1 333
+.dc dm
+
+.echo ====== adms cccs ======================
+
+.delete rb1
+.delete f1
+
+.verilog
+myf f1 (noutn1,noutp1,ninp1,ninn1);
+spice
+
+.dc dm
+.end
