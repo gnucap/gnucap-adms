@@ -12,7 +12,8 @@ gnucap_adms_include_HEADERS = \
     discipline.h \
     gnucap-adms.h \
     gcuf_compat.h \
-    e_adms.h
+    e_adms.h \
+    e_admsrc.h
 
 gnucap_adms_includedir = $(pkgincludedir)
 
