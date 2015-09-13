@@ -5,14 +5,18 @@ simple
 - fix portability of gnucap-adms.so
 - dont convert module names to caps in class names.
 - should pass -DGNUCAP (or similar) to adms.
+- get rid of compiler warnings
 
 medium
 - get rid of MODULE(?)
 - get rid of bogus #ifdef's
+- weed out dead code and old function templates
 
 missing features
+- those used by qucs components
 - instaciate modules in spice using X
 - switching branches
+- noise
 
 difficult
 - see BUGS
