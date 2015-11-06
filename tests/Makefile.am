@@ -235,7 +235,7 @@ $(SHS): %.sh: %.gc Makefile %.ref
 	@echo "eval \$$REDIRECT" >> $@
 	@echo "\$$GNUCAP -a ../src/.libs/d_adms_i.so -a ../src/.libs/d_adms_vbr.so \$$GNUCAP_ARGS $(LT) $< | sed $(subst ·, ,$(PREDIFF:%=-e %)) \\" >> $@
 	@echo "$(if $(POSTDIFF),| sed) $(subst ·, ,$(POSTDIFF:%=-e %)) > $*.out" >> $@
-	@echo "$(FILTER) $*.out < $(lastword $+) | diff -rup $(lastword $+) - || exit 1" >> $@
+	@echo "$(FILTER) $*.out < $(lastword $+) | diff -w -rup $(lastword $+) - || exit 1" >> $@
 	@echo "rm $*.out" >> $@
 	@chmod +x $@
 

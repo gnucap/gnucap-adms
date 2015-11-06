@@ -11,7 +11,7 @@ br ddt1.v_p_n.br matrix_number 1, user_number 4 nm[t]  vdc  0.
  0.         0.         0.         0.         0.        -1.        
 *.options method=euler 
 .model myddt diff ( gain=2)
-ddt1 ( nddt 0 n1 0 )  myddt 
+ddt1 ( nddt 0 n1 0 ) myddt
 V1 ( n1 0 ) pulse iv= 0. pv= 0.001 delay= 1.n rise= 0.001 fall= 0.001 width= 0.004 period= 0.008
 R1 ( nddt n2 )  100.
 C1 ( n2 0 )  1.u

@@ -12,17 +12,17 @@ endparamset
 mymul p1 (np, n2, n1);
 spice
 
-V1 n1 0 sin amplitude=1 frequency=2 zero peak
-V1 n2 0 sin amplitude=1 frequency=1 zero peak
 R1 np n2 100
 C1 n2 0 1u
 
 .nodelist
+.list
+V1 n1 0 sin amplitude=1 frequency=2 zero peak
+V2 n2 0 sin amplitude=1 frequency=1 zero peak
 
 .print dc v(nodes) i(R*)
 .dc
 
-.list
 .print tran v(nodes) hidden(0) dis(n*) v(C1)
 .tran 0 1 1 basic trace=a
 .end

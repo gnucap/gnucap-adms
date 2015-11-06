@@ -1,17 +1,21 @@
-* this file is part of gnucap-adms 
-* Copyright (C) 2013 Felix Salfelder 
-* License GPLv3 (or later) 
-.model myota someop ( Rf=NA( 10.) R1=NA( 100.Meg) output_range=NA( 0.7) f0dB=1e6 Sr=5e5 Rout=NA( 75.) Rinn=NA( 2.G) Rinp=NA( 2.G) Rin=NA( 2.Meg) gain=1820000)
-*// myota OTA0 (nout, nss, ninp, nout, ndd, nss);
-.subckt op103b ( 0 0 0 0 0 )
-OTA0 ( 0 0 0 0 0 0 )  myota 
-.ends op103b
-OTA1 ( nout nss ninp ninn ndd nss )  myota 
-* Xop1 nout ninp ninn ndd nss op103b 
-Vss ( nss 0 )  DC -2.
-Vdd ( ndd 0 )  DC  5.
-V2 ( ninn 0 )  DC  1.
-vin ( ninp ninn ) sin offset=NA( 0.) amplitude= 1.u frequency= 1. delay=NA( 0.) damping=NA( 0.) zero=1 peak=1
+//* this file is part of gnucap-adms 
+//* Copyright (C) 2013 Felix Salfelder 
+//* License GPLv3 (or later) 
+paramset myota someop;
+ .Rf=NA( 10.); .R1=NA( 100.Meg); .output_range=NA( 0.7); .f0dB=1e6; .Sr=5e5; .Rout=NA( 75.); .Rinn=NA( 2.G); .Rinp=NA( 2.G); .Rin=NA( 2.Meg); .gain=1820000;
+endparmset
+
+// myota OTA0 (nout, nss, ninp, nout, ndd, nss);
+module op103b (0,0,0,0,0);
+myota #() OTA0 (.out(0),.vref(0),.inp(0),.inn(0),.vddp(0),.vddn(0));
+endmodule // op103b
+
+myota #() OTA1 (.out(nout),.vref(nss),.inp(ninp),.inn(ninn),.vddp(ndd),.vddn(nss));
+//* Xop1 nout ninp ninn ndd nss op103b 
+vsource_value #() Vss (.p(nss),.n(0));
+vsource_value #() Vdd (.p(ndd),.n(0));
+vsource_value #() V2 (.p(ninn),.n(0));
+vsource_sin #(.offset(NA( 0.)),.amplitude( 1.u),.frequency( 1.),.zero(1),.peak(1)) vin (.p(ninp),.n(ninn));
 #Time       v(ndd)     v(ninn)    v(ninp)    v(nout)    v(nss)     v(vin)    
  0.         5.         1.         1.         1.5002    -2.         0.        
  0.01       5.         1.         1.         1.504     -2.         62.791n   

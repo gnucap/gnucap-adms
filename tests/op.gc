@@ -30,7 +30,9 @@ Vdd ndd 0 5
 V2 ninn 0 1
 vin ninp ninn sin amplitude=1u frequency=1 peak zero
 
-.list
+.verilog
+list
+spice
 
 .print tran v(nodes) v(vin)
 .tran 0 1 1 trace=a

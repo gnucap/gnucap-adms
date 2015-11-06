@@ -9,10 +9,8 @@ spice
 
 Vcc ndd 0 vdd
 Vcc1 0 ndd_minus  vdd
-V1 nin_p 0  sin(frequency=freq, amplitude=ampl, offset=0)
-
-
 .list
+V1 nin_p 0  sin(frequency=freq, amplitude=ampl, offset=0)
 
 .verilog
 

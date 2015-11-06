@@ -7,16 +7,14 @@ np       np matrix_number 4, user_number 1 nm[t]  vdc  0.
 -p1
 -p1.v_p_GND
 br p1.v_p_GND.br matrix_number 1, user_number 4 nm[t]  vdc  0.
-#           v(n1)      v(n2)      v(np)      i(R1)     
- 0.         0.         0.         0.         0.        
 *.options method=euler 
 *.options initsc 1 
 .model mymul mul ( gain=2)
 p1 ( np n2 n1 )  mymul 
-V1 ( n1 0 ) sin offset=NA( 0.) amplitude= 1. frequency= 2. delay=NA( 0.) damping=NA( 0.) zero=1 peak=1
-V1 ( n2 0 ) sin offset=NA( 0.) amplitude= 1. frequency= 1. delay=NA( 0.) damping=NA( 0.) zero=1 peak=1
 R1 ( np n2 )  100.
 C1 ( n2 0 )  1.u
+#           v(n1)      v(n2)      v(np)      i(R1)     
+ 0.         0.         0.         0.         0.        
 #Time       v(n1)      v(n2)      v(np)      hidden(0)  dis(n1)    dis(n2)    dis(np)    v(C1)     
  0.         0.         0.         0.         1.         2.         2.         2.         0.        
  0.01       0.12533    0.062791   0.015739   1.         0.         0.         0.         0.062791  

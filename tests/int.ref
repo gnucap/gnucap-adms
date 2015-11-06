@@ -1,10 +1,6 @@
-.print dc v(nodes) i(R*) 
-                     ^ ? no match
+.model myint integrator ( gain=1k)
 #           v(n1)      v(nint)   
  0.         0.         0.        
-.model myint integrator ( gain=1k)
-int1 ( nint 0 n1 0 )  myint 
-V1 ( n1 0 ) pulse iv= 0. pv= 1. delay= 0. rise= 0.001 fall= 0.001 width= 0.003 period= 0.005
 #Time       v(n1)      v(nint)    state0(int1)
  0.         0.         0.         0.        
  100.E-6    0.1        0.005      5.E-6     

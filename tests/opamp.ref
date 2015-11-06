@@ -1,7 +1,6 @@
 * note: nodenames case-sensitive 
 Vcc ( ndd 0 ) vdd
 Vcc1 ( 0 ndd_minus ) vdd
-V1 ( nin_p 0 ) sin offset= 0. amplitude=ampl frequency=freq delay=NA( 0.) damping=NA( 0.)
 //* note: nodenames case-sensitive 
 vdd #() Vcc (.p(ndd),.n(0));
 vdd #() Vcc1 (.p(0),.n(ndd_minus));
