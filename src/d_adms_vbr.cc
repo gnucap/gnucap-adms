@@ -201,7 +201,7 @@ void DEV_CPOLY_V::tr_load()
   double d = dampdiff(&_m0.c1, _m1.c1);
   if (d != 0.) { untested();
     _sim->_aa.load_symmetric(_n[BR].m_(), 0, -d);
-  }else{ untested();
+  }else{
   }
   //
   // // load source...
@@ -212,7 +212,7 @@ void DEV_CPOLY_V::tr_load()
   if(!boff) incomplete();
 
   // voltage control, like poly_g, but with branch node
-  for (uint_t i=2; i<=_n_ports; ++i) { untested();
+  for (uint_t i=2; i<=_n_ports; ++i) {
     trace3("DEV_CPOLY_V::tr_load vc", long_label(), i, _values[i]);
     tr_load_extended(gnd, _n[BR], _n[2*i-2+boff], _n[2*i-1+boff], &(_values[i]), &(_old_values[i]));
   }

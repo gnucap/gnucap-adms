@@ -8956,7 +8956,7 @@ return
 			$contrib[P_%(brp($(S)))_%(brp(.))_%(nature/access)] -= e * OPT::keepcoeff;
 		} else
 #endif
-		{ untested();
+		{
 			$contrib[0] -= ceq;
 			$contrib[P_%(brp($(S)))_%(brp(.))_%(nature/access)] += e;
 		}
