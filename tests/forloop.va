@@ -1,0 +1,22 @@
+// Copyright 2015 Felix Salfelder
+//
+// for loop
+
+`include "discipline.h"
+`include "constants.h"
+
+module vsforloop(p,n);
+	inout p,n;
+	electrical p,n;
+
+	parameter real voltage    = 1 from [0:inf);
+
+	analog begin	
+		real sum; sum = 0.;
+      integer i;
+		for (i = 0; i < 4; i = i+1) begin : forloop
+			sum = sum + voltage/4;
+		end
+		V(p,n) <+ sum;
+   end
+endmodule

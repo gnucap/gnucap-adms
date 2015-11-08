@@ -1343,6 +1343,11 @@ and name!='initializeInstance')]">
     <admst:when test="[datatypename='block']">
       <admst:apply-templates select="item" match="ngspiseMODULEguesstopology.cevaluatetopology"/>
     </admst:when>
+    <admst:when test="adms[datatypename='forloop']">
+      <admst:apply-templates select="initial" match="ngspiseMODULEguesstopology.cevaluatetopology"/>
+      <admst:apply-templates select="forblock" match="ngspiseMODULEguesstopology.cevaluatetopology"/>
+      <admst:apply-templates select="update" match="ngspiseMODULEguesstopology.cevaluatetopology"/>
+    </admst:when>
     <admst:when test="[datatypename='expression']"/>
     <admst:when test="[datatypename='probe']"/>
     <admst:when test="[datatypename='variable']"/>
@@ -4387,6 +4392,11 @@ inline double d_doh(double x)          {return  exp(x)/(exp(x) + 1); }
     <admst:when test="adms[datatypename='whileloop']">
       <admst:apply-templates select="whileblock" match="block:local:declaration" required="yes"/>
     </admst:when>
+    <admst:when test="adms[datatypename='forloop']">
+      <admst:apply-templates select="initial" match="block:local:declaration"/>
+      <admst:apply-templates select="forblock" match="block:local:declaration"/>
+      <admst:apply-templates select="update" match="block:local:declaration"/>
+    </admst:when>
     <admst:when test="adms[datatypename='contribution']">
     </admst:when>
     <admst:when test="adms[datatypename='nilled']">
@@ -5158,6 +5168,28 @@ EXIT_IF_ISNAN(__%s_%s); // B
   <admst:if test="while[dynamic='yes']">
     <admst:text format="#endif /*&lt;/dynamic_while&gt;*/\n"/>
   </admst:if>
+</admst:template>
+
+<!-- ----------------------------------------------------------------- -->
+<admst:template match="e">
+  <admst:apply-templates select="." match="%(datatypename)">$e</admst:apply-templates>
+</admst:template>
+
+<!-- analog//forloop (not used?!) -->
+<admst:template match="forloop">
+  <admst:message format="* check: forloop dup l 5183?\n"/>
+  <admst:text select="condition[dynamic='yes']" format="#ifdef _DYNAMIC\n"/>
+  <admst:variable name="SkipFVariable" string="y"/>
+  for\n(
+  %(e(initial/lhs))=%(e(initial/rhs/tree));
+  %(e(condition/tree));
+  %(e(update/lhs))=%(e(update/rhs/tree))
+  )
+  <admst:variable name="SkipFVariable" string="n"/>
+  <admst:text select="forblock/adms[datatypename!='block']" format="{\n"/>
+  <admst:apply-templates select="forblock" match="%(datatypename)"/>
+  <admst:text select="forblock/adms[datatypename!='block']" format="}\n"/>
+  <admst:text select="condition[dynamic='yes']" format="#endif /*&lt;/dynamic_for&gt;*/\n"/>
 </admst:template>
 
 <!-- ----------------------------------------------------------------- -->
@@ -9090,6 +9122,22 @@ return
   <admst:text select="while[dynamic='yes']" format="#endif /*&lt;/dynamic_while&gt;*/\n"/>
 </admst:template>
 
+<!-- analog//forloop -->
+<admst:template match="forloop">
+  <admst:text select="condition[dynamic='yes']" format="#ifdef _DYNAMIC\n"/>
+  <admst:variable name="SkipFVariable" string="y"/>
+  for\n(
+  %(e(initial/lhs))=%(e(initial/rhs/tree));
+  %(e(condition/tree));
+  %(e(update/lhs))=%(e(update/rhs/tree))
+  )
+  <admst:variable name="SkipFVariable" string="n"/>
+  <admst:text select="forblock/adms[datatypename!='block']" format="{\n"/>
+  <admst:apply-templates select="forblock" match="%(datatypename)"/>
+  <admst:text select="forblock/adms[datatypename!='block']" format="}\n"/>
+  <admst:text select="condition[dynamic='yes']" format="#endif /*&lt;/dynamic_for&gt;*/\n"/>
+</admst:template>
+
 <!-- ---------------------------------------------------------- -->
 <!-- analog//callfunctions -->
 <admst:template match="callfunction">
@@ -9171,6 +9219,8 @@ Q_CALLF_%(adms/id(.))_%(print_with_dollar_stripped(function/name))(
     <admst:text test="[static='no' and dynamic='yes']" format="// #endif _DYNAMIC\n"/>
   </admst:if>
 </admst:template>
+<!-- -------------------------------------------------- -->
+<!-- duplicate?! see 4371 -->
 <admst:template match="block:local:declaration">
 <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)block:local:declaration*\n"/>
   <admst:choose>
@@ -9187,6 +9237,11 @@ Q_CALLF_%(adms/id(.))_%(print_with_dollar_stripped(function/name))(
     <admst:when test="adms[datatypename='whileloop']">
       <admst:apply-templates select="whileblock" match="block:local:declaration"/>
     </admst:when>
+    <admst:when test="adms[datatypename='forloop']">
+      <admst:apply-templates select="initial" match="block:local:declaration"/>
+      <admst:apply-templates select="forblock" match="block:local:declaration"/>
+      <admst:apply-templates select="update" match="block:local:declaration"/>
+    </admst:when>
     <admst:when test="adms[datatypename='contribution']"/>
     <admst:when test="adms[datatypename='callfunction']"/>
     <admst:when test="adms[datatypename='nilled']"/>
@@ -9197,7 +9252,9 @@ Q_CALLF_%(adms/id(.))_%(print_with_dollar_stripped(function/name))(
       </admst:for-each>
     </admst:when>
     <admst:otherwise>
-      <admst:fatal format="'datatypename=%(adms/datatypename)': should not be reached %s\n"/>
+      <admst:value-of select="admst(.)"/>
+		<admst:value-of select="adms/datatypename"/>
+      <admst:fatal format="'datatypename=%s': incomplete %s\n"/>
     </admst:otherwise>
   </admst:choose>
 </admst:template>

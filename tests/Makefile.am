@@ -16,6 +16,7 @@ diff.2.log: $(PWD)/diff.va
 AM_DEFAULT_SOURCE_EXT = .va
 .va.cc:
 check_LTLIBRARIES = \
+    forloop.la \
     subcoil.la \
     subcoil.1.la \
     if.la if2.la \
@@ -131,6 +132,7 @@ GC_TESTS = \
     coil.sh \
     chainvs.sh \
     vs.sh \
+    forloop.sh \
     vs1.sh \
     vs2.sh \
     cs.sh cap.sh \

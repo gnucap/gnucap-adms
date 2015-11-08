@@ -1,0 +1,21 @@
+
+load ./forloop.so
+options nopicky
+
+verilog
+paramset myvs vsforloop;
+	.voltage = 5;
+endparamset
+
+myvs   v1 (nsum,ngnd);
+spice
+
+r0 0 ngnd 1u
+r1 nsum ngnd 1
+
+.print dc  v(nodes)
+.print tran  v(nodes)
+
+.dc trace=i
+.tran 0 1 1
+.end
