@@ -4544,6 +4544,7 @@ inline double d_doh(double x)          {return  exp(x)/(exp(x) + 1); }
 
 <!-- ----------------------------------------------------------------- -->
 <!-- analog//function: local assignment handling -->
+<!-- FIXME: backwards function calling -->
 <admst:template match="function:assignment">
   <admst:message test="[/dbg_xml='yes']" format="*(ngspvers)function:assignment %(.)*\n"/>
   <admst:for-each select="function[class='builtin']">
@@ -4574,7 +4575,7 @@ EXIT_IF_ISNAN(__%s_%s); // A
           <admst:apply-templates select="." match="subexpression:stringify:noprobe"/>
           <admst:text format="%s"/>
         </admst:join>
-        <admst:text format=")\n"/>
+        <admst:text format=");\n"/>
         <admst:value-of select="position(.)-1"/>
         <admst:apply-templates select="." match="function:getname_push"/>
 EXIT_IF_ISNAN(__%s_%s); // B

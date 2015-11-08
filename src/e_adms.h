@@ -434,7 +434,7 @@ inline double ADMS_BASE::tr_c_to_g(double c, double g)const
 #define _ambient_temp                (OPT::temp_c + CONSTCtoK)
 #define _circuit_temp                (CKT_BASE::_sim->_temp_c + CONSTCtoK)
 #define _vt_nom                      (BOLTZMANN*_ambient_temp/ELECTRON_CHARGE)
-#define _vt(t)                       (BOLTZMANN*t/ELECTRON_CHARGE)
+//#define _vt(t)                       (BOLTZMANN*t/ELECTRON_CHARGE)
 #define _scale                       1.0
 /*--------------------------------------------------------------------------*/
 #define EXP90 1.220403294317841e+039
@@ -444,12 +444,31 @@ inline double ADMS_BASE::tr_c_to_g(double c, double g)const
 #define m00_max(v00,x,y)        v00 = ((x)>(y))?(x):(y);
 #define m10_max(v10,v00,x,y)    v10 = ((x)>(y))?1.0:0.0;
 #define m11_max(v11,v00,x,y)    v11 = ((x)>(y))?0.0:1.0;
+inline double m20_max(double x,double y){untested(); return 0.;}
+
 #define m00_min(v00,x,y)        v00 = ((x)<(y))?(x):(y);
 #define m10_min(v10,v00,x,y)    v10 = ((x)<(y))?1.0:0.0;
 #define m11_min(v11,v00,x,y)    v11 = ((x)<(y))?0.0:1.0;
 #define m00_pow(v00,x,y)        v00 = pow(x,y);
 #define m10_pow(v10,v00,x,y)    v10 = (x==0.0)?0.0:(v00)*(y)/(x);
 #define m11_pow(v11,v00,x,y)    v11 = (x==0.0)?0.0:(log(x)*(v00));
+
+/* some guesswork:
+ * m00: no derive
+ * m10: derive once (1) wrt second argument (index 0)
+ * m11: derive once (1) wrt second argument (index 1)
+ * m20: derive twice (2) wrt first arg (index 0)
+ * m21: derive twice (2) wrt second arg (index 1)
+ * m201: derive twice (2) wrt first and second arg
+ */
+
+inline double _d_20_pow(double x,double y){untested(); return ((y)*((y)-1.0)*pow(x,y)/(x)/(x)); }
+inline double _d_21_pow(double x,double n){untested(); return  log(x)*log(x)*pow(x,n) + pow(x,n-1.); }
+inline double _d_10_pow(double x,double y){untested(); return (x==0.0)?0.0:(pow(x,y))*(y)/(x); }
+inline double _d_201_pow(double x,double n){untested(); return (x==0.0)?0.0:((1.+n*log(x))*pow(x,n-1.) );}
+inline double m20_pow(double x,double y){untested(); return   (y)*((y)-1.0)*pow(x,y)/(x)/(x); }
+inline double m21_pow(double x,double n){untested(); return  log(x)*log(x)*pow(x,n) + pow(x,n-1.); }
+
 #define m00_div(v00,v10,x,y)    double v10=1/(y); double v00=(x)*v10;
 #define m10_div(v10,v00,vv,x,y)
 #define m11_div(v11,v00,vv,x,y) double v11 = -v00*vv;
@@ -475,7 +494,7 @@ inline double ADMS_BASE::tr_c_to_g(double c, double g)const
 #define m10_atan(v10,v00,x)     v10 = (+1.0/(1+x*x));
 #define m00_atanh(v00,x)        v00 = atanh(x);
 #define m10_atanh(v10,v00,x)    v10 = (1.0/(1-x*x));
-#define m00_logE(v00,x)         v00 = log(x);
+#define m00_logE(v00,x)         v00 = log(double(x));
 #define m10_logE(v10,v00,x)     v10 = (1.0/x);
 #define m00_log10(v00,x)        v00 = log10(x);
 #define m10_log10(v10,v00,x)    v10 = (1.0/x/log(10));
@@ -488,68 +507,148 @@ inline double ADMS_BASE::tr_c_to_g(double c, double g)const
 #define m00_abs(v00)            ((v00)<(0)?(-(v00)):(v00))
 #define m00_limexp(v00,x)       v00 = ((x)<90.0?exp(x):EXP90*(x-89.0));
 #define m10_limexp(v10,v00,x)   v10 = ((x)<90.0?(v00):EXP90);
+
+#define m00_asinh(v00,x)        v00 = asinh(x);
+#define m10_asinh(v10,v00,x)    v10 = (1.0/(sqrt(x*x+1)));
+#define m20_asinh(x)          -(x/pow((1 + pow(x,2)),1.5))
+
+// more second derivatives. used in ddx expansion
 #define m20_logE(v00)         (-1.0/v00/v00)
 #define m20_exp(v00)          exp(v00)
 #define m20_limexp(v00)       ((v00)<90.0?exp(v00):0.0)
 #define m20_sqrt(v00)         (-0.25/(v00)/sqrt(v00))
 #define m20_fabs(v00)         0.0
+#define m20_tanh(x)           -8*sinh(2*x)*pow(cosh(x),2)/(pow(cosh(2*x)+1,3))
+inline double m20_cosh(double x){ untested(); return cosh(x);}
 
 /*--------------------------------------------------------------------------*/
-#define _cos(val,arg)            val = cos(arg);
+// possibly unneeded
+//#define _cos(val,arg)            val = cos(arg);
 #define _d_cos(val,dval,arg)     val = cos(arg);     dval = (-sin(arg));
-#define _sin(val,arg)            val = sin(arg);
+//#define _sin(val,arg)            val = sin(arg);
 #define _d_sin(val,dval,arg)     val = sin(arg);     dval = (cos(arg));
-#define _tan(val,arg)            val = tan(arg);
+//#define _tan(val,arg)            val = tan(arg);
 #define _d_tan(val,dval,arg)     val = tan(arg);     dval = (1.0/cos(arg)/cos(arg));
-#define _hypot(xy,x,y)           xy = sqrt((x)*(x)+(y)*(y));
+//#define _hypot(xy,x,y)           xy = sqrt((x)*(x)+(y)*(y));
 #define _dx_hypot(dx,xy,x,y)     dx = (x)/(xy);
 #define _dy_hypot(dy,xy,x,y)     dy = (y)/(xy);
-#define _max(xy,x,y)             xy = ((x)>(y))?(x):(y);
+//#define _max(xy,x,y)             xy = ((x)>(y))?(x):(y);
 #define _dx_max(dx,xy,x,y)       dx = ((x)>(y))?1.0:0.0;
 #define _dy_max(dy,xy,x,y)       dy = ((x)>(y))?0.0:1.0;
-#define _min(xy,x,y)             xy = ((x)<(y))?(x):(y);
+//#define _min(xy,x,y)             xy = ((x)<(y))?(x):(y);
 #define _dx_min(dx,xy,x,y)       dx = ((x)<(y))?1.0:0.0;
 #define _dy_min(dy,xy,x,y)       dy = ((x)<(y))?0.0:1.0;
-#define _cosh(val,arg)           val = cosh(arg);
+//#define _cosh(val,arg)           val = cosh(arg);
 #define _d_cosh(val,dval,arg)    val = cosh(arg);    dval = (sinh(arg));
-#define _sinh(val,arg)           val = sinh(arg);
+//#define _sinh(val,arg)           val = sinh(arg);
 #define _d_sinh(val,dval,arg)    val = sinh(arg);    dval = (cosh(arg));
-#define _tanh(val,arg)           val = tanh(arg);
+//#define _tanh(val,arg)           val = tanh(arg);
 #define _d_tanh(val,dval,arg)    val = tanh(arg);    dval = (1.0/cosh(arg)/cosh(arg));
-#define _acos(val,arg)           val = acos(arg);
+//#define _acos(val,arg)           val = acos(arg);
 #define _d_acos(val,dval,arg)    val = acos(arg);    dval = (-1.0/sqrt(1-arg*arg));
-#define _asin(val,arg)           val = asin(arg);
+//#define _asin(val,arg)           val = asin(arg);
 #define _d_asin(val,dval,arg)    val = asin(arg);    dval = (+1.0/sqrt(1-arg*arg));
-#define _atan(val,arg)           val = atan(arg);
+//#define _atan(val,arg)           val = atan(arg);
 #define _d_atan(val,dval,arg)    val = atan(arg);    dval = (+1.0/(1+arg*arg));
-#define _logE(val,arg)           val = log(arg);
-#define _d_logE(val,dval,arg)    val = log(arg);     dval = (1.0/arg);
-#define _log10(val,arg)          val = log10(arg);
+//#define _logE(val,arg)           val = log(arg);
+//#define _d_logE(val,dval,arg)    val = log(arg);     dval = (1.0/arg);
+//#define _log10(val,arg)          val = log10(arg);
 #define _d_log10(val,dval,arg)   val = log10(arg);   dval = (1.0/arg/log(10));
 // #define _exp(val,arg)            val = exp(arg);
 //#define _d_exp(val,dval,arg)     val = exp(arg);     dval = val;
-#define _sqrt(val,arg)           val = sqrt(arg);
+//#define _sqrt(val,arg)           val = sqrt(arg);
 #define _d_sqrt(val,dval,arg)    val = sqrt(arg);    dval = (1.0/val/2.0);
-#define _pow(xy,x,y)             xy = pow(x,y);
+//#define _pow(xy,x,y)             xy = pow(x,y);
 #define _dx_pow(dx,xy,x,y)       dx = (x==0.0)?0.0:((y/x)*xy);
 #define _dy_pow(dy,xy,x,y)       dy = (x==0.0)?0.0:((log(x)/exp(0.0))*xy);
 
 #define _div1(x,y)               ((x)/(y))
 #define _div0(xy,x,y)            xy=(x)/(y);
-#define _div(xy,dx,x,y)          dx=1/(y); xy=(x)*dx;
+//#define _div(xy,dx,x,y)          dx=1/(y); xy=(x)*dx;
 #define _dx_div(dx,xy,x,y)
 #define _dy_div(dy,dx,xy,x,y)    dy = -xy*dx;
 
-#define _limexp(val,arg)         val = ((arg)<(90)) ? (exp(arg)) : (exp(90)*(1.0+(arg-90)));
+//#define _limexp(val,arg)         val = ((arg)<(90)) ? (exp(arg)) : (exp(90)*(1.0+(arg-90)));
 #define _d_limexp(val,dval,arg)  val = ((arg)<(90)) ? (exp(arg)) : (exp(90)*(1.0+(arg-90))); dval = val;
-#define _fabs(val,arg)           val = fabs(arg);
+//#define _fabs(val,arg)           val = fabs(arg);
 #define _d_fabs(val,dval,arg)    val = fabs(arg);    dval = (((val)>=0)?(+1.0):(-1.0));
 
 inline void _abs(double& val, const double& arg){ untested(); val=abs(arg);}
 inline double _abs(const double& arg){ untested(); return abs(arg);}
 
-inline double _exp(double arg) { untested(); return  exp(arg); }
-inline double _d0_exp(double arg) {  untested(); return exp(arg); }
+//inline double _exp(double arg) { untested(); return  exp(arg); }
+// inline double _d0_exp(double arg) {  untested(); return exp(arg); }
+
+// feom analogfuntion
+inline double _cos(double arg)             {untested(); return  cos(arg); }
+inline double _d0_cos(double arg)          {untested(); return (-sin(arg)); }
+inline double _sin(double arg)             {untested(); return  sin(arg); }
+inline double _d0_sin(double arg)          {untested(); return (cos(arg)); }
+inline double _tan(double arg)             {untested(); return  tan(arg); }
+inline double _d0_tan(double arg)          {untested(); return (1.0/cos(arg)/cos(arg)); }
+inline double _cosh(double arg)            {untested(); return  cosh(arg); }
+inline double _d0_cosh(double arg)         {untested(); return (sinh(arg)); }
+inline double _sinh(double arg)            {untested(); return  sinh(arg); }
+inline double _d0_sinh(double arg)         {untested(); return (cosh(arg)); }
+inline double _tanh(double arg)            {untested(); return  tanh(arg); }
+inline double _d0_tanh(double arg)         {untested(); return (1.0/cosh(arg)/cosh(arg)); }
+inline double _acos(double arg)            {untested(); return  acos(arg); }
+inline double _d0_acos(double arg)         {untested(); return (-1.0/sqrt(1-arg*arg)); }
+inline double _asin(double arg)            {untested(); return  asin(arg); }
+inline double _d0_asin(double arg)         {untested(); return (+1.0/sqrt(1-arg*arg)); }
+inline double _atan(double arg)            {untested(); return  atan(arg); }
+inline double _d0_atan(double arg)         {untested(); return (+1.0/(1+arg*arg)); }
+inline double _acosh(double arg)           {untested(); return  acosh(arg); }
+inline double _d0_acosh(double arg)        {untested(); return (1.0/(sqrt(arg-1)*sqrt(arg+1))); }
+inline double _asinh(double arg)           {untested(); return  asinh(arg); }
+inline double _d0_asinh(double arg)        {untested(); return (1.0/(sqrt(arg*arg+1))); }
+inline double _atanh(double arg)           {untested(); return  atanh(arg); }
+inline double _d0_atanh(double arg)        {untested(); return (+1.0/(1-arg*arg)); }
+
+inline double _logE(double arg)            {untested(); return  log(arg); }
+inline double _d0_logE(double arg)         {untested(); return (1.0/arg); }
+inline double _log10(double arg)           {untested(); return  log10(arg); }
+inline double _d0_log10(double arg)        {untested(); return (1.0/arg/log(10.0)); }
+inline double _exp(double arg)             {untested(); return  exp(arg); }
+inline double _d0_exp(double arg)          {untested(); return exp(arg); }
+inline double _sqrt(double arg)            {untested(); return  sqrt(arg); }
+inline double _d0_sqrt(double arg)         {untested(); return (1.0/sqrt(arg)/2.0); }
+
+inline double _abs(double arg)             {untested(); return std::abs(arg); }
+inline double _d0_abs(double arg)          {untested(); return (((arg)>=0)?(+1.0):(-1.0)); }
+
+inline int _floor(double arg)              {untested(); return  floor(arg); }
+inline int _d0_floor(double)               {untested(); return (1.0); }
+
+inline int _ceil(double arg)               {untested(); return  ceil(arg); }
+
+inline double _hypot(double x,double y)    {untested(); return sqrt((x)*(x)+(y)*(y)); }
+inline double _d0_hypot(double x,double y) {untested(); return (x)/sqrt((x)*(x)+(y)*(y)); }
+inline double _d1_hypot(double x,double y) {untested(); return (y)/sqrt((x)*(x)+(y)*(y)); }
+
+inline double _atan2(double x,double y)    {untested(); return atan2(x,y); }
+// TODO atan2 derivatives?
+
+inline double _max(double x,double y)      {untested(); return ((x)>(y))?(x):(y); }
+inline double _d0_max(double x,double y)   {untested(); return ((x)>(y))?1.0:0.0; }
+inline double _d1_max(double x,double y)   {untested(); return ((x)>(y))?0.0:1.0; }
+
+inline double _min(double x,double y)      {untested(); return ((x)<(y))?(x):(y); }
+inline double _d0_min(double x,double y)   {untested(); return ((x)<(y))?1.0:0.0; }
+inline double _d1_min(double x,double y)   {untested(); return ((x)<(y))?0.0:1.0; }
+
+inline double _pow(double x,double y)      {untested(); return pow(x,y); }
+inline double _d0_pow(double x,double y)   {untested(); return (x==0.0)?0.0:((y/x)*pow(x,y)); }
+inline double _d1_pow(double x,double y)   {untested(); return (x==0.0)?0.0:((log(x)/exp(0.0))*pow(x,y)); }
+
+inline double _limexp(double arg)          {untested(); return ((arg)<(80))?(exp(arg)):(exp(80.0)*(1.0+(arg-80))); }
+inline double _d0_limexp(double arg)       {untested(); return ((arg)<(80))?(exp(arg)):(exp(80.0)); }
+
+inline double _vt(double arg)              {untested(); return 1.3806503e-23*arg/1.602176462e-19; }
+inline double _d0_vt(double)               {untested(); return 1.3806503e-23/1.602176462e-19; }
+
+// why is this still used? BUG?
+inline void _pow(double& xy,double x,double y) {untested(); xy = pow(x,y); }
 
 /*
 #define _(val,arg)         val = ((arg)<(90)) ? (exp(arg)) : (exp(90)*(1.0+(arg-90)));
