@@ -526,8 +526,8 @@ inline double ADMS_BASE::tr_c_to_g(double c, double g)const
 #define _d_logE(val,dval,arg)    val = log(arg);     dval = (1.0/arg);
 #define _log10(val,arg)          val = log10(arg);
 #define _d_log10(val,dval,arg)   val = log10(arg);   dval = (1.0/arg/log(10));
-#define _exp(val,arg)            val = exp(arg);
-#define _d_exp(val,dval,arg)     val = exp(arg);     dval = val;
+// #define _exp(val,arg)            val = exp(arg);
+//#define _d_exp(val,dval,arg)     val = exp(arg);     dval = val;
 #define _sqrt(val,arg)           val = sqrt(arg);
 #define _d_sqrt(val,dval,arg)    val = sqrt(arg);    dval = (1.0/val/2.0);
 #define _pow(xy,x,y)             xy = pow(x,y);
@@ -545,8 +545,11 @@ inline double ADMS_BASE::tr_c_to_g(double c, double g)const
 #define _fabs(val,arg)           val = fabs(arg);
 #define _d_fabs(val,dval,arg)    val = fabs(arg);    dval = (((val)>=0)?(+1.0):(-1.0));
 
-inline void _abs(double& val, const double& arg){val=abs(arg);}
-inline double _abs(const double& arg){return abs(arg);}
+inline void _abs(double& val, const double& arg){ untested(); val=abs(arg);}
+inline double _abs(const double& arg){ untested(); return abs(arg);}
+
+inline double _exp(double arg) { untested(); return  exp(arg); }
+inline double _d0_exp(double arg) {  untested(); return exp(arg); }
 
 /*
 #define _(val,arg)         val = ((arg)<(90)) ? (exp(arg)) : (exp(90)*(1.0+(arg-90)));

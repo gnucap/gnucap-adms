@@ -311,7 +311,7 @@
     <admst:when test="[type='real']">double</admst:when>
     <admst:when test="[type='string']">char*</admst:when>
     <admst:otherwise>
-      <admst:fatal format="variable type unknown\n"/>
+      <admst:fatal format="vtype %(name) unknown\n"/>
     </admst:otherwise>
   </admst:choose>
 </admst:template>
@@ -332,8 +332,8 @@
   <admst:push into="$(mydisciplines)" select="." onduplicate="ignore"/>
 </admst:for-each>
 
-#ifndef _$(filename)_header__
-#define _$(filename)_header__
+//#ifndef _$(filename)_header__
+//#define _$(filename)_header__
 <admst:for-each select="/module[not (nilled(analog) and nilled(instance))]">
 
 
@@ -1161,7 +1161,7 @@ class $(COMMON_NAME) : public COMMON_ADMS
 // -------------------------------------------------------------------------- //
 </admst:for-each>
 
-#endif
+//#endif
 // vim should work with any ts=sw
 
 
@@ -1552,6 +1552,7 @@ namespace {
 #include &quot;$(filename).h&quot;
 
 using namespace std;
+const double NA(NOT_INPUT);
 <admst:for-each select="/module[not (nilled(analog) and nilled(instance))]">
   <admst:apply-templates select="." match="ddticcollect"/>
   <admst:new datatype="list" arguments="branch">
@@ -1593,7 +1594,17 @@ $(MODEL_NAME)::$(MODEL_NAME)(const $(DEV_NAME)* p) :
   <!-- output='yes' - no matter, parametertype=instance or module - no matter also -->
   <admst:for-each select="variable[input='yes' and scope='global_model']">
 	  <!--    <admst:apply-templates select="default" match="expression:stringify:noprobe"/> -->
-	 $(var_prefix)%(name)(%(default/tree)),
+	 $(var_prefix)%(name)(
+    <admst:choose>
+      <admst:when test="[default/tree/datatypename='number']">
+		%(default/tree)
+      </admst:when>
+      <admst:otherwise>
+		NA /* %(default/tree) %(default/tree/datatypename) */
+      </admst:otherwise>
+    </admst:choose>
+
+),
   </admst:for-each>
     _key(&quot;dev_$(module)&quot;),
     _level()
@@ -7346,8 +7357,11 @@ return
     <admst:when test="[name='shiftl']">
       <admst:return name="bname" value="&lt;&lt;"/>
     </admst:when>
+    <admst:when test="[name='multmod']">
+      <admst:return name="bname" value="?multmod?"/>
+    </admst:when>
     <admst:otherwise>
-      <admst:fatal format="variable type unknown\n"/>
+      <admst:fatal format="variable type %(name) unknown\n"/>
     </admst:otherwise>
   </admst:choose>
 </admst:template>
