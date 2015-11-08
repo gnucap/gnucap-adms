@@ -695,6 +695,9 @@ inline string toLower(string s){
 }
 #define EXIT_IF_ISNAN(var) assert(is_number((double)var))
 
+#define _mpg(x) m->x.has_hard_value()
+#define _ipg(x) d->x.has_hard_value()
+
 #endif
 
 // vim:ts=8:sw=2:noet

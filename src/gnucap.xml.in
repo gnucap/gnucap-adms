@@ -1406,7 +1406,7 @@ and name!='initializeInstance')]">
     <admst:when test="[name='analysis']">
       <admst:apply-templates select="." match="function:analysis"/>
     </admst:when>
-    <admst:when test="[name='\$given']">
+    <admst:when test="[name='\$given' or name='\$param_given']">
       <admst:for-each select="arguments[position(.)=1]">
         <admst:if test="[datatypename!='variable']">
           <admst:error format="$given: argument is not a variable\n"/>
@@ -3903,7 +3903,7 @@ inline double d_doh(double x)          {return  exp(x)/(exp(x) + 1); }
         <admst:value-to select="/simulator/tmp" value="/*tmp*/ %s"/>
       </admst:for-each>
     </admst:when>
-    <admst:when test="[name='\$given']">
+    <admst:when test="[name='\$given' or name='\$param_given']">
       <admst:for-each select="arguments[position(.)=1]">
         <admst:if test="adms[datatypename!='variable']">
           <admst:error format="$given: argument is not a variable\n"/>
@@ -8230,16 +8230,17 @@ return
       <!-- ------------------------ -->
 
     </admst:when>
-    <admst:when test="[name='\$given']">
+	 <admst:when test="[name='\$given' or name='\$param_given']">
+		 /* function, paramgiven */
       <admst:variable name="arg1" select="%(arguments[1])"/>
       <admst:assert test="$arg1/adms[datatypename='variable']" format="\$given: argument is not a variable\n"/>
       <admst:assert test="$arg1/[input='yes']" format="\$given(%(name)): argument is not a parameter\n"/>
       <admst:choose>
         <admst:when test="$arg1/[parametertype='model']">
-          <admst:variable name="e" select="_mpg(%(name),%(name)Given)"/>
+          <admst:variable name="e" select="_mpg($var_prefix$arg1)"/>
         </admst:when>
         <admst:when test="$arg1/[parametertype='instance']">
-          <admst:variable name="e" select="_ipg(%(name),%(name)Given)"/>
+          <admst:variable name="e" select="_ipg($var_prefix$arg1)"/>
         </admst:when>
         <admst:otherwise>
           <admst:fatal format="$given(): should not be reached\n"/>
@@ -8372,7 +8373,7 @@ return
   <admst:choose>
     <admst:when test="[name='absdelay']">
     </admst:when>
-    <admst:when test="[name='\$given']">
+    <admst:when test="[name='\$given' or name='\$param_given']">
     </admst:when>
     <admst:when test="[name='\$temperature']">
     </admst:when>
@@ -8449,7 +8450,7 @@ return
   <admst:choose>
     <admst:when test="[name='absdelay']">
     </admst:when>
-    <admst:when test="[name='\$given']">
+    <admst:when test="[name='\$given' or name='\$param_given']">
     </admst:when>
     <admst:when test="[name='\$temperature']">
     </admst:when>
