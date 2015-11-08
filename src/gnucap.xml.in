@@ -4404,7 +4404,9 @@ inline double d_doh(double x)          {return  exp(x)/(exp(x) + 1); }
     <admst:when test="adms[datatypename='callfunction']">
     </admst:when>
     <admst:when test="adms[datatypename='case']">
-      <admst:error format="case statement: please implement me! (local declaration)\n"/>
+      <admst:for-each select="caseitem">
+        <admst:apply-templates select="code" match="block:local:declaration"/>
+      </admst:for-each>
     </admst:when>
     <admst:when test="adms[datatypename='blockvariable']"/>
     <admst:otherwise>
@@ -5125,8 +5127,33 @@ EXIT_IF_ISNAN(__%s_%s); // B
 <!-- analog//case -->
 <admst:template match="case">
   <admst:message test="[/dbg_xml='yes']" format="*(ngspvers)case*\n"/>
-  <admst:error format="case statement: please implement me! (inside block)\n"/>
-  <admst:text format="/*CASE*/;\n"/>
+  <admst:text select="case[dynamic='yes']" format="#ifdef _DYNAMIC\n"/>
+  <admst:variable name="casecondition" path="case/tree"/>
+  <admst:variable name="havedefault" string="no"/>
+  <admst:for-each select="caseitem">
+    <admst:if test="[defaultcase='yes']">
+      <admst:variable name="havedefault" string="yes"/>
+    </admst:if>
+  </admst:for-each>
+  <admst:for-each select="caseitem">
+    <admst:if test="[defaultcase='no']">
+      if( /*case*/
+      <admst:join select="condition" separator="||">
+        <admst:apply-templates select="." match="%(datatypename)"/>
+		  %(e($casecondition)) /* $casecondition */ ==($e)
+      </admst:join>
+      )
+      <admst:apply-templates select="code" match="%(datatypename)" required="yes"/>
+      else
+    </admst:if>
+  </admst:for-each>
+  <admst:text select="[$havedefault='no']" format="{ /* no default */ }\n"/>
+  <admst:for-each select="caseitem">
+    <admst:if test="[defaultcase='yes']">
+      <admst:apply-templates select="code" match="%(datatypename)" required="yes"/>
+    </admst:if>
+  </admst:for-each>
+  <admst:text select="case[dynamic='yes']" format="#endif /*&lt;/dynamic_case&gt;*/\n"/>
 </admst:template>
 
 <!-- ----------------------------------------------------------------- -->
@@ -5206,7 +5233,7 @@ EXIT_IF_ISNAN(__%s_%s); // B
     <admst:when test="branch/nnode[grounded='no']">
       <admst:value-of select="branch/nnode/name"/>
       <admst:value-of select="branch/pnode/name"/>
-		<admst:value-to select="/simulator/tmp" value=" /*probe*/ /*$(hint)*/ BP(%s,%s)"/>
+      <admst:value-to select="/simulator/tmp" value=" /*probe*/ /*$(hint)*/ BP(%s,%s)"/>
     </admst:when>
     <admst:otherwise>
       <admst:value-of select="branch/pnode/name"/>
@@ -9100,6 +9127,37 @@ return
   </admst:if>
   <admst:text test="if/function[class='builtin']" format="} // conditional\n"/>
   <admst:text test="[$_DYNAMIC='no']" select="if[dynamic='yes']" format="#endif /* if(...) */\n"/>
+</admst:template>
+
+<!-- ---------------------------------------------------------- -->
+<admst:template match="case">
+  <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)case*\n"/>
+  <admst:text select="case[dynamic='yes']" format="#ifdef _DYNAMIC\n"/>
+  <admst:variable name="casecondition" path="case/tree"/>
+  <admst:variable name="havedefault" string="no"/>
+  <admst:for-each select="caseitem">
+    <admst:if test="[defaultcase='yes']">
+      <admst:variable name="havedefault" string="yes"/>
+    </admst:if>
+  </admst:for-each>
+  <admst:for-each select="caseitem">
+    <admst:if test="[defaultcase='no']">
+      if( /*case*/
+      <admst:join select="condition" separator="||">
+		  %(e($casecondition)) == (%(e(.)))
+      </admst:join>
+      )
+      <admst:apply-templates select="code" match="%(datatypename)" required="yes"/>
+      else
+    </admst:if>
+  </admst:for-each>
+  <admst:text select="[$havedefault='no']" format="{ /* no default */ }\n"/>
+  <admst:for-each select="caseitem">
+    <admst:if test="[defaultcase='yes']">
+      <admst:apply-templates select="code" match="%(datatypename)" required="yes"/>
+    </admst:if>
+  </admst:for-each>
+  <admst:text select="case[dynamic='yes']" format="#endif /*&lt;/dynamic_case&gt;*/\n"/>
 </admst:template>
 
 <!-- ---------------------------------------------------------- -->

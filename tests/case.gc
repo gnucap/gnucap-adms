@@ -1,0 +1,27 @@
+
+load ./case.so
+options nopicky
+
+verilog
+paramset myvs vscase;
+	.voltage = 5;
+	.selectx = 1;
+endparamset
+
+paramset myvsn vscase;
+	.voltage = 5;
+	.selectx = 2;
+endparamset
+
+myvs   v1 (n1,ngnd);
+myvsn  v2 (n2,ngnd);
+spice
+
+R1 ngnd 0 1
+
+.print dc  v(nodes)
+.print tran  v(nodes)
+
+.dc trace=i
+.tran 0 1 1
+.end

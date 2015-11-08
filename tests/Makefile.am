@@ -17,6 +17,7 @@ AM_DEFAULT_SOURCE_EXT = .va
 .va.cc:
 check_LTLIBRARIES = \
     forloop.la \
+    case.la \
     subcoil.la \
     subcoil.1.la \
     if.la if2.la \
@@ -133,6 +134,7 @@ GC_TESTS = \
     chainvs.sh \
     vs.sh \
     forloop.sh \
+    case.sh \
     vs1.sh \
     vs2.sh \
     cs.sh cap.sh \
