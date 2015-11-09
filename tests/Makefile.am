@@ -38,6 +38,7 @@ check_LTLIBRARIES = \
     square.la \
     int.la pid.la vcvs.la \
     diff.la \
+    meas.la \
     mul.la \
     rc.la \
     rc_emb.la \
@@ -145,6 +146,7 @@ GC_TESTS = \
     ldo.sh \
     pid.sh \
     diff.sh \
+    meas.sh \
     mul.sh \
     cccs.sh \
     ccvs.sh \
