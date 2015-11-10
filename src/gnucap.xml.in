@@ -1044,7 +1044,8 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
       ];
 		enum{
 			P_%(brp($(B)))_const,
-			P_%(brp($(B)))_%(brp($(B)))_%(discipline/flow/access)
+			P_%(brp($(B)))_%(brp($(B)))_%(discipline/flow/access)=1,
+			P_%(brp($(B)))_%(brp($(B)))_%(discipline/potential/access)=1
       <admst:for-each select="probe[branch!=$B and nature=discipline/potential]">,
 			P_%(brp($(B)))_%(brp(.))_%(nature/access) /* %(adms/id(.)) */
       </admst:for-each>
@@ -1076,7 +1077,8 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
       ];
 		enum{
 			P_%(brp($(B)))_const,
-			P_%(brp($(B)))_%(brp($(B)))_%(discipline/potential/access)
+			P_%(brp($(B)))_%(brp($(B)))_%(discipline/flow/access)=1,
+			P_%(brp($(B)))_%(brp($(B)))_%(discipline/potential/access)=1
       <admst:for-each select="probe[branch!=$B and nature=discipline/potential]">,
 			P_%(brp($(B)))_%(brp(.))_%(nature/access) /* %(adms/id(.)) */
       </admst:for-each>
