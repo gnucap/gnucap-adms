@@ -346,6 +346,7 @@
 
   <admst:value-of select="attribute[name='ngspicename']/value"/>
   <admst:variable name="module" select="%s"/>
+  <admst:variable name="M" select="%(.)"/>
   <admst:variable name="DEV_NAME" select="DEV_%(upper-case(name))"/>
   <admst:variable name="MODEL_NAME" select="MODEL_%(upper-case(name))"/>
   <admst:variable name="COMMON_NAME" select="COMMON_%(upper-case(name))"/>
@@ -1028,10 +1029,64 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
 		COMPONENT* %(brp(.)); // %(.)
     </admst:for-each>
   </admst:if>
+	private: // all sources
+  <admst:for-each select="source">
+// %(.)
+  </admst:for-each>
+	private: // unique branches
+  <admst:for-each select="branch" onduplicate="ignore">
+// %(.)
+  </admst:for-each>
+	private: // sources by branch
+  <admst:for-each select="branch">
+    <admst:variable name="B" select="%(.)"/>
+    <admst:variable name="uniqueVprobes"/>
+    <admst:variable name="uniqueIprobes"/>
+	 <admst:if test="$(M)/source[branch=$(B)]">
+		 // there's a source with this branch
+		COMPONENT* %(brp(.));
+
+      <admst:for-each select="$(M)/source[branch=$B]/probe[branch!=$B and nature=discipline/potential]">
+        <admst:push into="$(uniqueVprobes)" select="." onduplicate="ignore"/>
+      </admst:for-each>
+      <admst:for-each select="$(M)/source[branch=$B]/probe[branch!=$B and nature=discipline/flow]">
+        <admst:push into="$(uniqueIprobes)" select="." onduplicate="ignore"/>
+      </admst:for-each>
+
+		double %(brp(.))_xxx[
+		    + 2 // constant and self admittance
+		    + %(count($uniqueVprobes)) // V transadmittance
+		    + 2*%(count($uniqueIprobes)) // I transadmittance
+      ];
+		double %(brp(.))_xxx_old[
+		    + 2 // constant and self admittance
+		    + %(count($uniqueVprobes)) // V transadmittance
+		    + 2*%(count($uniqueIprobes)) // I transadmittance
+      ];
+
+		enum{
+			P_%(brp($(B)))_const,
+			P_%(brp($(B)))_%(brp($(B)))_%(discipline/flow/access)=1,
+			P_%(brp($(B)))_%(brp($(B)))_%(discipline/potential/access)=1
+		<admst:for-each select="$(uniqueVprobes)">,
+			P_%(brp($(B)))_%(brp(.))_%(nature/access) /* %(adms/id(.)) */
+      </admst:for-each>
+      <admst:for-each select="$(uniqueIprobes)">,
+			P_%(brp($(B)))_%(brp(.))_%(nature/access)_val_
+      </admst:for-each>
+      <admst:for-each select="$(uniqueIprobes)">,
+			P_%(brp($(B)))_%(brp(.))_%(nature/access) /* %(adms/id(.)) */
+      </admst:for-each>
+		};
+
+    </admst:if>
+
+  </admst:for-each>
+#if 0
 	private: // controlled potential sources
   <admst:for-each select="source[nature=discipline/potential]">
     <admst:variable  name="B" select="%(branch)"/>
-		COMPONENT* %(brp(.));
+	 //COMPONENT* %(brp(.));
 		double %(brp(.))_xxx[
 		    + 2 // constant and self admittance
 		    + %(count(probe[nature=discipline/potential])) // V transadmittance
@@ -1042,29 +1097,12 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
 		    + %(count(probe[nature=discipline/potential])) // V transadmittance
 		    + 2*%(count(probe[nature=discipline/flow and branch!=$B])) // I transadmittance
       ];
-		enum{
-			P_%(brp($(B)))_const,
-			P_%(brp($(B)))_%(brp($(B)))_%(discipline/flow/access)=1,
-			P_%(brp($(B)))_%(brp($(B)))_%(discipline/potential/access)=1
-      <admst:for-each select="probe[branch!=$B and nature=discipline/potential]">,
-			P_%(brp($(B)))_%(brp(.))_%(nature/access) /* %(adms/id(.)) */
-      </admst:for-each>
-      <admst:for-each select="probe[branch!=$B and nature=discipline/flow]">,
-			P_%(brp($(B)))_%(brp(.))_%(nature/access)_val_
-      </admst:for-each>
-      <admst:for-each select="probe[branch!=$B and nature=discipline/flow]">,
-			P_%(brp($(B)))_%(brp(.))_%(nature/access) /* %(adms/id(.)) */
-      </admst:for-each>
-		};
-    <admst:if test="[count(probe[branch!=$B])!=0]">
-// ...
-    </admst:if>
   </admst:for-each>
 // ==========================================
 	private: // controlled current sources BUG: repeating the above, really?
   <admst:for-each select="source[nature=discipline/flow]">
     <admst:variable  name="B" select="%(branch)"/>
-		COMPONENT* %(brp(.)); // %(.)
+	 //COMPONENT* %(brp(.)); // %(.)
 		double %(brp(.))_xxx[
 		    + 2 // constant and self admittance
 		    + %(count(probe[nature=discipline/potential])) // V transadmittance
@@ -1075,21 +1113,8 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
 		    + %(count(probe[nature=discipline/potential])) // V transadmittance
 		    + 2*%(count(probe[nature=discipline/flow])) // I transadmittance
       ];
-		enum{
-			P_%(brp($(B)))_const,
-			P_%(brp($(B)))_%(brp($(B)))_%(discipline/flow/access)=1,
-			P_%(brp($(B)))_%(brp($(B)))_%(discipline/potential/access)=1
-      <admst:for-each select="probe[branch!=$B and nature=discipline/potential]">,
-			P_%(brp($(B)))_%(brp(.))_%(nature/access) /* %(adms/id(.)) */
-      </admst:for-each>
-      <admst:for-each select="probe[branch!=$B and nature=discipline/flow]">,
-			P_%(brp($(B)))_%(brp(.))_%(nature/access)_val_
-      </admst:for-each>
-      <admst:for-each select="probe[branch!=$B and nature=discipline/flow]">,
-			P_%(brp($(B)))_%(brp(.))_%(nature/access) /* %(adms/id(.)) */
-      </admst:for-each>
-		};
     </admst:for-each>
+#endif
 
 #ifndef NDEBUG
 		unsigned _loaditer;
@@ -1570,6 +1595,7 @@ const double NA(NOT_INPUT);
 
   <admst:value-of select="attribute[name='ngspicename']/value"/>
   <admst:variable name="module" select="%s"/>
+  <admst:variable name="M" select="%(.)"/>
   <admst:variable name="DEV_NAME" select="DEV_%(upper-case(name))"/>
   <admst:variable name="MODEL_NAME" select="MODEL_%(upper-case(name))"/>
   <admst:variable name="COMMON_NAME" select="COMMON_%(upper-case(name))"/>
@@ -1789,6 +1815,16 @@ void $(MODEL_NAME)::set_dev_type(const std::string&amp; new_type)
 	if (OPT::case_insensitive)
 		notstd::to_lower(&amp;_key);
 }
+
+<admst:template match="brpNULL">
+  <admst:for-each select="branch">
+    <admst:variable name="B" select="%(.)"/>
+    <admst:if test="$(M)/source[branch=$(B)]">,
+	%(brp(.))(NULL) /* %(.) */
+    </admst:if>
+  </admst:for-each>
+</admst:template>
+
 // ********************************* $(DEV_NAME) ********************************* //
 $(DEV_NAME)::$(DEV_NAME)()
     : ADMS_BASE(),
@@ -1803,9 +1839,7 @@ $(DEV_NAME)::$(DEV_NAME)()
 <admst:for-each select="$(short)">,
 	%(brp(.))(NULL) /* %(.) */
 </admst:for-each>
-<admst:for-each select="source">,
-	%(brp(.))(NULL) /* %(.) */
-</admst:for-each>
+<admst:apply-templates select="." match="brpNULL"/>
 {
 	attach_common(&amp;Default_$(COMMON_NAME));
 
@@ -1842,9 +1876,7 @@ $(DEV_NAME)::$(DEV_NAME)(const $(DEV_NAME)&amp; p) :
 <admst:for-each select="contribution[lhs/nature=lhs/discipline/flow]">,
 	//	%(brp(.))(NULL)
 </admst:for-each>
-<admst:for-each select="source">,
-	%(brp(.))(NULL) /* %(.) */
-</admst:for-each>
+<admst:apply-templates select="." match="brpNULL"/>
 {
 	for (int ii=0; ii&lt;OPT::_keep_time_steps; ++ii){
 		// not here!
@@ -2074,12 +2106,19 @@ void $(DEV_NAME)::expand()
 			%(brp(.))->set_param_by_name("r", "0.");
 		}
 </admst:for-each>
-		// voltage contributions
-<admst:for-each select="source[nature=discipline/potential]">
+		// sources, by branch
+<admst:for-each select="branch">
+  <admst:variable name="B" select="%(.)"/>
+       // $B, %(count($(M)/source[branch=$(B)]))
+	 <admst:if test="$(M)/source[branch=$(B)]">
+      <!-- there's a source with this branch -->
 		if (!%(brp(.))) {
-			const CARD* p = device_dispatcher["adms_v"];
+			std::string type="adms
+	 <admst:text format="_v" test="$(M)/source[branch=$(B) and nature=discipline/potential]"/>
+	 <admst:text format="_i" test="$(M)/source[branch=$(B) and nature=discipline/flow]"/>";
+			const CARD* p = device_dispatcher[type];
 			if(!p){
-				error(bDANGER, "cannot instanciate voltage source adms_v. load module?");
+				error(bDANGER, "cannot instanciate source of type \%s. load module?", type.c_str());
 			}else{ untested();
 				%(brp(.)) = dynamic_cast&lt;COMPONENT*&gt;(p->clone());
 				assert(%(brp(.)));
@@ -2088,63 +2127,62 @@ void $(DEV_NAME)::expand()
 			}
 		}else{
 		}
-</admst:for-each>
-		// current contributions as in I &lt;+ ...
-<admst:for-each select="source[nature=discipline/flow]">
-		if (!%(brp(.))) {
-			const CARD* p = device_dispatcher["adms_i"];
-			if(!p){ untested();
-				error(bDANGER, "cannot instanciate current source adms_i. load module?");
-			}else{
-				%(brp(.)) = dynamic_cast&lt;COMPONENT*&gt;(p->clone());
-				assert(%(brp(.)));
-				%(brp(.))->set_slave();
-				subckt()->push_front(%(brp(.)));
-			}
-		}else{ untested();
-		}
+    </admst:if>
+
 </admst:for-each>
 		// contributions, setup
-<admst:for-each select="source">
-  <admst:variable name="B" select="%(branch)"/>
-		assert(%(brp(.)));
-		{ // %(.) $(B)
-  <admst:for-each select="rhs/probe">
-			// rhs: %(.) %(nature) %(discipline/flow)
-  </admst:for-each>
-			unsigned c = %(count(rhs/probe[nature=discipline/potential and branch!=$B]));
-			unsigned f = %(count(rhs/probe[nature=discipline/flow and branch!=$B]));
+<admst:for-each select="branch">
+  <admst:variable name="B" select="%(.)"/>
+  // B %(.)
+  <admst:if test="$(M)/source[branch=$(B)]">
+	  // there's a source with this branch
+
+    <admst:variable name="uniqueVprobes"/>
+    <admst:variable name="uniqueIprobes"/>
+    <admst:for-each select="$(M)/source[branch=$B]/probe[branch!=$B and nature=discipline/potential]">
+      <admst:push into="$(uniqueVprobes)" select="." onduplicate="ignore"/>
+    </admst:for-each>
+    <admst:for-each select="$(M)/source[branch=$B]/probe[branch!=$B and nature=discipline/flow]">
+      <admst:push into="$(uniqueIprobes)" select="." onduplicate="ignore"/>
+    </admst:for-each>
+
+    <admst:for-each select="$(uniqueVprobes)">
+  // V %(.)
+    </admst:for-each>
+    <admst:for-each select="$(uniqueIprobes)">
+  // I %(.)
+    </admst:for-each>
+
+		{ // %(.)
+			unsigned c = %(count($uniqueVprobes));
+			unsigned f = %(count($uniqueIprobes));
 			node_t nodes[] = {
-				%(nnn(lhs/branch/pnode)), %(nnn(lhs/branch/nnode))
-  <admst:for-each select="rhs/probe[nature=discipline/potential and branch!=$B]">,
+				%(nnn(pnode)), %(nnn(nnode))
+    <admst:for-each select="$uniqueVprobes">,
 				%(nnn(branch/pnode)), %(nnn(branch/nnode))
-  </admst:for-each>
-  <admst:for-each select="rhs/probe[nature=discipline/flow]">
+    </admst:for-each>
+    <admst:for-each select="$uniqueIprobes[nature=discipline/flow]">
 	  // _n[n_%(branch/pnode/name)], _n[n_%(branch/nnode/name)] // no. use the probes directly
-  </admst:for-each>
+    </admst:for-each>
 			};
-  <admst:for-each select="rhs/probe[nature=discipline/flow]">
-    <admst:variable  name="BB" select="%(branch)"/>
-			assert(%(brp(.)));
-  </admst:for-each>
-			// n_curr %(count(rhs/probe[nature=discipline/flow and branch!=$B]))
 			COMPONENT*
-  <admst:text format="*brs=NULL;" test="[0=count(rhs/probe[nature=discipline/flow and branch!=$B])]"/>
-  <admst:if test="[0!=count(rhs/probe[nature=discipline/flow and branch!=$B])]">
+    <admst:text format="*brs=NULL;" test="[0=count($uniqueIprobes)]"/>
+    <admst:if test="[0!=count($uniqueIprobes)]">
 			brs[] = {
-    <admst:join separator="," select="rhs/probe[nature=discipline/flow and branch!=$B]">
+      <admst:join separator="," select="$uniqueIprobes">
 				%(brp(.)) /* %(.) me: $B */
-    </admst:join>
+      </admst:join>
 			};
-  </admst:if>
+    </admst:if>
 			ADMS_SOURCE* B = prechecked_cast&lt;ADMS_SOURCE*&gt;(%(brp(.)));
 			assert(B);
 			B->set_parameters_va(
-			    "v_%(lhs/branch/pnode/name)_%(lhs/branch/nnode/name)",
+			    "v_%(pnode/name)_%(nnode/name)",
 			    this, NULL, 0., 2+c+f,
 			    %(brp(.))_xxx, %(brp(.))_xxx_old,
 			    2*(1+c), nodes, f, brs); // %(.)
-		}
+		} // %(.)
+  </admst:if>
 </admst:for-each>
 		// netlist
 <admst:for-each select="instance">
@@ -3019,6 +3057,28 @@ void $(DEV_NAME)::tr_eval()
 	$(DEV_NAME)* d = this; USE(d);
 	trace2("$(DEV_NAME)::tr_eval", _sim->analysis_is_static(), _sim->_time0);
 
+  <admst:for-each select="branch">
+    <admst:variable  name="B" select="%(.)"/>
+	 <admst:if test="$(M)/source[branch=$(B)]">
+
+      <admst:variable name="uniqueVprobes"/>
+      <admst:variable name="uniqueIprobes"/>
+      <admst:for-each select="$(M)/source[branch=$B]/probe[branch!=$B and nature=discipline/potential]">
+        <admst:push into="$(uniqueVprobes)" select="." onduplicate="ignore"/>
+      </admst:for-each>
+      <admst:for-each select="$(M)/source[branch=$B]/probe[branch!=$B and nature=discipline/flow]">
+        <admst:push into="$(uniqueIprobes)" select="." onduplicate="ignore"/>
+      </admst:for-each>
+
+	  std::fill_n(%(brp(.))_xxx,
+		    + 2 // constant and self admittance
+		    + %(count($uniqueVprobes)) // V
+			 + %(count($uniqueIprobes)) // I val (unnecessary?)
+			 + %(count($uniqueIprobes)) // I raw
+	  , 0.);
+    </admst:if>
+  </admst:for-each>
+  #if 0
   <admst:for-each select="source">
     <admst:variable  name="B" select="%(branch)"/>
 	  std::fill_n(%(brp(.))_xxx,
@@ -3028,6 +3088,7 @@ void $(DEV_NAME)::tr_eval()
 			 + %(count(probe[nature=discipline/flow and branch!=$B])) // I raw
 	  , 0.);
   </admst:for-each>
+  #endif
 
 
 <admst:apply-templates select="analog/code[datatypename='block']/variable" match="generate_c:declare_variable"/>
@@ -6296,6 +6357,7 @@ return
 
   <admst:value-of select="attribute[name='ngspicename']/value"/>
   <admst:variable name="module" select="%s"/>
+  <admst:variable name="M" select="%(.)"/>
   <admst:variable name="DEV_NAME" select="DEV_%(upper-case(name))"/>
   <admst:variable name="MODEL_NAME" select="MODEL_%(upper-case(name))"/>
 
@@ -6310,6 +6372,7 @@ return
 <admst:for-each select="/module[not (nilled(analog) and nilled(instance))]">
   <admst:value-of select="attribute[name='ngspicename']/value"/>
   <admst:variable name="module" select="%s"/>
+  <admst:variable name="M" select="%(.)"/>
   <admst:variable name="DEV_NAME" select="DEV_%(upper-case(name))"/>
   <admst:variable name="MODEL_NAME" select="MODEL_%(upper-case(name))"/>
 
