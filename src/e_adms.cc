@@ -88,7 +88,6 @@ void ADMS_BASE::tr_begin()
 /*--------------------------------------------------------------------------*/
 void ADMS_BASE::tr_restore()
 {
-	untested();
 	trace0(("ADMS_BASE::tr_restore for " + short_label()).c_str());
 	if (_time[0] > _sim->_time0) {itested();
 		trace0("shift back");

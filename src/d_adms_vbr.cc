@@ -61,7 +61,7 @@ protected: // override virtual
   std::string dev_type()const	{unreachable(); return "cpoly_g";}
 
   bool	   has_iv_probe()const  {return 1-boff;}
-  bool	   has_inode()const  {untested(); return boff;}
+  bool	   has_inode()const  {return boff;}
 
   CARD*	   clone()const		{return new DEV_CPOLY_V(*this);}
   void	   tr_iwant_matrix();
@@ -280,8 +280,7 @@ void DEV_CPOLY_V::tr_unload()
 }
 /*--------------------------------------------------------------------------*/
 double DEV_CPOLY_V::tr_amps()const
-{ untested();
-
+{
   if(!boff) incomplete();
   double amps = 0; // _m0.c0; // == _values[0]?
   return dn_diff(_n[BR].v0(), 0.); // _values[1];
@@ -310,8 +309,8 @@ void DEV_CPOLY_V::ac_load()
 }
 /*--------------------------------------------------------------------------*/
 void DEV_CPOLY_V::expand()
-{ untested();
-  if (!subckt()) { untested();
+{
+  if (!subckt()) {
     new_subckt(); // hmm probably not a good idea
   }else{ untested();
   }
