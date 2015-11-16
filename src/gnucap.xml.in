@@ -8869,8 +8869,8 @@ return
             </admst:for-each>
           </admst:if>
         </admst:if>
-		  <admst:text test="lhs[insource='yes']/probe" format="// #endif DERIVATE \n"/>
-        <admst:variable name="allep"/>
+        <admst:text test="lhs[insource='yes']/probe" format="// #endif DERIVATE \n"/>
+        <admst:variable name="allep" select="0.0"/>
         <admst:variable name="qprobe"/>
         <admst:for-each select="$lhs/probe">
           <admst:variable name="pprobe" select="%(.)"/>
