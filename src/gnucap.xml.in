@@ -1737,6 +1737,7 @@ void $(MODEL_NAME)::precalc_first()
 	const CARD_LIST* par_scope = scope(); USE(par_scope);
 	assert(par_scope);
 	MODEL_CARD::precalc_first();
+	$(MODEL_NAME) *m = this; USE(m);
   <admst:for-each select="variable[input='yes' and scope!='global_instance']">
     <admst:apply-templates select="default/tree" match="subexpression:stringify:noprobe"/>
     <admst:choose>
@@ -1750,7 +1751,6 @@ void $(MODEL_NAME)::precalc_first()
   </admst:for-each>
 
 	// @(initial_model) block
-	$(MODEL_NAME) *m = this; USE(m);
    <admst:apply-templates select="analog" match="analog:initial_model" required="yes"/>
 }
 // -------------------------------------------------------------------------- //
@@ -1760,6 +1760,7 @@ void $(MODEL_NAME)::precalc_last()
 	const CARD_LIST* par_scope = scope(); USE(par_scope);
 	assert(par_scope);
 	MODEL_CARD::precalc_last();
+	$(MODEL_NAME) *m = this; USE(m);
   <admst:for-each select="variable[input='yes' and scope!='global_instance']">
     <admst:apply-templates select="default/tree" match="subexpression:stringify:noprobe"/>
     <admst:choose>
@@ -1773,7 +1774,6 @@ void $(MODEL_NAME)::precalc_last()
   </admst:for-each>
 
 	// @(initial_model) block
-	$(MODEL_NAME) *m = this; USE(m);
    <admst:apply-templates select="analog" match="analog:initial_model" required="yes"/>
 	// analog block global_model assignments
    <admst:apply-templates select="analog" match="model:precalc_last" required="yes"/>
