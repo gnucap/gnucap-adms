@@ -5693,8 +5693,11 @@ EXIT_IF_ISNAN(__%s_%s); // B
             <admst:when test="[$x='0.0' or $y='0.0']">
               <admst:return name="x" string="0.0"/>
             </admst:when>
-            <admst:when test="[$x='1.0' and $y='1.0']">
-              <admst:return name="x" string="1.0"/>
+            <admst:when test="[$x='1.0']">
+              <admst:return name="x" string="$y"/>
+            </admst:when>
+            <admst:when test="[$y='1.0']">
+              <admst:return name="x" string="$x"/>
             </admst:when>
             <admst:otherwise>
               <admst:return name="x" string="($x*$y)"/>
@@ -8177,16 +8180,20 @@ return
               <admst:variable name="epq" select="0.0"/>
             </admst:when>
             <admst:otherwise>
-              <admst:variable name="epq" select="($epq)"/>
+              <admst:variable name="epq" select=" /*addm*/ ($epq)"/>
             </admst:otherwise>
           </admst:choose>
       </admst:when>
       <admst:when test="[name='multtime']">
           <admst:variable name="t1" select="+$xpq*$y"/>
+          <admst:variable name="t1" select="" test="[$xpq='0.0' or $y='0.0']"/>
           <admst:variable name="t2" select="+$xp*$yq"/>
+          <admst:variable name="t2" select="" test="[$xp='0.0' or $yq='0.0']"/>
           <admst:variable name="t3" select="+$xq*$yp"/>
-          <admst:variable name="t4" select="+$x*$ypq"/>
-          <admst:variable name="epq" select="$t1$t2$t3$t4"/>
+          <admst:variable name="t3" select="" test="[$xq='0.0' or $yp='0.0']"/>
+			 <admst:variable name="t4" select="+ /*t4*/ $x*$ypq"/>
+          <admst:variable name="t4" select="" test="[$x='0.0' or $ypq='0.0']"/>
+			 <admst:variable name="epq" select="$t1$t2$t3$t4"/>
           <admst:choose>
             <admst:when test="[$eq='']">
               <admst:variable name="eq" select="0.0"/>
@@ -8200,12 +8207,18 @@ return
               <admst:variable name="epq" select="0.0"/>
             </admst:when>
             <admst:otherwise>
-              <admst:variable name="epq" select="($epq)"/>
+              <admst:variable name="epq" select=" /*multtime*/ ($epq)"/>
             </admst:otherwise>
           </admst:choose>
       </admst:when>
       <admst:when test="[name='multdiv']">
-        <admst:variable name="epq" select="($xpq/$y-($xp*$yq+$xq*$yp+$x*$ypq)/$y/$y+2*$x*$yp*$yq/$y/$y/$y)"/>
+        <admst:variable name="t1" select="$xpq/$y"/>
+        <admst:variable name="t1" select="" test="[$xpq='0.0']"/>
+        <admst:variable name="t2" select="$xp*$yq"/>
+        <admst:variable name="t2" select="" test="[$xp='0.0' or $yq='0.0']"/>
+        <admst:variable name="t3" select="+$xq*$yp"/>
+        <admst:variable name="t3" select="" test="[$xq='0.0' or $yp='0.0']"/>
+        <admst:variable name="epq" select=" /*multdiv*/ ($t1-($t2$t3+$x*$ypq)/$y/$y+2*$x*$yp*$yq/$y/$y/$y)"/>
       </admst:when>
     </admst:choose>
   </admst:if>
