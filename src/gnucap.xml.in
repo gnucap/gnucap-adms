@@ -8219,18 +8219,21 @@ return
   <admst:variable name="y" select="$e"/>
   <admst:variable name="yp" select="$ep"/>
   <admst:variable name="yq" select="$eq"/>
+  <admst:variable name="ypq" select="$epq"/>
   <admst:apply-templates select="arg3" match="ddx"/>
   <admst:variable name="z" select="$e"/>
   <admst:variable name="zp" select="$ep"/>
   <admst:variable name="zq" select="$eq"/>
+  <admst:variable name="zpq" select="$epq"/>
+
   <admst:variable name="e" select="($x?$y:$z)"/>
-
   <admst:variable name="ep" select="($x?$yp:$zp)"/>
+
+  <admst:variable name="eq" select="0.0"/>
+  <admst:variable name="epq" select="0.0"/>
   <admst:if test="$qprobe">
-
-  <admst:variable name="ep" select="($x?$yp:$zp)"/>
-
-  <admst:variable name="epq" select="fixme"/>
+    <admst:variable name="eq" select=" /*mapply_ternary*/ ($x?$yq:$zq)"/>
+    <admst:variable name="epq" select=" /*mapply_ternary*/ ($x?$ypq:$zpq)"/>
   </admst:if>
 </admst:template>
 <!-- -------------------------------------------------- -->
@@ -8598,24 +8601,46 @@ return
       <admst:variable name="index" select="%(index(./subexpression/expression/function[class='builtin'],.))"/>
       <admst:variable name="fname" select="%(funcname(.)/[name='fname']/value)"/>
       <admst:choose>
-        <admst:when test="[$x='0.0']">
+        <admst:when test="[$x='0.0' or $xp='0.0' or $xq='0.0']">
           <admst:variable name="epq" select="0.0"/>
         </admst:when>
-        <admst:when test="[$xp='0.0']">
-          <admst:variable name="epq" select="0.0"/>
-        </admst:when>
-        <admst:when test="[$xq='0.0']">
-          <admst:variable name="epq" select="0.0"/>
+        <admst:when test="[$xpq='0.0']">
+          <admst:variable name="epq" select=" /*p*/ (m20_$(fname)($x)*$xq*$xp)"/>
         </admst:when>
         <admst:otherwise>
-          <admst:variable name="epq" select="(m20_$(fname)($x)*$xq*$xp+d10_$(fname)$index*$xpq)"/>
+          <admst:variable name="epq" select=" /*p*/ (m20_$(fname)($x)*$xq*$xp+d10_$(fname)$index*$xpq)"/>
         </admst:otherwise>
       </admst:choose>
     </admst:when>
+    <!-- those with two arguments, only pow, max right now. -->
+    <admst:when test="[name='pow' or name='max']">
+      <admst:choose>
+        <admst:when test="[($yp='0.0' and $yq='0.0') and ($xp='0.0' or $xq='0.0')]">
+          <admst:variable name="epq" string="0.0"/>
+        </admst:when>
+        <admst:when test="[($yp='0.0' and $yq='0.0') and $xpq='0.0']">
+          <admst:variable name="epq" select=" /*pow p1*/ (m20_$(fname)($x,$y)*$xq*$xp)"/>
+        </admst:when>
+        <admst:when test="[($yp='0.0' and $yq='0.0')]">
+          <admst:variable name="epq" select=" /*pow p2*/ (m20_$(fname)($x,$y)*$xq*$xp+d10_$(fname)$index*$xpq)"/>
+        </admst:when>
+		  <admst:otherwise>
+          <!-- TODO: handle all cases like this! -->
+          <admst:variable name="t1" select="+d11_$(fname)$index*$ypq"/>
+			 <admst:variable name="t1" select="" test="[$ypq='0.0']"/>
+          <admst:variable name="t2" select="+d10_$(fname)$index*$xpq"/>
+			 <admst:variable name="t2" select="" test="[$xpq='0.0']"/>
+          <admst:variable name="epq" select="(_d_20_$(fname)($x,$y)*$xp*$xq
+                                            +_d_201_$(fname)($x,$y)*($yp*$xq+$xp*$yq)
+                                            +_d_21_$(fname)($x,$y)*$yp*$yq$t1$t2)"/>
+        </admst:otherwise>
+      </admst:choose>
+    </admst:when>
+    <!-- those with two arguments, not implemented -->
     <admst:when test="[name='div' or name='pow' or name='hypot' or name='min' or name='max']">
-      <admst:variable name="epq" select="fixme"/>
+      <admst:variable name="epq" select="fixme/*function %(name) %(arguments[1]) %(arguments[2]), x $x y $y xp $xp yp $yp yq $yq xq $xq*/"/>
       <admst:if test="[$requiredderivateforddx='yes']">
-        <admst:warning format="%(name): ddx dependency not implemented\n"/>
+        <admst:warning format="%(name): ddx dependency not implemented %(arguments[1]|' '|arguments[2])\n"/>
       </admst:if>
     </admst:when>
   </admst:choose>
