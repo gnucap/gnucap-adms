@@ -60,11 +60,11 @@
 // Not all Verilog-A compilers are able to properly collapse
 // internal nodes  by shorting branches. To ensure minimal node
 // count, comment out the following lines:
-`define __RDSMOD__
-`define __TNOISW__
-`define __RGATEMOD__
-`define __RBODYMOD__
-`define __SHMOD__
+// `define __RDSMOD__
+// `define __TNOISW__
+// `define __RGATEMOD__
+// `define __RBODYMOD__
+// `define __SHMOD__
 
 
 // Normalized pinch-off voltage including PD
@@ -4342,16 +4342,22 @@ end
 
 	CSS = ddx(QS,V(`IntrinsicSource));
 	CSD = -ddx(QS,V(`IntrinsicDrain));
+`ifdef __RBODYMOD__
 	CSB = CSBI - ddx((QS-QSI),V(sbulk));
+`endif
 	CSG = CSGI - ddx((QS-QSI),V(`GateEdgeNode));
 	
 	CDS = -ddx(QD,V(`IntrinsicSource));
 	CDD = ddx(QD,V(`IntrinsicDrain));
+`ifdef __RBODYMOD__
 	CDB = CDBI - ddx((QD-QDI),V(dbulk));
+`endif
 	CDG = CDGI - ddx((QD-QDI),V(`GateEdgeNode));
 	CBS = -ddx(QB,V(`IntrinsicSource));
 	CBD = -ddx(QB,V(`IntrinsicDrain));
+`ifdef __RBODYMOD__
 	CBB = CBBI + ddx(QB,V(sbulk)) + ddx(QB,V(dbulk)) + ddx((devsign * Qovb), V( `IntrinsicBody));
+`endif
 	CBG = -ddx(QB,V(`IntrinsicGate)) - ddx((devsign * Qovb), V(`GateEdgeNode));
 	
 

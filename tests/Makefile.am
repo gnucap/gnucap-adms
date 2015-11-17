@@ -17,6 +17,7 @@ AM_DEFAULT_SOURCE_EXT = .va
 .va.cc:
 check_LTLIBRARIES = \
     forloop.la \
+    BSIM6.1.1.la \
     case.la \
     subcoil.la \
     subcoil.1.la \
@@ -53,6 +54,9 @@ check_LTLIBRARIES += \
     aging_mos.la
 ## endif
 
+BSIM6_1_1_lo_CXXFLAGS =
+@nothing@BSIM6_1_1_la-BSIM6.1.1.lo: CXXFLAGS = -O0 # -Wall -pedantic
+@nothing@BSIM6.1.1.lo: CXXFLAGS = -O0 # -Wall -pedantic
 
 AM_CPPFLAGS = @GC_CPPFLAGS@ -I$(top_srcdir)/src
 AM_CXXFLAGS = -Wno-unused-variable -Wno-unused-but-set-variable
@@ -67,6 +71,8 @@ $(PWD)/%.ckt: %.ckt
 $(PWD)/%.gc: %.gc
 	[ -f $@ ] || $(LN_S) $< .
 $(PWD)/%.va: %.va
+	[ -f $@ ] || $(LN_S) $< .
+$(PWD)/modelcard.%: modelcard.%
 	[ -f $@ ] || $(LN_S) $< .
 
 DIST_TESTS = $(SO_TESTS)
@@ -91,8 +97,13 @@ AM_TESTS_ENVIRONMENT = \
            srcdir='$(srcdir)';
 
 AM_TESTS_FD_REDIRECT = 9>&2
-TEST_EXTENSIONS = .sh
-TESTS = $(GC_TESTS) $(GCUF_TESTS) $(INLINE_TESTS)
+TEST_EXTENSIONS = .sh .sp
+SP_LOG_COMPILER = $(top_srcdir)/tests/sp_log_compiler
+
+BSIM6_TESTS = bsim6_inv_dc.sp
+# FIXME: use different compiler.
+SH_TESTS = $(GC_TESTS) $(GCUF_TESTS) $(INLINE_TESTS)
+TESTS = $(SH_TESTS) $(BSIM6_TESTS)
 TESTS+= $(CUSTOM_TESTS)
 INLINE_TESTS = abs.sh instanceparam.sh
 # tests that require an .so
@@ -185,6 +196,9 @@ $(empty)ttint.sh: POSTDIFF='0,/^testdata/d'
 $(empty)inline.sh: POSTDIFF='0,/^outputstart/d'
 $(empty)aging_mos.sh: POSTDIFF='0,/^done·load_va/d'
 
+# ignore strobes about RSSMOD
+$(empty)bsim6_inv_dc.sp.out: POSTDIFF='/\[BSIM6\]·Although/d'
+
 # FIXME: more automatically...?
 EXTRA_DIST = \
     aging_mos.va \
@@ -269,14 +283,23 @@ PREDIFF= \
 $(TESTS:%.sh=%.log): Makefile
 
 check_custom: $(CUSTOM_TESTS:%.sh=%.log)
+check_bsim: $(BSIM6_TESTS:%.sp=%.log)
 
-$(TESTS:%.sh=%.out): %.out: %.gc
+$(BSIM6_TESTS:%=%.out): $(PWD)/modelcard.nmos $(PWD)/modelcard.pmos
+$(BSIM6_TESTS:%.sp=%.log): BSIM6.1.1.so
+
+$(SH_TESTS:%.sh=%.out): %.out: %.gc
 	$(AM_V_at)$(AM_TESTS_ENVIRONMENT)$(GNUCAP) $(GNUCAP_PLUGINS:%=-a ../src/.libs/%) $(GNUCAP_ARGS) $(LT) $< | \
 	    sed $(subst ·, ,$(PREDIFF:%=-e %)) \
 	    $(if $(POSTDIFF),| sed) $(subst ·, ,$(POSTDIFF:%=-e %)) > $*.out
 
+%.sp.out: %.sp
+	$(GNUCAP) -a ../src/.libs/d_adms_i.so -a ../src/.libs/d_adms_vbr.so -b $< | \
+	    sed $(subst ·, ,$(PREDIFF:%=-e %)) \
+	    $(if $(POSTDIFF),| sed) $(subst ·, ,$(POSTDIFF:%=-e %)) > $@
+
 # ugh, also creates some hxx files!
-%.cc %.h: %.va $(ADMS_GC_XML)
+%.cc %.h: %.va $(ADMS_GC_XML) $(top_srcdir)/src/implicit.xml
 	adms_implicit_transforms=$(top_srcdir)/src/implicit.xml admsXml @ADMSXML_FLAGS@ -I$(top_srcdir)/src $< $(ADMS_ES) -o $(notdir $*)
 
 %.cc %.h: %.va
@@ -311,6 +334,7 @@ CLEANFILES = .*.adms *.out \
     $(GC_TESTS) \
     $(INLINE_TESTS) \
     *.hxx .*.xml \
+    modelcard.* \
     core \
     rc_uic.sh \
     ddc_rc.sh \
@@ -323,8 +347,10 @@ CLEANFILES+= .*.adms *.out *.hxx .*.xml \
     inline.sh opamp.sh sensor_chip.sh
 
 
-$(TESTS:%.sh=%.log): .P
-$(TESTS:%.sh=%.out): .P
+$(SH_TESTS:%.sh=%.log): .P
+$(SH_TESTS:%.sh=%.out): .P
+$(BSIM6_TESTS:%=%.out): .P
+$(BSIM6_TESTS:%.sp=%.log): .P
 
 .P:
 	@:

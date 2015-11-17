@@ -121,6 +121,7 @@ AC_DEFINE_UNQUOTED(ADMS_LIBS, ["-lgnucap_adms"], [link against])
 WHICH_MAKE=`which make`
 AC_SUBST([WHICH_MAKE])
 
+AC_SUBST([nothing])
 # Checks for library functions.
 
 if test "$enable_debug" = "yes" ; then
