@@ -927,9 +927,10 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
         <admst:text select="$wnoise/item" format="\n\tdouble wnoise%(index($wnoise/item,.));\n"/>
 
 <admst:template match="printCtype">
-	<!--<admst:return name="yes" string=""/>-->
+  <!--<admst:return name="yes" string=""/>-->
   <admst:choose>
     <admst:when test="['%(datatypename)'='string']">const char*</admst:when>
+    <admst:when test="['%(datatypename)'='variable']"> /*fix type variable*/ %(vtype(.))</admst:when>
     <admst:otherwise>double</admst:otherwise>
   </admst:choose>
 </admst:template>
