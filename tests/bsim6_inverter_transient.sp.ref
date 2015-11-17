@@ -1,0 +1,136 @@
+*Sample netlist for BSIM6 
+.GEOMOD =0
+ ^ ? nmosHACK: bad parameter GEOMOD ignored
+.RGEOMOD =0
+ ^ ? nmosHACK: bad parameter RGEOMOD ignored
+.sca= 0
+ ^ ? nmosHACK: bad parameter sca ignored
+.scb= 0
+ ^ ? nmosHACK: bad parameter scb ignored
+.scc= 0
+ ^ ? nmosHACK: bad parameter scc ignored
+.sc= 0
+ ^ ? nmosHACK: bad parameter sc ignored
+.GEOMOD  = 0
+ ^ ? pmosHACK: bad parameter GEOMOD ignored
+.RGEOMOD = 0
+ ^ ? pmosHACK: bad parameter RGEOMOD ignored
+.RGATEMOD= 0
+ ^ ? pmosHACK: bad parameter RGATEMOD ignored
+.RBODYMOD= 0
+ ^ ? pmosHACK: bad parameter RBODYMOD ignored
+.TNOIA   = 0
+ ^ ? pmosHACK: bad parameter TNOIA ignored
+.TNOIB   = 0
+ ^ ? pmosHACK: bad parameter TNOIB ignored
+.TNOIC   = 0
+ ^ ? pmosHACK: bad parameter TNOIC ignored
+.RNOIA   = 0.577
+ ^ ? pmosHACK: bad parameter RNOIA ignored
+.RNOIB   = 0.5164
+ ^ ? pmosHACK: bad parameter RNOIB ignored
+.RNOIC   = 0.395
+ ^ ? pmosHACK: bad parameter RNOIC ignored
+.XGW     = 0
+ ^ ? pmosHACK: bad parameter XGW ignored
+.XGL     = 0
+ ^ ? pmosHACK: bad parameter XGL ignored
+.GBMIN   = 1E-012
+ ^ ? pmosHACK: bad parameter GBMIN ignored
+.RSHG    = 0.1
+ ^ ? pmosHACK: bad parameter RSHG ignored
+.RBPB    = 50
+ ^ ? pmosHACK: bad parameter RBPB ignored
+.RBPD    = 50
+ ^ ? pmosHACK: bad parameter RBPD ignored
+.RBPS    = 50
+ ^ ? pmosHACK: bad parameter RBPS ignored
+.RBDB    = 50
+ ^ ? pmosHACK: bad parameter RBDB ignored
+.RBSB    = 50
+ ^ ? pmosHACK: bad parameter RBSB ignored
+.RBPS0   = 50
+ ^ ? pmosHACK: bad parameter RBPS0 ignored
+.RBPSL   = 0
+ ^ ? pmosHACK: bad parameter RBPSL ignored
+.RBPSW   = 0
+ ^ ? pmosHACK: bad parameter RBPSW ignored
+.RBPSNF  = 0
+ ^ ? pmosHACK: bad parameter RBPSNF ignored
+.RBPD0   = 50
+ ^ ? pmosHACK: bad parameter RBPD0 ignored
+.RBPDL   = 0
+ ^ ? pmosHACK: bad parameter RBPDL ignored
+.RBPDW   = 0
+ ^ ? pmosHACK: bad parameter RBPDW ignored
+.RBPDNF  = 0
+ ^ ? pmosHACK: bad parameter RBPDNF ignored
+.RBPBX0  = 100
+ ^ ? pmosHACK: bad parameter RBPBX0 ignored
+.RBPBXL  = 0
+ ^ ? pmosHACK: bad parameter RBPBXL ignored
+.RBPBXW  = 0
+ ^ ? pmosHACK: bad parameter RBPBXW ignored
+.RBPBXNF = 0
+ ^ ? pmosHACK: bad parameter RBPBXNF ignored
+.RBPBY0  = 100
+ ^ ? pmosHACK: bad parameter RBPBY0 ignored
+.RBPBYL  = 0
+ ^ ? pmosHACK: bad parameter RBPBYL ignored
+.RBPBYW  = 0
+ ^ ? pmosHACK: bad parameter RBPBYW ignored
+.RBPBYNF = 0
+ ^ ? pmosHACK: bad parameter RBPBYNF ignored
+.RBSBX0  = 100
+ ^ ? pmosHACK: bad parameter RBSBX0 ignored
+.RBSBY0  = 100
+ ^ ? pmosHACK: bad parameter RBSBY0 ignored
+.RBDBX0  = 100
+ ^ ? pmosHACK: bad parameter RBDBX0 ignored
+.RBDBY0  = 100
+ ^ ? pmosHACK: bad parameter RBDBY0 ignored
+.RBSDBXL = 0
+ ^ ? pmosHACK: bad parameter RBSDBXL ignored
+.RBSDBXW = 0
+ ^ ? pmosHACK: bad parameter RBSDBXW ignored
+.RBSDBXNF= 0
+ ^ ? pmosHACK: bad parameter RBSDBXNF ignored
+.RBSDBYL = 0
+ ^ ? pmosHACK: bad parameter RBSDBYL ignored
+.RBSDBYW = 0
+ ^ ? pmosHACK: bad parameter RBSDBYW ignored
+.RBSDBYNF= 0
+ ^ ? pmosHACK: bad parameter RBSDBYNF ignored
+.XRCRG1  = 12
+ ^ ? pmosHACK: bad parameter XRCRG1 ignored
+.XRCRG2  = 1
+ ^ ? pmosHACK: bad parameter XRCRG2 ignored
+.NGCON   = 1
+ ^ ? pmosHACK: bad parameter NGCON ignored
+.VFBSDOFF= 0
+ ^ ? pmosHACK: bad parameter VFBSDOFF ignored
+.SCA     = 0
+ ^ ? pmosHACK: bad parameter SCA ignored
+.SCB     = 0
+ ^ ? pmosHACK: bad parameter SCB ignored
+.SCC     = 0
+ ^ ? pmosHACK: bad parameter SCC ignored
+.SC      = 0
+ ^ ? pmosHACK: bad parameter SC ignored
+.SA      = 0
+ ^ ? pmosHACK: bad parameter SA ignored
+.SB      = 0
+ ^ ? pmosHACK: bad parameter SB ignored
+.SD      = 0
+ ^ ? pmosHACK: bad parameter SD ignored
+#Time       v(vi)      v(vo)      hidden(0)  iter(0)   
+ 0.         0.5        0.0080557  1.         13.       
+ 10.n       0.5314     0.0080008  28.        112.      
+ 20.n       0.56267    0.0080751  6.985K     14.012K   
+ 30.n       0.59369    0.0080942  8.206K     16.413K   
+ 40.n       0.62434    0.0080734  9.091K     18.183K   
+ 50.n       0.65451    0.0080499  9.091K     20.461K   
+ 60.n       0.68406    0.0080382  9.089K     18.179K   
+ 70.n       0.71289    0.0080377  9.09K      22.337K   
+ 80.n       0.74088    0.0080427  9.09K      20.434K   
+ 90.n      ...
