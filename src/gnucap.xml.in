@@ -7427,7 +7427,7 @@ return
       <admst:return name="bname" value="&lt;&lt;"/>
     </admst:when>
     <admst:when test="[name='multmod']">
-      <admst:return name="bname" value="?multmod?"/>
+      <admst:return name="bname" value="%%"/>
     </admst:when>
     <admst:otherwise>
       <admst:fatal format="variable type %(name) unknown\n"/>
