@@ -462,11 +462,11 @@ inline double m20_max(double x,double y){untested(); return 0.;}
  * m201: derive twice (2) wrt first and second arg
  */
 
-inline double _d_20_pow(double x,double y){untested(); return ((y)*((y)-1.0)*pow(x,y)/(x)/(x)); }
-inline double _d_21_pow(double x,double n){untested(); return  log(x)*log(x)*pow(x,n) + pow(x,n-1.); }
+inline double _d_20_pow(double x,double y){return ((y)*((y)-1.0)*pow(x,y)/(x)/(x)); }
+inline double _d_21_pow(double x,double n){return  log(x)*log(x)*pow(x,n) + pow(x,n-1.); }
 inline double _d_10_pow(double x,double y){untested(); return (x==0.0)?0.0:(pow(x,y))*(y)/(x); }
-inline double _d_201_pow(double x,double n){untested(); return (x==0.0)?0.0:((1.+n*log(x))*pow(x,n-1.) );}
-inline double m20_pow(double x,double y){untested(); return   (y)*((y)-1.0)*pow(x,y)/(x)/(x); }
+inline double _d_201_pow(double x,double n){return (x==0.0)?0.0:((1.+n*log(x))*pow(x,n-1.) );}
+inline double m20_pow(double x,double y){return   (y)*((y)-1.0)*pow(x,y)/(x)/(x); }
 inline double m21_pow(double x,double n){untested(); return  log(x)*log(x)*pow(x,n) + pow(x,n-1.); }
 
 #define m00_div(v00,v10,x,y)    double v10=1/(y); double v00=(x)*v10;
@@ -519,7 +519,7 @@ inline double m21_pow(double x,double n){untested(); return  log(x)*log(x)*pow(x
 #define m20_sqrt(v00)         (-0.25/(v00)/sqrt(v00))
 #define m20_fabs(v00)         0.0
 #define m20_tanh(x)           -8*sinh(2*x)*pow(cosh(x),2)/(pow(cosh(2*x)+1,3))
-inline double m20_cosh(double x){ untested(); return cosh(x);}
+inline double m20_cosh(double x){return cosh(x);}
 
 /*--------------------------------------------------------------------------*/
 // possibly unneeded
@@ -605,14 +605,14 @@ inline double _d0_asinh(double arg)        {untested(); return (1.0/(sqrt(arg*ar
 inline double _atanh(double arg)           {untested(); return  atanh(arg); }
 inline double _d0_atanh(double arg)        {untested(); return (+1.0/(1-arg*arg)); }
 
-inline double _logE(double arg)            {untested(); return  log(arg); }
-inline double _d0_logE(double arg)         {untested(); return (1.0/arg); }
+inline double _logE(double arg)            {return  log(arg); }
+inline double _d0_logE(double arg)         {return (1.0/arg); }
 inline double _log10(double arg)           {untested(); return  log10(arg); }
 inline double _d0_log10(double arg)        {untested(); return (1.0/arg/log(10.0)); }
-inline double _exp(double arg)             {untested(); return  exp(arg); }
-inline double _d0_exp(double arg)          {untested(); return exp(arg); }
-inline double _sqrt(double arg)            {untested(); return  sqrt(arg); }
-inline double _d0_sqrt(double arg)         {untested(); return (1.0/sqrt(arg)/2.0); }
+inline double _exp(double arg)             {return  exp(arg); }
+inline double _d0_exp(double arg)          {return exp(arg); }
+inline double _sqrt(double arg)            {return  sqrt(arg); }
+inline double _d0_sqrt(double arg)         {return (1.0/sqrt(arg)/2.0); }
 
 inline double _abs(double arg)             {untested(); return std::abs(arg); }
 inline double _d0_abs(double arg)          {untested(); return (((arg)>=0)?(+1.0):(-1.0)); }
@@ -629,9 +629,9 @@ inline double _d1_hypot(double x,double y) {untested(); return (y)/sqrt((x)*(x)+
 inline double _atan2(double x,double y)    {untested(); return atan2(x,y); }
 // TODO atan2 derivatives?
 
-inline double _max(double x,double y)      {untested(); return ((x)>(y))?(x):(y); }
-inline double _d0_max(double x,double y)   {untested(); return ((x)>(y))?1.0:0.0; }
-inline double _d1_max(double x,double y)   {untested(); return ((x)>(y))?0.0:1.0; }
+inline double _max(double x,double y)      {return ((x)>(y))?(x):(y); }
+inline double _d0_max(double x,double y)   {return ((x)>(y))?1.0:0.0; }
+inline double _d1_max(double x,double y)   {return ((x)>(y))?0.0:1.0; }
 
 inline double _min(double x,double y)      {untested(); return ((x)<(y))?(x):(y); }
 inline double _d0_min(double x,double y)   {untested(); return ((x)<(y))?1.0:0.0; }
