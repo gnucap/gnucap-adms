@@ -132,6 +132,7 @@ CUSTOM_TESTS = \
     vsstamp.sh \
     csstamp.sh \
     vcvsstamp.sh \
+    vccsstamp.sh \
     ccvsstamp.sh \
     cccsstamp.sh \
     inline.sh \
