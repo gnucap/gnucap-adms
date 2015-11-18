@@ -1,20 +1,85 @@
 load ./res.so
 
 verilog
-
-resva  r1  (n, p);
+resif r1 (n, p);
 spice
+.echo if stamp
 .dc dm
+.delete r1
+
+.verilog
+resir r1 (n, p);
+spice
+.echo ir stamp
+.dc dm trace=i
+.delete r1
+
+.verilog
+resvf r1 (n, p);
+spice
+.echo vf stamp
+.dc dm
+.delete r1
+
+.verilog
+resvr r1 (n, p);
+spice
+.echo vr stamp
+.dc dm
+
 
 rgnd n 0 1
 v1 p n 1
 r2 n p 100
 
-*.dc dm
+.echo ==== sim resif ====
+.delete r1
+.verilog
+resif r1 (n, p);
+spice
 
 .print dc v(nodes) v(r1) v(r2) i(r*) i(r1.v_p_n)
 .print tran v(nodes) i(r1) v(r1) i(v1)
 
 .dc trace=i
-.tran 0 1 .1 trace=n
+.tran 0 1 .5 trace=n
+
+.echo ==== sim resir ====
+.delete r1
+.verilog
+resir r1 (n, p);
+spice
+
+.print dc v(nodes) v(r1) v(r2) i(r*) i(r1.v_p_n)
+.print tran v(nodes) i(r1) v(r1) i(v1)
+
+.dc trace=i
+.tran 0 1 .5 trace=n
+
+.echo ==== sim resvf ====
+.delete r1
+.verilog
+resvf r1 (n, p);
+spice
+
+.print dc v(nodes) v(r1) v(r2) i(r*) i(r1.v_p_n)
+.print tran v(nodes) i(r1) v(r1) i(v1)
+
+.dc trace=i
+.tran 0 1 .5 trace=n
+
+.echo ==== sim resvr ====
+.delete r1
+.verilog
+resvr r1 (n, p);
+spice
+
+
+.print dc v(nodes) v(r1) v(r2) i(r*) i(r1.v_p_n)
+.print tran v(nodes) i(r1) v(r1) i(v1)
+
+.dc trace=i
+.tran 0 1 .5 trace=n
+
+
 .end

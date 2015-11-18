@@ -1,0 +1,18 @@
+load ./res2.so
+
+verilog
+
+res2  r1  (n, p);
+spice
+.dc dm
+
+v1 p n 1
+
+.dc
+
+.print dc   v(nodes) i(v1)
+.print tran v(nodes) i(v1)
+
+.dc trace=i
+.tran 0 1 .1 trace=n
+.end

@@ -1,10 +1,11 @@
-// Copyright 2013 Felix
-// resistor
+// Copyright 2015 Felix Salfelder
+// resistor and variants
 
 `include "discipline.h"
 `include "constants.h"
 
-module resva(p,n);
+// v forward
+module resvf(p,n);
 	inout p,n;
 	electrical p,n;
 
@@ -16,5 +17,53 @@ module resva(p,n);
 		i = I(p,n);
 		v = V(p,n);
  		V(p,n) <+ i * R;
+   end
+endmodule
+
+// v reverse
+module resvr(p,n);
+	inout p,n;
+	electrical p,n;
+
+	parameter real R = 100;
+
+	real i (*ask="yes"*);
+	real v (*ask="yes"*);
+	analog begin	
+		i = - I(n,p);
+		v = - V(n,p);
+ 		V(p,n) <+ i * R;
+   end
+endmodule
+
+// i forward
+module resif(p,n);
+	inout p,n;
+	electrical p,n;
+
+	parameter real R = 100;
+
+	real i (*ask="yes"*);
+	real v (*ask="yes"*);
+	analog begin	
+		i = I(p,n);
+		v = V(p,n);
+ 		I(p,n) <+ v / R;
+   end
+endmodule
+
+// i reverse
+module resir(p,n);
+	inout p,n;
+	electrical p,n;
+
+	parameter real R = 100;
+
+	real i (*ask="yes"*);
+	real v (*ask="yes"*);
+	analog begin	
+		i = - I(n,p);
+		v = - V(n,p);
+ 		I(p,n) <+ v / R;
    end
 endmodule
