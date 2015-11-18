@@ -2064,12 +2064,11 @@ void $(DEV_NAME)::expand()
 		}else{ untested();
 		}
 		{
-			unsigned c = %(count(rhs/probe[nature=discipline/potential]));
 			node_t nodes[] = {
-				%(nnn(lhs/branch/pnode)), %(nnn(lhs/branch/nnode))
+				%(nnn(pnode)), %(nnn(nnode))
 			};
 			%(brp(.))->set_parameters(
-			    "i_%(branch/pnode/name)_%(branch/nnode/name)", this, NULL, /*value*/ 0.,
+			    "i_%(pnode/name)_%(nnode/name)", this, NULL, /*value*/ 0.,
 			    0, NULL, 2, nodes); // %(.)
 			%(brp(.))->set_param_by_name("r", "0.");
 		}
