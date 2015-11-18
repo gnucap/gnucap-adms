@@ -91,6 +91,8 @@ module someop(out, vref, inp, inn, vddp, vddn);
 //		if( vv1 > output_range*sup/2   && i_unlim > 0 ) i_unlim = 0;
 //		if( vv1 < -1*output_range*sup/2 &&  i_unlim < 0 ) i_unlim =  0;
 
+//	I(v1, vref) <+ -i_unlim;
+// BUG:
 	I(vref, v1) <+ i_unlim;
 
 	vvout = V(v1, vref)+sup/2; // Asymetrisch um zw. die Vdd und vss zu kommen

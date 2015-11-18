@@ -698,6 +698,18 @@ inline string toLower(string s){
 #define _mpg(x) m->x.has_hard_value()
 #define _ipg(x) d->x.has_hard_value()
 
+inline int contrib_polarity(int x)
+{
+  //return 1-2*x>0;
+  if(x<0){
+    return -1;
+  }else{
+    return 1;
+  }
+}
+
+#define contribute(S,C,W) S[abs(C)] += contrib_polarity(C) * (W)
+
 #endif
 
 // vim:ts=8:sw=2:noet

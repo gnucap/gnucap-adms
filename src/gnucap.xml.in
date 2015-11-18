@@ -73,11 +73,13 @@
 <admst:variable name="eval_kept" select="no"/>
 <admst:variable name="globalanalogfunction"/>
 
+<admst:variable name="M"/>
+<admst:variable name="module"/>
+
 <!-- result for tree traverse (ngspiceVersion vs .hxx) -->
 <admst:variable name="str_res_version" select=""/>
 <admst:variable name="str_res_hxx_ac" select=""/>
 <admst:variable name="str_res_hxx_tr" select=""/>
-<admst:variable name="sourcebranch" select="UNSET"/>
 
 <admst:value-to select="/simulator/package_name" value="@PACKAGE_NAME@"/>
 <admst:value-to select="/simulator/package_tarname" value="@PACKAGE_TARNAME@"/>
@@ -97,6 +99,17 @@
                 name="_br_%(lhs/branch/pnode)_%(lhs/branch/nnode)"/>
 </admst:template>
 
+<admst:template match="brp_rev">
+  <admst:return test="adms[datatypename='branch']" string="yes"
+                name="_br_%(nnode)_%(pnode)"/>
+  <admst:return test="adms[datatypename='source']" string="yes"
+                name="_br_%(branch/nnode)_%(branch/pnode)"/>
+  <admst:return test="adms[datatypename='probe'] " string="yes"
+                name="_br_%(branch/nnode)_%(branch/pnode)"/>
+  <admst:return test="adms[datatypename='contribution'] " string="yes"
+                name="_br_%(lhs/branch/nnode)_%(lhs/branch/pnode)"/>
+</admst:template>
+
 <!-- a run time "iterator" (node_t) to a node -->
 <admst:template match="nnn">
   <admst:return test="[grounded='yes']" string="yes"
@@ -114,7 +127,9 @@
     <admst:variable name="Pn" path="pnode"/>
     <admst:variable name="Nn" path="nnode"/>
     <!-- filter out those not occuring on lhs -->
-    <admst:if test="[0=count($modulehere/source/branch[pnode=$(Pn) and nnode=$(Nn)])]">
+    <admst:if test="[0=count($modulehere/source/branch[(pnode=$(Pn) and nnode=$(Nn))
+                                                    or (nnode=$(Pn) and pnode=$(Nn))])]">
+<!-- FIXME: polarity... -->
       <admst:push into="$(short)" select="." onduplicate="ignore"/>
     </admst:if>
   </admst:for-each>
@@ -305,7 +320,7 @@
 * used to create the mint:instance and model data structures.
 -->
 <admst:template match="vtype">
-<admst:message test="[/dbg_xml='yes']" format="*(tr_eval)vtype*\n"/>
+  <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)vtype*\n"/>
   <admst:choose>
     <admst:when test="[type='integer']">int</admst:when>
     <admst:when test="[type='real']">double</admst:when>
@@ -314,6 +329,85 @@
       <admst:fatal format="vtype %(name) unknown\n"/>
     </admst:otherwise>
   </admst:choose>
+</admst:template>
+
+<admst:variable name="uniqueVprobes"/>
+<admst:variable name="uniqueIprobes"/>
+<admst:variable name="B"/>
+<admst:variable name="module_source_branches"/>
+<admst:variable name="module_probe_branches"/>
+
+<admst:template match="collect_topology">
+  <admst:reset select="$(module_source_branches)"/>
+  <admst:reset select="$(module_probe_branches)"/>
+  <admst:variable name="M" select="%(.)"/>
+
+  <!-- find branches with a source attached
+    -- remove duplicates -->
+  <admst:for-each select="branch">
+    <admst:variable name="myB" select="%(.)"/>
+    <admst:if test="$(M)/source[branch=$(myB)]">
+      <admst:if test="[0=count($(module_source_branches)[pnode=$(myB)/nnode
+                                              and nnode=$(myB)/pnode])]">
+        <admst:push into="$(module_source_branches)" select="." onduplicate="ignore"/>
+        <admst:push into="$(module_probe_branches)" select="." onduplicate="ignore"/>
+      </admst:if>
+    </admst:if>
+  </admst:for-each>
+  <!-- does not work? <admst:variable name="module_probe_branches" select="$(module_source_branches)"/> -->
+
+  <admst:for-each select="branch">
+    <admst:variable name="myB" select="%(.)"/>
+	 <admst:if test="$(M)/probe[branch=$(myB)]">
+      <admst:if test="[0=count($(module_source_branches)[pnode=$(myB)/nnode
+                                              and nnode=$(myB)/pnode])]">
+        <admst:push into="$(module_probe_branches)" select="." onduplicate="ignore"/>
+	 </admst:if>
+	 </admst:if>
+ </admst:for-each>
+
+</admst:template>
+
+<!--
+<admst:template match="brp_any">
+  <admst:variable name="myB" select="%(.)"/>
+  <admst:fatal test="adms[datatypename!='branch']" format="not a branch"/>
+  <admst:return test="[count($(module_probe_branches)[.=$(myB)])]" name="_br_%(pnode)_%(nnode)" string="yes"/>
+  <admst:return test="[0=count($(module_probe_branches)[.=$(myB)])]" name="_br_%(nnode)_%(pnode)" string="yes"/>
+</admst:template>
+-->
+<admst:template match="brp_any">
+  <admst:variable name="myB" select="%(.)"/>
+  <admst:fatal test="adms[datatypename!='branch']" format="not a branch"/>
+  <admst:return test="[0!=count($(module_probe_branches)[.=$(myB)])]" name="_br_%(pnode)_%(nnode)" string="yes"/>
+  <admst:return test="[0=count($(module_probe_branches)[.=$(myB)])]" name="_br_%(nnode)_%(pnode)" string="yes"/>
+</admst:template>
+
+
+<!-- TODO: collect reverse probes? -->
+<!-- FIXME: implement global probes list -->
+<admst:template match="collect_unique_probes">
+  <admst:reset select="$(uniqueVprobes)"/>
+  <admst:reset select="$(uniqueIprobes)"/>
+
+  <admst:variable name="B" select="%(.)"/>
+
+  <admst:for-each select="$(M)/source[branch=$B]/probe[branch!=$B and nature=discipline/potential
+                                 and (branch/pnode!=$(B)/nnode or branch/nnode!=$(B)/pnode)]">
+    <admst:variable name="thisprobe" select="."/>
+	 <admst:if test="[0=count($(uniqueVprobes)[branch/pnode=$(thisprobe)/branch/nnode
+                                          and branch/nnode=$(thisprobe)/branch/pnode])]">
+      <admst:push into="$(uniqueVprobes)" select="." onduplicate="ignore"/>
+    </admst:if>
+  </admst:for-each>
+  <admst:for-each select="$(M)/source[branch=$B]/probe[branch!=$B and nature=discipline/flow
+                                             and (branch/pnode!=$(B)/nnode or branch/nnode!=$(B)/pnode)]">
+    <admst:variable name="thisprobe" select="."/>
+    <admst:if test="[0=count($(uniqueIprobes)[branch/pnode=$(thisprobe)/branch/nnode
+                                          and branch/nnode=$(thisprobe)/branch/pnode])]">
+      <admst:push into="$(uniqueIprobes)" select="." onduplicate="ignore"/>
+    </admst:if>
+  </admst:for-each>
 </admst:template>
 
 <!-- *********************************************************************************** -->
@@ -336,7 +430,6 @@
 //#define _$(filename)_header__
 <admst:for-each select="/module[not (nilled(analog) and nilled(instance))]">
 
-
   <admst:new datatype="list" arguments="branch">
 	  <admst:variable name="short"/>
   </admst:new>
@@ -355,6 +448,7 @@
   <admst:variable name="idts" select="%(expression/function[name='idt' and class='operator'])"/>
   <admst:variable name="sckt_size" select="%(count(instance) + count($(short)) + count(source))"/>
 
+  <admst:apply-templates match="collect_topology" select="." required="yes"/>
 
 // customization - gnucap specific constants
 #define VALUE_NAME &quot;#&quot;
@@ -520,18 +614,6 @@ class $(MODEL_NAME) : public MODEL_CARD {
 
 class $(DEV_NAME) : public ADMS_BASE
 {
-	private: // branches
-    <admst:for-each select="branch">
-      // %(.)
-    </admst:for-each>
-	private: // sources
-    <admst:for-each select="source">
-      // %(.)
-    </admst:for-each>
-	private: // probes
-    <admst:for-each select="probe">
-      // %(.)
-    </admst:for-each>
 	private:
 		std::string _modelname;
 		node_t _nodes[ %(count(node[grounded='no'])) ];
@@ -1025,34 +1107,46 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
 		COMPONENT* _%(name);
 </admst:for-each>
   <admst:if test="[(count($(short)))!=0]">
-	private: // short %(count($(short)))
+	private: // shorts (current probes)
 	 <admst:for-each select="$(short)">
 		COMPONENT* %(brp(.)); // %(.)
     </admst:for-each>
   </admst:if>
+	private: // branches
+    <admst:for-each select="branch">
+      // %(.)
+    </admst:for-each>
+	private: // sources
+    <admst:for-each select="source">
+		// %(.)
+    </admst:for-each>
+	private: // module_source_branches
+    <admst:for-each select="$(module_source_branches)">
+		// %(.) %(./pnode) %(./nnode)
+    </admst:for-each>
+	private: // module_probe_branches
+    <admst:for-each select="$(module_probe_branches)">
+		// %(.) %(./pnode) %(./nnode)
+    </admst:for-each>
+	private: // probes
+    <admst:for-each select="probe">
+      // %(.)
+    </admst:for-each>
 	private: // all sources
   <admst:for-each select="source">
 // %(.)
   </admst:for-each>
-	private: // unique branches
+	private: // unique (directed) branches
   <admst:for-each select="branch" onduplicate="ignore">
 // %(.)
   </admst:for-each>
 	private: // sources by branch
-  <admst:for-each select="branch">
+  <admst:for-each select="$(module_source_branches)">
     <admst:variable name="B" select="%(.)"/>
-    <admst:variable name="uniqueVprobes"/>
-    <admst:variable name="uniqueIprobes"/>
-	 <admst:if test="$(M)/source[branch=$(B)]">
-		 // there's a source with this branch
 		COMPONENT* %(brp(.));
+      <admst:text format="//%(.)\n" select="$(M)/source[branch=$(B)]"/>
 
-      <admst:for-each select="$(M)/source[branch=$B]/probe[branch!=$B and nature=discipline/potential]">
-        <admst:push into="$(uniqueVprobes)" select="." onduplicate="ignore"/>
-      </admst:for-each>
-      <admst:for-each select="$(M)/source[branch=$B]/probe[branch!=$B and nature=discipline/flow]">
-        <admst:push into="$(uniqueIprobes)" select="." onduplicate="ignore"/>
-      </admst:for-each>
+      <admst:apply-templates select="." match="collect_unique_probes"/>
 
 		double %(brp(.))_xxx[
 		    + 2 // constant and self admittance
@@ -1066,7 +1160,9 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
       ];
 
 		enum{
-			P_%(brp($(B)))_const,
+			P_%(brp($(B)))_%(brp_rev($(B)))_%(discipline/flow/access)=-1,
+			P_%(brp($(B)))_%(brp_rev($(B)))_%(discipline/potential/access)=-1,
+			P_%(brp($(B)))_const=0,
 			P_%(brp($(B)))_%(brp($(B)))_%(discipline/flow/access)=1,
 			P_%(brp($(B)))_%(brp($(B)))_%(discipline/potential/access)=1
 		<admst:for-each select="$(uniqueVprobes)">,
@@ -1080,7 +1176,21 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
       </admst:for-each>
 		};
 
-    </admst:if>
+		enum{
+			P_%(brp_rev($(B)))_%(brp_rev($(B)))_%(discipline/flow/access)=1,
+			P_%(brp_rev($(B)))_%(brp_rev($(B)))_%(discipline/potential/access)=1,
+			P_%(brp_rev($(B)))_%(brp($(B)))_%(discipline/flow/access)=-P_%(brp($(B)))_%(brp($(B)))_%(discipline/flow/access)
+      <admst:for-each select="$(uniqueVprobes)">,
+			P_%(brp_rev($(B)))_%(brp(.))_%(nature/access) = -P_%(brp($(B)))_%(brp(.))_%(nature/access)
+      </admst:for-each>
+      <admst:for-each select="$(uniqueIprobes)">,
+			P_%(brp_rev($(B)))_%(brp(.))_%(nature/access)_val_ = -P_%(brp($(B)))_%(brp(.))_%(nature/access)_val_
+      </admst:for-each>
+      <admst:for-each select="$(uniqueIprobes)">,
+			P_%(brp_rev($(B)))_%(brp(.))_%(nature/access) = -P_%(brp($(B)))_%(brp(.))_%(nature/access)
+      </admst:for-each>
+		};
+
 
   </admst:for-each>
 
@@ -1548,22 +1658,26 @@ namespace {
 
 using namespace std;
 const double NA(NOT_INPUT);
+
 <admst:for-each select="/module[not (nilled(analog) and nilled(instance))]">
+  <admst:variable name="M" path="."/>
+  <admst:variable name="ddts" select="%(expression/function[name='ddt' and class='operator'])"/>
+  <admst:variable name="idts" select="%(expression/function[name='idt' and class='operator'])"/>
+  <admst:variable name="_num_states" select="%(count($ddts)) + %(count($idts))"/>
+
   <admst:apply-templates select="." match="ddticcollect"/>
+  <admst:apply-templates match="collect_topology" select="." required="yes"/>
+
   <admst:new datatype="list" arguments="branch">
 	  <admst:variable name="short"/>
   </admst:new>
   <admst:apply-templates select="." match="findshorts"/>
-  <admst:variable name="ddts" select="%(expression/function[name='ddt' and class='operator'])"/>
-  <admst:variable name="idts" select="%(expression/function[name='idt' and class='operator'])"/>
-  <admst:variable name="_num_states" select="%(count($ddts)) + %(count($idts))"/>
 
   //analog function stuff
   <admst:variable name="sckt_size" select="%(count(instance) + count($(short)) + count(source))"/>
 
   <admst:value-of select="attribute[name='ngspicename']/value"/>
   <admst:variable name="module" select="%s"/>
-  <admst:variable name="M" select="%(.)"/>
   <admst:variable name="DEV_NAME" select="DEV_%(upper-case(name))"/>
   <admst:variable name="MODEL_NAME" select="MODEL_%(upper-case(name))"/>
   <admst:variable name="COMMON_NAME" select="COMMON_%(upper-case(name))"/>
@@ -1785,11 +1899,11 @@ void $(MODEL_NAME)::set_dev_type(const std::string&amp; new_type)
 }
 
 <admst:template match="brpNULL">
-  <admst:for-each select="branch">
-    <admst:variable name="B" select="%(.)"/>
-    <admst:if test="$(M)/source[branch=$(B)]">,
+  <admst:for-each select="$(short)">,
 	%(brp(.))(NULL) /* %(.) */
-    </admst:if>
+  </admst:for-each>
+  <admst:for-each select="$(module_source_branches)">,
+	%(brp(.))(NULL) /* %(.) */
   </admst:for-each>
 </admst:template>
 
@@ -1803,9 +1917,6 @@ $(DEV_NAME)::$(DEV_NAME)()
     _states_q1(NULL)
 <admst:for-each select="instance">,
     _%(name)(NULL)
-</admst:for-each>
-<admst:for-each select="$(short)">,
-	%(brp(.))(NULL) /* %(.) */
 </admst:for-each>
 <admst:apply-templates select="." match="brpNULL"/>
 {
@@ -1834,15 +1945,6 @@ $(DEV_NAME)::$(DEV_NAME)(const $(DEV_NAME)&amp; p) :
     _states_q1(NULL)
 <admst:for-each select="instance">,
     _%(name)(0)
-</admst:for-each>
-<admst:for-each select="$(short)">,
-	%(brp(.))(NULL) /* short */
-</admst:for-each>
-<admst:for-each select="contribution[lhs/nature=lhs/discipline/potential]">,
-	// %(brp(.))(NULL)
-</admst:for-each>
-<admst:for-each select="contribution[lhs/nature=lhs/discipline/flow]">,
-	//	%(brp(.))(NULL)
 </admst:for-each>
 <admst:apply-templates select="." match="brpNULL"/>
 {
@@ -2049,6 +2151,9 @@ void $(DEV_NAME)::expand()
 		}
 		// current probes as in V(a) &lt;+ I(b)
 <admst:for-each select="$(short)">
+// current probe %(.)
+</admst:for-each>
+<admst:for-each select="$(short)">
 		if (!%(brp(.))) {
 			const CARD* p = device_dispatcher["resistor"];
 			if(!p){
@@ -2073,12 +2178,11 @@ void $(DEV_NAME)::expand()
 			%(brp(.))->set_param_by_name("r", "0.");
 		}
 </admst:for-each>
+
 		// sources, by branch
-<admst:for-each select="branch">
+<admst:for-each select="$(module_source_branches)">
   <admst:variable name="B" select="%(.)"/>
        // $B, %(count($(M)/source[branch=$(B)]))
-	 <admst:if test="$(M)/source[branch=$(B)]">
-      <!-- there's a source with this branch -->
 		if (!%(brp(.))) {
 			std::string type="adms
 	 <admst:text format="_v" test="$(M)/source[branch=$(B) and nature=discipline/potential]"/>
@@ -2094,24 +2198,14 @@ void $(DEV_NAME)::expand()
 			}
 		}else{
 		}
-    </admst:if>
-
 </admst:for-each>
+
 		// contributions, setup
-<admst:for-each select="branch">
+<admst:for-each select="$(module_source_branches)">
   <admst:variable name="B" select="%(.)"/>
   // B %(.)
-  <admst:if test="$(M)/source[branch=$(B)]">
-	  // there's a source with this branch
 
-    <admst:variable name="uniqueVprobes"/>
-    <admst:variable name="uniqueIprobes"/>
-    <admst:for-each select="$(M)/source[branch=$B]/probe[branch!=$B and nature=discipline/potential]">
-      <admst:push into="$(uniqueVprobes)" select="." onduplicate="ignore"/>
-    </admst:for-each>
-    <admst:for-each select="$(M)/source[branch=$B]/probe[branch!=$B and nature=discipline/flow]">
-      <admst:push into="$(uniqueIprobes)" select="." onduplicate="ignore"/>
-    </admst:for-each>
+    <admst:apply-templates select="." match="collect_unique_probes"/>
 
     <admst:for-each select="$(uniqueVprobes)">
   // V %(.)
@@ -2149,7 +2243,6 @@ void $(DEV_NAME)::expand()
 			    %(brp(.))_xxx, %(brp(.))_xxx_old,
 			    2*(1+c), nodes, f, brs); // %(.)
 		} // %(.)
-  </admst:if>
 </admst:for-each>
 		// netlist
 <admst:for-each select="instance">
@@ -2858,24 +2951,36 @@ void $(DEV_NAME)::ac_begin()
 	// tr_accept();
 }
 // -------------------------------------------------------------------------- //
+
 void $(DEV_NAME)::do_ac()
 {
   assert(OPT::_keep_time_steps &lt;= 8);
   assert(_dt == NOT_VALID || ::conchk(_dt, _time[0] - _time[1]));
 
-  <admst:for-each select="source">
-    <admst:variable  name="B" select="%(branch)"/>
-	  std::fill_n(%(brp(.))_xxx,
+  <admst:for-each select="$(module_source_branches)">
+	  // msb %(.)
+	  //  %(brp_any(.))
+  </admst:for-each>
+
+
+  <admst:for-each select="$(module_source_branches)">
+	// msb %(.)
+
+    <admst:variable  name="B" select="%(.)"/>
+    <admst:apply-templates select="." match="collect_unique_probes"/>
+    <admst:variable  name="B" select="%(.)"/>
+
+	  std::fill_n(%(brp_any(.))_xxx,
 		    + 2 // constant and self admittance
-		    + %(count(probe[nature=discipline/potential])) // V
-			 + %(count(probe[nature=discipline/flow and branch!=$B])) // I val (unnecessary?)
-			 + %(count(probe[nature=discipline/flow and branch!=$B])) // I raw
+		    + %(count($uniqueVprobes)) // V
+			 + %(count($uniqueIprobes)) // I val (unnecessary?)
+			 + %(count($uniqueIprobes)) // I raw
 	  , 0.);
-	  std::fill_n(%(brp(.))_xxx_old,
+	  std::fill_n(%(brp_any(.))_xxx_old,
 		    + 2 // constant and self admittance
-		    + %(count(probe[nature=discipline/potential])) // V
-			 + %(count(probe[nature=discipline/flow and branch!=$B])) // I val (unnecessary?)
-			 + %(count(probe[nature=discipline/flow and branch!=$B])) // I raw
+		    + %(count($uniqueVprobes)) // V
+			 + %(count($uniqueIprobes)) // I val (unnecessary?)
+			 + %(count($uniqueIprobes)) // I raw
 	  , 0.);
   </admst:for-each>
 
@@ -3024,39 +3129,21 @@ void $(DEV_NAME)::tr_eval()
 	$(DEV_NAME)* d = this; USE(d);
 	trace2("$(DEV_NAME)::tr_eval", _sim->analysis_is_static(), _sim->_time0);
 
-  <admst:for-each select="branch">
+  <admst:for-each select="$(module_source_branches)">
+		// ?
+  </admst:for-each>
+
+  <admst:for-each select="$(module_source_branches)">
     <admst:variable  name="B" select="%(.)"/>
-	 <admst:if test="$(M)/source[branch=$(B)]">
+    <admst:apply-templates select="." match="collect_unique_probes"/>
 
-      <admst:variable name="uniqueVprobes"/>
-      <admst:variable name="uniqueIprobes"/>
-      <admst:for-each select="$(M)/source[branch=$B]/probe[branch!=$B and nature=discipline/potential]">
-        <admst:push into="$(uniqueVprobes)" select="." onduplicate="ignore"/>
-      </admst:for-each>
-      <admst:for-each select="$(M)/source[branch=$B]/probe[branch!=$B and nature=discipline/flow]">
-        <admst:push into="$(uniqueIprobes)" select="." onduplicate="ignore"/>
-      </admst:for-each>
-
-	  std::fill_n(%(brp(.))_xxx,
+	  std::fill_n(%(brp_any(.))_xxx,
 		    + 2 // constant and self admittance
 		    + %(count($uniqueVprobes)) // V
 			 + %(count($uniqueIprobes)) // I val (unnecessary?)
 			 + %(count($uniqueIprobes)) // I raw
 	  , 0.);
-    </admst:if>
   </admst:for-each>
-  #if 0
-  <admst:for-each select="source">
-    <admst:variable  name="B" select="%(branch)"/>
-	  std::fill_n(%(brp(.))_xxx,
-		    + 2 // constant and self admittance
-		    + %(count(probe[nature=discipline/potential])) // V
-			 + %(count(probe[nature=discipline/flow and branch!=$B])) // I val (unnecessary?)
-			 + %(count(probe[nature=discipline/flow and branch!=$B])) // I raw
-	  , 0.);
-  </admst:for-each>
-  #endif
-
 
 <admst:apply-templates select="analog/code[datatypename='block']/variable" match="generate_c:declare_variable"/>
 
@@ -6320,8 +6407,8 @@ return
 
 <!-- ----------------------------------------------------------------- -->
 <!-- ------------------ create hxx for tr ---------------------------- -->
-<admst:variable name="eval_mode" select="tr"/>
 <admst:for-each select="/module[not (nilled(analog) and nilled(instance))]">
+  <admst:variable name="eval_mode" select="tr"/>
   <admst:variable name="ddts" select="%(expression/function[name='ddt' and class='operator'])"/>
   <admst:variable name="idts" select="%(expression/function[name='idt' and class='operator'])"/>
 
@@ -6330,34 +6417,24 @@ return
   <admst:variable name="M" select="%(.)"/>
   <admst:variable name="DEV_NAME" select="DEV_%(upper-case(name))"/>
   <admst:variable name="MODEL_NAME" select="MODEL_%(upper-case(name))"/>
+
+  <admst:apply-templates match="collect_topology" select="." required="yes"/>
+  <admst:new datatype="list" arguments="branch">
+	  <admst:variable name="short"/>
+  </admst:new>
+  <admst:apply-templates select="." match="findshorts"/>
 
   <admst:open file="$(filename)_$(module)_tr.hxx">
     <admst:apply-templates select="analog/code" match="analog:evaluate" required="yes"/>
   </admst:open>
-</admst:for-each>
 
 <!-- ----------------------------------------------------------------- -->
 <!-- ------------------ create hxx for ac ---------------------------- -->
-<admst:variable name="eval_mode" select="ac"/>
-<admst:for-each select="/module[not (nilled(analog) and nilled(instance))]">
-  <admst:value-of select="attribute[name='ngspicename']/value"/>
-  <admst:variable name="module" select="%s"/>
-  <admst:variable name="M" select="%(.)"/>
-  <admst:variable name="DEV_NAME" select="DEV_%(upper-case(name))"/>
-  <admst:variable name="MODEL_NAME" select="MODEL_%(upper-case(name))"/>
+  <admst:variable name="eval_mode" select="ac"/>
 
-  <admst:variable name="ddts" select="%(expression/function[name='ddt' and class='operator'])"/>
-  <admst:variable name="idts" select="%(expression/function[name='idt' and class='operator'])"/>
+  <admst:apply-templates match="collect_topology" select="." required="yes"/>
 
   <admst:open file="$(filename)_$(module)_ac.hxx">
-    <admst:for-each select="source">
-	  std::fill_n(%(brp(.))_xxx,
-		    + 2 // constant and self admittance
-		    + %(count(probe[nature=discipline/potential])) // V
-			 + %(count(probe[nature=discipline/flow and branch!=$B])) // I val (unnecessary?)
-			 + %(count(probe[nature=discipline/flow and branch!=$B])) // I raw
-	  , 0.);
-    </admst:for-each>
     <admst:apply-templates select="analog/code" match="analog:evaluate" required="yes"/>
   </admst:open>
 </admst:for-each>
@@ -7506,8 +7583,9 @@ return
   <admst:variable name="loss" select="/*flowp*/" test="[nature=discipline/flow]"/>
   <admst:choose>
     <admst:when test="[nature=discipline/flow]">
-    <admst:variable  name="B" select="%(branch)"/>
-	 <admst:variable name="e" select="AMPS(%(brp(.)))"/>
+      <admst:variable name="B" select="%(branch)"/>
+		<admst:variable name="e" select="(-AMPS( /*rev*/  %(brp_rev(.))))"/>
+		<admst:variable name="e" select="AMPS(%(brp(.)))" test="$(module_probe_branches)[.=$(B)]"/>
     </admst:when>
     <admst:when test="[nature=discipline/flow and source/nature=discipline/potential]">
       <admst:variable name="e" select="(/* HERE */ BP(%(branch/pnode/name), %(branch/nnode/name)))"/>
@@ -8980,7 +9058,6 @@ return
   <admst:text test="rhs/function[class='builtin']" format="{\n"/>
   <admst:apply-templates select="rhs/function[class='builtin']" match="function:precomputation"/>
   <admst:apply-templates select="rhs[not(nilled(function))]" match="function:derivate:precomputation"/>
-  <admst:variable name="sourcebranch" select="%(lhs/branch)"/>
   <admst:variable name="sourcepnode" select="%(lhs/branch/pnode)"/>
   <admst:variable name="sourcennode" select="%(lhs/branch/nnode)"/>
   <admst:variable name="sourcepnodename" select="%($sourcepnode/name)"/>
@@ -9061,10 +9138,18 @@ return
 
 // done res %(dynamic)
 
-  <admst:variable name="sourcebranch" select="SET"/>
+  <admst:variable name="B" select="%(lhs/branch)"/>
   <admst:apply-templates select="." match="residual_"/>
-  <admst:variable name="contrib" select="%(brp(.))_xxx"/>
-  <admst:variable  name="S" select="%(lhs/branch)"/>
+  <admst:variable name="contrib_src_branch" select="%(brp(.))_xxx"/>
+  <admst:variable name="source_polarity" select=""/>
+
+  <admst:if test="[0=count($(module_source_branches)[.=$(B)])]">
+    <admst:variable name="contrib_src_branch" select="%(brp_rev(.))_xxx"/>
+    <admst:variable name="source_polarity" select="-"/>
+  </admst:if>
+
+  <admst:variable name="S" select="%(lhs/branch)"/>
+  <admst:variable name="lhs" select="%(lhs)"/>
 
   // iterating rhs potential probes for %(.)
   <!--<admst:for-each select="rhs/probe[nature=../../lhs/discipline/potential]">-->
@@ -9075,14 +9160,16 @@ return
     <admst:variable name="probepnodename" select="%($probepnode/name)"/>
     <admst:variable name="probennodename" select="%($probennode/name)"/>
     <admst:variable name="pprobe" select="%(.)"/>
+
+	 <admst:variable name="csb_slot" select=""/>
     <admst:if test="[$eval_mode='ac' and ../../dynamic='yes']">
-      <admst:variable name="contrib" select="%(brp($(S)))_xxx_old"/>
+      <admst:variable name="csb_slot" select="_old"/>
     </admst:if>
 
     <admst:apply-templates select="../tree" match="subexpression:differentiate"/>
 
     <admst:choose>
-      <admst:when test="../../lhs/branch/pnode[discipline/name='degradational']">
+      <admst:when test="$(lhs)/branch/pnode[discipline/name='degradational']">
 		//skipping jacobian for degr node
       </admst:when> <!--degradational-->
       <admst:when test="branch/pnode[discipline/name='degradational']">
@@ -9100,16 +9187,16 @@ return
 			/* HACK. argh.*/
 			double _CKTag0 = 1.;
 			double e = $ep;
-			$contrib[0] -= e * BR($probepnodename, $probennodename);
+			$contrib_src_branch$csb_slot[0] -= $source_polarity e * BR($probepnodename, $probennodename);
 
 			$keepstatevar = 1;
-			e = $ep;
-			$contrib[P_%(brp($(S)))_%(brp(.))_%(nature/access)] -= e * OPT::keepcoeff;
+			e = - $ep;
+			contribute($contrib_src_branch$csb_slot, P_%(brp($(S)))_%(brp(.))_%(nature/access), $source_polarity e * OPT::keepcoeff);
 		} else
 #endif
 		{
-			$contrib[0] -= ceq;
-			$contrib[P_%(brp($(S)))_%(brp(.))_%(nature/access)] += e;
+			$contrib_src_branch$csb_slot[0] -= $source_polarity ceq;
+			contribute($contrib_src_branch$csb_slot, P_%(brp($(S)))_%(brp(.))_%(nature/access), /* $source_polarity */ e);
 		}
 	}
 #endif
@@ -9118,9 +9205,9 @@ return
 	{ // ?&lt;+ V in %(.) %(../dynamic)
 		double e = $ep;
 		double ceq;
-		ceq = e * BR($probepnodename, $probennodename);
-		$contrib[0] -= ceq; // offset
-		$contrib[P_%(brp($(S)))_%(brp(.))_%(nature/access)] += e;
+		ceq = - e * BR($probepnodename, $probennodename);
+		contribute($contrib_src_branch$csb_slot, 0, $source_polarity ceq); // offset
+		contribute($contrib_src_branch$csb_slot, P_%(brp($(S)))_%(brp(.))_%(nature/access), e);
 	}
       </admst:when>
     </admst:choose>
@@ -9141,21 +9228,27 @@ return
 	 <admst:apply-templates select="../tree" match="subexpression:differentiate"/>
 			{ // I&lt;+ in %(.)
 				double e = $ep;
-				$contrib[P_%(brp($(S)))_%(brp(.))_%(nature/access)] += e; // transconductance
+				contribute($contrib_src_branch,P_%(brp($(S)))_%(brp(.))_%(nature/access), $source_polarity e); // transconductance
 				double ceq;
-      <admst:if test="[lhs/nature=discipline/potential]">
-				// the d_mos+d_poly_g case...
-				/// volts_limited maybe?
+      <admst:if test="[$(lhs)/nature=discipline/potential]">
+// nonsense??
 				ceq = e * BR($probepnodename, $probennodename);
       </admst:if>
-      <admst:if test="[lhs/nature=discipline/flow]">
-				if(%(brp(.))->has_iv_probe()){
-				}else{ incomplete();
-					assert(%(brp(.))->has_inode());
-				}
-				ceq = e * AMPS(%(brp(.)));
+      <admst:if test="[$(lhs)/nature=discipline/flow]">
+// nonsense??
      </admst:if>
-				$contrib[0] -= ceq; // offset
+				// %(branch)
+				if(%(brp_any(branch))->has_iv_probe()){
+				}else{ incomplete();
+					assert(%(brp_any(branch))->has_inode());
+				}
+				//				ceq = e * AMPS(%(brp_any(branch)));
+								ceq = $source_polarity e *
+    <admst:variable name="B" select="%(branch)"/>
+    <!-- hmm, use adms:if-inside? -->
+    <admst:text format="AMPS(%(brp(.)))" test="$(module_probe_branches)[.=$(B)]"/>
+    <admst:text format="(-AMPS(%(brp_rev(.))))" test="[0=count($(module_probe_branches)[.=$(B)])]"/>;
+				contribute($contrib_src_branch, 0, -ceq); // offset
 		   } // I&lt;+ in %(.)
   </admst:for-each>
 
@@ -9175,8 +9268,13 @@ return
   <admst:variable name="loss" select="/*lhpot*/-1/OPT::shortckt * " test="[lhs/type='ps']"/>
   <admst:variable name="static_rhs" select=""/>
   <admst:variable name="static_rhs" select="STATIC_RHS *" test="[dynamic='no']"/>
+  <admst:variable name="B" select="%(lhs/branch)"/>
 
 	// residual2($(Pp),$(Pn),%(rhs/tree)), ../dynamic:%(../dynamic) dynamic %(dynamic)
+	// me %(.)
+	// lhs %(lhs)
+	// rhs %(rhs)
+
 	{
 		double vx = $(static_rhs) %(e(rhs/tree)); // %(rhs/tree)
 		assert(is_number(vx));
@@ -9185,12 +9283,19 @@ return
 			assert(_n[$node_prefix$Pp].a_());
 			_n[$node_prefix$Pp].a_()->tr() = vx; // hack, should be +=
       </admst:when>
-      <admst:when test="[lhs/nature=lhs/discipline/potential]">
-			%(brp(.))_xxx[0] += vx; // %(.)
+      <admst:when test="[lhs/nature=lhs/discipline/potential or lhs/nature=lhs/discipline/flow]">
+        <admst:variable name="B" select="%(lhs/branch)"/>
+		  <admst:if test="[0!=count($(module_source_branches)[.=$(B)])]">
+			%(brp(lhs/branch))_xxx[0] += vx; //B %(.)
+        </admst:if>
+        <admst:if test="[0=count($(module_source_branches)[.=$(B)])]">
+			%(brp_rev(lhs/branch))_xxx[0] -= vx; //A %(.)
+        </admst:if>
+			// contribute($Pp, $Pn, 0, vx);
       </admst:when>
-      <admst:when test="[lhs/nature=lhs/discipline/flow]">
-			%(brp(.))_xxx[0] += vx; // %(.)
-      </admst:when>
+      <admst:otherwise>
+			error. what is this: %(.)?
+      </admst:otherwise>
     </admst:choose>
 	}
 

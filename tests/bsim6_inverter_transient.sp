@@ -30,6 +30,6 @@ Xinv5  4 vo supply 0 inverter
 * --- Transient Analysis ---
 
 .print tran v(vi) v(vo) hidden(0) iter(0)
-.tran 10n 5u trace=n
+.tran 1n 10n trace=n
 
 .end

@@ -31,6 +31,7 @@ check_LTLIBRARIES = \
     ccvs.la \
     cccs.la \
     res.la \
+    res2.la \
     short.la \
     collapse.la \
     vccs.la \
@@ -103,7 +104,7 @@ SP_LOG_COMPILER = $(top_srcdir)/tests/sp_log_compiler
 BSIM6_TESTS = bsim6_inv_dc.sp bsim6_inverter_transient.sp
 
 # takes too long, still
-bsim6_inverter_transient.log: SP_LOG_FLAGS = SKIP
+# bsim6_inverter_transient.log: SP_LOG_FLAGS = SKIP
 
 # FIXME: use different compiler.
 SH_TESTS = $(GC_TESTS) $(GCUF_TESTS) $(INLINE_TESTS)
@@ -167,6 +168,7 @@ GC_TESTS = \
     cccs.sh \
     ccvs.sh \
     res.sh \
+    res2.sh \
     vccs.sh \
     vcvs.sh
 # will only work with -uf
@@ -245,6 +247,7 @@ callfunctions.out: callfunctions.so
 
 SENSOR_SO = op.so ldo.so vbg.so sensor.so
 
+res2.log: res.so
 
 LT = <
 
