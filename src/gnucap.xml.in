@@ -6446,61 +6446,6 @@ return
 </admst:for-each>
 
 <!-- ----------------------------------------------------------------- -->
-<!-- -------------------- analog//contribution ----------------------- -->
-<!-- never called ?? admst:template match="contribution:ddt">
-<admst:message test="[/dbg_xml='yes']" format="*(tr_eval)contribution:ddt*\n"/>
-  <admst:choose>
-    <admst:when test="[whitenoise='yes' or flickernoise='yes']">
-        <admst:warning format=" not implemented.\n"/>
-    </admst:when>
-    <admst:otherwise>
-      <admst:apply-templates select="." match="contribution:nonoise:ddt"/>
-    </admst:otherwise>
-  </admst:choose>
-</admst:template-->
-
-<!-- ----------------------------------------------------------------- -->
-<admst:template match="contribution:nonoise:ddt">
-  <admst:error format="not called?\n"/>
-  <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)contribution:nonoise:ddt*\n"/>
-
-  <admst:if test="rhs[not(nilled(function[class='builtin']))]">
-  <admst:text format="{ // 5206 \n"/>
-    <admst:for-each select="rhs/function[class='builtin']">
-      <admst:value-of select="position(.)-1"/>
-      <admst:apply-templates select="." match="function:getCid"/>
-      <admst:text format="double __%s_%s=0.0;\n"/>
-    </admst:for-each>
-    <admst:apply-templates select="." match="ddx:function:computation"/>
-  </admst:if>
-  <admst:choose>
-  </admst:choose>
-  <admst:choose>
-    <admst:when test="lhs/branch/nnode[grounded='no']">
-      <admst:text format="//exec %e(rhs/tree))\n"/>
-      <admst:text format=" $e\n"/>
-    </admst:when>
-    <admst:otherwise>
-      <admst:value-of select="lhs/branch/pnode/name"/>
-      <admst:text format="// exec residual1(%s,%e(rhs/tree))\n"/>
-      <admst:text format="//founnde $e\n"/>
-    </admst:otherwise>
-  </admst:choose>
-  <admst:for-each select="rhs/probe">
-    <admst:text format="// Rhsp %(.)\n"/>
-
-    <admst:variable name="probepnode" select="%(branch/pnode)"/>
-    <admst:variable name="probennode" select="%(branch/nnode)"/>
-    <admst:variable name="probepnodename" select="%($probepnode/name)"/>
-    <admst:variable name="probennodename" select="%($probennode/name)"/>
-    <admst:variable name="pprobe" select="%(.)"/>
-    <admst:apply-templates select="../tree" match="%(adms/datatypename)"/>
-    <admst:choose>
-    </admst:choose>
-  </admst:for-each>
-</admst:template>
-
-<!-- ----------------------------------------------------------------- -->
 <!-- -------------------- analog//contribution ------------------------ -->
 <admst:template match="contribution">
 	{ // contribution %(.)
