@@ -5011,7 +5011,7 @@ EXIT_IF_ISNAN(__%s_%s); // B
 </admst:template>
 
 <!-- ----------------------------------------------------------------- -->
-<!-- analog//assignment -->
+<!-- analog//assignment (not used?) -->
 <admst:template match="assignment">
 // assignment ngspiceVersion.xml %(.)
 
@@ -6505,6 +6505,7 @@ return
 	} // contribution
 
 </admst:template>
+
 <!-- compute node arguments of noise routines -->
 <admst:template match="noisebranch">
   <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)noisebranch*\n"/>
@@ -8856,8 +8857,7 @@ return
   <admst:variable name="assignment" select="%(.)"/>
   <admst:variable name="rhs" select="%(rhs)"/>
   <admst:variable name="lhs" select="%(lhs)"/>
-  <!--  <admst:text test="[dynamic='yes']" format="#if defined(_DYNAMIC)\n"/> -->
-  <admst:if test="[dynamic='no' or $_DYNAMIC='yes']" >
+  <admst:if test="[$_DYNAMIC='yes']" >
     <admst:text test="rhs/function[class='builtin']" format="{ // rhs function \n"/>
     <admst:for-each select="lhs/probe">
       <admst:variable name="pprobe" select="%(.)"/>
@@ -8875,10 +8875,9 @@ return
     </admst:if>
     <admst:choose>
       <admst:when test="rhs/tree/adms[datatypename='function']/..[name='ddx']">
-        <admst:text format="// #if defined(_DDX) line? \n"/>
+        <admst:text format="// found ddx ... \n"/>
         <admst:if test="[$_DDX='yes']">
           <admst:variable name="ddxprobe" select="%(rhs/tree/arguments[2])"/>
-          <admst:text test="lhs[insource='yes']/probe" format="// #if defined(_DERIVATE)\n"/>
           <admst:if test="[$_DERIVATE='yes']">
             <admst:for-each select="lhs[insource='yes']/probe">
               <admst:variable name="qprobe" select="%(.)"/>
@@ -8945,7 +8944,7 @@ return
             </admst:otherwise>
           </admst:choose>
 
-          <admst:if test="[$ddxreq='no' or $_DERIVATEFORDDX='yes' or (( $derreq='no' or $_DERIVATE='yes') and $ddxreq='no' )] " >
+          <admst:if test="[$_DERIVATEFORDDX='yes' or $_DERIVATE='yes']">
             <admst:for-each select="lhs/probe">
               <admst:variable name="pprobe" select="%(.)"/>
               <admst:variable name="ddxinsidethisprobe" select="no"/>
