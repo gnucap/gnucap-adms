@@ -392,17 +392,23 @@
 
   <admst:variable name="B" select="%(.)"/>
 
-  <admst:for-each select="$(M)/source[branch=$B]/probe[branch!=$B and nature=discipline/potential
-                                 and (branch/pnode!=$(B)/nnode or branch/nnode!=$(B)/pnode)]">
-    <admst:variable name="thisprobe" select="."/>
-	 <admst:if test="[0=count($(uniqueVprobes)[branch/pnode=$(thisprobe)/branch/nnode
-                                          and branch/nnode=$(thisprobe)/branch/pnode])]">
+  <admst:for-each select="$(M)/source[(branch/nnode/name=$(B)/nnode/name and branch/pnode/name=$(B)/pnode/name) or
+                                      (branch/nnode/name=$(B)/pnode/name and branch/pnode/name=$(B)/nnode/name)]/probe[
+                                        branch!=$B and nature=discipline/potential
+                                   and (branch/pnode!=$(B)/nnode or branch/nnode!=$(B)/pnode)]">
+    <admst:variable name="thisprobe" path="."/>
+    <admst:if test="[0=count($(uniqueVprobes)[./branch/pnode=$(thisprobe)/branch/nnode
+                                            and branch/nnode=$(thisprobe)/branch/pnode])]">
       <admst:push into="$(uniqueVprobes)" select="." onduplicate="ignore"/>
     </admst:if>
   </admst:for-each>
-  <admst:for-each select="$(M)/source[branch=$B]/probe[branch!=$B and nature=discipline/flow
-                                             and (branch/pnode!=$(B)/nnode or branch/nnode!=$(B)/pnode)]">
-    <admst:variable name="thisprobe" select="."/>
+
+  <!-- flow probes -->
+  <admst:for-each select="$(M)/source[(branch/nnode/name=$(B)/nnode/name and branch/pnode/name=$(B)/pnode/name) or
+                                      (branch/nnode/name=$(B)/pnode/name and branch/pnode/name=$(B)/nnode/name)]/probe[
+                                        branch!=$B and nature=discipline/flow
+                                   and (branch/pnode!=$(B)/nnode or branch/nnode!=$(B)/pnode)]">
+    <admst:variable name="thisprobe" path="."/>
     <admst:if test="[0=count($(uniqueIprobes)[branch/pnode=$(thisprobe)/branch/nnode
                                           and branch/nnode=$(thisprobe)/branch/pnode])]">
       <admst:push into="$(uniqueIprobes)" select="." onduplicate="ignore"/>
