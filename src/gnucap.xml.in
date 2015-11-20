@@ -9111,6 +9111,21 @@ return
 <admst:template match="contribution:nonoise">
 // contribution:nonoise %(.) dynamic %(dynamic)
 
+// ======================= ass =================
+	double e;
+  <admst:variable name="lhs" select="%(lhs)"/>
+  <admst:for-each select="rhs/probe">
+    <admst:variable name="pprobe" select="%(.)"/>
+	double %(dx_name($lhs));
+  </admst:for-each>
+  <admst:apply-templates select="." match="assignment"/>
+// ======================= /ass =================
+
+
+  <admst:for-each select="rhs/function[class='operator']">
+// op %(.)
+  </admst:for-each>
+
   <admst:if test="rhs[not(nilled(function[class='builtin']))]">
 	{ // builtin
 
@@ -9137,7 +9152,6 @@ return
   <admst:variable name="lhs" select="%(lhs)"/>
 
   // iterating rhs potential probes for %(.)
-  <!--<admst:for-each select="rhs/probe[nature=../../lhs/discipline/potential]">-->
   <admst:for-each select="rhs/probe[nature=discipline/potential]">
     <admst:text format="\t// Rhs/probe: %(.) ../dynamic: %(../dynamic) ../../dynamic: %(../../dynamic)\n"/>
     <admst:variable name="probepnode" select="%(branch/pnode)"/>
@@ -9164,7 +9178,7 @@ return
 
 #ifndef NOJAC
 	{ // ?&lt;+ V in %(.) %(../dynamic)
-		double e = $ep;
+		double e = %(dx_name($lhs));
 		double ceq;
 		ceq = e * BR($probepnodename, $probennodename);
 #ifdef HAVE_KEEPCOEFF
@@ -9188,7 +9202,7 @@ return
       </admst:when>
       <admst:when test="..[dynamic='no']">
 	{ // ?&lt;+ V in %(.) %(../dynamic)
-		double e = $ep;
+		double e = %(dx_name($lhs));
 		double ceq;
 		ceq = - e * BR($probepnodename, $probennodename);
 		contribute($contrib_src_branch$csb_slot, 0, $source_polarity ceq); // offset
@@ -9201,7 +9215,6 @@ return
 
   // I &lt+ I and V &lt+ I is the same eventually?
   // I &lt+ I might not work yet (?)
-  <!--<admst:for-each select="rhs/probe[nature=../../lhs/discipline/flow]">-->
   <admst:for-each select="rhs/probe[nature=discipline/flow]">
     <admst:text format="\t// Rhs/probe: %(.) ../dynamic: %(../dynamic) ../../dynamic: %(../../dynamic)\n"/>
     <admst:variable name="probepnode" select="%(branch/pnode)"/>
@@ -9212,7 +9225,7 @@ return
 
 	 <admst:apply-templates select="../tree" match="subexpression:differentiate"/>
 			{ // I&lt;+ in %(.)
-				double e = $ep;
+				double e = %(dx_name($lhs));
 				contribute($contrib_src_branch,P_%(brp($(S)))_%(brp(.))_%(nature/access), $source_polarity e); // transconductance
 				double ceq;
       <admst:if test="[$(lhs)/nature=discipline/potential]">
@@ -9261,7 +9274,7 @@ return
 	// rhs %(rhs)
 
 	{
-		double vx = $(static_rhs) %(e(rhs/tree)); // %(rhs/tree)
+		double vx = $(static_rhs) e; <!-- %(e(rhs/tree)); -->
 		assert(is_number(vx));
     <admst:choose><!-- HACK ... implement later -->
       <admst:when test="[lhs/branch/pnode/discipline/name='degradational']">
