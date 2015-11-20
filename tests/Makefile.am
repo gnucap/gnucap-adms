@@ -26,7 +26,9 @@ check_LTLIBRARIES = \
     vs.la \
     vs1.la \
     vs2.la \
-    cs.la cap.la \
+    cap.la \
+    cap_rescale.la \
+    cs.la \
     coil.la \
     ccvs.la \
     cccs.la \
@@ -155,7 +157,9 @@ GC_TESTS = \
     case.sh \
     vs1.sh \
     vs2.sh \
-    cs.sh cap.sh \
+    cap.sh \
+    cap_rescale.sh \
+    cs.sh \
     analogfunction.sh \
     afsquare.sh \
     square.sh \

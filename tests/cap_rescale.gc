@@ -1,0 +1,25 @@
+load ./cap_rescale.so
+options debug
+
+verilog
+paramset mycap_big va_cap;
+	.capacitance = 1;
+	.rescale = 1e30;
+endparamset
+paramset mycap_small va_cap;
+	.capacitance = 1;
+	.rescale = 1e-30;
+endparamset
+
+mycap_big c1 (0,nout1);
+mycap_small c2 (0,nout2);
+spice
+
+v1 nin 0 pulse iv=0 pv=1 rise=1
+r1 nout1 nin 1
+r2 nout2 nin 1
+
+.print tran v(nodes) i(r1) dtr(c*)
+.tran 0 10 10 trace=a
+
+.end
