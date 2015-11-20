@@ -199,7 +199,7 @@ void DEV_CPOLY_V::tr_load()
   assert(_n_vports+1 == _n_ports);
 
   double d = dampdiff(&_m0.c1, _m1.c1);
-  if (d != 0.) { untested();
+  if (d != 0.) {
     _sim->_aa.load_symmetric(_n[BR].m_(), 0, -d);
   }else{
   }
@@ -222,10 +222,10 @@ void DEV_CPOLY_V::tr_load()
   node_t* ni = _n+2*_n_ports + boff; // start of current input ports.
 
   trace4("loading control", long_label(), _n_iports, _n_vports, _n_ports);
-  for (uint_t i=0; i<_n_iports; ++i) { untested();
+  for (uint_t i=0; i<_n_iports; ++i) {
     // something like tr_load_active
     trace4("loading control", i, ival[i], ioval[i], _inputs[i]->has_iv_probe());
-    if (_inputs[i]->has_iv_probe()) { untested();
+    if (_inputs[i]->has_iv_probe()) {
       ELEMENT const* ie = prechecked_cast<ELEMENT* const>(_inputs[i]);
       assert(ie);
 
@@ -320,7 +320,7 @@ void DEV_CPOLY_V::expand()
 
 #if boff
   assert(BR);
-  if (!(_n[BR].n_())) { untested();
+  if (!(_n[BR].n_())) {
     _n[BR].new_model_node( "br", this);
   }else{ untested();
   }

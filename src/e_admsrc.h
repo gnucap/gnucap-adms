@@ -177,7 +177,7 @@ inline void ADMS_SOURCE::set_parameters_va(const std::string& Label, CARD *Owner
 void ADMS_SOURCE::expand_last()
 {
   trace2("ADMS_SOURCE::expand_last", long_label(), mfactor());
-  for(unsigned i=0; i<_n_iports; ++i) { untested();
+  for(unsigned i=0; i<_n_iports; ++i) {
     assert(_inputs[i]);
 
     node_t* ni = _n+_boff+2+_n_vports*2;
@@ -187,7 +187,7 @@ void ADMS_SOURCE::expand_last()
       trace3("ADMS_SOURCE::expand_last inode", _inputs[i]->long_label(), i, net_nodes());
       ni[2*i] = _inputs[i]->n_(IN1);
       ni[2*i+1].set_to_ground(this);
-    }else if (_inputs[i]->has_iv_probe()) { untested();
+    }else if (_inputs[i]->has_iv_probe()) {
       trace4("ADMS_SOURCE::expand_last colleting nodes", _inputs[i]->long_label(), i, net_nodes(), INT_MAX);
       ni[2*i]   = _inputs[i]->n_(OUT1);
       ni[2*i+1] = _inputs[i]->n_(OUT2);
@@ -236,10 +236,10 @@ inline bool ADMS_SOURCE::do_tr_last()
   double* ival = _values+2+_n_vports;
   double* ctrl = _values+2+_n_vports+_n_iports;
 
-  for (uint_t i=0; i<_n_iports; ++i) { untested();
+  for (uint_t i=0; i<_n_iports; ++i) {
     trace3("ADMS_SOURCE::do_tr_last", long_label(), _inputs[i]->long_label(), _inputs[i]->has_iv_probe());
     trace1("ADMS_SOURCE::do_tr_last", ival[i]);
-    if (_inputs[i]->has_iv_probe()) { untested();
+    if (_inputs[i]->has_iv_probe()) {
       ELEMENT const* ie = prechecked_cast<ELEMENT* const>(_inputs[i]);
       assert(ie);
       //cccs do_tr_last.
@@ -256,7 +256,7 @@ inline bool ADMS_SOURCE::do_tr_last()
 /*--------------------------------------------------------------------------*/
 
 double ADMS_SOURCE::tr_probe_num(const std::string& x) const
-{ untested();
+{
   unsigned nval = _n_vports+_n_iports+2;
   std::string* vnames = new std::string[nval];
   for(unsigned i=0; i<nval; i++)

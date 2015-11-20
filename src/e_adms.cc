@@ -29,7 +29,7 @@ void COMMON_ADMS::attach_model(const COMPONENT* d)
 	assert(d);
 	try{
 		COMMON_COMPONENT::attach_model(d);
-	}catch(Exception_Cant_Find){ untested();
+	}catch(Exception_Cant_Find){
 		const MODEL_CARD* p = model_dispatcher[modelname()];
 		attach(p);
 	}
@@ -341,7 +341,7 @@ double ADMS_BASE::tr_probe_num(const std::string& x)const
 /*--------------------------------------------------------------------------*/
 void ADMS_BASE::set_param_by_name(string name, string value)
 {
-	if( Umatch(name,"method") ) { untested();
+	if( Umatch(name,"method") ) {
 		_method_u = method_t(atoi(value.c_str())); // HACK
 	}else{ untested();
 		COMPONENT::set_param_by_name(name, value);

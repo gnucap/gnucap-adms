@@ -2196,7 +2196,7 @@ void $(DEV_NAME)::expand()
 			const CARD* p = device_dispatcher[type];
 			if(!p){
 				error(bDANGER, "cannot instanciate source of type \%s. load module?", type.c_str());
-			}else{ untested();
+			}else{
 				%(brp(.)) = dynamic_cast&lt;COMPONENT*&gt;(p->clone());
 				assert(%(brp(.)));
 				%(brp(.))->set_slave();
@@ -9182,7 +9182,7 @@ return
 		double ceq;
 		ceq = e * BR($probepnodename, $probennodename);
 #ifdef HAVE_KEEPCOEFF
-		if (uic_now( $keepstatename )) { untested();
+		if (uic_now( $keepstatename )) {
 			/* HACK. argh.*/
 			double _CKTag0 = 1.;
 			double e = $ep;

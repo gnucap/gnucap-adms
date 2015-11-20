@@ -171,7 +171,7 @@ void ADMS_I::tr_load()
       ELEMENT const* ie = prechecked_cast<ELEMENT* const>(_inputs[i]);
       assert(ie);
       double d = dampdiff(&(ival[i]), ioval[i]); //  * ie->_m0.c1;
-      if (d != 0.) { untested();
+      if (d != 0.) {
 	_sim->_aa.load_asymmetric(_n[OUT1].m_(), _n[OUT2].m_(),  ni[2*i].m_(), ni[2*i+1].m_(), d);
       }
       ioval[i]=ival[i];
