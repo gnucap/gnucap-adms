@@ -3308,16 +3308,18 @@ void $(COMMON_NAME)::set_param_by_name(std::string name, std::string value)
 <!-- *********************************************************************************** -->
 
 <!-- ----------------------------------------------------------------- -->
-<admst:template match="ddxname">
-  <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)ddxname*\n"/>
-  <admst:return name="ddxname"
-    value="%(name)_%($pprobe/nature/access)%($pprobe/branch/pnode/name)_%($pprobe/branch/nnode/name)_%($qprobe/nature/access)%($qprobe/branch/pnode/name)_%($qprobe/branch/nnode/name)"/>
+<admst:template match="dx_name">
+  <admst:variable test="adms[datatypename='variable']" name="name" path="name"/>
+  <admst:variable test="adms[datatypename='source']" name="name" string="e"/>
+  <admst:return string="yes"
+    name="$(name)_%($pprobe/nature/access)%($pprobe/branch/pnode/name)_%($pprobe/branch/nnode/name)"/>
 </admst:template>
 <!-- -------------------------------------------------- -->
-<admst:template match="dxname">
-  <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)dxname*\n"/>
-  <admst:return name="dxname"
-    value="%(name)_%($pprobe/nature/access)%($pprobe/branch/pnode/name)_%($pprobe/branch/nnode/name)"/>
+<admst:template match="ddx_name">
+  <admst:variable test="adms[datatypename='variable']" name="name" path="name"/>
+  <admst:variable test="adms[datatypename='source']" name="name" string="e"/>
+  <admst:return string="yes"
+    name="$(name)_%($pprobe/nature/access)%($pprobe/branch/pnode/name)_%($pprobe/branch/nnode/name)_%($qprobe/nature/access)%($qprobe/branch/pnode/name)_%($qprobe/branch/nnode/name)"/>
 </admst:template>
 <!-- -------------------------------------------------- -->
 <admst:template match="c:myfunc:math_h">
@@ -7531,7 +7533,7 @@ return
   <admst:if test="[insource='yes']">
     <admst:if-inside select="$pprobe" list="%(probe)">
       <admst:if-inside select="$qprobe" list="%(probe)">
-        <admst:variable name="epq" select="%(ddxname(.)/[name='ddxname']/value)"/>
+        <admst:variable name="epq" select="%(ddx_name(.))"/>
       </admst:if-inside>
     </admst:if-inside>
   </admst:if>
@@ -8717,7 +8719,7 @@ return
         <admst:variable name="pprobe" select="%(.)"/>
         <admst:for-each select="$myvariable/probe">
           <admst:variable name="qprobe" select="%(.)"/>
-          <admst:text format="  double %(ddxname($myvariable)/[name='ddxname']/value);\n"/>
+          <admst:text format="  double %(ddx_name($myvariable));\n"/>
         </admst:for-each>
       </admst:for-each>
       </admst:if>
@@ -8931,7 +8933,7 @@ return
               </admst:for-each>
               <admst:variable name="pprobe" select="%($qprobe)"/>
               <admst:if test="[$requiredderivateforddx='yes']">
-                <admst:text format="// rdddx\n%(dxname($lhs)/[name='dxname']/value)=$allepq;\n"/>
+                <admst:text format="// rdddx\n%(dx_name($lhs)) = $allepq;\n"/>
               </admst:if>
             </admst:for-each>
           </admst:if>
@@ -8994,8 +8996,8 @@ return
               <!-- <admst:text test="[$ddxinsidederivate='yes' and $ddxinsidethisprobe='no']"
                    format="#if defined(_DERIVATE) // FIXME 8\n"/> -->
               <admst:if  test="[$ddxinsidederivate='no' and $ddxinsidethisprobe='yes' or $_DERIVATE='yes']" >
-            <admst:text format="%(dxname($lhs)/[name='dxname']/value) = /*ep*/ $ep; // 7672"/>
-		assert(is_number(%(dxname($lhs)/[name='dxname']/value)));
+            <admst:text format="%(dx_name($lhs)) = /*ep*/ $ep; // 7672"/>
+		assert(is_number(%(dx_name($lhs))));
 
               </admst:if>
               <!-- <admst:text test="[$ddxinsidederivate='yes' and $ddxinsidethisprobe='no']"
@@ -9006,7 +9008,7 @@ return
                   <admst:variable name="epq" select="0."/>
                   <admst:variable name="qprobe" select="%(.)"/>
                   <admst:apply-templates select="[$isinside='1']/$rhs/tree" match="%(adms/datatypename)"/>
-                  <admst:text format="  %(ddxname($lhs)/[name='ddxname']/value) = $epq; // epq\n"/>
+                  <admst:text format="  %(ddx_name($lhs)) = $epq; // epq\n"/>
                 </admst:for-each>
                 <!-- <admst:text test="$lhs[$ddxinsidethisprobe='yes']" format="#endif // 5\n"/> -->
               </admst:if>
@@ -9444,7 +9446,7 @@ Q_CALLF_%(adms/id(.))_%(print_with_dollar_stripped(function/name))(
             <admst:variable name="pprobe" select="%(.)"/>
             <admst:for-each select="$myvariable/probe">
               <admst:variable name="qprobe" select="%(.)"/>
-              <admst:text format="  double %(ddxname($myvariable)/[name='ddxname']/value);\n"/>
+              <admst:text format="  double %(ddx_name($myvariable));\n"/>
             </admst:for-each>
           </admst:for-each>
         </admst:if>
