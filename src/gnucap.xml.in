@@ -610,7 +610,6 @@ class $(MODEL_NAME) : public MODEL_CARD {
 			 <admst:otherwise>
 				 <admst:variable name="jacobian" path="."/>
 				 <admst:value-to select="[row=column]/diagonal" string="yes"/>
-				 <admst:message format="extra jacobian, pushing: %(.)\n"/>
 				 <admst:push into="module/jacobian" select="."/>
 			 </admst:otherwise>
 		 </admst:choose>
@@ -8875,7 +8874,6 @@ return
   <admst:choose>
     <admst:when test="[datatypename='contribution']">
       <!-- treat "SOURCE <+ RHS" as "tmpvar = RHS; SOURCE <+ tmpvar" -->
-      <admst:message format="it's a contribution %(lhs) ... %(rhs)\n"/>
       <admst:variable name="lhsprobe" path="rhs/probe"/>
       <!-- lhsddxprobe: empty list -->
       <admst:variable name="lhsinsource" string="yes"/>
