@@ -103,7 +103,11 @@ AM_TESTS_FD_REDIRECT = 9>&2
 TEST_EXTENSIONS = .sh .sp
 SP_LOG_COMPILER = $(top_srcdir)/tests/sp_log_compiler
 
-BSIM6_TESTS = bsim6_inv_dc.sp bsim6_inverter_transient.sp
+BSIM6_TESTS = \
+    bsim6_ringosc_17.sp \
+    bsim6_inv_dc.sp \
+    bsim6_inv_tr.sp \
+    bsim6_inverter_transient.sp
 
 # takes too long, still
 # bsim6_inverter_transient.log: SP_LOG_FLAGS = SKIP
@@ -208,8 +212,9 @@ $(empty)inline.sh: POSTDIFF='0,/^outputstart/d'
 $(empty)aging_mos.sh: POSTDIFF='0,/^done·load_va/d'
 
 # ignore strobes about RSSMOD
-$(empty)bsim6_inv_dc.sp.out: POSTDIFF='/\[BSIM6\]·Although/d'
+$(empty)bsim6_inv_dc.sp.out bsim6_inv_tr.sp.out: POSTDIFF='/\[BSIM6\]·Although/d'
 $(empty)bsim6_inverter_transient.sp.out: POSTDIFF='/\[BSIM6\]·Although/d'
+$(empty)bsim6_ringosc_17.sp.out: POSTDIFF='/\[BSIM6\]·Although/d'
 
 # FIXME: more automatically...?
 EXTRA_DIST = \

@@ -1,7 +1,7 @@
 *Sample netlist for BSIM6
 *Inverter Transient
 
-.option abstol=1e-6 reltol=1e-6 post ingold
+*.option abstol=1e-4 reltol=1e-3 post ingold
 *.option trtol=7
 .option nobypass noincmode
 
@@ -21,16 +21,13 @@ vin  vi  0 dc=0.5 sin (0.5 0.5 1MEG)
 .ends
 
 * --- Inverter ---
-Xinv1  vi 1 supply 0 inverter
-Xinv2  1 2 supply 0 inverter
-Xinv3  2 3 supply 0 inverter
-Xinv4  3 4 supply 0 inverter
-Xinv5  4 vo supply 0 inverter
+Xinv1  vi vo supply 0 inverter
 
 * --- Transient Analysis ---
 
-.print tran v(vi) v(vo) hidden(0) iter(0)
+.print tran v(vi) v(vo)
++hidden(0) iter(0)
 .tran 0 5u 5u basic trace=a
 
-*>.status notime
+.status notime
 .end
