@@ -939,13 +939,15 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
 		// stupid copy. fixme.
 		// gnucap stores things more usable.
 
+		q[0] = FPOLY1(NOT_VALID, _states[0][qcap], 0.);
+
 		for (unsigned ii = 0; ii &lt; k; ii++)
 		{
 			trace5(&quot;$(DEV_NAME)::_DDT&quot;, ii, _states[ii][qcap], _states[ii][qcap+1], _time[0], _time[1] );
 			assert( _states[ii][qcap] == _states[ii][qcap] );
 			assert( _states[ii][qcap+1] == _states[ii][qcap+1] );
-			q[ii] = FPOLY1(NOT_VALID, _states[ii][qcap], 0.0);
-			i[ii] = FPOLY1(NOT_VALID, _states[ii][qcap+1], 0.0);// not necessary for ii==0
+			q[ii] = FPOLY1(NOT_VALID, _states[ii][qcap], 0.);
+			i[ii] = FPOLY1(NOT_VALID, _states[ii][qcap+1], 0.);
 		}
 
 		trace0("calling differentiate");
@@ -2672,13 +2674,6 @@ bool $(DEV_NAME)::do_tr()
 	}else{
 	}
 
-<admst:if test="[$(_has_states)='true']">
-	for (unsigned ii = 0; ii &lt; _num_states; ++ii) { // similar e_cap.cc do_tr();
-		// BUG: use discipline
-		set_converged(converged() &amp;&amp; ::conchk(_states[0][ii*2], _states_q1[ii]));
-	}
-</admst:if>
-
 	bool needs_load = !converged();
 
 	store_values();
@@ -2785,7 +2780,7 @@ TIME_PAIR $(DEV_NAME)::tr_review()
 		for (int ii = 0; ii &lt; OPT::_keep_time_steps; ++ii) {
 			assert(_states[ii]);
 			q[ii].x  = NOT_VALID;
-			q[ii].f0 = _states[ii][ _ddt_%(adms/id(.)) ];
+			q[ii].f0 = _states[ii][ 2*_ddt_%(adms/id(.)) ];
 			q[ii].f1 = NOT_VALID;
 		}
 
@@ -2799,8 +2794,16 @@ TIME_PAIR $(DEV_NAME)::tr_review()
 
 		trace3(&quot;$(DEV_NAME)::tr_review _ddt_%(adms/id(.))&quot;, timestep,
 		   _states[0][ _ddt_%(adms/id(.)) ],
-		   _states[0][ _ddt_%(adms/id(.)) + 1 ]
-	  );
+		   _states[0][ _ddt_%(adms/id(.)) + 1 ]);
+
+		{
+		// %(.)
+		// %(arguments[1])
+		// %(arguments[1]/datatypename)
+    <admst:for-each select="arguments[1]/probe">
+		//. %(.)
+    </admst:for-each>
+		}
 	}
   </admst:for-each>
 	//-----
@@ -2941,7 +2944,7 @@ double $(DEV_NAME)::tr_probe_num(const std::string&amp; x)const
 	// states probes
 	for (int ii=0; ii&lt;_num_states; ++ii) {
 		if (Umatch(x, state_names[ii] + ' ')) {
-			return _states[0][ii];
+			return _states[0][2*ii];
 		}
 	}
 </admst:if>
@@ -3059,6 +3062,7 @@ bool $(DEV_NAME)::conv_check()const
 			// BUG: use discipline
 			return false;
 		}
+		// BUG: also compare 2*ii+1
 	}
 </admst:if>
 
