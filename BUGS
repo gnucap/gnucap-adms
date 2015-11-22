@@ -1,6 +1,2 @@
-- admsXml doesnt analyze function expressions correctly. contributions like
-  i=ddt(V); I<+i; dont work (without warning).  I<+ddt(V) works
-  (this is a known bug: see adms.implicit.xml line 156) 
 - some scopes are chosen terribly wrong (c->, m->, etc.)
 - V(..)<+ is experimental
-- no nested function calls (only missing in obsolete parts?)

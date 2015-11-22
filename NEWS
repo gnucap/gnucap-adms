@@ -19,3 +19,5 @@
 
 0.0.8 (WIP)
  - turn sources/probes into subdevices
+ - fix (stupid) tr_review bug
+ - works with bsim6 (minus optional features)
