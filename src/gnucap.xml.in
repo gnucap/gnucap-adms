@@ -3189,10 +3189,9 @@ void $(DEV_NAME)::tr_eval()
   </admst:if>
 
   <admst:if test="[count($idts)!=0]">
-	double CKTga0;
+	double CKTga0 = 0.;
 	if(_sim->analysis_is_tran_restore()){ incomplete();
 	}else if( _sim->analysis_is_static() ) {
-		CKTga0 = 0;
 	} else {
 		CKTga0 = _dt/2;
 	}
