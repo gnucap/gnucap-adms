@@ -1041,7 +1041,6 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
     </admst:for-each>
 		} args_%(adms/id(.)); // %(position(.))
 
-		<!--void DO_CALLF_%(adms/id(.))_%(print_with_dollar_stripped(%(function/name))(){-->
 		void DO_CALLF_%(adms/id(.))_%(print_with_dollar_stripped(function/name))(){
 			do_%(print_with_dollar_stripped(function/name))(<admst:join select="$cf/function/arguments" separator=","> args_%(adms/id($(cf))).arg_%(position(.))</admst:join>);
 		}
@@ -8268,9 +8267,6 @@ return
       <admst:variable name="e" select="$e"/>
     </admst:when>
     <admst:when test="[name='ddt']">
-
-			/* function ddt %(.)*/
-
       <admst:variable name="keepstate" select="keep_%(adms/id(.))"/>
       <admst:variable name="keepstatename" select="_ddt_%(adms/id(.))"/>
       <admst:apply-templates select="arguments[1]" match="ddx"/>
@@ -8289,10 +8285,6 @@ return
 
       <admst:variable name="e" select="_DDT($x, _ddt_%(adms/id(.)) ) "/>
       <admst:variable name="ddt_cur" select="$(ddt_cur)_"/>
-
-
-      <!-- ------------------------ -->
-
     </admst:when>
     <admst:when test="[name='idt']">
 
@@ -9272,7 +9264,7 @@ return
 	// rhs %(rhs)
 
 	{
-		double vx = $(static_rhs) e; <!-- %(e(rhs/tree)); -->
+		double vx = $(static_rhs) e;
 		assert(is_number(vx));
     <admst:choose><!-- HACK ... implement later -->
       <admst:when test="[lhs/branch/pnode/discipline/name='degradational']">
@@ -9282,10 +9274,10 @@ return
       <admst:when test="[lhs/nature=lhs/discipline/potential or lhs/nature=lhs/discipline/flow]">
         <admst:variable name="B" select="%(lhs/branch)"/>
 		  <admst:if test="[0!=count($(module_source_branches)[.=$(B)])]">
-			%(brp(lhs/branch))_xxx[0] += vx; //B %(.)
+			%(brp(lhs/branch))_xxx[0] += vx;
         </admst:if>
         <admst:if test="[0=count($(module_source_branches)[.=$(B)])]">
-			%(brp_rev(lhs/branch))_xxx[0] -= vx; //A %(.)
+			%(brp_rev(lhs/branch))_xxx[0] -= vx;
         </admst:if>
 			// contribute($Pp, $Pn, 0, vx);
       </admst:when>
