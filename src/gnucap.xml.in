@@ -1208,6 +1208,10 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
 <admst:if test="[count($idts)!=0]">
 		double _CKTga0;
 </admst:if>
+#ifndef NDEBUG
+	private: // debugging
+		int _ddtmindt_index;
+#endif
 }; // $(DEV_NAME)
 // ------------------------------------------------------------------------ //
 // ------------------------------------------------------------------------ //
@@ -2785,7 +2789,14 @@ TIME_PAIR $(DEV_NAME)::tr_review()
 			q[ii].f1 = NOT_VALID;
 		}
 
-		timestep = std::min(tr_review_trunc_error(&amp;q[0]), timestep);
+		double myt = tr_review_trunc_error(&amp;q[0]);
+		if(myt &lt; timestep){
+			timestep = myt;
+#ifndef NDEBUG
+			_ddtmindt_index = _ddt_%(adms/id(.));
+#endif
+		}
+
 		trace3(&quot;$(DEV_NAME)::tr_review _ddt_%(adms/id(.))&quot;, timestep,
 		   _states[0][ _ddt_%(adms/id(.)) ],
 		   _states[0][ _ddt_%(adms/id(.)) + 1 ]
@@ -2943,6 +2954,10 @@ double $(DEV_NAME)::tr_probe_num(const std::string&amp; x)const
   <admst:for-each select="variable[input='no' and scope='global_model']">
 	if( Umatch(x, "%(.) ") ) return m->$(var_prefix)%(.);
   </admst:for-each>
+
+#ifndef NDEBUG
+	if( Umatch(x, "ddd") ) return _ddtmindt_index;
+#endif
 
   return ADMS_BASE::tr_probe_num(x);
 }

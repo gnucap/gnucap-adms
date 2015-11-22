@@ -333,6 +333,8 @@ double ADMS_BASE::tr_probe_num(const std::string& x)const
 		return converged() + 10*conv_check();
 	} else if (Umatch(x, "met{hod} ")) { untested();
 		return _method_a;
+	} else if (Umatch(x, "ord{er} ")) { itested();
+		return order();
 	}
 
 	return COMPONENT::tr_probe_num(x);
