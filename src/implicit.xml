@@ -174,7 +174,6 @@
           ]">
         </admst:when>
         <admst:when test="[name='idt' or name='ddt']">
-          <admst:message format="found op %(.)\n"/>
           <admst:push into="$globalexpression/function" select="."/>
           <admst:value-to select="class" string="operator"/>
         </admst:when>

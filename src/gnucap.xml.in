@@ -173,7 +173,6 @@
               <admst:if test="[./rhs/tree/arg2/arguments[position(.)=1]/branch/pnode=./lhs/branch/pnode
                           and ./rhs/tree/arg2/arguments[position(.)=1]/branch/nnode=./lhs/branch/nnode]">
                 <admst:push into="$(ddts_ic)" select="." onduplicate="ignore"/>
-                <admst:message format="ic candidate3 %(.) %(adms/id(.))\n"/>
               </admst:if>
             </admst:if>
           </admst:if>
@@ -227,9 +226,6 @@
         <admst:push into="$wnoise/item" select="$contribution" onduplicate="ignore"/>
       </admst:when>
     </admst:choose>
-  </admst:for-each>
-  <admst:for-each select="$(ddts)">
-    <admst:message format="ic debug %(..) %(.)\n"/>
   </admst:for-each>
 </admst:for-each>
 
@@ -586,7 +582,6 @@ class $(MODEL_NAME) : public MODEL_CARD {
       </admst:new>
     </admst:for-each>
     <admst:for-each select="lhs[(nature=discipline/potential)]">
-		<admst:message format="lhs pot: %(.)\n"/>
 		<admst:new datatype="jacobian" inputs="module,$mysource/branch/pnode,$mysource/branch/pnode">
         <admst:push into="/@jacobian" select="." onduplicate="ignore"/>
       </admst:new>
@@ -1325,8 +1320,8 @@ and name!='initializeInstance')]">
       <admst:apply-templates select="while" match="ngspiseMODULEguesstopology.cevaluatetopology"/>
     </admst:when>
     <admst:when test="[datatypename='case']">
-      <admst:error format="case statement: please implement me! (local declaration)\n"/>
-		{ // conditional. incomplete?
+      <admst:error format="case statement: incomplete?\n"/>
+		{ incomplete();
 		}
     </admst:when>
     <admst:when test="[datatypename='conditional']">
@@ -2811,14 +2806,6 @@ TIME_PAIR $(DEV_NAME)::tr_review()
 		   _states[0][ _ddt_%(adms/id(.)) ],
 		   _states[0][ _ddt_%(adms/id(.)) + 1 ]);
 
-		{
-		// %(.)
-		// %(arguments[1])
-		// %(arguments[1]/datatypename)
-    <admst:for-each select="arguments[1]/probe">
-		//. %(.)
-    </admst:for-each>
-		}
 	}
   </admst:for-each>
 	//-----
