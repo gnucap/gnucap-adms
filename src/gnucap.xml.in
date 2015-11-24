@@ -394,8 +394,9 @@
 
   <admst:for-each select="$(M)/source[(branch/nnode/name=$(B)/nnode/name and branch/pnode/name=$(B)/pnode/name) or
                                       (branch/nnode/name=$(B)/pnode/name and branch/pnode/name=$(B)/nnode/name)]/probe[
-                                        branch!=$B and nature=discipline/potential
-                                   and (branch/pnode!=$(B)/nnode or branch/nnode!=$(B)/pnode)]">
+                                        branch!=$B and
+                                       (branch/pnode!=$(B)/nnode or branch/nnode!=$(B)/pnode) and
+                                        nature=discipline/potential]">
     <admst:variable name="thisprobe" path="."/>
     <admst:if test="[0=count($(uniqueVprobes)[./branch/pnode=$(thisprobe)/branch/nnode
                                             and branch/nnode=$(thisprobe)/branch/pnode])]">
@@ -406,10 +407,9 @@
   <!-- flow probes -->
   <admst:for-each select="$(M)/source[(branch/nnode/name=$(B)/nnode/name and branch/pnode/name=$(B)/pnode/name) or
                                       (branch/nnode/name=$(B)/pnode/name and branch/pnode/name=$(B)/nnode/name)]/probe[
-                                        branch!=$B and nature=discipline/flow
-                                   and (branch/pnode!=$(B)/nnode or branch/nnode!=$(B)/pnode)]">
+                                        nature=discipline/flow]">
     <admst:variable name="thisprobe" path="."/>
-    <admst:if test="[0=count($(uniqueIprobes)[branch/pnode=$(thisprobe)/branch/nnode
+	 <admst:if test="[0=count($(uniqueIprobes)[branch/pnode=$(thisprobe)/branch/nnode
                                           and branch/nnode=$(thisprobe)/branch/pnode])]">
       <admst:push into="$(uniqueIprobes)" select="." onduplicate="ignore"/>
     </admst:if>
@@ -1166,31 +1166,33 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
       ];
 
 		enum{
-			P_%(brp($(B)))_%(brp_rev($(B)))_%(discipline/flow/access)=-1,
 			P_%(brp($(B)))_%(brp_rev($(B)))_%(discipline/potential/access)=-1,
 			P_%(brp($(B)))_const=0,
-			P_%(brp($(B)))_%(brp($(B)))_%(discipline/flow/access)=1,
 			P_%(brp($(B)))_%(brp($(B)))_%(discipline/potential/access)=1
 		<admst:for-each select="$(uniqueVprobes)">,
 			P_%(brp($(B)))_%(brp(.))_%(nature/access) /* %(adms/id(.)) */
       </admst:for-each>
-      <admst:for-each select="$(uniqueIprobes)">,
+		<admst:for-each select="$(uniqueIprobes)[branch=$B or ( branch/pnode=$(B)/nnode and branch/nnode=$(B)/pnode )]">,
+			P_%(brp($(B)))_%(brp($B))_%(nature/access)_val_
+      </admst:for-each>
+		<admst:for-each select="$(uniqueIprobes)[branch!=$B and ( branch/pnode!=$(B)/nnode or branch/nnode!=$(B)/pnode )]">,
 			P_%(brp($(B)))_%(brp(.))_%(nature/access)_val_
       </admst:for-each>
-      <admst:for-each select="$(uniqueIprobes)">,
+		<admst:for-each select="$(uniqueIprobes)[branch=$B or ( branch/pnode=$(B)/nnode and branch/nnode=$(B)/pnode )]">,
+			P_%(brp($(B)))_%(brp($B))_%(nature/access)
+      </admst:for-each>
+      <admst:for-each select="$(uniqueIprobes)[branch!=$B and ( branch/pnode!=$(B)/nnode or branch/nnode!=$(B)/pnode )]">,
 			P_%(brp($(B)))_%(brp(.))_%(nature/access) /* %(adms/id(.)) */
       </admst:for-each>
 		};
 
 		enum{
-			P_%(brp_rev($(B)))_%(brp_rev($(B)))_%(discipline/flow/access)=1,
-			P_%(brp_rev($(B)))_%(brp_rev($(B)))_%(discipline/potential/access)=1,
-			P_%(brp_rev($(B)))_%(brp($(B)))_%(discipline/flow/access)=-P_%(brp($(B)))_%(brp($(B)))_%(discipline/flow/access)
+			P_%(brp_rev($(B)))_%(brp_rev($(B)))_%(discipline/potential/access)=1
       <admst:for-each select="$(uniqueVprobes)">,
 			P_%(brp_rev($(B)))_%(brp(.))_%(nature/access) = -P_%(brp($(B)))_%(brp(.))_%(nature/access)
       </admst:for-each>
-      <admst:for-each select="$(uniqueIprobes)">,
-			P_%(brp_rev($(B)))_%(brp(.))_%(nature/access)_val_ = -P_%(brp($(B)))_%(brp(.))_%(nature/access)_val_
+		<admst:for-each select="$(uniqueIprobes)[branch=$B or ( branch/pnode=$(B)/nnode and branch/nnode=$(B)/pnode )]">,
+			P_%(brp($(B)))_%(brp_rev($B))_%(nature/access) = -P_%(brp($(B)))_%(brp($B))_%(nature/access)
       </admst:for-each>
       <admst:for-each select="$(uniqueIprobes)">,
 			P_%(brp_rev($(B)))_%(brp(.))_%(nature/access) = -P_%(brp($(B)))_%(brp(.))_%(nature/access)
@@ -2241,7 +2243,7 @@ void $(DEV_NAME)::expand()
     <admst:if test="[0!=count($uniqueIprobes)]">
 			brs[] = {
       <admst:join separator="," select="$uniqueIprobes">
-				%(brp(.)) /* %(.) me: $B */
+				%(brp_any(branch)) /* %(.) me: $B */
       </admst:join>
 			};
     </admst:if>

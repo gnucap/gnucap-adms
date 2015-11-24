@@ -38,8 +38,8 @@ r2 n p 100
 resif r1 (n, p);
 spice
 
-.print dc v(nodes) v(r1) v(r2) i(r*) i(r1.v_p_n)
-.print tran v(nodes) i(r1) v(r1) i(v1)
+.print dc   v(nodes) v(r1) v(r2) i(r*) i(r1.v_p_n)
+.print tran v(nodes) v(r1) v(r2) i(r*) i(r1.v_p_n)
 
 .dc trace=i
 .tran 0 1 .5 trace=n
@@ -50,8 +50,8 @@ spice
 resir r1 (n, p);
 spice
 
-.print dc v(nodes) v(r1) v(r2) i(r*) i(r1.v_p_n)
-.print tran v(nodes) i(r1) v(r1) i(v1)
+.print dc   v(nodes) v(r1) v(r2) i(r*) i(r1.v_p_n)
+.print tran v(nodes) v(r1) v(r2) i(r*) i(r1.v_p_n)
 
 .dc trace=i
 .tran 0 1 .5 trace=n
@@ -62,8 +62,8 @@ spice
 resvf r1 (n, p);
 spice
 
-.print dc v(nodes) v(r1) v(r2) i(r*) i(r1.v_p_n)
-.print tran v(nodes) i(r1) v(r1) i(v1)
+.print dc   v(nodes) v(r1) v(r2) i(r*) i(r1.v_p_n)
+.print tran v(nodes) v(r1) v(r2) i(r*) i(r1.v_p_n)
 
 .dc trace=i
 .tran 0 1 .5 trace=n
@@ -74,9 +74,8 @@ spice
 resvr r1 (n, p);
 spice
 
-
-.print dc v(nodes) v(r1) v(r2) i(r*) i(r1.v_p_n)
-.print tran v(nodes) i(r1) v(r1) i(v1)
+.print dc   v(nodes) v(r1) v(r2) i(r*) i(r1.v_p_n)
+.print tran v(nodes) v(r1) v(r2) i(r*) i(r1.v_p_n)
 
 .dc trace=i
 .tran 0 1 .5 trace=n
