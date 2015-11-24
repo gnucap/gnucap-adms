@@ -1,0 +1,15 @@
+`include "discipline.h"
+
+module implicit(a,b);
+	inout a, b;
+	electrical a, b;
+	real i (*ask="yes"*);
+	real v (*ask="yes"*);
+	real X (*ask="yes"*);
+	analog begin
+		i = I(a,b);
+		v = V(a,b);
+		X = V(a,b)-I(a,b);
+		I(a,b) <+ X;
+	end
+endmodule

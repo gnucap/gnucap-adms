@@ -245,6 +245,8 @@ inline bool ADMS_SOURCE::do_tr_last()
       //cccs do_tr_last.
       // _m0.c1  = _y[0].f1 * (_input->_loss0 + _input->_m0.c1); ?
       ival[i] = ctrl[i] * ie->_m0.c1;
+      if(ie->_loss0){incomplete();
+      }
     }else{ itested();
       assert(_inputs[i]->has_inode());
       ival[i] = - ctrl[i];

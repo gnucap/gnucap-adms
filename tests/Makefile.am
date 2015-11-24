@@ -32,6 +32,7 @@ check_LTLIBRARIES = \
     coil.la \
     ccvs.la \
     cccs.la \
+    implicit.la \
     res.la \
     res2.la \
     short.la \
@@ -154,6 +155,7 @@ GC_TESTS = \
     $(SO_TESTS) \
     if.sh \
     if2.sh \
+    implicit.sh \
     coil.sh \
     chainvs.sh \
     vs.sh \
