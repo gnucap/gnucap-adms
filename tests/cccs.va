@@ -14,7 +14,7 @@ module cccsva(p,n,cp,cn);
 	real i (*ask="yes"*);
 	analog begin	
 		I(p,n) <+ gain * I(cp,cn) + offset;
-		I(p,n) <+ 0 * V(cp,cn); // top bug
+//		I(p,n) <+ 0 * V(cp,cn); // top bug
 	end
 endmodule
 
