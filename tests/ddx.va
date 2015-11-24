@@ -1,0 +1,88 @@
+// Copyright 2015 Felix Salfelder
+//
+// ddx, several instances
+
+`include "discipline.h"
+`include "constants.h"
+
+module ddxtest(p,n);
+	inout p,n;
+	electrical p,n;
+
+	real o (*ask="yes"*);
+	analog begin	
+		real v;
+		v = 2*V(p,n);
+		
+		real dd; // BUG: d is not allowed...
+		dd = ddx(v,V(p,n));
+
+		I(p,n) <+ dd;
+   end
+endmodule
+
+module ddxres(p,n);
+	inout p,n;
+	electrical p,n;
+
+	analog begin	
+		real vsq, v;
+		vsq = .5* V(p,n) * V(p,n);
+		// vsq = .5*pow(V(p,n),2.);
+		
+		v = ddx(vsq,V(p,n)); // V(p,n)
+
+		I(p,n) <+ v;
+   end
+endmodule
+
+// from the manual.
+// BUG: should "desc" imply "ask"?
+module ddxdiode(a,c);
+	inout a, c;
+	electrical a, c;
+	parameter real IS = 1.0e-14;
+	real idio (*ask="yes"*);
+	(*desc="small-signal conductance"*)
+	real gdio (*ask="yes"*);
+	analog begin
+		idio = IS * (limexp(V(a,c)/$vt) - 1);
+		gdio = ddx(idio, V(a));
+		I(a,c) <+ idio;
+	end
+endmodule
+
+module ddxdiode_r(a,c);
+	inout a, c;
+	electrical a, c;
+	parameter real IS = 1.0e-14;
+	parameter real RS = 0.0;
+	real idio (*ask="yes"*);
+	real gdio (*ask="yes"*);
+	(*desc="effective conductance"*)
+	real geff (*ask="yes"*);
+	analog begin
+		idio = IS * (limexp((V(a,c)-RS*I(a,c))/$vt) - 1);
+		gdio = ddx(idio, V(a));
+		geff = gdio / (RS * gdio + 1.0);
+		I(a,c) <+ idio;
+	end
+endmodule
+
+// BUG, "vccs" does not work
+module ddxvccs(pout,nout,pin,nin);
+	inout pout, nout, pin, nin;
+	electrical pout, nout, pin, nin;
+	parameter real k = 1.0;
+	real vin (*ask="yes"*);
+	real one (*ask="yes"*);
+	real minusone (*ask="yes"*);
+	real zero (*ask="yes"*);
+	analog begin
+		vin = V(pin,nin);
+		one = ddx(vin, V(pin));
+		minusone = ddx(vin, V(nin));
+		zero = ddx(vin, V(pout));
+		I(pout,nout) <+ k * vin;
+	end
+endmodule

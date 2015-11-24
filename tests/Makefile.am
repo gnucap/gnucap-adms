@@ -19,6 +19,7 @@ check_LTLIBRARIES = \
     forloop.la \
     BSIM6.1.1.la \
     case.la \
+    ddx.la \
     subcoil.la \
     subcoil.1.la \
     if.la if2.la \
@@ -158,6 +159,7 @@ GC_TESTS = \
     implicit.sh \
     coil.sh \
     chainvs.sh \
+    ddx.sh \
     vs.sh \
     forloop.sh \
     case.sh \
