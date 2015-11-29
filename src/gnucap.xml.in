@@ -8909,9 +8909,9 @@ return
                 <admst:text format="); // 7539\n"/>
               </admst:if>
               <admst:if test="math[dependency='constant']">
-                <admst:text format="// constant: double m1%(position(.)-1)_$(fname)(d1%(position(.)-1)_$(fname)$index,d00_$(fname)$index"/>
-					 <admst:text select="../arguments" format=",// %(e(.))"/>
-					 <admst:text format="// );\n"/>
+                <admst:text format=" /*constant*/ double m1%(position(.)-1)_$(fname)(d1%(position(.)-1)_$(fname)$index,d00_$(fname)$index"/>
+					 <admst:text select="../arguments" format=",%(e(.))"/>
+					 <admst:text format=");\n"/>
               </admst:if>
             </admst:for-each>
           </admst:otherwise>
