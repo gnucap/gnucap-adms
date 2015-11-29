@@ -7604,7 +7604,7 @@ return
       <admst:variable name="ep" select=" /*pprobe*/ $(keepstate) "/>
     </admst:when>
     <admst:otherwise>
-      <admst:variable name="ep" select="0. /*pprobe*/"/>
+      <admst:variable name="ep" select="0.0"/>
     </admst:otherwise>
   </admst:choose>
 
@@ -7614,7 +7614,7 @@ return
       <admst:variable name="eq" select=" /*qprobe*/$(keepstate) "/>
     </admst:when>
     <admst:otherwise>
-      <admst:variable name="eq" select="0. /*qprobe*/ "/>
+      <admst:variable name="eq" select="0.0"/>
     </admst:otherwise>
   </admst:choose>
 
