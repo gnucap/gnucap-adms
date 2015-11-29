@@ -1,22 +1,29 @@
 simple
 - check for python (version?)
 - check for known-to-work gnucap
-- more devices/tests
 - fix portability of gnucap-adms.so
 - dont convert module names to caps in class names.
 - should pass -DGNUCAP (or similar) to adms.
 - get rid of compiler warnings
+- missing variable prefixes (breaks some variable names)
+- tests for qucs components.
 
 medium
+- test against vanilla gnucap
 - get rid of MODULE(?)
 - get rid of bogus #ifdef's
+- get rid of extra .hxx files
+- cannot reuse existing device names
 - weed out dead code and old function templates
+- uninitialized and unused variables
+- test suite cleanup
+
+experimental/incomplete
+- ddx
+- implicit equations
 
 missing features
-- those used by qucs components
-- instaciate modules in spice using X
+- topology detection, conditional internal nodes
 - switching branches
 - noise
-
-difficult
-- see BUGS
+- instaciate modules in spice using X
