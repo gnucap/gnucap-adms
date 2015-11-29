@@ -8962,7 +8962,10 @@ return
     <admst:text test="rhs/function[class='builtin']" format="{ // rhs function \n"/>
     <admst:for-each select="$lhsprobe">
       <admst:variable name="pprobe" select="%(.)"/>
-      <admst:if test="$lhsddxprobe/branch/pnode[.=$pprobe/branch/pnode or .=$pprobe/branch/nnode]">
+      <admst:if test="$lhsddxprobe/branch/pnode[name!='GND' and (.=$pprobe/branch/pnode or .=$pprobe/branch/nnode)]">
+        <admst:variable name="ddxinsidederivate" select="yes"/>
+      </admst:if>
+      <admst:if test="$lhsddxprobe/branch/nnode[name!='GND' and (.=$pprobe/branch/pnode or .=$pprobe/branch/nnode)]">
         <admst:variable name="ddxinsidederivate" select="yes"/>
       </admst:if>
     </admst:for-each>
@@ -8987,24 +8990,21 @@ return
                 <admst:variable name="pprobe" select="%(.)"/>
                 <admst:choose>
                   <admst:when test="$pprobe/branch/pnode[.=$ddxprobe/branch/pnode]">
-                    <admst:text format="// ... pp\n"/>
+                    <admst:text format="// ... pp %(.)\n"/>
                     <admst:apply-templates select="$rhs/tree/arguments[1]" match="%(adms/datatypename)"/>
                     <admst:variable name="allepq" select="$allepq+($epq)"/>
                   </admst:when>
                   <admst:when test="$pprobe/branch/nnode/[.=$ddxprobe/branch/pnode]">
-                    <admst:text format="// ... np\n"/>
                     <admst:apply-templates select="$rhs/tree/arguments[1]" match="%(adms/datatypename)"/>
-                    <admst:variable name="allepq" select="$allepq-($epq)"/>
+                    <admst:variable name="allepq" select="$allepq-( /*np*/ $epq)"/>
                   </admst:when>
                   <admst:when test="$pprobe/branch/pnode[.=$ddxprobe/branch/nnode]">
-                    <admst:text format="// ... pn\n"/>
                     <admst:apply-templates select="$rhs/tree/arguments[1]" match="%(adms/datatypename)"/>
-                    <admst:variable name="allepq" select="fixme"/>
+                    <admst:variable name="allepq" select="$allepq-( /*pn*/ $epq)"/>
                   </admst:when>
-                  <admst:when test="$pprobe/branch/nnode/[.=$ddxprobe/branch/nnode]">
-                    <admst:text format="// ... nn\n"/>
+                  <admst:when test="$pprobe/branch/nnode/[.=$ddxprobe/branch/nnode and name!='GND']">
                     <admst:apply-templates select="$rhs/tree/arguments[1]" match="%(adms/datatypename)"/>
-                    <admst:variable name="allepq" select="fixme"/>
+                    <admst:variable name="allepq" select="$allepq+( /*nn*/ $epq)"/>
                   </admst:when>
                   <admst:otherwise>
                     <admst:text format="// ... miss $(ddxprobe)\n"/>
@@ -9066,13 +9066,16 @@ return
             </admst:for-each>
  */
 
+            <!-- hmm flow vs potential?! -->
             <admst:for-each select="$lhsprobe">
               <admst:variable name="pprobe" select="%(.)"/>
               <admst:variable name="ddxinsidethisprobe" select="no"/>
-				  <admst:if test="$lhsddxprobe/branch/pnode[.=$pprobe/branch/pnode or .=$pprobe/branch/nnode]">
-                <!-- the variable to be assigned depends on a ddx expression,
-                  -- which depends on the probe we are currently derivating to
-                  -->
+              <admst:if test="$lhsddxprobe/branch/pnode[.=$pprobe/branch/pnode or .=$pprobe/branch/nnode]">
+                <!-- ddx(var, X(a,b)) is used somewhere, and var depends on X(a) -->
+                <admst:variable name="ddxinsidethisprobe" select="yes"/>
+              </admst:if>
+              <admst:if test="$lhsddxprobe/branch/nnode[.=$pprobe/branch/pnode or .=$pprobe/branch/nnode]">
+                <!-- ddx(var, X(a,b)) is used somewhere, and var depends on X(b) -->
                 <admst:variable name="ddxinsidethisprobe" select="yes"/>
                 <admst:text format="// tested ddxinsidethisprobe\n"/>
               </admst:if>
