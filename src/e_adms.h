@@ -550,13 +550,17 @@ inline double m20_cosh(double x){return cosh(x);}
 #define _d_asin(val,dval,arg)    val = asin(arg);    dval = (+1.0/sqrt(1-arg*arg));
 //#define _atan(val,arg)           val = atan(arg);
 #define _d_atan(val,dval,arg)    val = atan(arg);    dval = (+1.0/(1+arg*arg));
-//#define _logE(val,arg)           val = log(arg);
+inline void _logE(double &val, double arg){untested();   val = log(arg); }
 //#define _d_logE(val,dval,arg)    val = log(arg);     dval = (1.0/arg);
 //#define _log10(val,arg)          val = log10(arg);
 #define _d_log10(val,dval,arg)   val = log10(arg);   dval = (1.0/arg/log(10));
-// #define _exp(val,arg)            val = exp(arg);
+inline void _exp(double& val, double arg){untested();
+  val=exp(arg);
+}
 //#define _d_exp(val,dval,arg)     val = exp(arg);     dval = val;
-//#define _sqrt(val,arg)           val = sqrt(arg);
+inline void _sqrt(double &val, double arg){untested();
+  val = sqrt(arg);
+}
 #define _d_sqrt(val,dval,arg)    val = sqrt(arg);    dval = (1.0/val/2.0);
 //#define _pow(xy,x,y)             xy = pow(x,y);
 #define _dx_pow(dx,xy,x,y)       dx = (x==0.0)?0.0:((y/x)*xy);
@@ -568,7 +572,9 @@ inline double m20_cosh(double x){return cosh(x);}
 #define _dx_div(dx,xy,x,y)
 #define _dy_div(dy,dx,xy,x,y)    dy = -xy*dx;
 
-//#define _limexp(val,arg)         val = ((arg)<(90)) ? (exp(arg)) : (exp(90)*(1.0+(arg-90)));
+inline void _limexp(double& val, double arg){ untested();
+  val = ((arg)<(90)) ? (exp(arg)) : (exp(90)*(1.0+(arg-90)));
+}
 #define _d_limexp(val,dval,arg)  val = ((arg)<(90)) ? (exp(arg)) : (exp(90)*(1.0+(arg-90))); dval = val;
 //#define _fabs(val,arg)           val = fabs(arg);
 #define _d_fabs(val,dval,arg)    val = fabs(arg);    dval = (((val)>=0)?(+1.0):(-1.0));
@@ -633,6 +639,7 @@ inline double _max(double x,double y)      {return ((x)>(y))?(x):(y); }
 inline double _d0_max(double x,double y)   {return ((x)>(y))?1.0:0.0; }
 inline double _d1_max(double x,double y)   {return ((x)>(y))?0.0:1.0; }
 
+inline void _min(double& m, double x,double y)      { untested(); m=((x)<(y))?(x):(y);}
 inline double _min(double x,double y)      {untested(); return ((x)<(y))?(x):(y); }
 inline double _d0_min(double x,double y)   {untested(); return ((x)<(y))?1.0:0.0; }
 inline double _d1_min(double x,double y)   {untested(); return ((x)<(y))?0.0:1.0; }
