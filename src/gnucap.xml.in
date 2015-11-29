@@ -1178,16 +1178,22 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
       </admst:for-each>
 		};
 
-		enum{
+		enum{ // different polarity "aliases"
+			P_%(brp_rev($(B)))_%(brp($(B)))_%(discipline/potential/access)=-1,
 			P_%(brp_rev($(B)))_%(brp_rev($(B)))_%(discipline/potential/access)=1
       <admst:for-each select="$(uniqueVprobes)">,
 			P_%(brp_rev($(B)))_%(brp(.))_%(nature/access) = -P_%(brp($(B)))_%(brp(.))_%(nature/access)
       </admst:for-each>
-		<admst:for-each select="$(uniqueIprobes)[branch=$B or ( branch/pnode=$(B)/nnode and branch/nnode=$(B)/pnode )]">,
+      <admst:for-each select="$(uniqueVprobes)">,
+			P_%(brp_rev($(B)))_%(brp_rev(.))_%(nature/access) = P_%(brp($(B)))_%(brp(.))_%(nature/access)
+      </admst:for-each>
+		/*.I.*/
+      <admst:for-each select="$(uniqueIprobes)[branch=$B or ( branch/pnode=$(B)/nnode and branch/nnode=$(B)/pnode )]">,
 			P_%(brp($(B)))_%(brp_rev($B))_%(nature/access) = -P_%(brp($(B)))_%(brp($B))_%(nature/access)
       </admst:for-each>
-      <admst:for-each select="$(uniqueIprobes)">,
-			P_%(brp_rev($(B)))_%(brp(.))_%(nature/access) = -P_%(brp($(B)))_%(brp(.))_%(nature/access)
+		/*...*/
+      <admst:for-each select="$(uniqueIprobes)[branch=$B or ( branch/pnode=$(B)/nnode and branch/nnode=$(B)/pnode )]">,
+			P_%(brp_rev($(B)))_%(brp_rev($B))_%(nature/access) = P_%(brp($(B)))_%(brp($B))_%(nature/access)
       </admst:for-each>
 		};
 
