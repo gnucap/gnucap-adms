@@ -3340,7 +3340,8 @@ void $(COMMON_NAME)::set_param_by_name(std::string name, std::string value)
 </admst:template>
 <!-- -------------------------------------------------- -->
 <admst:template match="ddx_name">
-  <admst:variable name="name" select="adms/datatypename"/>
+  <admst:variable name="name" select="%(adms/datatypename)"/>
+  <admst:variable test="adms[datatypename='variableprototype']" name="name" path="name"/>
   <admst:variable test="adms[datatypename='variable']" name="name" path="name"/>
   <admst:variable test="adms[datatypename='source']" name="name" string="e"/>
   <admst:return string="yes"
