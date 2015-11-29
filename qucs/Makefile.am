@@ -84,6 +84,9 @@ VPATH+= $(QUCS_DATADIR)
 AM_DEFAULT_SOURCE_EXT = .va
 .va.cc:
 
+# stated in adms.mk. does not work?
+%.cc %.h: %.va $(top_srcdir)/src/implicit.xml
+
 AM_CPPFLAGS = @GC_CPPFLAGS@ -I$(top_srcdir)/src
 LIBS = ../src/libgnucap_adms.la
 AM_LDFLAGS = -module -avoid-version -rpath /dev/null
