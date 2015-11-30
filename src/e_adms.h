@@ -580,7 +580,7 @@ inline void _limexp(double& val, double arg){ untested();
 #define _d_fabs(val,dval,arg)    val = fabs(arg);    dval = (((val)>=0)?(+1.0):(-1.0));
 
 inline void _abs(double& val, const double& arg){ untested(); val=abs(arg);}
-inline double _abs(const double& arg){ untested(); return abs(arg);}
+// inline double _abs(const double& arg){ untested(); return abs(arg);}
 
 //inline double _exp(double arg) { untested(); return  exp(arg); }
 // inline double _d0_exp(double arg) {  untested(); return exp(arg); }
