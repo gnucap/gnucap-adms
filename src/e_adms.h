@@ -548,7 +548,7 @@ inline double m20_cosh(double x){return cosh(x);}
 #define _d_acos(val,dval,arg)    val = acos(arg);    dval = (-1.0/sqrt(1-arg*arg));
 //#define _asin(val,arg)           val = asin(arg);
 #define _d_asin(val,dval,arg)    val = asin(arg);    dval = (+1.0/sqrt(1-arg*arg));
-//#define _atan(val,arg)           val = atan(arg);
+inline void _atan(double &val, double arg){untested();  val = atan(arg); }
 #define _d_atan(val,dval,arg)    val = atan(arg);    dval = (+1.0/(1+arg*arg));
 inline void _logE(double &val, double arg){untested();   val = log(arg); }
 //#define _d_logE(val,dval,arg)    val = log(arg);     dval = (1.0/arg);

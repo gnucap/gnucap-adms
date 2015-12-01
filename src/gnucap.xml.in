@@ -1527,6 +1527,9 @@ and name!='initializeInstance')]">
     <admst:when test="[name='\$nominal_temperature']">
       <admst:return name="function:getname" value="_circuit_tnom"/>
     </admst:when>
+	 <admst:when test="[class!='builtin']">
+      <admst:return name="function:getname" value="$(af_prefix)%(name)"/>
+    </admst:when>
     <admst:otherwise>
       <admst:message test="[/dbg_xml='yes']" format="otherwise (not impl?) %(name)\n"/>
       <admst:value-of select="name"/>

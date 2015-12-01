@@ -51,14 +51,11 @@ QUCS_VERILOG = \
 	potentiometer.la \
 	tff_SR.la \
 	EKV26MOS.la \
-	vcresistor.la
-
-QUCS_NOTYET=
-
-#guesstopology issue
-QUCS_NOTYET+= \
+	vcresistor.la \
 	bsim3v34pMOS.la \
 	bsim4v30nMOS.la
+
+QUCS_NOTYET=
 
 # has an external temperature node...
 QUCS_NOTYET+= fbh_hbt-2_2a.la
