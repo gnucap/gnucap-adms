@@ -128,7 +128,7 @@ DEV_DOT* LANG_ADMS::parse_command(CS& cmd, DEV_DOT* x)
 /*--------------------------------------------------------------------------*/
 void LANG_ADMS::admsXml(string path, string file)
 {
-  trace2("running admsXml", path, file);
+  error(bTRACE, "running admsXml" + path + " " + file);
   int childret;
   pid_t p = vfork();
   if (p) {
@@ -145,9 +145,6 @@ void LANG_ADMS::admsXml(string path, string file)
     chdir(path.c_str());
 
     error(bDEBUG, string("calling cd ") + path + "; admsXml "
-#ifdef USE_EXTERN
-        + "-DUSE_EXTERN "
-#endif
         + "-I" + id + " "
         + "-e" + sp + "/gnucap_0.xml "
         + "-e" + sp + "/gnucap_1.xml "
@@ -156,9 +153,6 @@ void LANG_ADMS::admsXml(string path, string file)
         + "-o"+ file);
 
     int ret = execlp( "admsXml", "admsXml",
-#ifdef USE_EXTERN
-        "-DUSE_EXTERN",
-#endif
         ("-I" + id).c_str(),
         ("-e" + sp + "/gnucap_0.xml").c_str(),
         ("-e" + sp + "/gnucap_1.xml").c_str(),
