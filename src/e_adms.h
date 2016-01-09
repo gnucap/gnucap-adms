@@ -576,7 +576,12 @@ inline void _limexp(double& val, double arg){ untested();
   val = ((arg)<(90)) ? (exp(arg)) : (exp(90)*(1.0+(arg-90)));
 }
 #define _d_limexp(val,dval,arg)  val = ((arg)<(90)) ? (exp(arg)) : (exp(90)*(1.0+(arg-90))); dval = val;
-//#define _fabs(val,arg)           val = fabs(arg);
+inline void _fabs(double &val, double arg){ untested();
+  val = fabs(arg);
+}
+inline double _fabs(const double arg){ untested();
+  return fabs(arg);
+}
 #define _d_fabs(val,dval,arg)    val = fabs(arg);    dval = (((val)>=0)?(+1.0):(-1.0));
 
 inline void _abs(double& val, const double& arg){ untested(); val=abs(arg);}
