@@ -82,3 +82,6 @@ adms_opamp_la_LIBADD = libgnucap_adms.la
 
 CLEANFILES = .adms* cap.cc res.cc opamp.cc .*.adms *.hxx gnucap_*.xml .*.xml
 CLEANFILES+= cap.h res.h opamp.h constants.h
+
+# stated in adms.mk. does not work?
+%.cc %.h: %.va $(top_srcdir)/src/implicit.xml gnucap_0.xml

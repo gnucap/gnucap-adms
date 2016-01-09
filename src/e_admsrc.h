@@ -212,8 +212,6 @@ inline void ADMS_SOURCE::tr_iwant_matrix_active()
 //  assert(_n[IN1].m_() != INVALID_NODE);
 //  assert(_n[IN2].m_() != INVALID_NODE);
 
-  node_t* ni = _n+_boff+2+2*_n_vports;
-
   //_sim->_aa.iwant(_n[OUT1].m_(),_n[OUT2].m_());
   for(unsigned i=0; i<_n_vports; ++i) {
     if (!_boff){

@@ -52,8 +52,8 @@ QUCS_VERILOG = \
 	tff_SR.la \
 	EKV26MOS.la \
 	vcresistor.la \
-	bsim3v34pMOS.la \
-	bsim4v30nMOS.la
+	bsim3v34nMOS.la \
+	bsim3v34pMOS.la
 
 QUCS_NOTYET=
 
@@ -68,7 +68,7 @@ QUCS_NOTYET+= hicumL2V2p31n.la \
 #adms segfaults
 QUCS_NOTYET+= \
 	bsim4v30pMOS.la \
-	bsim3v34nMOS.la
+	bsim4v30nMOS.la
 
 
 try: $(QUCS_NOTYET)
