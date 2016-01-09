@@ -736,8 +736,17 @@ class $(DEV_NAME) : public ADMS_BASE
 	private: // parameters
 		void set_param_by_name(std::string Name, std::string Value);
 
-	protected: // implementation
+	private:
+		void init_nodemap();
+		PARTITION&lt;%(count(node[grounded='no']))&gt;* _nodemap;
 		void guesstopology();
+		void collapse_nodes(unsigned a, unsigned b)
+		{ untested();
+			assert(_nodemap);
+			error(bTRACE,"\%s: collapse node %u and %u\\n", long_label().c_str(), a, b);
+			_nodemap->identify(a,b);
+		}
+	protected: // implementation
 		void acLoad();
 		void pzLoad(COMPLEX s);
 		enum ELoadModes { // FIXME: remove
@@ -1371,19 +1380,14 @@ and name!='initializeInstance')]">
 		    </admst:otherwise>
         </admst:choose>
         <admst:choose>
-          <admst:when test="lhs/branch[grounded='no']">
-            <admst:if test="lhs/branch/nnode[location='internal']">
-              // _nodes[$node_prefix%(lhs/branch/nnode/name)]
-				// = _nodes[$node_prefix%(lhs/branch/pnode/name)]; // nnode collapsed
-            </admst:if>
-
-            <admst:text test="lhs/branch/pnode[location='internal']"
-              format="_nodes[$node_prefix%(lhs/branch/pnode/name)] = _nodes[$node_prefix%(lhs/branch/nnode/name)]; // pnode collapsed \n"/>
-
+          <admst:when test="lhs/branch/pnode[location='internal']">
+	collapse_nodes($node_prefix%(lhs/branch/pnode/name), $node_prefix%(lhs/branch/nnode/name));\n
           </admst:when>
-          <admst:otherwise>
-// dont know.
-            <admst:text format="// _nodes[$node_prefix%(lhs/branch/pnode/name)] = 0; /* pnode collapsed to GND */ \n"/>
+          <admst:when test="lhs/branch/nnode[location='internal']">
+	collapse_nodes($node_prefix%(lhs/branch/pnode/name), $node_prefix%(lhs/branch/nnode/name));\n
+          </admst:when>
+			 <admst:otherwise>
+				 // no collapse\n
           </admst:otherwise>
         </admst:choose>
       </admst:if>
@@ -1702,6 +1706,7 @@ and name!='initializeInstance')]">
 #include &lt;e_adms.h&gt;
 #include &lt;u_parameter.h&gt;
 #include &lt;e_admsrc.h&gt;
+#include &lt;m_part.h&gt;
 
 namespace {
 #include &quot;$(filename).h&quot;
@@ -1974,7 +1979,8 @@ void $(MODEL_NAME)::set_dev_type(const std::string&amp; new_type)
 // ********************************* $(DEV_NAME) ********************************* //
 $(DEV_NAME)::$(DEV_NAME)()
     : ADMS_BASE(),
-    _nodes()
+    _nodes(),
+    _nodemap(NULL)
 <admst:for-each select="variable[input='yes' and scope='global_instance']">,
 	$(var_prefix)%(.)(%(./default))
 </admst:for-each>
@@ -2003,7 +2009,8 @@ $(DEV_NAME)::$(DEV_NAME)()
 // -------------------------------------------------------------------------- //
 $(DEV_NAME)::$(DEV_NAME)(const $(DEV_NAME)&amp; p) :
     ADMS_BASE(p),
-    _nodes()
+    _nodes(),
+    _nodemap(NULL)
 <admst:for-each select="variable[input='yes' and scope='global_instance']">,
     $(var_prefix)%(.)(p.$(var_prefix)%(.))
 </admst:for-each>
@@ -2141,10 +2148,11 @@ void $(DEV_NAME)::expand()
 	}else{
 	}
 
-  // set m_required
-  guesstopology();
-  // allocate state vectors
+	init_nodemap();
+	guesstopology();
+	// orbit_number(_nodemap, %(count(node[grounded='no'])));
 
+  // allocate state vectors
 <admst:if test="[$(_has_states)='true']">
   if (!_states[0]) {
     // initialise in tr_begin() ?
@@ -2168,29 +2176,30 @@ void $(DEV_NAME)::expand()
   }
 </admst:if>
 
-	// fix up internal nodes
+	// setup internal nodes
+<admst:for-each select="node[grounded='no']" separator=";">
+	// %(name) %(discipline) %(location)
+</admst:for-each>
 	if (_sim->is_first_expand()) {
 		precalc_first();
 		precalc_last();
 		trace4("$(DEV_NAME)::expand nodes", net_nodes(), max_nodes(), matrix_nodes(), int_nodes());
-<admst:for-each select="node[grounded='no']" separator=";">
-		// %(name) %(discipline) %(location)
-</admst:for-each>
 
 		for(uint_t ii = net_nodes(); ii &lt; matrix_nodes(); ++ii) {
 #ifdef HAVE_ADP_NODE
 			trace2("$(DEV_NAME)::expand nodes", ii, _n[ii].is_adp());
 			if(!_n[ii].is_adp()){
 #endif
-				if( !_n[ii].n_() ) {
-					if( ii &lt; max_nodes() ) {
-						trace2("$(DEV_NAME)::expand node between _net_nodes and max_nodes(): set to ground", ii, node_name(ii));
-						_n[ii].set_to_ground(this);
-					} else {
-						trace2("$(DEV_NAME)::expand node between max_nodes() and matrix_nodes(): alloc new", ii, node_name(ii));
-						_n[ii].new_model_node(node_name(ii), this);
-					}
-				}
+			if(_nodemap->cycle(ii)&lt;ii) { untested();
+				_n[ii] = _n[_nodemap->cycle(ii)];
+			}else if(_n[ii].n_()) { untested();
+				// already set up...
+			}else if(ii &lt; max_nodes()){ untested();
+				// omitted
+				_n[ii].set_to_ground(this);
+			}else{ untested();
+				_n[ii].new_model_node(node_name(ii), this);
+			}
 #ifdef HAVE_ADP_NODE
 			} else if ( !_n[ii].a_()){ itested();
 				trace0("$(DEV_NAME)::expand node, registering new adpnode");
@@ -2362,6 +2371,9 @@ void $(DEV_NAME)::expand()
 	subckt()->expand();
 	//	subckt()->set_slave(); NO. doesnt make sense
   </admst:if>
+
+  delete (_nodemap);
+  _nodemap=NULL;
 }
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::precalc_first()
@@ -3071,8 +3083,13 @@ void $(DEV_NAME)::ac_load()
 }
 
 // -------------------------------------------------------------------------- //
-// this is quite a hack.
-// wouldnt be necessary if branches were subdevices ...
+void $(DEV_NAME)::init_nodemap()
+{
+	assert(!_nodemap);
+	const unsigned nn = %(count(node[grounded='no']));
+	_nodemap = new PARTITION&lt;nn&gt;();
+}
+// -------------------------------------------------------------------------- //
 void $(DEV_NAME)::guesstopology ()
 {
 	const COMMON_COMPONENT* c = prechecked_cast&lt;const COMMON_COMPONENT*&gt;(common());
