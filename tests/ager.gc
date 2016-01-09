@@ -1,3 +1,6 @@
+load public models-uf.so
+load rcd_sym.so
+load ./ager.so
 spice
 * simplistic ager example
 
@@ -7,8 +10,6 @@ spice
 V1 nin 0 pulse iv=0 pv=1 rise=500u delay=1 width=10
 
 .verilog
-load rcd_sym.so
-load ./ager.so
 paramset myager ager
 	.r0=20k;
 endparamset
