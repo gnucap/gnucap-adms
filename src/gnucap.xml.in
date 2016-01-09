@@ -1585,6 +1585,25 @@ and name!='initializeInstance')]">
         </admst:choose>
       </admst:for-each>
     </admst:when>
+    <admst:when test="[class!='builtin']">
+      <admst:variable name="mycode" select=""/>
+      <admst:if test="[exists(arguments)]">
+        <admst:for-each select="arguments">
+          <admst:apply-templates select="." match="subexpression:stringify:noprobe"/>
+          <admst:choose>
+            <admst:when test="[$mycode='']">
+              <admst:variable name="mycode" select="%s"/>
+            </admst:when>
+            <admst:otherwise>
+              <admst:variable name="mycode" select="$mycode,%s"/>
+            </admst:otherwise>
+          </admst:choose>
+        </admst:for-each>
+        <admst:variable name="mycode" select="($mycode)"/>
+      </admst:if>
+      <admst:variable name="myname" select="%(function:getname(.)/[name='function:getname']/value)"/>
+		<admst:value-to select="/simulator/tmp" value=" /*1590*/ $myname$mycode"/>
+    </admst:when>
     <admst:otherwise>
       <admst:variable name="mycode" select=""/>
       <admst:if test="[exists(arguments)]">
@@ -8465,7 +8484,6 @@ return
     </admst:when>
     <admst:otherwise>
       <admst:variable name="fname" select="%(funcname(.)/[name='fname']/value)"/>
-		<admst:variable name="fname" test="[class!='builtin']" select="$(af_prefix)$(fname)"/>
       <admst:variable name="args" select=""/>
       <admst:for-each select="arguments">
         <admst:if test="[$args!='']">
