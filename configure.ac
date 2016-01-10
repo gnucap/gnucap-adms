@@ -11,6 +11,21 @@ LT_INIT([disable-static])
 
 AS_IF([ test x$program_suffix = xNONE ],,[_program_suffix=$program_suffix])
 
+dnl ------------------- gnucap-uf? -------------------
+
+AC_MSG_CHECKING([gnucap-uf availibility])
+echo | gnucap$_program_suffix -a "lazy models-uf.so" -b /dev/stdin > /dev/null 2>/dev/null
+MODELS_UF=${PIPESTATUS[[1]]}
+AS_IF([ test $MODELS_UF -eq 0 ],[
+	GNUCAP_UF=yes
+		 ],[
+	GNUCAP_UF=no
+			 ])
+AC_MSG_RESULT([$GNUCAP_UF])
+
+dnl this is required for testing.
+AM_CONDITIONAL([GNUCAP_UF], [test x"$GNUCAP_UF" != xno])
+
 dnl ------------------- debugging -------------------
 AC_MSG_CHECKING([if debug code should be compiled in])
 AC_ARG_ENABLE([debug],
@@ -145,5 +160,6 @@ AC_MSG_RESULT([
    CPPFLAGS:   $CPPFLAGS
    plugindir:  $gnucap_libdir
    pkglibdir:  $pkglibdir
+   uf:         $GNUCAP_UF
    qucs:       $enable_qucs
 ])
