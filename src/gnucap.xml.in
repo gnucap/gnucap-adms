@@ -2209,7 +2209,7 @@ void $(DEV_NAME)::expand()
 			trace2("$(DEV_NAME)::expand nodes", ii, _n[ii].is_adp());
 			if(!_n[ii].is_adp()){
 #endif
-			if(_nodemap->cycle(ii)&lt;ii) { untested();
+			if(uint_t(_nodemap->cycle(ii))&lt;ii) { untested();
 				_n[ii] = _n[_nodemap->cycle(ii)];
 			}else if(_n[ii].n_()) { untested();
 				// already set up...

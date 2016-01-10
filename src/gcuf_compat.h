@@ -1,4 +1,6 @@
 // gnucap-uf transition
+#ifndef GCUF_COMPAT_H
+#define GCUF_COMPAT_H
 
 #ifndef USE
 # define USE(x)
@@ -62,4 +64,6 @@ using OS::getenv;
 /*--------------------------------------------------------------------------*/
 #ifndef GCUF_CONST
 #define GCUF_CONST
+#endif
+
 #endif

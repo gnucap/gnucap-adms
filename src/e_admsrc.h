@@ -21,6 +21,7 @@
 
 #include <e_elemnt.h>
 //#include <io_misc.h>
+#include "gcuf_compat.h"
 
 // -------------------------------------------------------------------------- //
 class ADMS_SOURCE : public ELEMENT {
@@ -153,7 +154,7 @@ inline void ADMS_SOURCE::set_parameters_va(const std::string& Label, CARD *Owner
     assert(_n_ports + _n_iports == n_states - 1);// ?
     assert(net_nodes() == n_nodes);
   }
-  assert(matrix_nodes() == 2*n_states + _boff - 2); // used by iwant_matrix.
+  assert(int(matrix_nodes()) == int(2*n_states + _boff - 2)); // used by iwant_matrix.
   assert(ext_nodes() == 2*n_states - 2); // used by map_nodes
   trace2("ADMS_SOURCE::sp_va now", _m0, _m1);
 
@@ -177,7 +178,7 @@ inline void ADMS_SOURCE::set_parameters_va(const std::string& Label, CARD *Owner
 void ADMS_SOURCE::expand_last()
 {
   trace2("ADMS_SOURCE::expand_last", long_label(), mfactor());
-  for(unsigned i=0; i<_n_iports; ++i) {
+  for(uint_t i=0; i<_n_iports; ++i) {
     assert(_inputs[i]);
 
     node_t* ni = _n+_boff+2+_n_vports*2;
@@ -202,7 +203,7 @@ void ADMS_SOURCE::expand_last()
 // the current controlled current part...
 inline void ADMS_SOURCE::tr_iwant_matrix_active()
 {
-  assert(matrix_nodes() == 2+_boff+2*(_n_vports + _n_iports));
+  assert(int(matrix_nodes()) == int(2+_boff+2*(_n_vports + _n_iports)));
   assert(is_device());
   assert(!subckt());
   assert(!_boff);
@@ -213,7 +214,7 @@ inline void ADMS_SOURCE::tr_iwant_matrix_active()
 //  assert(_n[IN2].m_() != INVALID_NODE);
 
   //_sim->_aa.iwant(_n[OUT1].m_(),_n[OUT2].m_());
-  for(unsigned i=0; i<_n_vports; ++i) {
+  for(uint_t i=0; i<_n_vports; ++i) {
     if (!_boff){
       _sim->_aa.iwant(_n[OUT1].m_(),_n[2*i+0].m_());
       _sim->_aa.iwant(_n[OUT1].m_(),_n[2*i+1].m_());
