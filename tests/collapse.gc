@@ -1,4 +1,5 @@
 load ./collapse.so
+options trace
 
 verilog
 
@@ -10,5 +11,7 @@ v1 n 0 1
 .print dc i(v1)
 .print tran i(s1) v(nodes) v(s1)
 
-.dc trace=i
+.dc trace=n
+.nodelist
+.mstat
 .end

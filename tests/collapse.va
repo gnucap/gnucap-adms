@@ -8,22 +8,47 @@ module cond(p,n);
 	inout p,n;
 	electrical p,n;
 
-	analog begin	
- 		I(p,n) <+ V(p,n);
-   end
+	analog begin
+		I(p,n) <+ V(p,n);
+	end
+endmodule
+
+module short(p,n);
+	inout p,n;
+	electrical p,n;
+
+	analog begin
+		V(p,n) <+ 0.;
+	end
 endmodule
 
 module collr(p,n);
 	inout p,n;
-	electrical p,n,i,j,k;
+	electrical p,n,i,j,k,l;
 	parameter real pp = 1 from [0:inf);
+	real current0;
 
-	analog begin	
- 		V(n,i) <+ 0.; // collapse (unconditionally)
- 		V(k,p) <+ 1.; // don't collapse (unconditionally)
+	analog begin
+		V(n,i) <+ 0.; // collapse (unconditionally)
+		V(n,i) <+ 0.; // collapse (unconditionally)
+		V(n,l) <+ 0.; // don't collapse. it's a current probe!
+		current0 =  I(n,l);
+		V(k,p) <+ 1.; // don't collapse (unconditionally)
 		if(0) V(i,j) <+ 0.; // collapse (maybe)
 		if(pp) V(n,j) <+ 0.; // collapse (maybe?)
 		if(V(p,n)) V(n,j) <+ 0.; // collapse (maybe?)
- 		I(k,j) <+ V(k,j);
-   end
+		I(k,j) <+ V(k,j);
+	end
+endmodule
+
+module iprobe(p,n);
+	inout p,n;
+	electrical p,n,i;
+	real current0 (*ask='yes'*);
+
+	analog begin
+		V(n,i) <+ 0.; // don't collapse. it's a current probe!
+		current0 = I(n,i);
+		I(i,p) <+ V(i,p)*1e4;
+	end
 endmodule

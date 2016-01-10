@@ -12,7 +12,7 @@ module va_cap(p,n);
 
 	analog begin	
 		I(p,n) <+ capacitance*ddt(V(p,n));
-   end
+	end
 endmodule
 endadms
 
