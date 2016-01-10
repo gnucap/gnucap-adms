@@ -6,7 +6,11 @@ GNUCAP_ADMS = ../src/gnucap-adms
 # GNUCAP = LD_LIBRARY_PATH=../src/.libs
 GNUCAP = $(shell echo gnucap | sed -e '$(transform)')
 plugindir = @gnucap_libdir@
+if GNUCAP_UF
 FILTER = $(plugindir)/gnucap-testfilter
+else
+FILTER = cat
+endif
 GNUCAP_PLUGINS = d_adms_i.so d_adms_vbr.so
 
 sensor_chip.log: $(PWD)/sensor_chip.ckt
@@ -16,6 +20,7 @@ diff.2.log: $(PWD)/diff.va
 AM_DEFAULT_SOURCE_EXT = .va
 .va.cc:
 check_LTLIBRARIES = \
+    $(UFCHECKLIB) \
     forloop.la \
     BSIM6.1.1.la \
     case.la \
@@ -48,16 +53,18 @@ check_LTLIBRARIES = \
     mul.la \
     rc.la \
     rc_emb.la \
-    ager.la \
     motor.la \
     vbg.la ldo.la sensor.la callfunctions.la \
     op.la \
     lamp.la
 
-## if AGING
-check_LTLIBRARIES += \
+if GNUCAP_UF
+UFCHECKLIB = \
+    ager.la \
     aging_mos.la
-## endif
+else
+	UFCHECKLIB =
+endif
 
 BSIM6_1_1_lo_CXXFLAGS =
 @nothing@BSIM6_1_1_la-BSIM6.1.1.lo: CXXFLAGS = -O0 # -Wall -pedantic
@@ -82,7 +89,7 @@ $(PWD)/modelcard.%: modelcard.%
 
 DIST_TESTS = $(SO_TESTS)
 
-ager.log rc.log : %.log: %.so
+rc.log : %.log: %.so
 
 AM_TESTS_ENVIRONMENT = \
     export PATH='../src:$(PATH)'\
@@ -110,9 +117,6 @@ BSIM6_TESTS = \
     bsim6_inv_dc.sp \
     bsim6_inv_tr.sp \
     bsim6_inverter_transient.sp
-
-# takes too long, still
-# bsim6_inverter_transient.log: SP_LOG_FLAGS = SKIP
 
 # FIXME: use different compiler.
 SH_TESTS = $(GC_TESTS) $(GCUF_TESTS) $(INLINE_TESTS)
@@ -281,7 +285,10 @@ $(SHS): %.sh: %.gc Makefile %.ref
 	@echo "rm $*.out" >> $@
 	@chmod +x $@
 
-aging_mos.log: aging_mos.so
+if GNUCAP_UF
+ager.log aging_mos.log : %.log: %.so
+endif
+
 subcoil.log subcoil.1.log vccs.log ccvs.log cap.log: %.log: %.so
 coil.log: coil.so
 coil_auto.log: coil.so
