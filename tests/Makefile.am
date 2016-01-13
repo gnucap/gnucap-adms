@@ -228,6 +228,10 @@ $(empty)bsim6_ringosc_17.sp.out: POSTDIFF='/\[BSIM6\]·Although/d'
 EXTRA_DIST = \
     aging_mos.va \
     bug1.va \
+    modelcard.nmos \
+    modelcard.pmos \
+    $(BSIM6_TESTS) \
+    $(BSIM6_TESTS:%=%.ref) \
     $(GC_TESTS:%.sh=%.gc) \
     $(GC_TESTS:%.sh=%.ref) \
     $(GCUF_TESTS:%.sh=%.gc) \
@@ -250,7 +254,8 @@ EXTRA_DIST = \
     ldo.ref \
     motor.gc \
     motor.ref \
-    net.va
+    net.va \
+    sp_log_compiler
 
 vbg.out sensor_chip.log sensor_chip.out: \
     $(SENSOR_SO) $(PWD)/sensor_chip.ckt $(PWD)/opvm.core.gc $(PWD)/vbgvm.core.gc $(PWD)/ldovm.core.gc \
@@ -359,15 +364,23 @@ inline.log inline.out: cleantmp
 cleantmp:
 	rm -rf .admstmp
 
-CLEANFILES = .*.adms *.out \
+if VPATH_BUILD
+VPATH_CLEANFILES = modelcard.*
+endif
+
+CLEANFILES = \
+    $(CUSTOM_TESTS) \
+	 $(GCUF_TESTS) \
+    $(VPATH_CLEANFILES) \
+    .*.adms *.out \
     $(GC_TESTS) \
     $(INLINE_TESTS) \
     *.hxx .*.xml \
-    modelcard.* \
     core \
     rc_uic.sh \
     ddc_rc.sh \
-    ddc.2.sh
+    ddc.2.sh \
+    *.vams
 
 CLEANFILES+= $(check_LTLIBRARIES:%.la=%.h) \
              $(check_LTLIBRARIES:%.la=%.cc)

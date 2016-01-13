@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.67])
-AC_INIT([gnucap-adms], [0.0.8-rc1], [felix@salfelder.org])
+AC_INIT([gnucap-adms], [0.0.8-rc2], [felix@salfelder.org])
 AC_CONFIG_SRCDIR([README])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
@@ -10,6 +10,7 @@ AM_INIT_AUTOMAKE([-Wno-portability silent-rules])
 LT_INIT([disable-static])
 
 AS_IF([ test x$program_suffix = xNONE ],,[_program_suffix=$program_suffix])
+AM_CONDITIONAL([VPATH_BUILD], [test ! x$srcdir = "x."])
 
 dnl ------------------- gnucap-uf? -------------------
 

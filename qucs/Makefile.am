@@ -134,6 +134,8 @@ nodist_potentiometer_la_SOURCES = potentiometer.va
 nodist_tff_SR_la_SOURCES = tff_SR.va
 nodist_EKV26MOS_la_SOURCES = EKV26MOS.va
 nodist_vcresistor_la_SOURCES = vcresistor.va
+nodist_bsim3v34pMOS_la_SOURCES = bsim3v34pMOS.va
+nodist_bsim3v34nMOS_la_SOURCES = bsim3v34nMOS.va
 
 # EXTRA_LTLIBRARIES = $(QUCS_NOTYET)
 
