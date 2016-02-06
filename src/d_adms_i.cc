@@ -188,14 +188,14 @@ void ADMS_I::tr_load()
 }
 /*--------------------------------------------------------------------------*/
 double ADMS_I::tr_amps()const
-{ untested();
+{
   double amps = _m0.c0;
   double mul = 1.;
-  for (uint_t i=1; i<2+_n_vports; ++i) { untested();
+  for (uint_t i=1; i<2+_n_vports; ++i) {
     // don't use _values. they have just been zeroed!
     amps += dn_diff(_n[2*i-2].v0(),_n[2*i-1].v0()) * _old_values[i];
   }
-  for (uint_t i=0; i<_n_iports; ++i) { untested();
+  for (uint_t i=0; i<_n_iports; ++i) {
     if (_inputs[i]==this){ incomplete();
       assert(!i);
       mul = 1./(1.-_old_values[2+_n_vports]);
