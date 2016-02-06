@@ -6,8 +6,8 @@
 
 // diff
 
-`include "discipline.h"
-`include "constants.h"
+`include "disciplines.vams"
+`include "constants.vams"
 
 module diff(p,n,cp,cn);
 	inout p,n,cp,cn;

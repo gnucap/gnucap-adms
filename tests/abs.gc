@@ -1,7 +1,7 @@
 spice
 .load lang_adms.so
 .adms
-`include "discipline.h"
+`include "disciplines.vams"
 
 module dabs (p,n);
 	inout p,n;

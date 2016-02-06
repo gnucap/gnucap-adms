@@ -7,8 +7,8 @@
 
 // lamp
 
-`include "discipline.h"
-`include "constants.h"
+`include "discipline.vams"
+`include "constants.vams"
 
 module lamp(p1,p2);
 	inout p1,p2;
