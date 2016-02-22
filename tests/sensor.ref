@@ -81,7 +81,7 @@ vin ( ninp 0 ) pulse iv= 0. pv= 10. delay=NA( 0.) rise= 1. fall=NA( 0.) width=NA
  4.398K     5.         4.398K     2.5        2.5016     300.38    
  8.7961K    5.         8.7961K    2.5        2.5016     300.38    
 Gnucap   System status
-iterations: op=0, dc=198, tran=163, fourier=0, total=393
+iterations: op=0, dc=1~~, tran=163, fourier=0, total=3~~
 transient timesteps: accepted=31, rejected=1, total=32
 nodes: user=4, subckt=0, model=1, total=5
 dctran density=100.0%, ac density=100.0%

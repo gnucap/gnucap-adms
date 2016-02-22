@@ -29,7 +29,7 @@ vout= 0.401~
 *.......*00000*00*0
 *.........*00*0000*
 Gnucap   System status
-iterations: op=0, dc=467, tran=189, fourier=0, total=707
+iterations: op=0, dc=46~, tran=189, fourier=0, total=70~
 transient timesteps: accepted=40, rejected=1, total=41
 nodes: user=10, subckt=5, model=3, total=18
 dctran density=69.1%, ac density=69.1%

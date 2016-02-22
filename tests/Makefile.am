@@ -95,6 +95,7 @@ AM_TESTS_ENVIRONMENT = \
     export PATH='../src:$(PATH)'\
            LD_LIBRARY_PATH='../src/.libs'\
            GNUCAP='$(GNUCAP)'\
+           GNUCAP_TESTFILTER='$(FILTER)'\
            GNUCAP_ADMS_CPPFLAGS='-I$(abs_top_srcdir)/src'\
            GNUCAP_ADMS_DATADIR='$(PWD)/../src'\
            GNUCAP_ADMS_INCLUDEDIR='$(abs_top_srcdir)/src'\
@@ -218,6 +219,9 @@ $(empty)instanceparam.sh: POSTDIFF='1,/^testdata/d'
 $(empty)ttint.sh: POSTDIFF='0,/^testdata/d'
 $(empty)inline.sh: POSTDIFF='0,/^outputstart/d'
 $(empty)aging_mos.sh: POSTDIFF='0,/^done·load_va/d'
+$(empty)ddx.log: POSTDIFF='s/9.962E-15/0.·······/g' \
+	                       's/-27.76E-30/·0.·······/' \
+                          's/385.1E-24/·0.······/'
 
 # ignore strobes about RSSMOD
 $(empty)bsim6_inv_dc.sp.out bsim6_inv_tr.sp.out: POSTDIFF='/\[BSIM6\]·Although/d'

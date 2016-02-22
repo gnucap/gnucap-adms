@@ -1,6 +1,6 @@
 #!/bin/bash
 
-GNUCAP_TESTFILTER=cat
+GNUCAP_TESTFILTER=${GNUCAP_TESTFILTER:-cat}
 
 [ x$1 = xSKIP ] && exit 77
 
