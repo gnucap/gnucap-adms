@@ -894,7 +894,7 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
 	private: //callfunctions
 		unsigned _callf_seek;
 		void ($(DEV_NAME)::*_callf_q[%(count(callfunction))])();
-		void q_callf_ptr( void ($(DEV_NAME)::*c)()){ untested();
+		void q_callf_ptr( void ($(DEV_NAME)::*c)()){ itested();
 			_callf_q[_callf_seek++] = c;
 		}
   <admst:for-each select="callfunction" separator=",">
@@ -2318,11 +2318,11 @@ void $(DEV_NAME)::tr_regress()
 bool $(DEV_NAME)::tr_needs_eval()const
 {
 	trace3(&quot;$(DEV_NAME)::tr_needs_eval&quot;, converged(), is_q_for_eval(), _sim-&gt;is_advance_iteration());
-	if (is_q_for_eval()){ untested();
+	if (is_q_for_eval()){ itested();
 		return false; // needed?
 	}else if ( !OPT::lcbypass
 	  || !converged()
-	  || _sim->is_advance_or_first_iteration() ) { untested();
+	  || _sim->is_advance_or_first_iteration() ) { itested();
 		return true;
 	}
   <admst:if test="[$has_sckt!=0]">
@@ -2399,7 +2399,7 @@ bool $(DEV_NAME)::do_tr()
   <admst:if test="[$has_sckt!=0]">
 	set_converged(subckt()->do_tr());
   </admst:if>
-	if(converged()){ untested();
+	if(converged()){ itested();
 		set_converged(conv_check());
 	}
 
@@ -2738,7 +2738,7 @@ void $(DEV_NAME)::ac_begin()
 {
 	ADMS_BASE::ac_begin();
 	internal_precalc();
-	untested();
+	itested();
 	// tr_accept();
 }
 // -------------------------------------------------------------------------- //
