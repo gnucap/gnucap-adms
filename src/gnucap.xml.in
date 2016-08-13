@@ -2048,7 +2048,7 @@ $(DEV_NAME)::$(DEV_NAME)(const $(DEV_NAME)&amp; p) :
 	_n = _nodes;
 	for (uint_t ii = 0; ii &lt; int_nodes() + max_nodes(); ++ii){
 		_n[ii] = p._n[ii];
-		trace3("$(DEV_NAME)::$(DEV_NAME)", ii, _n[ii].is_adp(), p._n[ii].is_adp());
+		trace1("$(DEV_NAME)::$(DEV_NAME)", ii);
 	}
 
 	for (int ii=0; ii&lt;OPT::_keep_time_steps; ++ii){
@@ -2235,7 +2235,7 @@ void $(DEV_NAME)::expand()
 		assert(max_nodes() != 0);
 		for (uint_t ii = 0; ii &lt; matrix_nodes(); ++ii)
 		{
-			trace2("$(DEV_NAME)::expand matrix node check", ii, _n[ii].is_adp());
+			trace1("$(DEV_NAME)::expand matrix node check", ii);
 			assert(_n[ii].t_()!=INVALID_NODE);
 #ifdef HAVE_ADP_NODE
 			assert(_n[ii].n_() || _n[ii].is_adp());
@@ -2341,7 +2341,7 @@ void $(DEV_NAME)::expand()
 		// netlist
 <admst:for-each select="instance">
 		if (!_%(name)) {
-			trace1("$(DEV_NAME)::expand, instanciating", hp(_%(name)));
+			trace1("$(DEV_NAME)::expand, instanciating", _%(name));
 			// FIXME: recycle u_lang or move to e_adms.cc
 			const CARD* p = OPT::language->find_proto("%(module)", this);
 			if(!p) throw Exception("cannot find '%(module)'. Load module first?");
@@ -3225,7 +3225,7 @@ double $(DEV_NAME)::tr_c_to_g(double c, double g)const
 		}
 		return g;
 	}else{ unreachable();
-		trace3("$(DEV_NAME)::tr_c_to_g", _sim->phase(), _sim->sim_mode(), _sim->_time0);
+		trace2("$(DEV_NAME)::tr_c_to_g", _sim->sim_mode(), _sim->_time0);
 		return 0.;
 	}
 }
