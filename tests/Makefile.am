@@ -120,10 +120,10 @@ BSIM6_TESTS = \
     bsim6_inverter_transient.sp
 
 # FIXME: use different compiler.
-SH_TESTS = $(GC_TESTS) $(GCUF_TESTS) $(INLINE_TESTS)
+SH_TESTS = $(INLINE_TESTS) $(GC_TESTS) $(GCUF_TESTS)
 TESTS = $(SH_TESTS) $(BSIM6_TESTS)
 TESTS+= $(CUSTOM_TESTS)
-INLINE_TESTS = abs.sh instanceparam.sh
+INLINE_TESTS = abs.sh instanceparam.sh paramset.sh
 # tests that require an .so
 SO_TESTS = \
     op.sh \
