@@ -93,7 +93,7 @@ rc.log : %.log: %.so
 
 AM_TESTS_ENVIRONMENT = \
     export PATH='../src:$(PATH)'\
-           LD_LIBRARY_PATH='../src/.libs'\
+           LD_LIBRARY_PATH='../src/.libs${LD_LIBRARY_PATH:%=:%}'\
            GNUCAP='$(GNUCAP)'\
            GNUCAP_TESTFILTER='$(FILTER)'\
            GNUCAP_ADMS_CPPFLAGS='-I$(abs_top_srcdir)/src'\
