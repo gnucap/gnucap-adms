@@ -78,6 +78,17 @@ adms_opamp_la_CXXFLAGS = $(PLUGIN_CXXFLAGS)
 nodist_adms_opamp_la_SOURCES = opamp.va
 adms_opamp_la_LIBADD = libgnucap_adms.la
 
+if C_DEBUG
+debug_plugin =
+else
+debug_plugin = c_debug.la
+endif
+c_debug_la_SOURCES = c_debug.cc
+c_debug_la_CXXFLAGS = $(PLUGIN_CXXFLAGS)
+c_debug_la_LDFLAGS = -shared -module
+
+plugin_LTLIBRARIES += ${debug_plugin}
+
 # automatically by "make depend"?
 #$(SOURCES:%.cc=%.o): %.o: %.cc %.h %_tr.hxx %_ac.hxx %_top.hxx
 

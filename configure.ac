@@ -27,6 +27,21 @@ AC_MSG_RESULT([$GNUCAP_UF])
 dnl this is required for testing.
 AM_CONDITIONAL([GNUCAP_UF], [test x"$GNUCAP_UF" != xno])
 
+dnl ------------------- debug? -------------------
+
+AC_MSG_CHECKING([gnucap debug plugin availibility])
+echo | gnucap$_program_suffix -a "lazy c_debug.so" -b /dev/stdin > /dev/null 2>/dev/null
+C_DEBUG=${PIPESTATUS[[1]]}
+AS_IF([ test $C_DEBUG -eq 0 ],[
+	C_DEBUG=yes
+		 ],[
+	C_DEBUG=no
+			 ])
+AC_MSG_RESULT([$C_DEBUG])
+
+dnl this is required for testing.
+AM_CONDITIONAL([C_DEBUG], [test x"$C_DEBUG" != xno])
+
 dnl ------------------- debugging -------------------
 AC_MSG_CHECKING([if debug code should be compiled in])
 AC_ARG_ENABLE([debug],
