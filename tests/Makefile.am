@@ -315,7 +315,9 @@ $(GC_TESTS:%.sh=%.out): %.out: %.so
 PREDIFF= \
     '1,/^core-lib·version/d' \
     '/^stashing·as/d' \
+    '/^>>>>>$$/d' \
     '/^@/d' \
+    '/^default·plugins:/d' \
     '/:·already.installed,·replacing/d'
 
 $(TESTS:%.sh=%.log): Makefile
