@@ -67,7 +67,7 @@ public: // override virtual, called by commands
 
 private: // override virtual, called by print_item
   void print_paramset(OMSTREAM&, const MODEL_CARD*){}
-  void print_module(OMSTREAM&, const MODEL_SUBCKT*){}
+  void print_module(OMSTREAM&, const BASE_SUBCKT*){}
   void print_instance(OMSTREAM&, const COMPONENT*){}
   void print_comment(OMSTREAM&, const DEV_COMMENT*){}
   void print_command(OMSTREAM& o, const DEV_DOT* c){}
@@ -82,7 +82,7 @@ private: // unnecessary, make compiler hapopy
   virtual DEV_COMMENT*	parse_comment(CS&, DEV_COMMENT*){return NULL;}
 //  virtual DEV_DOT*	parse_command(CS&, DEV_DOT*){return NULL;}
   virtual MODEL_CARD*	parse_paramset(CS&, MODEL_CARD*){return NULL;}
-  virtual MODEL_SUBCKT* parse_module(CS&, MODEL_SUBCKT*){return NULL;}
+  virtual BASE_SUBCKT* parse_module(CS&, BASE_SUBCKT*){return NULL;}
   virtual COMPONENT*	parse_instance(CS&, COMPONENT*){return NULL;}
   std::string	find_type_in_string(CS&) GCUF_CONST {return "";}
 
