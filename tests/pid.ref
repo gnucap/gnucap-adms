@@ -1,7 +1,7 @@
 #           v(n1)      v(nr)     
  0.         0.         0.        
 .model mypid pid ( d=1m i=1 p=1)
-pid1 ( nr 0 n1 0 )  mypid 
+pid1 ( nr 0 n1 0 ) mypid
 V1 ( n1 0 ) pulse iv= 0. pv= 1. delay= 0. rise= 0.002 fall= 0.001 width= 0.004 period= 0.012
 #Time       v(n1)      v(nr)      state0(pid1) state1(pid1)
  0.         0.         0.         0.         0.        

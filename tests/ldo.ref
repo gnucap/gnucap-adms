@@ -3,9 +3,9 @@
 * License GPLv3 (or later) 
 .model myldo ldo ( Vdrop=NA( 0.3) Vddmin=NA( 2.1) Rrs=NA( 5.2K) rdegout=NA( 10.K) Imax=NA( 0.00182) fak2=NA( 4.138) fak1=NA( 1.6) Ibias=NA( 0.0018) C1=NA( 1.n) rout=2 psrr=NA( 300.u))
 .subckt ldo101b ( vbg2 nout vrs vdd gnd )
-LDO1 ( vbg2 nout vrs vdd gnd )  myldo 
+LDO1 ( vbg2 nout vrs vdd gnd ) myldo
 .ends ldo101b
-Xldo ( vbg nout vrs ndd 0 )  ldo101b 
+Xldo ( vbg nout vrs ndd 0 ) ldo101b
 Vdd ( ndd 0 )  DC  5.
 V2 ( vrs 0 )  DC  1.
 Vb ( vbg 0 )  DC  1.4

@@ -1718,7 +1718,7 @@ and name!='initializeInstance')]">
 #include &lt;globals.h&gt;
 
 #include &lt;u_xprobe.h&gt;
-#include &lt;d_subckt.h&gt;
+#include &lt;e_paramlist.h&gt;
 #include &lt;e_storag.h&gt;
 #include &lt;e_model.h&gt;
 #include &lt;e_compon.h&gt;

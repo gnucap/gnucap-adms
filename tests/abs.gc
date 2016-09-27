@@ -1,5 +1,7 @@
+load lang_adms.so
+load c_make_attach.so
+options trace
 spice
-.load lang_adms.so
 .adms
 `include "disciplines.vams"
 
@@ -22,9 +24,7 @@ endparamset
 
 myabs foo(0 1);
 
-spice
-
-.echo testdata
+spice ; testdata
 
 V1 1 0 sin amplitude=1 frequency=1
 

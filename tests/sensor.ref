@@ -1,5 +1,5 @@
 .model mydruck drucksensor ( C_waerm=5e-7 ub0=NA( 3.) d2=NA( 300.u) d1=NA( 50.u) a=NA( 0.77) k=NA( 1.8) lquerLuft=NA( 66.5u) lambda0=NA( 0.0256) Area=NA( 4.u) epsilon=NA( 0.03) sigma=NA( 56.7n) G_b=NA( 800.n) Rnull=6.2e3 beta=0.0054)
-DR2 ( nout pout ninp ndd 0 )  mydruck 
+DR2 ( nout pout ninp ndd 0 ) mydruck
 * Xd nout npout np ndd nss mydruck 
 Vdd ( ndd 0 )  DC  5.
 vin ( ninp 0 ) pulse iv= 0. pv= 10. delay=NA( 0.) rise= 1. fall=NA( 0.) width=NA( Inf) period=NA( Inf)

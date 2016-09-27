@@ -1,10 +1,4 @@
-* note: nodenames case-sensitive 
-Vcc ( ndd 0 ) vdd
-Vcc1 ( 0 ndd_minus ) vdd
 //* note: nodenames case-sensitive 
-vdd #() Vcc (.p(ndd),.n(0));
-vdd #() Vcc1 (.p(0),.n(ndd_minus));
-vsource_sin #(.offset( 0.),.amplitude(ampl),.frequency(freq)) V1 (.p(nin_p),.n(0));
 paramset myota opamp;
  .Rf=NA( 10.); .r1=NA( 100.Meg); .f0dB=1e6; .Sr=5e5; .Rout=NA( 75.); .Rinn=NA( 2.G); .Rinp=NA( 2.G); .Rin=NA( 2.Meg); .A0=2e5;
 endparmset
@@ -15,6 +9,14 @@ myota #() OTA1 (.out(nout1),.inp(nin_p),.inn(0),.vddp(ndd),.vddn(ndd_minus),.vre
 myota #() OTA0 (.out(nout0),.inp(nin_p),.inn(0),.vddp(ndd),.vddn(ndd_minus));
 // bypass paramset
 opamp #() OTA2 (.out(nout2),.inp(nin_p),.inn(0),.vddp(ndd),.vddn(ndd_minus));
+* note: nodenames case-sensitive 
+.model myota opamp ( Rf=NA( 10.) r1=NA( 100.Meg) f0dB=1e6 Sr=5e5 Rout=NA( 75.) Rinn=NA( 2.G) Rinp=NA( 2.G) Rin=NA( 2.Meg) A0=2e5)
+*// biased by 1V
+OTA1 ( nout1 nin_p 0 ndd ndd_minus nvbias ) myota
+*// unbiased
+OTA0 ( nout0 nin_p 0 ndd ndd_minus ) myota
+*// bypass paramset
+OTA2 ( nout2 nin_p 0 ndd ndd_minus ) opamp
 #Time       v(ndd)     v(ndd_minus) v(nin_p)   v(nout0)   v(nout1)   v(nout2)   v(nvbias) 
  0.         1.7       -1.7        5.f        999.15p    0.99915    999.9p     1.        
  0.1        1.7       -1.7        2.9389u    0.41715    1.4163     0.41747    1.        
@@ -39,16 +41,16 @@ opamp #() OTA2 (.out(nout2),.inp(nin_p),.inn(0),.vddp(ndd),.vddn(ndd_minus));
  1.8        1.7       -1.7       -1.9021    -1.7003    -1.7003    -1.7016     1.        
  1.9        1.7       -1.7       -1.1756    -1.7003    -1.7003    -1.7016     1.        
  2.         1.7       -1.7        2.f       -1.6987    -1.6987    -1.7        1.        
-#Time       v(ndd)     v(ndd_minus) v(nin_p)   v(nout0)   v(nout1)   v(nout2)   v(nvbias) 
- 0.         1.7       -1.7        5.f        999.15p    0.99915    999.9p     1.        
- 1.u        1.7       -1.7        1.1756     0.482~     1.48~      0.48326    1.        
- 2.u        1.7       -1.7        1.9021     0.982~     1.7015     0.98323    1.        
- 3.u        1.7       -1.7        1.9021     1.48~      1.699~     1.4832     1.        
- 4.u        1.7       -1.7        1.1756     1.7015     1.6993     1.7027     1.        
- 5.u        1.7       -1.7        5.f        1.6998     1.62~      1.7011     1.        
- 6.u        1.7       -1.7       -1.1756     1.238~     1.252~     1.2391     1.        
+#Time       v(ndd)     v(ndd_minus) v(nin_p)   v(nout0)   v(~out     v(nout2)   v(nvbias) 
+ 0.         1.7       -1.7        5.f        999.1~     0.99915    999.9p     1.        
+ 1.u        1.7       -1.7        1.1756     0.48~      1.482~     0.48326    1.        
+ 2.u        1.7       -1.7        1.9021     0.9825     1.7015     0.98323    1.        
+ 3.u        1.7       -1.7        1.9021     1.4821     1.69~      1.4832     1.        
+ 4.u        1.7       -1.7        1.1756     1.701~     1.699~     1.7027     1.        
+ 5.u        1.7       -1.7        5.f        1.699~     1.627~     1.7011     1.        
+ 6.u        1.7       -1.7       -1.1756     1.238~     1.25~      1.2391     1.        
  7.u        1.7       -1.7       -1.9021     0.738~     0.752~     0.73902    1.        
- 8.u        1.7       -1.7       -1.9021     0.238~     0.25~      0.23901    1.        
- 9.u        1.7       -1.7       -1.1756    -0.260~    -0.246~    -0.26099    1.        
- 10.u       1.7       -1.7        4.f       -0.510~    -0.496~    -0.51098    1.        
-x= 8.47~u   
+ 8.u        1.7       -1.7       -1.9021     0.238~     0.253~     0.23901    1.        
+ 9.u   ~    1.7       -1.7       -1.1756    -0.2608    -0.24656   -0.26099    1.        
+ 10.u       1.7       -1.7        4.f       -0.5106    -0.49633   -0.51098    1.        
+x= 8.478013u

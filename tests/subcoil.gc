@@ -1,8 +1,9 @@
-spice
+load subcoil.so
 
-.load ./subcoil.so
+* BUG: double load?!
+*options trace
 
-.verilog
+verilog
 paramset mycoil subcoil;
 endparamset
 

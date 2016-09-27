@@ -23,6 +23,6 @@ V2 n2 0 sin amplitude=1 frequency=1 zero peak
 .print dc v(nodes) i(R*)
 .dc
 
-.print tran v(nodes) hidden(0) dis(n*) v(C1)
+.print tran v(nodes) dis(n*) v(C1)
 .tran 0 1 1 basic trace=a
 .end

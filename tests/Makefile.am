@@ -27,7 +27,8 @@ check_LTLIBRARIES = \
     ddx.la \
     subcoil.la \
     subcoil.1.la \
-    if.la if2.la \
+    if.la \
+    if2.la \
     chainvs.la \
     vs.la \
     vs1.la \
@@ -93,7 +94,7 @@ rc.log : %.log: %.so
 
 AM_TESTS_ENVIRONMENT = \
     export PATH='../src:$(PATH)'\
-           LD_LIBRARY_PATH='../src/.libs${LD_LIBRARY_PATH:%=:%}'\
+           LD_LIBRARY_PATH='$(abs_builddir)/.libs:$(abs_top_builddir)/src/.libs${LD_LIBRARY_PATH:%=:%}'\
            GNUCAP='$(GNUCAP)'\
            GNUCAP_TESTFILTER='$(FILTER)'\
            GNUCAP_ADMS_CPPFLAGS='-I$(abs_top_srcdir)/src'\
@@ -110,8 +111,10 @@ AM_TESTS_ENVIRONMENT = \
            srcdir='$(srcdir)';
 
 AM_TESTS_FD_REDIRECT = 9>&2
-TEST_EXTENSIONS = .sh .sp
+TEST_EXTENSIONS = .sh .sp .gc
 SP_LOG_COMPILER = $(top_srcdir)/tests/sp_log_compiler
+GC_LOG_COMPILER = $(top_srcdir)/tests/gc_log_compiler
+
 
 BSIM6_TESTS = \
     bsim6_ringosc_17.sp \
@@ -120,108 +123,119 @@ BSIM6_TESTS = \
     bsim6_inverter_transient.sp
 
 # FIXME: use different compiler.
-SH_TESTS = $(INLINE_TESTS) $(GC_TESTS) $(GCUF_TESTS)
-TESTS = $(SH_TESTS) $(BSIM6_TESTS)
+# SH_TESTS = $(GCUF_TESTS)
+TESTS = \
+	$(SH_TESTS) \
+	$(GC_TESTS) \
+	$(BSIM6_TESTS) \
+	$(INLINE_TESTS)
+
 TESTS+= $(CUSTOM_TESTS)
-INLINE_TESTS = abs.sh instanceparam.sh paramset.sh
+INLINE_TESTS = abs.gc instanceparam.gc
+
 # tests that require an .so
 SO_TESTS = \
-    op.sh \
-    sensor.sh \
-    lamp.sh \
-    vbg.sh \
-    subcoil.sh \
-    subcoil.1.sh \
-    rc.sh \
-    short.sh \
-    collapse.sh \
-    rc_emb.sh \
-    motor.sh
+    res.gc \
+    op.gc \
+    sensor.gc \
+    lamp.gc \
+    vbg.gc \
+    subcoil.gc \
+    subcoil.1.gc \
+    rc.gc \
+    short.gc \
+    collapse.gc \
+    rc_emb.gc \
+    motor.gc
 CUSTOM_TESTS = \
-    callfunctions.sh \
-    coil_auto.sh \
-    coil_br.sh \
-    diff.2.sh \
-    sensor_chip.sh \
-    vsstamp.sh \
-    csstamp.sh \
-    vcvsstamp.sh \
-    vccsstamp.sh \
-    ccvsstamp.sh \
-    cccsstamp.sh \
-    inline.sh \
-    rc1.sh \
-    tr.sh \
-    tr1.sh \
-    int_cont.sh \
-    motor1.sh \
-    adms_res.sh \
-    opamp.sh
+    if.gc \
+	 callfunctions.gc \
+    coil_auto.gc \
+    coil_br.gc \
+    diff.2.gc \
+	 paramset.gc \
+    sensor_chip.gc \
+    vsstamp.gc \
+    csstamp.gc \
+    vcvsstamp.gc \
+    vccsstamp.gc \
+    ccvsstamp.gc \
+    cccsstamp.gc \
+    inline.gc \
+    rc1.gc \
+    tr.gc \
+    tr1.gc \
+    int_cont.gc \
+    motor1.gc \
+    adms_res.gc \
+    opamp.gc
 GC_TESTS = \
     $(SO_TESTS) \
-    if.sh \
-    if2.sh \
-    implicit.sh \
-    coil.sh \
-    chainvs.sh \
-    ddx.sh \
-    vs.sh \
-    forloop.sh \
-    case.sh \
-    vs1.sh \
-    vs2.sh \
-    cap.sh \
-    cap_rescale.sh \
-    cs.sh \
-    analogfunction.sh \
-    afsquare.sh \
-    square.sh \
-    int.sh \
-    ldo.sh \
-    pid.sh \
-    diff.sh \
-    meas.sh \
-    mul.sh \
-    cccs.sh \
-    ccvs.sh \
-    res.sh \
-    res2.sh \
-    vccs.sh \
-    vcvs.sh
+    if2.gc \
+    implicit.gc \
+    coil.gc \
+    chainvs.gc \
+    ddx.gc \
+    vs.gc \
+    forloop.gc \
+    case.gc \
+    vs1.gc \
+    vs2.gc \
+    cap.gc \
+    cap_rescale.gc \
+    cs.gc \
+    analogfunction.gc \
+    afsquare.gc \
+    square.gc \
+    int.gc \
+    ldo.gc \
+    pid.gc \
+    diff.gc \
+    meas.gc \
+    mul.gc \
+    cccs.gc \
+    ccvs.gc \
+    res2.gc \
+    vccs.gc \
+    vcvs.gc
 # will only work with -uf
 GCUF_TESTS = \
-    bvs.sh \
-    ager.sh \
-	 aging_mos.sh \
-    rc_uic.sh \
-    ddc_rc.sh \
-    ddc.2.sh \
-    ttint.sh
+    bvs.gc \
+    ager.gc \
+	 aging_mos.gc \
+    rc_uic.gc \
+    ddc_rc.gc \
+    ddc.2.gc \
+    ttint.gc
 
 XFAIL_TESTS =
 
 # not implemented yet
-XFAIL_TESTS += collapse.sh
+XFAIL_TESTS += collapse.gc
 
 # not implemented yet
-XFAIL_TESTS += diff.2.sh
+XFAIL_TESTS += diff.2.gc
 
 # does not work.
-XFAIL_TESTS += coil_br.sh
+XFAIL_TESTS += coil_br.gc
 
 # time restore mismatch
-XFAIL_TESTS += tr1.sh
+XFAIL_TESTS += tr1.gc
 
 POSTDIFF=
 # remove cruft from model compiler
-$(empty)abs.sh: POSTDIFF='1,/^testdata/d'
-$(empty)instanceparam.sh: POSTDIFF='1,/^testdata/d'
-$(empty)ttint.sh: POSTDIFF='0,/^testdata/d'
-$(empty)inline.sh: POSTDIFF='0,/^outputstart/d'
-$(empty)aging_mos.sh: POSTDIFF='0,/^done·load_va/d'
-$(empty)ddx.log: POSTDIFF='s/9.962E-15/0.·······/g' \
-	                       's/-27.76E-30/·0.·······/' \
-                          's/385.1E-24/·0.······/'
+@nothing@$(INLINE_TESTS:%=%.out): POSTDIFF='1,/;·testdata/d'
+@nothing@ttint.gc.out: POSTDIFF='0,/^testdata/d'
+@nothing@if.gc.out: POSTDIFF='s/··[a-z][a-z][a-z][a-z]·$$/·myif/' \
+                            's/=·0\.3333.*$$/=·0\.3333/'
+@nothing@if2.gc.out: POSTDIFF='s/=·0\.3333.*$$/=·0\.3333/'
+@nothing@inline.gc.out: POSTDIFF='0,/outputstart/d'
+@nothing@aging_mos.gc.out: POSTDIFF='0,/^done·load_va/d'
+@nothing@ddx.gc.out: POSTDIFF='s/-9\....E-15/·0.·······/g' \
+	                       's/-27\...E-30/·0.·······/' \
+	                       's/9\....E-15/0.·······/g' \
+                          's/385.1E-24/0.·······/'
+
 
 # ignore strobes about RSSMOD
 $(empty)bsim6_inv_dc.sp.out bsim6_inv_tr.sp.out: POSTDIFF='/\[BSIM6\]·Although/d'
@@ -236,20 +250,20 @@ EXTRA_DIST = \
     modelcard.pmos \
     $(BSIM6_TESTS) \
     $(BSIM6_TESTS:%=%.ref) \
-    $(GC_TESTS:%.sh=%.gc) \
-    $(GC_TESTS:%.sh=%.ref) \
-    $(GCUF_TESTS:%.sh=%.gc) \
-    $(GCUF_TESTS:%.sh=%.ref) \
-    $(INLINE_TESTS:%.sh=%.gc) \
-    $(INLINE_TESTS:%.sh=%.ref) \
+    $(GC_TESTS) \
+    $(GC_TESTS:%.gc=%.ref) \
+    $(GCUF_TESTS) \
+    $(GCUF_TESTS:%.gc=%.ref) \
+    $(INLINE_TESTS) \
+    $(INLINE_TESTS:%.gc=%.ref) \
     rc_uic.gc ddc_rc.gc \
     lamp.va ager.va rc.va motor.va \
     $(SENSOR_SO:%.so=%.va) \
     $(SENSOR_SO:%.so=%vm.core.gc) \
     sensor_chip.ckt \
     callfunctions.va \
-    $(DIST_TESTS:%.sh=%.gc) $(DIST_TESTS:%.sh=%.ref) \
-    $(CUSTOM_TESTS:%.sh=%.gc) $(CUSTOM_TESTS:%.sh=%.ref) \
+    $(DIST_TESTS) $(DIST_TESTS:%.gc=%.ref) \
+    $(CUSTOM_TESTS) $(CUSTOM_TESTS:%.gc=%.ref) \
     opvm.core.gc \
     vbgvm.core.gc \
     ldovm.core.gc \
@@ -277,12 +291,12 @@ res2.log: res.so
 
 LT = <
 
-callfunctions.sh: LT=2> >(tee /dev/fd/2 | grep negative | while read line; do echo "[ERROR] \$$line"; done ) <
+callfunctions.gc.out: LT=2> >(tee /dev/fd/2 | grep negative | while read line; do echo "[ERROR] $$line"; done ) <
 
 SHS = \
-	$(CUSTOM_TESTS) \
-   $(INLINE_TESTS) $(GCUF_TESTS) $(GC_TESTS)
+   $(GCUF_TESTS)
 
+# obsolete, hopefully
 $(SHS): %.sh: %.gc Makefile %.ref
 	@echo "#!$(SHELL)" > $@
 	@echo "set -e" >> $@
@@ -299,6 +313,9 @@ ager.log aging_mos.log : %.log: %.so
 endif
 
 subcoil.log subcoil.1.log vccs.log ccvs.log cap.log: %.log: %.so
+
+# SO_TESTS?
+# (don't remember why this is/was needed)
 coil.log: coil.so
 coil_auto.log: coil.so
 coil_br.log: coil.so
@@ -309,8 +326,8 @@ if2.log: if2.so
 motor1.log: motor.so
 callfunctions.log: callfunctions.so
 
-$(GC_TESTS:%.sh=%.log): %.log: %.so
-$(GC_TESTS:%.sh=%.out): %.out: %.so
+$(GC_TESTS:%.gc=%.log): %.log: %.so
+$(GC_TESTS:%.gc=%.out): %.out: %.so
 
 PREDIFF= \
     '1,/^core-lib·version/d' \
@@ -320,7 +337,8 @@ PREDIFF= \
     '/^default·plugins:/d' \
     '/:·already.installed,·replacing/d'
 
-$(TESTS:%.sh=%.log): Makefile
+# huh?
+# $(TESTS:%.sh=%.log): Makefile
 
 check_custom: $(CUSTOM_TESTS:%.sh=%.log)
 check_bsim: $(BSIM6_TESTS:%.sp=%.log)
@@ -335,6 +353,13 @@ $(SH_TESTS:%.sh=%.out): %.out: %.gc
 
 %.sp.out: %.sp
 	$(GNUCAP) -a ../src/.libs/d_adms_i.so -a ../src/.libs/d_adms_vbr.so -b $< | \
+	    sed $(subst ·, ,$(PREDIFF:%=-e %)) \
+	    $(if $(POSTDIFF),| sed) $(subst ·, ,$(POSTDIFF:%=-e %)) > $@
+
+PLUGIN_ARGS = -a c_debug.so -a d_adms_i.so -a d_adms_vbr.so
+
+%.gc.out: %.gc
+	$(AM_TESTS_ENVIRONMENT)$(GNUCAP) $(PLUGIN_ARGS) $(LT) $< | \
 	    sed $(subst ·, ,$(PREDIFF:%=-e %)) \
 	    $(if $(POSTDIFF),| sed) $(subst ·, ,$(POSTDIFF:%=-e %)) > $@
 
@@ -363,7 +388,7 @@ clean-local: clean-examples cleantmp
 clean-examples:
 	rm -f *.out *.so *.cc *.hxx *.h
 
-abs.log abs.out: cleantmp
+abs.log abs.out: abs.gc cleantmp abs.gc
 instanceparam.log instanceparam.out: cleantmp
 inline.log inline.out: cleantmp
 
@@ -394,7 +419,12 @@ CLEANFILES+= .*.adms *.out *.hxx .*.xml \
     callfunctions.sh \
     inline.sh opamp.sh sensor_chip.sh
 
-
+$(CUSTOM_TESTS:%.gc=%.gc.out): .P
+$(CUSTOM_TESTS:%.gc=%.log): .P
+$(INLINE_TESTS:%.gc=%.gc.out): .P
+$(INLINE_TESTS:%.gc=%.log): .P
+$(GC_TESTS:%.gc=%.gc.out): .P
+$(GC_TESTS:%.gc=%.log): .P
 $(SH_TESTS:%.sh=%.log): .P
 $(SH_TESTS:%.sh=%.out): .P
 $(BSIM6_TESTS:%=%.out): .P

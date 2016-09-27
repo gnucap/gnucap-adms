@@ -7,11 +7,6 @@ spice
 .param ampl=0.000005
 .param freq=1
 
-Vcc ndd 0 vdd
-Vcc1 0 ndd_minus  vdd
-.list
-V1 nin_p 0  sin(frequency=freq, amplitude=ampl, offset=0)
-
 .verilog
 
 paramset myota opamp;
@@ -30,6 +25,12 @@ opamp OTA2 (nout2, nin_p, 0, ndd, ndd_minus);
 list
 
 spice
+
+.list
+
+Vcc ndd 0 vdd
+Vcc1 0 ndd_minus  vdd
+V1 nin_p 0  sin(frequency=freq, amplitude=ampl, offset=0)
 
 R0 nout0 0 100k
 R1 nout1 0 100k

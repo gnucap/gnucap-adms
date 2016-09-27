@@ -1,7 +1,7 @@
 #           v(n1)      v(nb)      v(nl)      i(Rb)      i(Rm)     
  0.         0.         0.         0.         0.         0.        
 .model mycoil coil_auto ( inductance=100m)
-ll ( nl 0 )  mycoil 
+ll ( nl 0 ) mycoil
 V1 ( n1 0 ) pulse iv= 0. pv= 1. delay= 0. rise= 0.001 fall=NA( 0.) width=NA( Inf) period=NA( Inf)
 Rb ( n1 nb )  1.K
 Rm ( n1 nl )  1.K

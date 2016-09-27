@@ -1,4 +1,4 @@
-load ./if.so
+load if.so
 
 verilog
 paramset myif dif; .r=2; endparamset

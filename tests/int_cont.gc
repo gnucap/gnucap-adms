@@ -1,8 +1,6 @@
-spice
+load int.so
+verilog
 
-.load ./int.so
-
-.verilog
 paramset myint integrator;
 	.gain=.13k;
 endparamset

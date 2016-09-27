@@ -1,6 +1,5 @@
-spice
-.load ./vs1.so
-.verilog
+load vs1.so
+verilog
 
 vavs   v1 (nreal,ngnd);
 spice

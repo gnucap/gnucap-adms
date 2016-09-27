@@ -1,5 +1,5 @@
 .model mycoil subcoil ( r0=NA( 10.K))
-lm ( nm 0 )  mycoil 
+lm ( nm 0 ) mycoil
 V1 ( n1 0 ) pulse iv= 0. pv= 1. delay= 0. rise= 0.001 fall=NA( 0.) width=NA( Inf) period=NA( Inf)
 Ra ( n1 na )  1.K
 Rb ( n1 nb )  1.K

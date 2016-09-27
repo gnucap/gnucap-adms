@@ -22,9 +22,8 @@ module cap (n, p)
    admscap #(.c(c)) c1 (n, p);
 endmodule
 
-
-spice
-.echo testdata
+options trace
+spice ; testdata
 
 v1 1 0 pulse iv=1 pv=0 rise=1
 Xcap 0 2 cap c=.5

@@ -19,13 +19,10 @@ spice
 *                                  |
 *                                  V
 
-.echo ====== built in ccvs ======================
-
 rb1 ninp1 ninn1 0
 h1 noutn1 noutp1 rb1 333
-.dc dm
-
-.echo ====== adms ccvs ======================
+.print dc v(nodes)
+.dc ; built in ccvs
 
 .delete rb1
 .delete h1
@@ -34,5 +31,6 @@ h1 noutn1 noutp1 rb1 333
 myf f1 (noutn1,noutp1,ninp1,ninn1);
 spice
 
-.dc dm
+.print dc v(nodes)
+.dc ; adms ccvs
 .end

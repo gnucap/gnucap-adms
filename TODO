@@ -18,6 +18,10 @@ medium
 - uninitialized and unused variables
 - test suite cleanup
 
+hard/ambitious
+- partial evaluation bypass
+- replace admsXML
+
 experimental/incomplete
 - ddx
 - implicit equations
