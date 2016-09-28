@@ -1,7 +1,6 @@
-*Sample netlist for BSIM6 
-.option abstol=1e-6 reltol=1e-6 post ingold 
+.option abstol=1e-6 reltol=1e-6 post ingold
                                 ^ ? what's this?
-.option abstol=1e-6 reltol=1e-6 post ingold 
+.option abstol=1e-6 reltol=1e-6 post ingold
                                      ^ ? what's this?
 .GEOMOD =0
  ^ ? nmosHACK: bad parameter GEOMOD ignored

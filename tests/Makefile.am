@@ -122,20 +122,18 @@ GC_LOG_COMPILER = $(top_srcdir)/tests/gc_log_compiler
 
 BSIM6_TESTS = \
     include.2.sp \
-    bsim6_ringosc_17.sp \
-    bsim6_inv_dc.sp \
-    bsim6_inv_tr.sp \
-    bsim6_inverter_transient.sp
+    bsim6_inv_dc.gc \
+    bsim6_ringosc_17.gc \
+    bsim6_inv_tr.gc \
+    bsim6_inverter_transient.gc
 
-# FIXME: use different compiler.
-# SH_TESTS = $(GCUF_TESTS)
 TESTS = \
+	$(CUSTOM_TESTS) \
 	$(SH_TESTS) \
 	$(GC_TESTS) \
 	$(BSIM6_TESTS) \
 	$(INLINE_TESTS)
 
-TESTS+= $(CUSTOM_TESTS)
 INLINE_TESTS = abs.gc instanceparam.gc
 
 # tests that require an .so
@@ -216,6 +214,9 @@ GCUF_TESTS = \
 
 XFAIL_TESTS =
 
+# .verilog does not work
+XFAIL_TESTS += include.2.sp
+
 # not implemented yet
 XFAIL_TESTS += collapse.gc
 
@@ -242,12 +243,16 @@ POSTDIFF=
 	                       's/9\....E-15/0.·······/g' \
                           's/385.1E-24/0.·······/'
 
-
 # ignore strobes about RSSMOD
-$(empty)bsim6_inv_dc.sp.out bsim6_inv_tr.sp.out \
-	bsim6_ringosc_17.sp.out \
-	bsim6_inverter_transient.sp.out: \
-	POSTDIFF='/\[BSIM6\]·Although/d' '/^gnucap-adms·/d'
+@nothing@$(BSIM6_TESTS:%=%.out): \
+	POSTDIFF='/\[BSIM6\]·Although/d' '/^gnucap-adms·/d' \
+	         's/·pmosHACK·$$/pmosHACK/' \
+	         's/·nmosHACK·$$/nmosHACK/' \
+	         '/[a-z]·$$/s/·$$//' \
+	         '/·0·$$/s/·$$//' \
+	         '/BD·$$/s/·$$//' \
+	         '/^>>>/s/·$$//' \
+	         '/^\./s/·$$//'
 
 $(empty)include.2.sp.out: POSTDIFF='/^gnucap-adms·/d'
 $(empty)include.1.gc.out: POSTDIFF='/^gnucap-adms·/d'
@@ -259,7 +264,7 @@ EXTRA_DIST = \
     modelcard.nmos \
     modelcard.pmos \
     $(BSIM6_TESTS) \
-    $(BSIM6_TESTS:%=%.ref) \
+    $(BSIM6_TESTS:%.gc=%.ref) \
     $(GC_TESTS) \
     $(GC_TESTS:%.gc=%.ref) \
     $(GCUF_TESTS) \
@@ -342,6 +347,8 @@ $(GC_TESTS:%.gc=%.out): %.out: %.so
 PREDIFF= \
     '1,/^core-lib·version/d' \
     '/^stashing·as/d' \
+    '/>spice/s/·$$//' \
+    '/>verilog/s/·$$//' \
     '/^>>>>>$$/d' \
     '/^@/d' \
     '/^default·plugins:/d' \
@@ -354,10 +361,11 @@ check_custom: $(CUSTOM_TESTS:%.sh=%.log)
 check_bsim: $(BSIM6_TESTS:%.sp=%.log)
 
 $(BSIM6_TESTS:%=%.out): $(PWD)/modelcard.nmos $(PWD)/modelcard.pmos
-$(BSIM6_TESTS:%.sp=%.log): BSIM6.1.1.so
+# $(BSIM6_TESTS:%.sp=%.log): BSIM6.1.1.so
 
 $(SH_TESTS:%.sh=%.out): %.out: %.gc
-	$(AM_V_at)$(AM_TESTS_ENVIRONMENT)$(GNUCAP) $(GNUCAP_PLUGINS:%=-a ../src/.libs/%) $(GNUCAP_ARGS) $(LT) $< | \
+	$(AM_V_at)$(AM_TESTS_ENVIRONMENT)$(GNUCAP) \
+		$(GNUCAP_PLUGINS:%=-a ../src/.libs/%) $(GNUCAP_ARGS) $(LT) $< | \
 	    sed $(subst ·, ,$(PREDIFF:%=-e %)) \
 	    $(if $(POSTDIFF),| sed) $(subst ·, ,$(POSTDIFF:%=-e %)) > $*.out
 
@@ -438,7 +446,8 @@ $(GC_TESTS:%.gc=%.log): .P
 $(SH_TESTS:%.sh=%.log): .P
 $(SH_TESTS:%.sh=%.out): .P
 $(BSIM6_TESTS:%=%.out): .P
-$(BSIM6_TESTS:%.sp=%.log): .P
+# $(BSIM6_TESTS:%.sp=%.log): .P
+$(BSIM6_TESTS:%.gc=%.log): .P
 
 .P:
 	@:

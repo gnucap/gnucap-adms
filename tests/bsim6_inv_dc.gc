@@ -1,8 +1,9 @@
-*Sample netlist for BSIM6
+spice
 .load lang_adms.so
-*Inverter DC Analysis
+.options numdgt=4
 .options trace
-.option abstol=1e-6 reltol=1e-6 post ingold
+.options out=99999
+*.option abstol=1e-6 reltol=1e-6 post ingold
 *.hdl "BSIM6.1.1.va"
 .attach BSIM6.1.1.so
 .verilog

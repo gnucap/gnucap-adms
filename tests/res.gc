@@ -1,4 +1,4 @@
-load ./res.so
+load res.so
 options trace
 
 verilog

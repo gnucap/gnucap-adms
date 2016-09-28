@@ -1,4 +1,4 @@
-*Sample netlist for BSIM6
+spice
 .load lang_adms.so
 *17-stage ring oscillator
 *.options abstol=1e-6 reltol=1e-6 post ingold dcon=1
