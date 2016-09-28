@@ -1,6 +1,5 @@
-*MODELCARD FOR BSIM6_BD
+//modelcard for BSIM6_BD
 
-.verilog
 paramset pmosHACK bsim6;
 .TYPE	 = -1.0	
 .TOXE    = 2.34E-009
@@ -426,12 +425,10 @@ paramset pmosHACK bsim6;
 .LODETA0 = 1
 endparamset;
 
-spice
-.subckt pmos vout vin vdd gnd
-.parameter W=10u
-.parameter L=10u
+module pmos(vout vin vdd gnd);
+parameter W=10u
+parameter L=10u
 
-.verilog
 pmosHACK #(.W(W),.L(L)) p(vout vin vdd gnd);
-spice
-.ends
+endmodule
+

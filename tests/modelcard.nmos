@@ -1,6 +1,5 @@
-*modelcard for BSIM6_BD
+//modelcard for BSIM6_BD
 
-.verilog
 paramset nmosHACK bsim6;
 .LLONG =2E-06
 .WWIDE =1E-05
@@ -214,14 +213,10 @@ paramset nmosHACK bsim6;
 .sc= 0
 endparamset;
 
-spice
-			
-.subckt nmos vout vin vdd gnd
-.parameter W=10u
-.parameter L=10u
+module nmos(vout vin vdd gnd);
+parameter W=10u
+parameter L=10u
 
-.verilog
 nmosHACK #(.W(W),.L(L)) n(vout vin vdd gnd);
-spice
-.ends
+endmodule
 

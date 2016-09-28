@@ -1,15 +1,15 @@
 *Sample netlist for BSIM6
+.load lang_adms.so
 *Inverter Transient
-
 *.option abstol=1e-4 reltol=1e-3 post ingold
 *.option trtol=7
 .option nobypass noincmode
+.verilog
 
-*.hdl "BSIM6.1.1.va"
-*>.attach ./BSIM6.1.1.so
-.include "modelcard.nmos"
-.include "modelcard.pmos"
-
+attach ./BSIM6.1.1.so
+`include "modelcard.nmos"
+`include "modelcard.pmos"
+spice
 * --- Voltage Sources ---
 vdd   supply  0 dc=1.0
 vin  vi  0 dc=0.5 sin (0.5 0.5 1MEG)

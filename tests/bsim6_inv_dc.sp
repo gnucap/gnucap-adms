@@ -1,13 +1,14 @@
 *Sample netlist for BSIM6
+.load lang_adms.so
 *Inverter DC Analysis
 .options trace
-
-
 .option abstol=1e-6 reltol=1e-6 post ingold
 *.hdl "BSIM6.1.1.va"
-*>.attach ./BSIM6.1.1.so
-.include "modelcard.nmos"
-.include "modelcard.pmos"
+.attach BSIM6.1.1.so
+.verilog
+`include "modelcard.nmos"
+`include "modelcard.pmos"
+spice
 .list
 * --- Voltage Sources ---
 vdd   supply  0 dc=1.0

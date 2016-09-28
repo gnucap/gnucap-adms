@@ -71,6 +71,10 @@ BSIM6_1_1_lo_CXXFLAGS =
 @nothing@BSIM6_1_1_la-BSIM6.1.1.lo: CXXFLAGS = -O0 # -Wall -pedantic
 @nothing@BSIM6.1.1.lo: CXXFLAGS = -O0 # -Wall -pedantic
 
+# BUG. assertions fail in BSIM6 (uninitialized vars)
+@nothing@BSIM6_1_1_la-BSIM6.1.1.lo: CPPFLAGS += -DNDEBUG
+@nothing@BSIM6.1.1.lo: CPPFLAGS += -DNDEBUG
+
 AM_CPPFLAGS = @GC_CPPFLAGS@ -I$(top_srcdir)/src
 AM_CXXFLAGS = -Wno-unused-variable -Wno-unused-but-set-variable
 
@@ -240,9 +244,11 @@ POSTDIFF=
 
 
 # ignore strobes about RSSMOD
-$(empty)bsim6_inv_dc.sp.out bsim6_inv_tr.sp.out: POSTDIFF='/\[BSIM6\]·Although/d'
-$(empty)bsim6_inverter_transient.sp.out: POSTDIFF='/\[BSIM6\]·Although/d'
-$(empty)bsim6_ringosc_17.sp.out: POSTDIFF='/\[BSIM6\]·Although/d'
+$(empty)bsim6_inv_dc.sp.out bsim6_inv_tr.sp.out \
+	bsim6_ringosc_17.sp.out \
+	bsim6_inverter_transient.sp.out: \
+	POSTDIFF='/\[BSIM6\]·Although/d' '/^gnucap-adms·/d'
+
 $(empty)include.2.sp.out: POSTDIFF='/^gnucap-adms·/d'
 $(empty)include.1.gc.out: POSTDIFF='/^gnucap-adms·/d'
 

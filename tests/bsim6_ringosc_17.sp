@@ -1,14 +1,14 @@
 *Sample netlist for BSIM6
+.load lang_adms.so
 *17-stage ring oscillator
-
 *.options abstol=1e-6 reltol=1e-6 post ingold dcon=1
 *.options nobypass noincmode
 
-*.hdl "BSIM6.1.1.va"
-*>.load ./BSIM6.1.1.so
-.include "modelcard.nmos"
-.include "modelcard.pmos"
-
+.load ./BSIM6.1.1.so
+.verilog
+`include "modelcard.nmos"
+`include "modelcard.pmos"
+spice
 * --- Voltage Sources ---
 vdd supply  0 dc=1.0
 
