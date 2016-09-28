@@ -117,6 +117,7 @@ GC_LOG_COMPILER = $(top_srcdir)/tests/gc_log_compiler
 
 
 BSIM6_TESTS = \
+    include.2.sp \
     bsim6_ringosc_17.sp \
     bsim6_inv_dc.sp \
     bsim6_inv_tr.sp \
@@ -149,6 +150,7 @@ SO_TESTS = \
     motor.gc
 CUSTOM_TESTS = \
     if.gc \
+    include.1.gc \
 	 callfunctions.gc \
     coil_auto.gc \
     coil_br.gc \
@@ -241,6 +243,8 @@ POSTDIFF=
 $(empty)bsim6_inv_dc.sp.out bsim6_inv_tr.sp.out: POSTDIFF='/\[BSIM6\]·Although/d'
 $(empty)bsim6_inverter_transient.sp.out: POSTDIFF='/\[BSIM6\]·Although/d'
 $(empty)bsim6_ringosc_17.sp.out: POSTDIFF='/\[BSIM6\]·Although/d'
+$(empty)include.2.sp.out: POSTDIFF='/^gnucap-adms·/d'
+$(empty)include.1.gc.out: POSTDIFF='/^gnucap-adms·/d'
 
 # FIXME: more automatically...?
 EXTRA_DIST = \
@@ -352,7 +356,7 @@ $(SH_TESTS:%.sh=%.out): %.out: %.gc
 	    $(if $(POSTDIFF),| sed) $(subst ·, ,$(POSTDIFF:%=-e %)) > $*.out
 
 %.sp.out: %.sp
-	$(GNUCAP) -a ../src/.libs/d_adms_i.so -a ../src/.libs/d_adms_vbr.so -b $< | \
+	$(AM_TESTS_ENVIRONMENT)$(GNUCAP) -a ../src/.libs/d_adms_i.so -a ../src/.libs/d_adms_vbr.so -b $< | \
 	    sed $(subst ·, ,$(PREDIFF:%=-e %)) \
 	    $(if $(POSTDIFF),| sed) $(subst ·, ,$(POSTDIFF:%=-e %)) > $@
 

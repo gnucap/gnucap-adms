@@ -29,7 +29,9 @@ AM_CPPFLAGS = $(GC_CPPFLAGS)
 plugindir = @gnucap_libdir@
 plugin_LTLIBRARIES = lang_adms.la
 lang_adms_la_LDFLAGS = -module -shared
-lang_adms_la_SOURCES = lang_adms.cc md5.c c_attach.cc
+lang_adms_la_SOURCES = \
+	lang_adms.cc md5.c c_attach.cc \
+	verilog_include.cc signon.cc
 lang_adms_la_CPPFLAGS = $(AM_CPPFLAGS) \
     -DGNUCAP_ADMS_IMPLICIT=\"$(GNUCAP_ADMS_IMPLICIT)\" \
     -DGNUCAP_ADMS_MAKE=\"$(GNUCAP_ADMS_MAKE)\"
