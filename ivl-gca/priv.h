@@ -17,7 +17,7 @@
  *    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
 
-# include  <ivl_target.h>
+# include  <iverilog/ivl_target.h>
 # include  <stdio.h>
 
 #ifdef __cplusplus

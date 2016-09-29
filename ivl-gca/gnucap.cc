@@ -23,9 +23,15 @@
  */
 
 #define __STDC_FORMAT_MACROS 1
+#ifdef HAVE_VERSION_BASE
 # include "version_base.h"
 # include "version_tag.h"
+#else
+# define VERSION_TAG "notag"
+#endif
+#ifdef HAVE_CONFIG_H
 # include "config.h"
+#endif
 # include "priv.h"
 # include <stdlib.h>
 # include <inttypes.h>
@@ -34,7 +40,9 @@
 # include <vector>
 # include <string.h>
 # include <assert.h>
+#ifdef HAVE_IVL_ALLOC_H
 # include "ivl_alloc.h"
+#endif
 
 
 static const char*version_string =
@@ -210,7 +218,9 @@ static void collect_expr(std::vector<ivl_expr_t> &bag,
 	  case IVL_EX_UNARY:
 	  case IVL_EX_MEMORY:
 	  case IVL_EX_SIGNAL:
+#ifdef BJHACKS
 	  case IVL_EX_DERIVATIVE:
+#endif
 	    collect_expr(bag, ivl_expr_oper1(ex), code);
 	  case IVL_EX_BACCESS:
 	  case IVL_EX_REALNUM:

@@ -6,7 +6,10 @@ ACLOCAL_AMFLAGS = -Im4
 if QUCS
 QUCS=qucs
 endif
-SUBDIRS = src tests $(QUCS)
+
+IVL_GCA = ivl-gca
+
+SUBDIRS = src tests $(QUCS) $(IVL_GCA)
 EXTRA_DIST = \
     bootstrap \
     gnuplot.mk \

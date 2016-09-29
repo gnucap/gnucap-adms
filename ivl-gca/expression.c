@@ -286,9 +286,11 @@ void show_expression(ivl_expr_t net, unsigned ind)
 	    show_branch_access_expression(net, ind);
 	    break;
 
+#ifdef BJHACKS
 	  case IVL_EX_DERIVATIVE:
 	    show_derivative_expression(net, ind);
 	    break;
+#endif
 
 	  case IVL_EX_BINARY:
 	    show_binary_expression(net, ind);
