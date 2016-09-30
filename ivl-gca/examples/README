@@ -1,0 +1,12 @@
+here's (rougly) what we want to create from ../res.va.
+
+example derived from gnucap-adms output. this is working, but suboptimal.
+
+TODO:
+- decruft
+- merge into one file
+- explain, add comments (!)
+- get rid of MODEL_* classes
+- allow instanciation in spice (Xres 1 2 res...)
+- move evaluation to COMMON subdevice (see modelgen)
+- later: more examples (such as cap.va, vcvs.va, ... )
