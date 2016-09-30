@@ -22,22 +22,7 @@ INCLUDE_PATH = -I. -I.. -I$(srcdir) -I$(srcdir)/..
 
 AM_CPPFLAGS = $(INCLUDE_PATH) @CPPFLAGS@ @DEFS@
 
-
 tgtdir = ${prefix}/tbd
 tgt_LTLIBRARIES = gca.la
 gca_la_LDFLAGS = -module -shared
 gca_la_SOURCES = gnucap.cc enumerate.c expression.c statement.c switches.c
-
-clean:
-	rm -rf *.o dep gca.tgt
-
-distclean: clean
-	rm -f Makefile config.log
-
-gca.tgt: $O $(TGTDEPLIBS)
-	$(CC) @shared@ -o $@ $O $(TGTLDFLAGS)
-
-uninstall:
-	rm -f "$(DESTDIR)$(libdir)/ivl$(suffix)/gnucap.tgt"
-	rm -f "$(DESTDIR)$(libdir)/ivl$(suffix)/gnucap.conf"
-	rm -f "$(DESTDIR)$(libdir)/ivl$(suffix)/gnucap-s.conf"
