@@ -26,3 +26,6 @@ tgtdir = ${prefix}/tbd
 tgt_LTLIBRARIES = gca.la
 gca_la_LDFLAGS = -module -shared
 gca_la_SOURCES = gnucap.cc enumerate.c expression.c statement.c switches.c
+
+# run like this (roughly)
+# iverilog -gverilog-ams -B. -t $(srcdir)/gca -I$(srcdir) $(srcdir)res.va -ores.cc

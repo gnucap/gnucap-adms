@@ -6,15 +6,21 @@
   Plus some changes...
 */
 
+// BUG:
+// BUG:
+// BUG: use free header (provided by admsXml)
+// BUG:
+// BUG:
+
 `ifdef DISCIPLINES_VAMS
 `else
 `define DISCIPLINES_VAMS 1
 //
 // Natures and Disciplines
 //
-discipline logic
-  domain discrete;
-enddiscipline
+// discipline logic
+//   domain discrete;
+// enddiscipline
 
 /*
 * Default absolute tolerances may be overridden by setting the
@@ -243,12 +249,12 @@ enddiscipline
 nature Damage
   units = "1";
   access = State;
-  abstol = 0.;
+  abstol = 1e-9; // not used
 endnature
 nature Stress
   units = "1";
   access = Level;
-  abstol = 0.;
+  abstol = 1e-9; // not used
 endnature
 discipline degradational
   potential Damage;

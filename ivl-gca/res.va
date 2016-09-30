@@ -1,0 +1,16 @@
+// Copyright 2016 Felix Salfelder
+// resistor
+
+`include "discipline.h"
+`include "constants.h"
+
+module res2(p,n);
+	inout p,n;
+	electrical p,n;
+
+	parameter real R=100;
+
+	analog begin
+		I(p,n) <+ V(p,n) / R;
+	end
+endmodule
