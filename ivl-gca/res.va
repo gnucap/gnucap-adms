@@ -10,7 +10,9 @@ module res2(p,n);
 
 	parameter real R=100;
 
-	analog begin
-		I(p,n) <+ V(p,n) / R;
-	end
+	analog I(p,n) <+ V(p,n) / R;
+// this does not work (yet)
+//	analog begin
+//		I(p,n) <+ V(p,n) / R;
+//	end
 endmodule

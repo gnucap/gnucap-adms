@@ -27,5 +27,7 @@ tgt_LTLIBRARIES = gca.la
 gca_la_LDFLAGS = -module -shared
 gca_la_SOURCES = gnucap.cc enumerate.c expression.c statement.c switches.c
 
-# run like this (roughly)
-# iverilog -gverilog-ams -B. -t $(srcdir)/gca -I$(srcdir) $(srcdir)res.va -ores.cc
+try_run:
+	ln /usr/local/lib/ivl/ivlpp -sf
+	ln /usr/local/lib/ivl/ivl -sf
+	iverilog -gverilog-ams -B. -t $(srcdir)/gca -I$(top_srcdir)/src $(srcdir)/res.va -ores.cc
