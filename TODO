@@ -1,26 +1,24 @@
 simple
+- carve out admsXML, make it optional (focus on tgt-gca development)
 - check for python (version?)
 - check for known-to-work gnucap
-- fix portability of gnucap-adms.so
-- dont convert module names to caps in class names.
 - should pass -DGNUCAP (or similar) to adms.
 - get rid of compiler warnings
 - missing variable prefixes (breaks some variable names)
 - tests for qucs components.
 
 medium
-- test against vanilla gnucap
-- get rid of MODULE(?)
+- finish vanilla gnucap compatibility
+- get rid of MODULE (how?)
 - get rid of bogus #ifdef's
 - get rid of extra .hxx files
-- cannot reuse existing device names
+- cannot reuse existing device names (why?)
 - weed out dead code and old function templates
 - uninitialized and unused variables
-- test suite cleanup
 
 hard/ambitious
 - partial evaluation bypass
-- replace admsXML
+- replace admsXML (implement iverilog target)
 
 experimental/incomplete
 - ddx
