@@ -46,6 +46,7 @@ check_LTLIBRARIES = \
     collapse.la \
     vccs.la \
     analogfunction.la \
+    afbuf.la \
     afsquare.la \
     square.la \
     int.la pid.la vcvs.la \
@@ -189,6 +190,7 @@ GC_TESTS = \
     cap_rescale.gc \
     cs.gc \
     analogfunction.gc \
+    afbuf.gc \
     afsquare.gc \
     square.gc \
     int.gc \
