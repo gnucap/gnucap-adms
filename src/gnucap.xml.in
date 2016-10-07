@@ -824,13 +824,11 @@ class $(DEV_NAME) : public ADMS_BASE
 		 // REQUIRED, write out in any case (incomplete)...  $(foo)
     </admst:if>
 		enum Node_%(./name) {
-    <admst:if test="[(name='electrical')]">
-			n_GND=-1,
-    </admst:if>
+			n_GND<admst:text format="_%(name)" test="[(name!='electrical')]"/>=-1
 
-	 <admst:join select="$mytmpmodule/node[discipline=$(foo) and discipline!='' and grounded='no']" separator=",">
-      <admst:text format="\n\t\t\t$node_prefix%(name)=__%(name) /* %(./discipline) -- $(foo) */ "/>
-    </admst:join>
+	 <admst:for-each select="$mytmpmodule/node[discipline=$(foo) and discipline!='' and grounded='no']">
+      <admst:text format=",\n\t\t\t$node_prefix%(name)=__%(name) /* %(./discipline) -- $(foo) */ "/>
+    </admst:for-each>
 		};
   </admst:for-each>
 
