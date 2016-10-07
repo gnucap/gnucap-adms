@@ -1,0 +1,18 @@
+`include "discipline.h"
+`include "constants.h"
+`include "gnucap-adms.h"
+
+`ifdef insideADMS
+ `define P(p) (*p*)
+`else
+ `define
+`endif
+
+module mid(p, n);
+	electrical p, n;
+	electrical mid;
+
+	analog begin
+		V(mid) <+ (V(p) + V(n)) *.5;
+	end
+endmodule
