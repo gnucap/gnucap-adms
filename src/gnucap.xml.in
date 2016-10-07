@@ -1383,11 +1383,18 @@ and name!='initializeInstance')]">
             <admst:text format="//1023 static_jacobian1(%($psource/name),%($psource/name))\n"/>
 		    </admst:otherwise>
         </admst:choose>
+	// rhs=0? %(rhs) %(rhs/tree) %(rhs/tree/datatypename)
+	// incomplete...
         <admst:choose>
+          <admst:when test="[./rhs/tree/datatypename!='number']">
+				untested(); // nonzero rhs\n
+          </admst:when>
           <admst:when test="lhs/branch/pnode[location='internal']">
+	// case A %(branch)
 	collapse_nodes($node_prefix%(lhs/branch/pnode/name), $node_prefix%(lhs/branch/nnode/name));\n
           </admst:when>
           <admst:when test="lhs/branch/nnode[location='internal']">
+	// case B
 	collapse_nodes($node_prefix%(lhs/branch/pnode/name), $node_prefix%(lhs/branch/nnode/name));\n
           </admst:when>
 			 <admst:otherwise>
