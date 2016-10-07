@@ -846,24 +846,30 @@ inline double _BR(int p, int n) {
 }
 
 // discipline wrapped value
+// TODO: move to header/expand as required?
 #define NP(p) _NP($(node_prefix) ## p)
-inline voltage_t _NP(Node_electrical p){
+inline voltage_t _NP(Node_electrical p)
+{ untested();
 	return std::min(1000., std::max(-1000., _n[p].v0()) );
 }
-inline double _NP(Node_magnetic p){
+inline double _NP(Node_magnetic p)
+{ untested();
 	assert(is_number(_n[p].v0()));
 	return _n[p].v0();
 }
-inline double _NP(Node_rotational_omega p){
+inline double _NP(Node_rotational_omega p)
+{ untested();
 	assert(is_number(_n[p].v0()));
 	return _n[p].v0();
 }
-inline double _NP(Node_thermal p){
+inline double _NP(Node_thermal p)
+{ untested();
 	assert(is_number(_n[p].v0()));
 	return _n[p].v0() + P_CELSIUS0;
 }
 <admst:if test="[count(node[discipline/name='degradational' and grounded='no'])!=0]">
-inline double _NP(Node_degradational p){
+inline double _NP(Node_degradational p)
+{ untested();
 	trace1("NP(Node_degradational)", _n[p].m_());
 	assert(is_number(_n[p].tt()));
 	assert(_n[p].a_());
