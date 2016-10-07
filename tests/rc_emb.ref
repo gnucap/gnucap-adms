@@ -1,5 +1,5 @@
-V1 ( nin 0 ) pulse iv= 1. pv= 0. delay=NA( 0.) rise= 200.u fall=NA( 0.) width=NA( Inf) period=NA( Inf)
 .model myrc rc ( r=200k c=3n)
+V1 ( nin 0 ) pulse iv= 1. pv= 0. delay=NA( 0.) rise= 200.u fall=NA( 0.) width=NA( Inf) period=NA( Inf)
 rc1 ( nin nout1 0 ) myrc
 name   ...
 have 2 nodes. model: 0 sckt: 0 adp 0
