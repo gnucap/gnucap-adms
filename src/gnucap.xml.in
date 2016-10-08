@@ -339,7 +339,7 @@
 
   <!-- find branches with a source attached
     -- remove duplicates -->
-  <admst:for-each select="branch">
+  <admst:for-each select="branch[./pnode/discipline/name!='degradational']">
     <admst:variable name="myB" select="%(.)"/>
     <admst:if test="$(M)/source[branch=$(myB)]">
       <admst:if test="[0=count($(module_source_branches)[pnode=$(myB)/nnode
@@ -849,7 +849,7 @@ inline double _BR(int p, int n) {
 // TODO: move to header/expand as required?
 #define NP(p) _NP($(node_prefix) ## p)
 inline voltage_t _NP(Node_electrical p)
-{ untested();
+{ itested();
 	return std::min(1000., std::max(-1000., _n[p].v0()) );
 }
 inline double _NP(Node_magnetic p)
@@ -869,7 +869,7 @@ inline double _NP(Node_thermal p)
 }
 <admst:if test="[count(node[discipline/name='degradational' and grounded='no'])!=0]">
 inline double _NP(Node_degradational p)
-{ untested();
+{ itested();
 	trace1("NP(Node_degradational)", _n[p].m_());
 	assert(is_number(_n[p].tt()));
 	assert(_n[p].a_());
@@ -2262,7 +2262,7 @@ void $(DEV_NAME)::expand()
 		if (!%(brp(.))) {
 			const CARD* p = device_dispatcher["resistor"];
 			if(!p){
-				error(bDANGER, "cannot instanciate resistor. load module?");
+				error(bDANGER, "cannot instanciate resistor. load module?\\n");
 			}else{
 				%(brp(.)) = dynamic_cast&lt;COMPONENT*&gt;(p->clone());
 				assert(%(brp(.)));
@@ -2294,7 +2294,7 @@ void $(DEV_NAME)::expand()
 	 <admst:text format="_i" test="$(M)/source[branch=$(B) and nature=discipline/flow]"/>";
 			const CARD* p = device_dispatcher[type];
 			if(!p){
-				error(bDANGER, "cannot instanciate source of type \%s. load module?", type.c_str());
+				error(bDANGER, "cannot instanciate source of type \%s. load module?\\n", type.c_str());
 			}else{
 				%(brp(.)) = dynamic_cast&lt;COMPONENT*&gt;(p->clone());
 				assert(%(brp(.)));
@@ -2308,7 +2308,7 @@ void $(DEV_NAME)::expand()
 		// contributions, setup
 <admst:for-each select="$(module_source_branches)">
   <admst:variable name="B" select="%(.)"/>
-  // B %(.)
+  // B %(.), %(./pnode), %(./pnode/discipline) %(discipline)
 
     <admst:apply-templates select="." match="collect_unique_probes"/>
 
@@ -2934,7 +2934,9 @@ TIME_PAIR $(DEV_NAME)::tr_review()
 	const $(COMMON_NAME)* c = prechecked_cast&lt;const $(COMMON_NAME)*&gt;(this);
 	USE(c); assert(c);
 	const $(MODEL_NAME)* m = prechecked_cast&lt;const $(MODEL_NAME)*&gt;(c-&gt;model());
-	USE(m); assert(m);
+	if(m){ untested();
+	}else{ untested();
+	}
 </admst:template>
 // -------------------------------------------------------------------------- //
 <admst:template match="commonmodel">
@@ -3115,7 +3117,11 @@ void $(DEV_NAME)::ac_load()
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::init_nodemap()
 {
-	assert(!_nodemap);
+	if(_nodemap){ unreachable();
+		delete _nodemap;
+		_nodemap = NULL;
+	}else{ untested();
+	}
 	const unsigned nn = %(count(node[grounded='no']));
 	_nodemap = new PARTITION&lt;nn&gt;();
 }
@@ -9421,8 +9427,15 @@ return
 		assert(is_number(vx));
     <admst:choose><!-- HACK ... implement later -->
       <admst:when test="[lhs/branch/pnode/discipline/name='degradational']">
-			assert(_n[$node_prefix$Pp].a_());
-			_n[$node_prefix$Pp].a_()->tr() = vx; // hack, should be +=
+			ADP_NODE* A = prechecked_cast&lt;ADP_NODE*>(_n[$node_prefix$Pp].a_());
+			assert(A);
+			<admst:if test="[lhs/nature=lhs/discipline/potential]">
+				A->tt() = vx; // hmmm
+			</admst:if>
+			<admst:if test="[lhs/nature=lhs/discipline/flow]">
+				incomplete();
+				A->tr() = vx; // hack, should be +=
+			</admst:if>
       </admst:when>
       <admst:when test="[lhs/nature=lhs/discipline/potential or lhs/nature=lhs/discipline/flow]">
         <admst:variable name="B" select="%(lhs/branch)"/>

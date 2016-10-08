@@ -1,0 +1,37 @@
+load public models-uf.so
+load lang_adms.so
+load rcd_sym.so
+*options method=euleronly
+* options noincmode
+options trace
+
+load_va mos.1.va
+echo done load_va
+
+verilog
+
+paramset mymos mos_level1;
+.cgbo=1n;
+.cgdo=1n;
+.cgso=1n;
+endparamset
+
+mymos m (nd,ng,ndd,ndd);
+vsource #(2) v1 ( ndd 0 );
+
+list
+
+spice
+rin nin ng 1k
+r1 0 nd 100k
+vin nin 0 sin amplitude=.1 offset=1.01
+
+.nodelist
+
+.print tran v(nin) v(nd) stress(m.myQ0.rcd1)
+.print tw dvth0(m) dvth1(m) dvth2(m)
+* .tran 0 1m 1m trace=a
+
+.ttr 0 10k 1m .05m * 2 new > tt.out echo tran trace=n > tr.out echo
+.status notime
+.end

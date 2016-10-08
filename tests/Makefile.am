@@ -40,6 +40,7 @@ check_LTLIBRARIES = \
     ccvs.la \
     cccs.la \
     implicit.la \
+    mid.la \
     res.la \
     res2.la \
     short.la \
@@ -63,7 +64,9 @@ check_LTLIBRARIES = \
 if GNUCAP_UF
 UFCHECKLIB = \
     ager.la \
-    aging_mos.la
+    ager.sub.la \
+    aging_mos.la \
+    mos.1.la
 else
 	UFCHECKLIB =
 endif
@@ -133,7 +136,8 @@ TESTS = \
 	$(SH_TESTS) \
 	$(GC_TESTS) \
 	$(BSIM6_TESTS) \
-	$(INLINE_TESTS)
+	$(INLINE_TESTS) \
+	$(GCUF_TESTS)
 
 INLINE_TESTS = abs.gc instanceparam.gc
 
@@ -143,6 +147,7 @@ SO_TESTS = \
     op.gc \
     sensor.gc \
     lamp.gc \
+    mid.gc \
     vbg.gc \
     subcoil.gc \
     subcoil.1.gc \
@@ -208,10 +213,12 @@ GC_TESTS = \
 GCUF_TESTS = \
     bvs.gc \
     ager.gc \
+    ager.sub.gc \
 	 aging_mos.gc \
     rc_uic.gc \
     ddc_rc.gc \
     ddc.2.gc \
+	 mos.1.gc \
     ttint.gc
 
 XFAIL_TESTS =
@@ -262,6 +269,7 @@ $(empty)include.1.gc.out: POSTDIFF='/^gnucap-adms·/d'
 # FIXME: more automatically...?
 EXTRA_DIST = \
     aging_mos.va \
+    mos.1.va \
     bug1.va \
     modelcard.nmos \
     modelcard.pmos \
@@ -310,8 +318,8 @@ LT = <
 
 callfunctions.gc.out: LT=2> >(tee /dev/fd/2 | grep negative | while read line; do echo "[ERROR] $$line"; done ) <
 
-SHS = \
-   $(GCUF_TESTS)
+# SHS = \
+#    $(GCUF_TESTS)
 
 # obsolete, hopefully
 $(SHS): %.sh: %.gc Makefile %.ref
@@ -326,13 +334,16 @@ $(SHS): %.sh: %.gc Makefile %.ref
 	@chmod +x $@
 
 if GNUCAP_UF
-ager.log aging_mos.log : %.log: %.so
+ager.sub.log ager.log aging_mos.log mos.1.log: %.log: %.so
+ager.sub.gc.out ager.gc.out aging_mos.gc.out mos.1.gc.out: %.gc.out: %.so
 endif
 
 subcoil.log subcoil.1.log vccs.log ccvs.log cap.log: %.log: %.so
 
 # SO_TESTS?
 # (don't remember why this is/was needed)
+$(SO_TESTS:%.gc=%.log): %.log: %.so
+$(SO_TESTS:%.gc=%.log): %.gc.out: %.so
 coil.log: coil.so
 coil_auto.log: coil.so
 coil_br.log: coil.so
@@ -445,6 +456,8 @@ $(INLINE_TESTS:%.gc=%.gc.out): .P
 $(INLINE_TESTS:%.gc=%.log): .P
 $(GC_TESTS:%.gc=%.gc.out): .P
 $(GC_TESTS:%.gc=%.log): .P
+$(GCUF_TESTS:%.gc=%.gc.out): .P
+$(GCUF_TESTS:%.gc=%.log): .P
 $(SH_TESTS:%.sh=%.log): .P
 $(SH_TESTS:%.sh=%.out): .P
 $(BSIM6_TESTS:%=%.out): .P

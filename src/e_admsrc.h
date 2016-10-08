@@ -65,8 +65,8 @@ public:
   void set_parameters(const std::string& Label, CARD* Parent,
 		      COMMON_COMPONENT* Common, double Value,
 		      uint_t state_count, double state[],
-		      uint_t node_count, const node_t nodes[]){
-	  untested(); incomplete();
+		      uint_t node_count, const node_t nodes[])
+  { untested(); incomplete();
 	  set_parameters_va(Label, Parent, Common, Value, state_count, state, state /*incomplete*/,
 			  node_count, nodes, 0, NULL);
   }
@@ -158,6 +158,10 @@ inline void ADMS_SOURCE::set_parameters_va(const std::string& Label, CARD *Owner
   assert(ext_nodes() == 2*n_states - 2); // used by map_nodes
   trace2("ADMS_SOURCE::sp_va now", _m0, _m1);
 
+  for(unsigned i=0; i<net_nodes(); ++i){
+    assert(nodes[i].t_()!=INVALID_NODE);
+  }
+
   _values = states;
   _old_values = old_states;
   assert(states);
@@ -172,7 +176,6 @@ inline void ADMS_SOURCE::set_parameters_va(const std::string& Label, CARD *Owner
   // skip branch node (IN1) if boff
   notstd::copy_n(nodes+2, net_nodes()-2, _n+_boff+2);
   notstd::copy_n(currents, _n_iports, _inputs);
-
 }
 
 void ADMS_SOURCE::expand_last()

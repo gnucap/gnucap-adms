@@ -58,7 +58,7 @@ public:
 protected: // override virtual
   char	   id_letter()const	{unreachable(); return '\0';}
   std::string value_name()const	{incomplete(); return "";}
-  std::string dev_type()const	{unreachable(); return "cpoly_g";}
+  std::string dev_type()const	{unreachable(); return "cpoly_v";}
 
   bool	   has_iv_probe()const  {return 1-boff;}
   bool	   has_inode()const  {return boff;}
@@ -225,37 +225,46 @@ void DEV_CPOLY_V::tr_load()
   for (uint_t i=0; i<_n_iports; ++i) {
     // something like tr_load_active
     trace4("loading control", i, ival[i], ioval[i], _inputs[i]->has_iv_probe());
-    if (_inputs[i]->has_iv_probe()) {
+    if (_inputs[i]->has_iv_probe()) { untested();
       ELEMENT const* ie = prechecked_cast<ELEMENT* const>(_inputs[i]);
       assert(ie);
 
       double d = dampdiff(&(ival[i]), ioval[i]);
-      if(d!=0.){
+      if(d!=0.){ untested();
 	_sim->_aa.load_asymmetric(_n[BR].m_(), 0,  ni[2*i].m_(), ni[2*i+1].m_(), d);
+      }else{untested();
       }
-      ioval[i]=ival[i];
+      ioval[i] = ival[i];
     }else{ incomplete();
       assert(_inputs[i]->has_inode());
       double d = dampdiff(&(ival[i]), ioval[i]);
       if(d!=0.){ untested();
 	_sim->_aa.load_asymmetric(_n[BR].m_(), 0,  ni[2*i].m_(), ni[2*i+1].m_(), d);
+      }else{
+	untested();
       }
-      ioval[i]=ival[i];
+      ioval[i] = ival[i];
     }
   }
 
   d = _one0 - _one1;
   if (!_sim->is_advance_or_first_iteration()) {
     _one0 = _one1 + d;
+  }else{
   }
   d = ((_sim->is_inc_mode()) ? d : _one0);
 
   // convert current to voltage between OUT1 OUT2
   if (d != 0.) {
+    assert(_n[BR].m_() != INVALID_NODE);
+    assert(_n[OUT1].m_() != INVALID_NODE);
+    assert(_n[OUT2].m_() != INVALID_NODE);
+    trace5("load", long_label(), _n[BR].m_(), _n[OUT1].m_(), _n[OUT2].m_(), d);
     _sim->_aa.load_point(_n[BR].m_(), _n[OUT1].m_(), d);
     _sim->_aa.load_point(_n[BR].m_(), _n[OUT2].m_(), -d);
     _sim->_aa.load_point(_n[OUT1].m_(), _n[BR].m_(), d);
     _sim->_aa.load_point(_n[OUT2].m_(), _n[BR].m_(), -d);
+  }else{
   }
 
   _one1 = _one0;
@@ -326,6 +335,10 @@ void DEV_CPOLY_V::expand()
   }
 #endif
   COMPONENT::expand();
+
+  assert(_n[BR].t_() != INVALID_NODE);
+  assert(_n[OUT1].t_() != INVALID_NODE);
+  assert(_n[OUT2].t_() != INVALID_NODE);
 }
 /*--------------------------------------------------------------------------*/
 /*--------------------------------------------------------------------------*/
