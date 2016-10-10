@@ -738,7 +738,6 @@ class $(DEV_NAME) : public ADMS_BASE
 
 	private:
 		void init_nodemap();
-		PARTITION&lt;%(count(node[grounded='no']))&gt;* _nodemap;
 		void guesstopology();
 		void collapse_nodes(unsigned a, unsigned b)
 		{ untested();
@@ -842,7 +841,7 @@ inline double _NR(int p){ return _n[p].v0(); }
 inline double _BR(int p, int n) {
 	if (n==-1)
 		return _n[p].v0();
-	return volts_limited(_n[p],_n[n]);
+		return volts_limited(_n[p],_n[n]);
 }
 
 // discipline wrapped value
@@ -1228,6 +1227,8 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
 	private: // debugging
 		int _ddtmindt_index;
 #endif
+	private: // internal
+		PARTITION&lt;%(count(node[grounded='no']))&gt;* _nodemap;
 }; // $(DEV_NAME)
 // ------------------------------------------------------------------------ //
 // ------------------------------------------------------------------------ //
@@ -2009,17 +2010,17 @@ void $(MODEL_NAME)::set_dev_type(const std::string&amp; new_type)
 // ********************************* $(DEV_NAME) ********************************* //
 $(DEV_NAME)::$(DEV_NAME)()
     : ADMS_BASE(),
-    _nodes(),
-    _nodemap(NULL)
+    _nodes()
 <admst:for-each select="variable[input='yes' and scope='global_instance']">,
-	$(var_prefix)%(.)(%(./default))
+    $(var_prefix)%(.)(%(./default))
 </admst:for-each>
 <admst:apply-templates select="." match="zero_instance_vars"/>,
     _states_q1(NULL)
 <admst:for-each select="instance">,
     _%(name)(NULL)
 </admst:for-each>
-<admst:apply-templates select="." match="brpNULL"/>
+<admst:apply-templates select="." match="brpNULL"/>,
+    _nodemap(NULL)
 {
 	attach_common(&amp;Default_$(COMMON_NAME));
 
@@ -2039,8 +2040,7 @@ $(DEV_NAME)::$(DEV_NAME)()
 // -------------------------------------------------------------------------- //
 $(DEV_NAME)::$(DEV_NAME)(const $(DEV_NAME)&amp; p) :
     ADMS_BASE(p),
-    _nodes(),
-    _nodemap(NULL)
+    _nodes()
 <admst:for-each select="variable[input='yes' and scope='global_instance']">,
     $(var_prefix)%(.)(p.$(var_prefix)%(.))
 </admst:for-each>
@@ -2049,7 +2049,8 @@ $(DEV_NAME)::$(DEV_NAME)(const $(DEV_NAME)&amp; p) :
 <admst:for-each select="instance">,
     _%(name)(0)
 </admst:for-each>
-<admst:apply-templates select="." match="brpNULL"/>
+<admst:apply-templates select="." match="brpNULL"/>,
+    _nodemap(NULL)
 {
 	for (int ii=0; ii&lt;OPT::_keep_time_steps; ++ii){
 		// not here!
