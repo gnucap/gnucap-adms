@@ -343,7 +343,7 @@ subcoil.log subcoil.1.log vccs.log ccvs.log cap.log: %.log: %.so
 # SO_TESTS?
 # (don't remember why this is/was needed)
 $(SO_TESTS:%.gc=%.log): %.log: %.so
-$(SO_TESTS:%.gc=%.log): %.gc.out: %.so
+$(SO_TESTS:%.gc=%.gc.out): %.gc.out: %.so
 coil.log: coil.so
 coil_auto.log: coil.so
 coil_br.log: coil.so

@@ -158,7 +158,7 @@ inline void ADMS_SOURCE::set_parameters_va(const std::string& Label, CARD *Owner
   assert(ext_nodes() == 2*n_states - 2); // used by map_nodes
   trace2("ADMS_SOURCE::sp_va now", _m0, _m1);
 
-  for(unsigned i=0; i<net_nodes(); ++i){
+  for(unsigned i=0; i<(unsigned)net_nodes(); ++i){
     assert(nodes[i].t_()!=INVALID_NODE);
   }
 
