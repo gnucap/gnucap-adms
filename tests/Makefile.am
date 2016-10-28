@@ -159,11 +159,12 @@ SO_TESTS = \
 CUSTOM_TESTS = \
     if.gc \
     include.1.gc \
-	 callfunctions.gc \
+    include.3.gc \
+    callfunctions.gc \
     coil_auto.gc \
     coil_br.gc \
     diff.2.gc \
-	 paramset.gc \
+    paramset.gc \
     sensor_chip.gc \
     vsstamp.gc \
     csstamp.gc \

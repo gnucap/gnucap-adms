@@ -28,6 +28,9 @@ module ageQ(p, n, d);
 	rcd_exp #(.weight(1.1), .re0(4), .re1(3), .rc0(5), .rc1(-2)) rcd2(p,n,d2);
 
 	analog begin
+		@ ( initial_step ) begin
+			State(d) <+ 0;
+		end
 		a = State(d1) + 0.9998 * State(d2);
 		State(d) <+ State(d1) + 0.999 * State(d2);
 		b = State(d);
