@@ -95,8 +95,11 @@ fi
 
 if test "X$enable_local" = "Xno"; then
 	gnucap_libdir=$(gnucap-conf$_program_suffix --libdir)
+	gnucap_pkglibdir=$(gnucap-conf$_program_suffix --pkglibdir)
 else
+	# has this ever worked?
 	gnucap_libdir=$HOME/.gnucap/lib
+	gnucap_pkglibdir=$HOME/.gnucap/lib
 fi
 
 test "x$prefix" = xNONE &&  prefix=$ac_default_prefix
@@ -109,6 +112,7 @@ GNUCAP_MAKE="$gnucap_exec_prefix/bin/gnucap.mk$_program_suffix"
 AC_SUBST([GNUCAP_MAKE])
 
 AC_SUBST([gnucap_libdir])
+AC_SUBST([gnucap_pkglibdir])
 AC_SUBST([GC_CPPFLAGS])
 CXXFLAGS+=" -Wall -pedantic"
 AC_DEFINE_UNQUOTED(ADMS_DATADIR, ["$prefix/share/gnucap-adms"], [path to xml files])

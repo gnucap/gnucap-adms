@@ -5,7 +5,7 @@
 GNUCAP_ADMS = ../src/gnucap-adms
 # GNUCAP = LD_LIBRARY_PATH=../src/.libs
 GNUCAP = $(shell echo gnucap | sed -e '$(transform)')
-plugindir = @gnucap_libdir@
+plugindir = @gnucap_pkglibdir@
 FILTER = $(plugindir)/gnucap-testfilter
 
 sensor_chip.log: $(PWD)/sensor_chip.ckt
@@ -65,7 +65,7 @@ ager.log rc.log : %.log: %.so
 
 AM_TESTS_ENVIRONMENT = \
     export PATH='../src:$(PATH)'\
-           LD_LIBRARY_PATH='../src/.libs'\
+           LD_LIBRARY_PATH='../src/.libs$(LD_LIBRARY_PATH:%=:%)'\
            GNUCAP='$(GNUCAP)'\
            GNUCAP_ADMS_CPPFLAGS='-I$(abs_top_srcdir)/src'\
            GNUCAP_ADMS_DATADIR='$(PWD)/../src'\
@@ -199,7 +199,7 @@ $(SHS): %.sh: %.gc Makefile %.ref
 	@echo "eval \$$REDIRECT" >> $@
 	@echo "\$$GNUCAP \$$GNUCAP_ARGS $(LT) $< | sed $(subst ·, ,$(PREDIFF:%=-e %)) \\" >> $@
 	@echo "$(if $(POSTDIFF),| sed) $(subst ·, ,$(POSTDIFF:%=-e %)) > $*.out" >> $@
-	@echo "$(FILTER) $*.out < $(lastword $+) | diff -rup $(lastword $+) - || exit 1" >> $@
+	@echo "$(FILTER) $*.out < $(lastword $+) | diff -w -rup $(lastword $+) - || exit 1" >> $@
 	@echo "rm $*.out" >> $@
 	@chmod +x $@
 
