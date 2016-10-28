@@ -2687,7 +2687,7 @@ void $(DEV_NAME)::tr_regress()
 bool $(DEV_NAME)::tr_needs_eval()const
 {
 	trace3(&quot;$(DEV_NAME)::tr_needs_eval&quot;, converged(), is_q_for_eval(), _sim-&gt;is_advance_iteration());
-	if (is_q_for_eval()){ untested();
+	if (is_q_for_eval()){ itested();
 		return false; // needed?
 	}else if ( !OPT::lcbypass
 	  || !converged()
@@ -3062,7 +3062,7 @@ void $(DEV_NAME)::ac_begin()
 {
 	ADMS_BASE::ac_begin();
 	internal_precalc();
-	untested();
+	itested();
 	// tr_accept();
 }
 // -------------------------------------------------------------------------- //
