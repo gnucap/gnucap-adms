@@ -4,9 +4,7 @@
 * Copyright (C) 2013 Lars Hedrich, Felix Salfelder
 * License GPLv3 (or later)
 
-.subckt DRUCKSENSOR ngnd nout ndd pout ngnd p_in
 
-.verilog
 load ./sensor.so
 paramset mydruck drucksensor;
 .beta=0.0054;
@@ -14,7 +12,6 @@ paramset mydruck drucksensor;
 .C_waerm=5e-7;
 endparamset
 
+module DRUCKSENSOR (ngnd nout ndd pout ngnd p_in);
 mydruck DR2 (nout,pout,p_in,ndd,ngnd);
-spice
-
-.ends
+endmodule

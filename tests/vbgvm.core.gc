@@ -4,8 +4,7 @@
 * Copyright (C) 2013 Lars Hedrich, Felix Salfelder
 * License GPLv3 (or later)
 
-.load ./vbg.so
-.verilog
+load ./vbg.so
 paramset myvbg vbg;
 .rout=994;
 endparamset
@@ -13,5 +12,3 @@ endparamset
 module vbg102b (vbg2, bvbg, vdd, gnd);
 myvbg VBG1 (vbg2, bvbg, vdd, gnd);
 endmodule
-
-spice

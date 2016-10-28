@@ -5,20 +5,15 @@
 * License GPLv3 (or later)
 
 
-.load ./op.so
+load ./op.so
 
-.verilog
 paramset myota someop;
 .gain=1820000;
 .f0dB=1e6;
 .Sr=5e5;
 endparamset
 
-spice
-.verilog
-
 module op103b (nout, ninp, ninn, vdd, gnd);
 myota OTA0 (nout, gnd, ninp, ninn, vdd, gnd);
 endmodule
 
-spice

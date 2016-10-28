@@ -4,8 +4,7 @@
 * Copyright (C) 2013 Lars Hedrich, Felix Salfelder
 * License GPLv3 (or later)
 
-.load ./ldo.so
-.verilog
+load ./ldo.so
 
 paramset myldo ldo;
 .rout=2;
@@ -15,4 +14,3 @@ module ldo101b (vbg2, nout, vrs, vdd, gnd);
 myldo LDO1 (vbg2, nout, vrs, vdd, gnd);
 endmodule
 
-spice
