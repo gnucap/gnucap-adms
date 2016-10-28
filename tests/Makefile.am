@@ -268,13 +268,16 @@ POSTDIFF=
 	         '/^>>>/s/·$$//' \
 	         '/^\./s/·$$//'
 
-$(empty)include.1.gc.out: POSTDIFF='/^gnucap-adms·/d'
-$(empty)include.2.sp.out: POSTDIFF='/^gnucap-adms·/d'
-$(empty)include.3.gc.out: POSTDIFF='/^gnucap-adms·/d'
+@nothing@include.1.gc.out: POSTDIFF='/^gnucap-adms·/d'
+@nothing@include.2.sp.out: POSTDIFF='/^gnucap-adms·/d'
+@nothing@include.3.gc.out: POSTDIFF='/^gnucap-adms·/d'
+@nothing@mos.1.gc.out: POSTDIFF='/^gnucap-adms·/d'
 
 @nothing@bsim6_ringosc_17.gc.out \
          bsim6_inv_tr.gc.out \
 			bsim6_inverter_transient.gc.out: BSIM6.1.1.so
+
+@nothing@mos.1.gc.out: $(PWD)/mos.1.va
 
 # FIXME: more automatically...?
 EXTRA_DIST = \
