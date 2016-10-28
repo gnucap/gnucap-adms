@@ -1,0 +1,24 @@
+load lang_adms.so
+
+spice
+
+.subckt definedinspice 1 2
+R1 1 2 1
+.ends
+
+.list
+
+.subckt wraphere 1 2
+R1 1 2 1
+X1 1 2 foo
+.ends
+
+.options language=verilog
+
+list
+
+`include "includefile.v"
+
+end
+
+.op

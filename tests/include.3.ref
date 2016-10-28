@@ -1,0 +1,13 @@
+gnucap-adms 0.0.2-rc11 GIT 0x50d7903.138
+.subckt definedinspice ( 1 2 )
+R1 ( 1 2 )  1.
+.ends definedinspice
+module definedinspice (1,2);
+resistor #(.r( 1.)) R1 (.p(1),.n(2));
+endmodule // definedinspice
+
+module wraphere (1,2);
+resistor #(.r( 1.)) R1 (.p(1),.n(2));
+foo #() X1 (.(1),.(2));
+endmodule // wraphere
+
