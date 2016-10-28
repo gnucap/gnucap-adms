@@ -58,9 +58,11 @@ R6 1 IA1o 150k
 R1 IA1- IA1o 10k
 
 *=================================
+.list
 
 .print dc
-+ v(v_pin) v(nodes)
++ v(v_pin)
++ v(nodes)
 + dxm(0) gmin(0) damp(0)
 
 .dc Vpin 10e-9 10e-9 0 trace=v > sensor_net_debug.out

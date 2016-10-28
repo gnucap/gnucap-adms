@@ -26,7 +26,6 @@
 #include "c_comand.h"
 #include "globals.h"
 #include "e_node.h"
-#include "d_subckt.h"
 #include "e_subckt.h"
 #include "u_nodemap.h"
 #include "io_matrix.h"

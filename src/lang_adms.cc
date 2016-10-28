@@ -26,7 +26,7 @@
 #include <c_comand.h>
 #include <d_dot.h>
 #include <d_coment.h>
-#include <d_subckt.h>
+#include <e_subckt.h>
 #include <e_model.h>
 #include <u_lang.h>
 #include <l_lib.h>
