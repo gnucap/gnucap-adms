@@ -5,7 +5,7 @@
 GNUCAP_ADMS = ../src/gnucap-adms
 # GNUCAP = LD_LIBRARY_PATH=../src/.libs
 GNUCAP = $(shell echo gnucap | sed -e '$(transform)')
-plugindir = @gnucap_libdir@
+plugindir = @gnucap_pkglibdir@
 if GNUCAP_UF
 FILTER = $(plugindir)/gnucap-testfilter
 else
