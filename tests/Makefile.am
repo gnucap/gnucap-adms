@@ -91,6 +91,8 @@ $(PWD)/%.ckt: %.ckt
 	[ -f $@ ] || $(LN_S) $< .
 $(PWD)/%.gc: %.gc
 	[ -f $@ ] || $(LN_S) $< .
+$(PWD)/%.v: %.v
+	[ -f $@ ] || $(LN_S) $< .
 $(PWD)/%.va: %.va
 	[ -f $@ ] || $(LN_S) $< .
 $(PWD)/modelcard.%: modelcard.%
@@ -211,6 +213,7 @@ GC_TESTS = \
     vccs.gc \
     vcvs.gc
 # will only work with -uf
+if GNUCAP_UF
 GCUF_TESTS = \
     bvs.gc \
     ager.gc \
@@ -221,6 +224,7 @@ GCUF_TESTS = \
     ddc.2.gc \
 	 mos.1.gc \
     ttint.gc
+endif
 
 XFAIL_TESTS =
 
@@ -264,8 +268,13 @@ POSTDIFF=
 	         '/^>>>/s/·$$//' \
 	         '/^\./s/·$$//'
 
-$(empty)include.2.sp.out: POSTDIFF='/^gnucap-adms·/d'
 $(empty)include.1.gc.out: POSTDIFF='/^gnucap-adms·/d'
+$(empty)include.2.sp.out: POSTDIFF='/^gnucap-adms·/d'
+$(empty)include.3.gc.out: POSTDIFF='/^gnucap-adms·/d'
+
+@nothing@bsim6_ringosc_17.gc.out \
+         bsim6_inv_tr.gc.out \
+			bsim6_inverter_transient.gc.out: BSIM6.1.1.so
 
 # FIXME: more automatically...?
 EXTRA_DIST = \
@@ -340,6 +349,8 @@ ager.sub.gc.out ager.gc.out aging_mos.gc.out mos.1.gc.out: %.gc.out: %.so
 endif
 
 subcoil.log subcoil.1.log vccs.log ccvs.log cap.log: %.log: %.so
+
+include.3.gc.out: $(PWD)/includefile.v
 
 # SO_TESTS?
 # (don't remember why this is/was needed)

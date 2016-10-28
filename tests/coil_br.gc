@@ -16,6 +16,9 @@ Rm n1 nl .1k
 * builtin coil for comparison
 Lb nb 0 100m
 
+.list
+.end
+
 .print dc v(nodes) i(R*)
 .dc
 * + trace=i > /tmp/dbg

@@ -58,7 +58,7 @@ R6 1 IA1o 150k
 R1 IA1- IA1o 10k
 
 *=================================
-.list
+*.list
 
 .print dc
 + v(v_pin)
