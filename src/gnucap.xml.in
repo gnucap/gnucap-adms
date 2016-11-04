@@ -2295,7 +2295,8 @@ void $(DEV_NAME)::expand()
 	 <admst:text format="_i" test="$(M)/source[branch=$(B) and nature=discipline/flow]"/>";
 			const CARD* p = device_dispatcher[type];
 			if(!p){
-				error(bDANGER, "cannot instanciate source of type \%s. load module?\\n", type.c_str());
+				error(bTRACE, "cannot instanciate source of type \%s. load module?\\n", type.c_str());
+				throw Exception_Cant_Find(long_label(), type, "available components");
 			}else{
 				%(brp(.)) = dynamic_cast&lt;COMPONENT*&gt;(p->clone());
 				assert(%(brp(.)));
