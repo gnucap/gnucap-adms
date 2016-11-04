@@ -26,7 +26,7 @@ libgnucap_adms_la_SOURCES = e_adms.cc
 GNUCAP_ADMS_MAKE=$(shell echo gnucap-adms.mk | sed -e '$(transform)')
 AM_CPPFLAGS = $(GC_CPPFLAGS)
 
-plugindir = @gnucap_libdir@
+plugindir = @gnucap_pkglibdir@
 plugin_LTLIBRARIES = lang_adms.la
 lang_adms_la_LDFLAGS = -module -shared
 lang_adms_la_SOURCES = \
