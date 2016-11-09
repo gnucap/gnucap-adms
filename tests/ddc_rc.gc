@@ -1,3 +1,4 @@
+load s_ddc.so
 spice
 
 .param qci1=1

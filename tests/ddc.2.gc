@@ -1,3 +1,4 @@
+load s_ddc.so
 spice
 
 .param P -1
