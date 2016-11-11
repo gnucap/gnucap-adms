@@ -102,9 +102,12 @@ DIST_TESTS = $(SO_TESTS)
 
 rc.log : %.log: %.so
 
+EXLDL=$(abs_top_builddir)/examples/.libs
+SRCLDL=$(abs_top_builddir)/examples/.libs
+
 AM_TESTS_ENVIRONMENT = \
     export PATH='../src:$(PATH)'\
-           LD_LIBRARY_PATH='$(abs_builddir)/.libs:$(abs_top_builddir)/src/.libs${LD_LIBRARY_PATH:%=:%}'\
+           LD_LIBRARY_PATH='$(abs_builddir)/.libs:$(SRCLDL):$(EXLDL)${LD_LIBRARY_PATH:%=:%}'\
            GNUCAP='$(GNUCAP)'\
            GNUCAP_TESTFILTER='$(FILTER)'\
            GNUCAP_ADMS_CPPFLAGS='-I$(abs_top_srcdir)/src'\
