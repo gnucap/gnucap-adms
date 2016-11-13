@@ -71,6 +71,7 @@ endif
 c_debug_la_SOURCES = c_debug.cc
 c_debug_la_CXXFLAGS = $(PLUGIN_CXXFLAGS)
 c_debug_la_LDFLAGS = -shared -module
+c_debug_la_CPPFLAGS = $(AM_CPPFLAGS) -DADD_VERSION
 
 plugin_LTLIBRARIES += ${debug_plugin}
 
