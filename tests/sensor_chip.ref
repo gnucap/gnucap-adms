@@ -1,4 +1,4 @@
-#Time       v(v_pin)   v(output)  gmin(0)    damp(0)    control(0) v(ia1+)    v(ia1-)    T(Xsensor1.DR2) v(Xsensor1.DR2.t1)
+#Time       v(v_pin)   v(output)  gmin(0)    damp(0)    control(0) v(IA1+)    v(IA1-)    T(Xsensor1.DR2) v(Xsensor1.DR2.t1)
  0.         100.E-6    2.0328     1.E-12     1.         1.         1.1953     1.1953     378.9      105.75    
  0.01       0.01005    1.7676     1.E-12     1.         1.         1.172      1.172      366.77     93.623    
  0.02       0.02       1.1536     1.E-12     1.         1.         1.1182     1.1182     341.07     67.921    

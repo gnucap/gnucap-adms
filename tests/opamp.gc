@@ -1,4 +1,4 @@
-load ../src/.libs/adms_opamp.so
+load adms_opamp.so
 spice
 
 * note: nodenames case-sensitive

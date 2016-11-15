@@ -839,9 +839,11 @@ inline double _NR(int p){ return _n[p].v0(); }
 
 #define BR(p,n) _BR($(node_prefix) ## p, $(node_prefix) ## n)
 inline double _BR(int p, int n) {
-	if (n==-1)
+	if (n==-1){ untested();
 		return _n[p].v0();
+	}else{ untested();
 		return volts_limited(_n[p],_n[n]);
+	}
 }
 
 // discipline wrapped value
@@ -1981,8 +1983,10 @@ void $(MODEL_NAME)::set_dev_type(const std::string&amp; new_type)
 	trace1("$(MODEL_NAME)::set_dev_type", new_type);
 
 	_key = new_type;
-	if (OPT::case_insensitive)
+	if (OPT::case_insensitive) {untested();
 		notstd::to_lower(&amp;_key);
+	}else{ untested();
+	}
 }
 
 <admst:template match="brpNULL">

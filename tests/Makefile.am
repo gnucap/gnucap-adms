@@ -103,7 +103,7 @@ DIST_TESTS = $(SO_TESTS)
 rc.log : %.log: %.so
 
 EXLDL=$(abs_top_builddir)/examples/.libs
-SRCLDL=$(abs_top_builddir)/examples/.libs
+SRCLDL=$(abs_top_builddir)/src/.libs
 
 AM_TESTS_ENVIRONMENT = \
     export PATH='../src:$(PATH)'\

@@ -1,3 +1,4 @@
+- double load (assertion fail) with upstream...
 - some scopes are chosen terribly wrong (c->, m->, etc.)
 - cannot reuse existing device names
 - V(..)<+ is experimental

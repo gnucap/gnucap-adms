@@ -1,5 +1,4 @@
-load ../src/.libs/adms_res.so
-
+load adms_res.so
 verilog
 
 res r1  (n, p);

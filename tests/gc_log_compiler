@@ -7,5 +7,5 @@ out=${base}.out
 ref=${1%%gc}ref
 make $out
 # diff $out $ref
-$GNUCAP_TESTFILTER $out < $ref | diff -up - $ref --label $ref || exit 1
+$GNUCAP_TESTFILTER $out < $ref | diff -w -up - $ref --label $ref || exit 1
 rm $out

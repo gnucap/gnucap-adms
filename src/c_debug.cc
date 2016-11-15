@@ -236,12 +236,28 @@ public:
 } p5;
 DISPATCHER<CMD>::INSTALL d5(&command_dispatcher, "acx", &p5);
 /*--------------------------------------------------------------------------*/
-/*----*/
-class CMD_NL : public CMD {
+class CMD_ML : public CMD {
 public:
   void print(OMSTREAM, const CARD_LIST*);
   void do_it(CS& cmd, CARD_LIST* )
   {
+    OMSTREAM _out = IO::mstdout;
+
+    for(DISPATCHER<CARD*>::const_iterator i=model_dispatcher.begin();
+        i!=model_dispatcher.end(); ++i)
+    {
+      _out << i->first;
+      _out << "\n";
+    }
+  }
+} plm;
+DISPATCHER<CMD>::INSTALL dlm(&command_dispatcher, "listmodels", &plm);
+/*--------------------------------------------------------------------------*/
+class CMD_NL : public CMD { //
+public:
+  void print(OMSTREAM, const CARD_LIST*);
+  void do_it(CS& cmd, CARD_LIST* )
+  { untested();
     OMSTREAM _out = IO::mstdout;
     _out.setfloatwidth(3);
   //  _out.outset(cmd);
@@ -255,7 +271,7 @@ public:
       << " sckt: " << _sim->_subckt_nodes
 //      << " adp " << _sim->_adp_nodes
       << "\n";
-    for(unsigned k=0; k<= (unsigned)_sim->_total_nodes; ++k){
+    for(unsigned k=0; k<= (unsigned)_sim->_total_nodes; ++k){ untested();
       trace2( "CMD_NL::do_it", k, _sim->_nm[k]);
     }
     _out << "\n";
