@@ -385,17 +385,22 @@
   <admst:reset select="$(uniqueVprobes)"/>
   <admst:reset select="$(uniqueIprobes)"/>
 
+  <!-- the branch -->
   <admst:variable name="B" select="%(.)"/>
 
-  <admst:for-each select="$(M)/source[(branch/nnode/name=$(B)/nnode/name and branch/pnode/name=$(B)/pnode/name) or
-                                      (branch/nnode/name=$(B)/pnode/name and branch/pnode/name=$(B)/nnode/name)]/probe[
+  <admst:for-each select="$(M)/source[
+         (branch/nnode/name=$(B)/nnode/name and branch/pnode/name=$(B)/pnode/name)
+      or (branch/nnode/name=$(B)/pnode/name and branch/pnode/name=$(B)/nnode/name)]/probe[
                                         branch!=$B and
                                        (branch/pnode!=$(B)/nnode or branch/nnode!=$(B)/pnode) and
                                         nature=discipline/potential]">
     <admst:variable name="thisprobe" path="."/>
+    <!-- filter out reverse probes -->
     <admst:if test="[0=count($(uniqueVprobes)[./branch/pnode=$(thisprobe)/branch/nnode
                                             and branch/nnode=$(thisprobe)/branch/pnode])]">
-      <admst:push into="$(uniqueVprobes)" select="." onduplicate="ignore"/>
+      <admst:push into="$(uniqueVprobes)" select="." onduplicate="ignore"
+                  test="[$(thisprobe)/discipline/name!='degradational']"/>
+
     </admst:if>
   </admst:for-each>
 
