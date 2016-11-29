@@ -1,11 +1,10 @@
 name   ...
-have 3 nodes. model: 1 sckt: 0 adp 0
+have 3 nodes. model: 1 sckt: 0
 
-nin      nin matrix_number 2, user_number 2 nm[t]  vdc  0.
-nout     nout matrix_number 3, user_number 1 nm[t]  vdc  0.
+nin      nin matrix_number 2, user_number 2 nm[t]  vdc 
+nout     nout matrix_number 3, user_number 1 nm[t]  vdc 
 -c1
--c1.v_p_n
-br c1.v_p_n.br matrix_number 1, user_number 3 nm[t]  vdc  0.
+c1.v_p_n.br c1.v_p_n.br matrix_number 3, user_number 1 nm[t]  vdc 
 #Time       v(nin)     v(nout)   
  0.         0.         0.        
  0.1        0.58779    0.58779   

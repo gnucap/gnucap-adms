@@ -10,6 +10,7 @@ V1 nin 0 pulse iv=0 pv=1 rise=3 delay=1 width=3 fall=2
 mid m1 (nin,0);
 spice
 
+* does not work like this in upstream gnucap
 .print tran v(nin) v(m1.mid)
 
 .tr 0 10 1 trace=n echo

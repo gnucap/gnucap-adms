@@ -1,0 +1,164 @@
+.GEOMOD =0
+ ^ ? nmosHACK: bad parameter GEOMOD ignored
+.RGEOMOD =0
+ ^ ? nmosHACK: bad parameter RGEOMOD ignored
+.sca= 0
+ ^ ? nmosHACK: bad parameter sca ignored
+.scb= 0
+ ^ ? nmosHACK: bad parameter scb ignored
+.scc= 0
+ ^ ? nmosHACK: bad parameter scc ignored
+.sc= 0
+ ^ ? nmosHACK: bad parameter sc ignored
+.GEOMOD  = 0
+ ^ ? pmosHACK: bad parameter GEOMOD ignored
+.RGEOMOD = 0
+ ^ ? pmosHACK: bad parameter RGEOMOD ignored
+.RGATEMOD= 0
+ ^ ? pmosHACK: bad parameter RGATEMOD ignored
+.RBODYMOD= 0
+ ^ ? pmosHACK: bad parameter RBODYMOD ignored
+.TNOIA   = 0
+ ^ ? pmosHACK: bad parameter TNOIA ignored
+.TNOIB   = 0
+ ^ ? pmosHACK: bad parameter TNOIB ignored
+.TNOIC   = 0
+ ^ ? pmosHACK: bad parameter TNOIC ignored
+.RNOIA   = 0.577
+ ^ ? pmosHACK: bad parameter RNOIA ignored
+.RNOIB   = 0.5164
+ ^ ? pmosHACK: bad parameter RNOIB ignored
+.RNOIC   = 0.395
+ ^ ? pmosHACK: bad parameter RNOIC ignored
+.XGW     = 0
+ ^ ? pmosHACK: bad parameter XGW ignored
+.XGL     = 0
+ ^ ? pmosHACK: bad parameter XGL ignored
+.GBMIN   = 1E-012
+ ^ ? pmosHACK: bad parameter GBMIN ignored
+.RSHG    = 0.1
+ ^ ? pmosHACK: bad parameter RSHG ignored
+.RBPB    = 50
+ ^ ? pmosHACK: bad parameter RBPB ignored
+.RBPD    = 50
+ ^ ? pmosHACK: bad parameter RBPD ignored
+.RBPS    = 50
+ ^ ? pmosHACK: bad parameter RBPS ignored
+.RBDB    = 50
+ ^ ? pmosHACK: bad parameter RBDB ignored
+.RBSB    = 50
+ ^ ? pmosHACK: bad parameter RBSB ignored
+.RBPS0   = 50
+ ^ ? pmosHACK: bad parameter RBPS0 ignored
+.RBPSL   = 0
+ ^ ? pmosHACK: bad parameter RBPSL ignored
+.RBPSW   = 0
+ ^ ? pmosHACK: bad parameter RBPSW ignored
+.RBPSNF  = 0
+ ^ ? pmosHACK: bad parameter RBPSNF ignored
+.RBPD0   = 50
+ ^ ? pmosHACK: bad parameter RBPD0 ignored
+.RBPDL   = 0
+ ^ ? pmosHACK: bad parameter RBPDL ignored
+.RBPDW   = 0
+ ^ ? pmosHACK: bad parameter RBPDW ignored
+.RBPDNF  = 0
+ ^ ? pmosHACK: bad parameter RBPDNF ignored
+.RBPBX0  = 100
+ ^ ? pmosHACK: bad parameter RBPBX0 ignored
+.RBPBXL  = 0
+ ^ ? pmosHACK: bad parameter RBPBXL ignored
+.RBPBXW  = 0
+ ^ ? pmosHACK: bad parameter RBPBXW ignored
+.RBPBXNF = 0
+ ^ ? pmosHACK: bad parameter RBPBXNF ignored
+.RBPBY0  = 100
+ ^ ? pmosHACK: bad parameter RBPBY0 ignored
+.RBPBYL  = 0
+ ^ ? pmosHACK: bad parameter RBPBYL ignored
+.RBPBYW  = 0
+ ^ ? pmosHACK: bad parameter RBPBYW ignored
+.RBPBYNF = 0
+ ^ ? pmosHACK: bad parameter RBPBYNF ignored
+.RBSBX0  = 100
+ ^ ? pmosHACK: bad parameter RBSBX0 ignored
+.RBSBY0  = 100
+ ^ ? pmosHACK: bad parameter RBSBY0 ignored
+.RBDBX0  = 100
+ ^ ? pmosHACK: bad parameter RBDBX0 ignored
+.RBDBY0  = 100
+ ^ ? pmosHACK: bad parameter RBDBY0 ignored
+.RBSDBXL = 0
+ ^ ? pmosHACK: bad parameter RBSDBXL ignored
+.RBSDBXW = 0
+ ^ ? pmosHACK: bad parameter RBSDBXW ignored
+.RBSDBXNF= 0
+ ^ ? pmosHACK: bad parameter RBSDBXNF ignored
+.RBSDBYL = 0
+ ^ ? pmosHACK: bad parameter RBSDBYL ignored
+.RBSDBYW = 0
+ ^ ? pmosHACK: bad parameter RBSDBYW ignored
+.RBSDBYNF= 0
+ ^ ? pmosHACK: bad parameter RBSDBYNF ignored
+.XRCRG1  = 12
+ ^ ? pmosHACK: bad parameter XRCRG1 ignored
+.XRCRG2  = 1
+ ^ ? pmosHACK: bad parameter XRCRG2 ignored
+.NGCON   = 1
+ ^ ? pmosHACK: bad parameter NGCON ignored
+.VFBSDOFF= 0
+ ^ ? pmosHACK: bad parameter VFBSDOFF ignored
+.SCA     = 0
+ ^ ? pmosHACK: bad parameter SCA ignored
+.SCB     = 0
+ ^ ? pmosHACK: bad parameter SCB ignored
+.SCC     = 0
+ ^ ? pmosHACK: bad parameter SCC ignored
+.SC      = 0
+ ^ ? pmosHACK: bad parameter SC ignored
+.SA      = 0
+ ^ ? pmosHACK: bad parameter SA ignored
+.SB      = 0
+ ^ ? pmosHACK: bad parameter SB ignored
+.SD      = 0
+ ^ ? pmosHACK: bad parameter SD ignored
+#Time       v(vi)      v(vo)      hidden(0)  iter(0)   
+ 0.         0.5        0.17261    0.         10.       
+ 50.E-9     0.65451    0.080516   0.         7.        
+ 100.E-9    0.79389    0.038027   0.         6.        
+ 150.E-9    0.90451    0.02165    0.         5.        
+ 200.E-9    0.97553    0.012085   0.         5.        
+ 250.E-9    1.         0.0085153  0.         5.        
+ 447.92E-9  0.66072    0.042715   0.         6.        
+ 645.83E-9  0.10332    0.96366    0.         10.       
+ 843.75E-9  0.084265   1.0272     0.         5.        
+ 965.99E-9  0.39397    0.85606    0.         7.        
+ 1.2033E-6  0.97862    0.02259    0.         6.        
+ 1.3615E-6  0.88227   -457.75E-6  0.         5.        
+ 1.5197E-6  0.43833    0.64918    0.         11.       
+ 1.6779E-6  0.050467   0.96763    0.         8.        
+ 1.8361E-6  0.071354   1.0278     0.         5.        
+ 1.9943E-6  0.482      0.36511    0.         10.       
+ 2.1525E-6  0.90901    0.024705   0.         8.        
+ 2.3107E-6  0.96412    0.0029239  0.         5.        
+ 2.4689E-6  0.59721    0.070592   0.         6.        
+ 2.699E-6   0.02549    0.96948    0.         8.        
+ 2.8633E-6  0.12148    1.0296     0.         5.        
+ 3.0277E-6  0.58653    0.11848    0.         13.       
+ 3.192E-6   0.96721    0.012791   0.         7.        
+ 3.3564E-6  0.89236    0.010167   0.         5.        
+ 3.5208E-6  0.43496    0.49052    0.         10.       
+ 3.6851E-6  0.040972   0.98845    0.         9.        
+ 3.8495E-6  0.094535   1.0116     0.         5.        
+ 4.0138E-6  0.54343    0.17318    0.         9.        
+ 4.1782E-6  0.94998    0.010249   0.         7.        
+ 4.3426E-6  0.9178     0.013269   0.         5.        
+ 4.5069E-6  0.47827    0.1386     0.         7.        
+ 4.6713E-6  0.059923   0.98805    0.         7.        
+ 4.8356E-6  0.070656   1.0096     0.         5.        
+ 5.E-6      0.5        0.27865    0.         11.       
+Gnucap   System status
+iterations: op=0, dc=0, tran=243, fourier=0, total=277
+transient timesteps: accepted=34, rejected=0, total=34
+nodes: user=3, subckt=0, model=0, total=3
+dctran density=100.0%, ac density=100.0%

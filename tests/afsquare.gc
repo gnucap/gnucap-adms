@@ -12,6 +12,7 @@ spice
 .nodelist
 
 v1 nin 0 sin freq=1 amplitude=1
+.list
 r1 nout 0 .1
 
 * built in, for reference

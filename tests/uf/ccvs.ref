@@ -1,0 +1,40 @@
+.print dc v(noutp*) i(h1) i(rp) i(i1) v(h1.v_p_n) i(h1.v_p_n) 
+                            ^ ? no match
+.print tran v(noutn*) v(noutp*) v(r1) i(h1) i(rp) 
+                                  ^ ? no match
+.print tran v(n ... utp*) v(r1) i(h1) i(rp) 
+                                        ^ ? no match
+name   ...
+have 9 nodes. model: 1 sckt: 0 adp 0
+
+ninn1    ninn1 matrix_number 6, user_number 4 nm[t]  vdc  0.
+ninn2    ninn2 matrix_number 4, user_number 6 nm[t]  vdc  0.
+ninp1    ninp1 matrix_number 7, user_number 3 nm[t]  vdc  0.
+ninp2    ninp2 matrix_number 5, user_number 5 nm[t]  vdc  0.
+noutn1   noutn1 matrix_number 8, user_number 2 nm[t]  vdc  0.
+noutn2   noutn2 matrix_number 2, user_number 8 nm[t]  vdc  0.
+noutp1   noutp1 matrix_number 9, user_number 1 nm[t]  vdc  0.
+noutp2   noutp2 matrix_number 3, user_number 7 nm[t]  vdc  0.
+-h1
+br    h1.br matrix_number 1, user_number 9 nm[t]  vdc  0.
+#           v(noutp1)  v(noutp2)  i(h1)      i(i1)      v(h1.v_p_n) i(h1.v_p_n) i(r2)      i(h1.i_cp_cn)
+h1.i_cp_cn: short circuit
+ 0.         0.         0.         0.         0.         0.         0.         0.         0.        
+open circuit: internal node 7
+-1.         9.6668     0.33333    0.        -0.001      9.6667    -0.031738   0.001      0.001     
+-2.         9.6668     0.33333    0.001     -0.001      9.6667    -0.031738   0.001      0.001     
+ 0.         9.6668     0.33333    0.001     -0.001      9.6667    -0.031738   0.001      0.001     
+#Time       v(noutn1)  v(noutn2)  v(noutp1)  v(noutp2)  i(h1)     
+h1.i_cp_cn: short circuit
+open circuit: internal node 7
+ 0.         122.06u    1.097p     9.6668     0.33333    0.001     
+ 0.1       -0.0020994  878.f      9.7312     0.26667    800.u     
+ 0.2       -414.99u    658.f      9.7996     0.2        600.u     
+ 0.3       -683.51u    439.f      9.866      0.13333    400.u     
+ 0.4       -952.03u    219.f      9.9324     0.066667   200.u     
+ 0.5       -0.0012206  0.         9.9988     0.         0.        
+ 0.6       -0.0014891 -219.f      10.065    -0.066667  -200.u     
+ 0.7       -0.0017576 -439.f      10.132    -0.13333   -400.u     
+ 0.8       -0.0020261 -658.f      10.198    -0.2       -600.u     
+ 0.9       -341.76u   -878.f      10.266    -0.26667   -800.u     
+ 1.        -0.0025632 -1.097p     10.331    -0.33333   -0.001     

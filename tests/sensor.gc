@@ -22,7 +22,7 @@ vin ninp 0 pulse iv=0 pv=10 rise=1
 .list
 
 .print tran v(nodes) T(DR2)
-.tran 0 1 1 trace=a
+.tran 0 1 trace=n
 .print dc v(nodes) T(DR2)
 .dc vin 1n 10k * 2
 

@@ -20,6 +20,7 @@ ndd      ndd matrix_number 4, user_number 3 nm[t]  vdc  0.
 ng       ng matrix_number 5, user_number 2 nm[t]  vdc  0.
 nin      nin matrix_number 3, user_number 4 nm[t]  vdc  0.
 -m
+br     m.br matrix_number 1, user_number 6 nm[t]  vdc  0.
 deg0   m.deg0 adp 0 6
 deg1   m.deg1 adp 1 6
 deg2   m.deg2 adp 2 6
@@ -39,8 +40,6 @@ d1 m.myQ0.d1 adp 7 6
 d2 m.myQ0.d2 adp 8 6
 -m.myQ0.rcd2
 -m.myQ0.rcd1
--m.v_mid_GND
-br m.v_mid_GND.br matrix_number 1, user_number 6 nm[t]  vdc  0.
 >>>>>.print tran v(nin) v(nd) stress(m.myQ0.rcd1) 
 >>>>>.print tw dvth0(m) dvth1(m) dvth2(m) 
 >>>>>.ttr 0 10k 1m .05m * 2 new > tt.out echo tran trace=n > tr.out echo 

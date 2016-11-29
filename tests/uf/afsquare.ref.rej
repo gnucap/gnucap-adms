@@ -1,0 +1,18 @@
+--- afsquare.ref
++++ afsquare.ref	2016-12-02 15:58:12.247995151 +0000
+@@ -3,11 +3,11 @@ have 3 nodes. model: 1 sckt: 0 adp 0
+ 
+ nin      nin matrix_number 2, user_number 2 nm[t]  vdc  0.
+ nout     nout matrix_number 3, user_number 1 nm[t]  vdc  0.
++
++
+ -c1
+-br    c1.br matrix_number 1, user_number 3 nm[t]  vdc  0.
+-.model thing square ( ex=NA( 2.) gain=NA( 1.))
+-c1 ( nout 0 nin 0 ) thing
+-v1 ( nin 0 ) sin offset=NA( 0.) amplitude= 1. frequency= 1.
++-c1.v_p_n
++br c1.v_p_n.br matrix_number 1, user_number 3 nm[t]  vdc  0.
+ #Time       v(nin)     v(nout)   
+  0.         0.         0.        
+  0.1        0.58779    0.3454~   

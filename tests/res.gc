@@ -1,4 +1,4 @@
-load res.so
+load ./res.so
 options trace
 
 verilog
@@ -11,12 +11,14 @@ spice
 resir r1 (n, p);
 spice
 .dc trace=i ; ir
+* delete resir
 .delete r1
 
 .verilog
 resvf r1 (n, p);
 spice
 .dc ; vf
+* delete resvf
 .delete r1
 
 .verilog

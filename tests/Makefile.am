@@ -51,7 +51,8 @@ check_LTLIBRARIES = \
     afbuf.la \
     afsquare.la \
     square.la \
-    int.la pid.la vcvs.la \
+    int.la pid.la \
+	 vcvs.la \
     diff.la \
     meas.la \
     mul.la \
@@ -232,6 +233,12 @@ GCUF_TESTS = \
 endif
 
 XFAIL_TESTS =
+
+# some hack in -uf makes this work...
+if !GNUCAP_UF
+XFAIL_DIFF = diff.gc
+endif
+XFAIL_TESTS += $(XFAIL_DIFF)
 
 # .verilog does not work
 XFAIL_TESTS += include.2.sp
