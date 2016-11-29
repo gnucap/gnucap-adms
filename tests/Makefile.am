@@ -7,6 +7,7 @@ GNUCAP_ADMS = ../src/gnucap-adms
 GNUCAP = $(shell echo gnucap | sed -e '$(transform)')
 plugindir = @gnucap_pkglibdir@
 if GNUCAP_UF
+ALT_REF_DIR=uf
 FILTER = $(plugindir)/gnucap-testfilter
 else
 FILTER = cat
@@ -108,6 +109,7 @@ SRCLDL=$(abs_top_builddir)/src/.libs
 AM_TESTS_ENVIRONMENT = \
     export PATH='../src:$(PATH)'\
            LD_LIBRARY_PATH='$(abs_builddir)/.libs:$(SRCLDL):$(EXLDL)${LD_LIBRARY_PATH:%=:%}'\
+           ALT_REF_DIR='$(ALT_REF_DIR)'\
            GNUCAP='$(GNUCAP)'\
            GNUCAP_TESTFILTER='$(FILTER)'\
            GNUCAP_ADMS_CPPFLAGS='-I$(abs_top_srcdir)/src'\

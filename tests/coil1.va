@@ -16,7 +16,6 @@ module coil_br(p,n);
       i = I(e1,n);
       v = ddt(inductance * I(e1,n));
       V(p,e1) <+ ddt(inductance * I(e1,n));
-   // I(p) <+ 0*V(n); // BUG
    end
 endmodule
 

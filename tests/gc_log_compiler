@@ -3,8 +3,14 @@
 [ x$1 = xSKIP ] && exit 77
 
 base=`basename $1`
+dir=`dirname $1`
 out=${base}.out
 ref=${1%%gc}ref
+refbase=${base%%gc}ref
+if [ -n "$ALT_REF_DIR" -a -f $dir/$ALT_REF_DIR/$refbase ]; then
+	ref=$dir/$ALT_REF_DIR/$refbase
+fi
+
 make $out
 # diff $out $ref
 $GNUCAP_TESTFILTER $out < $ref | diff -w -up - $ref --label $ref || exit 1
