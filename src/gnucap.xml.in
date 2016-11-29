@@ -680,7 +680,6 @@ class $(DEV_NAME) : public ADMS_BASE
 		void tr_queue_eval();
 </admst:if>
 		void tr_eval();
-		void tr_eval_kept();
 		bool conv_check()const;
 		TIME_PAIR tr_review();
 		void tr_accept();
@@ -714,8 +713,12 @@ class $(DEV_NAME) : public ADMS_BASE
 		void tr_stress_last(); // tt_stress??
 #endif
 
-	public: // misc
+#ifdef HAVE_KEEPCOEFF
+	public: // state space stuff
 		void keep_ic();
+		void tr_eval_kept();
+#endif
+	public: // misc
 		bool has_memory(){return $_has_states;}
 
 	public: // ports
@@ -2737,12 +2740,14 @@ bool $(DEV_NAME)::tr_needs_eval()const
 	return false;
 }
 // -------------------------------------------------------------------------- //
+#ifdef HAVE_KEEPCOEFF
 void $(DEV_NAME)::tr_eval_kept()
 {
 #if 0
 <!-- <admst:apply-templates select="analog/code[datatypename='block']/item" match="tr_eval_kept" required="yes"/> -->
 #endif // 0
 }
+#endif
 // -------------------------------------------------------------------------- //
 // MODEINITFLOAT = normal iteration
 // MODEINITPRED  = 1st iter at a new time point
@@ -2792,13 +2797,13 @@ bool $(DEV_NAME)::do_tr()
 	return converged();
 }
 // -------------------------------------------------------------------------- //
+#ifdef HAVE_KEEPCOEFF
+// this is old -uf code...
 void $(DEV_NAME)::keep_ic()
 {
-#ifdef HAVE_KEEPCOEFF
   <admst:if test="[$sckt_size!=0]">
 	subckt()-&gt;keep_ic();
   </admst:if>
-#endif
 
 	//double x =  dn_diff(_n[OUT1].v0(),_n[OUT2].v0() );
 	$(COMMON_NAME)* c = prechecked_cast&lt; $(COMMON_NAME)*&gt;(mutable_common());
@@ -2818,6 +2823,7 @@ void $(DEV_NAME)::keep_ic()
 </admst:if>
 	trace1(&quot;$(DEV_NAME)::keep_ic&quot;, long_label() );
 }
+#endif
 // -------------------------------------------------------------------------- //
 void $(DEV_NAME)::store_values()
 {
