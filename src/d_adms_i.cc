@@ -92,7 +92,7 @@ ADMS_I::ADMS_I()
   :ADMS_SOURCE(),
    _time(NOT_VALID)
 {
-  trace2("ADMS_I::ADMS_I", _m0, _m1);
+  //trace2("ADMS_I::ADMS_I", _m0, _m1);
 }
 /*--------------------------------------------------------------------------*/
 bool ADMS_I::do_tr_con_chk_and_q()
@@ -123,7 +123,7 @@ bool ADMS_I::do_tr()
   trace5("ADMS_I::do_tr", long_label(),
       _values[0], _old_values[0],
       _values[1], _old_values[1]);
-  trace2("ADMS_I::do_tr", _m0, _m1);
+  // trace2("ADMS_I::do_tr", _m0, _m1);
   assert(_values);
   _m0 = CPOLY1(0., _values[0], _values[1]);
   bool P = converged();
@@ -146,7 +146,7 @@ void ADMS_I::tr_load()
 {
   trace4("ADMS_I::tr_load", _values[0], _old_values[0],
                             _values[1], _old_values[1]);
-  trace4("ADMS_I::tr_load", _m0, _m1, _n_vports, _n_iports);
+  // trace4("ADMS_I::tr_load", _m0, _m1, _n_vports, _n_iports);
   trace1("ADMS_I::tr_load rhs", _m0.c0);
   tr_load_passive();
   _old_values[0] = _values[0];
