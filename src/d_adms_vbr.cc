@@ -160,6 +160,7 @@ void DEV_CPOLY_V::tr_iwant_matrix()
 {
   // FIXME: this is likely too much.
   trace2("tr_iwant_matrix", long_label(), matrix_nodes());
+  assert(!subckt());
   tr_iwant_matrix_extended(); // uses matrix_nodes
 
   _sim->_aa.iwant(_n[BR].m_(),_n[OUT1].m_());
@@ -320,7 +321,7 @@ void DEV_CPOLY_V::ac_load()
 void DEV_CPOLY_V::expand()
 {
   if (!subckt()) {
-    new_subckt(); // hmm probably not a good idea
+    // new_subckt(); // hmm probably not a good idea
   }else{ untested();
   }
 
