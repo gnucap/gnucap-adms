@@ -184,6 +184,8 @@ class ADMS_BASE : public COMPONENT {
 			incomplete(); // what does the standard say?
 			throw(Exception("va finish"));
 		}
+	protected:
+		node_t _nGND;
 };
 /*--------------------------------------------------------------------------*/
 void COMPONENT::set_port_by_index(uint_t num, std::string& ext_name)
@@ -691,8 +693,6 @@ inline void _pow(double& xy,double x,double y) {untested(); xy = pow(x,y); }
 #define flickernoise_jacobian2p(p,r,s)
 #define flickernoise_jacobian1(p)
 /*--------------------------------------------------------------------------*/
-
-#define _nGND node_t(&ground_node)
 
 // temp hacks
 #define _stop() assert(false)

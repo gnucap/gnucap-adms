@@ -46,6 +46,7 @@ ADMS_BASE::ADMS_BASE():
 	_n = _nodes;
 
 	std::fill_n(_time, int(OPT::_keep_time_steps), 0.);
+	_nGND.set_to_ground(this);
 }
 /*--------------------------------------------------------------------------*/
 ADMS_BASE::ADMS_BASE(const ADMS_BASE& p)
@@ -67,6 +68,7 @@ ADMS_BASE::ADMS_BASE(const ADMS_BASE& p)
 	}
 
 	notstd::copy_n(p._time, int(OPT::_keep_time_steps), _time);
+	_nGND.set_to_ground(this);
 }
 /*--------------------------------------------------------------------------*/
 bool ADMS_BASE::skip_dev_type(CS& cmd)
