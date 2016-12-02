@@ -1,5 +1,6 @@
 /*$Id: d_poly_g.cc,v 26.137 2010/04/10 02:37:05 al Exp $ -*- C++ -*-
  * Copyright (C) 2001 Albert Davis
+ *               2015-2016 Felix Salfelder
  * Author: Albert Davis <aldavis@gnu.org>
  *
  * This file is part of "Gnucap", the Gnu Circuit Analysis Package
@@ -84,6 +85,28 @@ protected: // override virtual
   }
 public:
   void expand();
+#ifndef NDEBUG
+public: //debug
+void map_nodes()
+{ untested();
+  assert(is_device());
+  assert(0 <= min_nodes());
+  //assert(min_nodes() <= net_nodes());
+  assert(net_nodes() <= max_nodes());
+  //assert(ext_nodes() + int_nodes() == matrix_nodes());
+
+  trace2("mapnodes", ext_nodes(), int_nodes());
+  for (int ii = 0; ii < ext_nodes()+int_nodes(); ++ii) { untested();
+    trace1("mapnodes");
+    _n[ii].map();
+  }
+
+  if (subckt()) { untested();
+    subckt()->map_nodes();
+  }else{ untested();
+  }
+}
+#endif
 protected:
   bool do_tr_con_chk_and_q();
 private:
@@ -332,6 +355,7 @@ void DEV_CPOLY_V::expand()
   assert(BR);
   if (!(_n[BR].n_())) {
     _n[BR].new_model_node( "br", this);
+    trace2("newmodelnode", long_label(), _n[BR].t_());
   }else{ untested();
   }
 #endif
