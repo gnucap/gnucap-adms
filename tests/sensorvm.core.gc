@@ -12,6 +12,6 @@ paramset mydruck drucksensor;
 .C_waerm=5e-7;
 endparamset
 
-module DRUCKSENSOR (ngnd nout ndd pout ngnd p_in);
+module DRUCKSENSOR (ngnd nout ndd pout ngnd2 p_in);
 mydruck DR2 (nout,pout,p_in,ndd,ngnd);
 endmodule

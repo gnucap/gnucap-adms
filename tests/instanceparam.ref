@@ -10,13 +10,24 @@
  0.2        0.8        0.99995    0.99995   
  0.3        0.7        0.9999     0.9999    
  0.4        0.6        0.99983    0.99983   
- 0.5        0.5        0.99974    0.99974   
  1.         19.98n     0.99899    0.99899   
- 10.        19.627n    0.98133    0.98133   
+step rejected:v1
+new=0.00267371  old=9  required=4.5
+backwards time step
+newtime=1.002673e+00  rejectedtime=1.000000e+01  oldtime=1.000000e+00
+step rejected:v1
+new=0.000660086  old=0.002673  required=0.0013365
+backwards time step
+newtime=1.000535e+00  rejectedtime=1.002673e+00  oldtime=1.000000e+00
+ 1.0005     19.98n     0.99899    0.99899   
+ 1.0011     19.98n     0.99899    0.99899   
+ 1.0016     19.98n     0.99899    0.99899   
+ 1.0021     19.98n     0.99899    0.99899   
+ 10.        19.623n    0.98117    0.98117   
 >>>>>.status notime 
 Gnucap   System status
-iterations: op=0, dc=4, tran=26, fourier=0, total=38
-transient timesteps: accepted=8, rejected=0, total=8
+iterations: op=0, dc=4, tran=39, fourier=0, total=56
+transient timesteps: accepted=11, rejected=2, total=13
 nodes: user=3, subckt=0, model=0, total=3
 dctran density=77.8%, ac density=77.8%
 >>>>>.end 

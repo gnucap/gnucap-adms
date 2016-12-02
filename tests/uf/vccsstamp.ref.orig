@@ -1,0 +1,12 @@
+.echo ====== built in vccs ====================== 
+ ^ ? echo: no match
+.dc dm 
+    ^ ? what's this?
+#          
+ 0.        
+.echo ====== adms vccs ====================== 
+ ^ ? echo: no match
+.dc dm 
+    ^ ? what's this?
+#          
+ 0.        

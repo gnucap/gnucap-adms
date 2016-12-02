@@ -1,6 +1,6 @@
 v1 ( nreal ngnd ) vavs
 r0 ( 0 ngnd )  1.
-have 0 nodes. model: 0 sckt: 0name   ...
+name   ...
 have 3 nodes. model: 1 sckt: 0
 
 ngnd     ngnd matrix_number 2, user_number 2 nm[t]  vdc 

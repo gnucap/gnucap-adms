@@ -1,4 +1,5 @@
 load lang_adms.so
+load c_make_attach.so
 load ./cap.so
 
 adms
