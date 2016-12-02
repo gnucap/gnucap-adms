@@ -12,7 +12,7 @@ synopsis:
 
 installation prerequisites:
  - current adms [1] should work.
- - gnucap-uf or gnucap. this is under construction. see mailing lists.
+ - gnucap-uf or gnucap/unstable
 
 [1] git://github.com/QUCS/adms
 
