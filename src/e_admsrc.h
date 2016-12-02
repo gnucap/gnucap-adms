@@ -91,6 +91,11 @@ public:
     tr_load();
   }
 /*--------------------------------------------------------------------------*/
+public:
+  virtual node_t get_inode() const{ unreachable();
+    return node_t();
+  }
+/*--------------------------------------------------------------------------*/
 protected:
   double*  _values;
   double*  _old_values;
@@ -156,7 +161,7 @@ inline void ADMS_SOURCE::set_parameters_va(const std::string& Label, CARD *Owner
   }
   assert(int(matrix_nodes()) == int(2*n_states + _boff - 2)); // used by iwant_matrix.
   assert(ext_nodes() == 2*n_states - 2); // used by map_nodes
-  trace2("ADMS_SOURCE::sp_va now", _m0, _m1);
+  // trace2("ADMS_SOURCE::sp_va now", _m0, _m1);
 
   for(unsigned i=0; i<(unsigned)net_nodes(); ++i){
     assert(nodes[i].t_()!=INVALID_NODE);
@@ -173,9 +178,23 @@ inline void ADMS_SOURCE::set_parameters_va(const std::string& Label, CARD *Owner
   assert(net_nodes() == _n_ports * 2);
 
   trace4("ADMS_SOURCE::sp_va DEBUG", _n_ports, _n_vports, net_nodes(), _boff);
+  trace2("ADMS_SOURCE::sp_va DEBUG", long_label(), _n_iports);
   // skip branch node (IN1) if boff
-  notstd::copy_n(nodes+2, net_nodes()-2, _n+_boff+2);
+  notstd::copy_n(nodes+2, net_nodes()-2, _n+2);
   notstd::copy_n(currents, _n_iports, _inputs);
+}
+
+static node_t get_inode_(COMPONENT const* c)
+{ untested();
+  assert(c->has_inode());
+
+  if( ADMS_SOURCE const* s = dynamic_cast<const ADMS_SOURCE*>(c) ) {
+    return s->get_inode();
+  } else if( ELEMENT const* e = dynamic_cast<const ELEMENT*>(c) ) {
+    return e->n_(IN1);
+  }else{ unreachable();
+    return node_t();
+  }
 }
 
 void ADMS_SOURCE::expand_last()
@@ -184,21 +203,21 @@ void ADMS_SOURCE::expand_last()
   for(uint_t i=0; i<_n_iports; ++i) {
     assert(_inputs[i]);
 
-    node_t* ni = _n+_boff+2+_n_vports*2;
+    node_t* ni = _n+2+_n_vports*2;
     assert(net_nodes() == 2+_n_vports*2);
 
     if (_inputs[i]->has_inode()) {untested();
       trace3("ADMS_SOURCE::expand_last inode", _inputs[i]->long_label(), i, net_nodes());
-      ni[2*i] = _inputs[i]->n_(IN1);
+      ni[2*i] = get_inode_(_inputs[i]);
       ni[2*i+1].set_to_ground(this);
-    }else if (_inputs[i]->has_iv_probe()) {
+    }else if (_inputs[i]->has_iv_probe()) { untested();
       trace4("ADMS_SOURCE::expand_last colleting nodes", _inputs[i]->long_label(), i, net_nodes(), INT_MAX);
       ni[2*i]   = _inputs[i]->n_(OUT1);
       ni[2*i+1] = _inputs[i]->n_(OUT2);
       trace2("ADMS_SOURCE::expand_last colleting nodes", ni[2*i].m_(), ni[2*i+1].m_());
     }
   }
-  trace3("ADMS_SOURCE::sp_va done", _n_ports, _n_vports, _n_iports);
+  trace3("expand_last done", _n_ports, _n_vports, _n_iports);
   assert(_n_vports+1 == _n_ports);
 }
 
@@ -217,13 +236,14 @@ inline void ADMS_SOURCE::tr_iwant_matrix_active()
 //  assert(_n[IN2].m_() != INVALID_NODE);
 
   //_sim->_aa.iwant(_n[OUT1].m_(),_n[OUT2].m_());
-  for(uint_t i=0; i<_n_vports; ++i) {
-    if (!_boff){
+  for(uint_t i=0; i<_n_vports; ++i) { untested();
+    if (!_boff){ untested();
       _sim->_aa.iwant(_n[OUT1].m_(),_n[2*i+0].m_());
       _sim->_aa.iwant(_n[OUT1].m_(),_n[2*i+1].m_());
       _sim->_lu.iwant(_n[OUT1].m_(),_n[2*i+0].m_());
       _sim->_lu.iwant(_n[OUT1].m_(),_n[2*i+1].m_());
 
+    }else{untested();
     }
     _sim->_aa.iwant(_n[OUT2+_boff].m_(),_n[2*i+0+_boff].m_());
     _sim->_aa.iwant(_n[OUT2+_boff].m_(),_n[2*i+1+_boff].m_());

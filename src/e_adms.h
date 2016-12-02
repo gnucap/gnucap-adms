@@ -74,6 +74,26 @@ class ADMS_BASE : public COMPONENT {
 
 		//void   map_nodes();
 		virtual double   tr_probe_num(const std::string&)const;
+
+	public: //debug
+void map_nodes()
+{ untested();
+  assert(is_device());
+  assert(0 <= min_nodes());
+  //assert(min_nodes() <= net_nodes());
+  assert(net_nodes() <= max_nodes());
+  //assert(ext_nodes() + int_nodes() == matrix_nodes());
+
+  for (int ii = 0; ii < ext_nodes()+int_nodes(); ++ii) { untested();
+    _n[ii].map();
+  }
+
+  if (subckt()) { untested();
+    subckt()->map_nodes();
+  }else{ untested();
+  }
+}
+
 	protected: // inline, below
 		template <class T>
 			T   dampdiff(T*, const T&);
