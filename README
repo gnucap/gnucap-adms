@@ -10,6 +10,22 @@ synopsis:
     generates c++ code distributed over file.cc file.h file_top.hxx ...
     containing a gnucap device
 
+gnucap session example, FTR:
+
+current status is, with gnucap/unstable + gnucap-make + gnucap-adms, you can do
+
+$ gnucap -a lang_adms.so -a d_adms_vbr.so -a d_adms_i.so -a c_make_attach.so
+[..]
+gnucap> load_va somemodel.va
+[ translates, compiles/caches and loads... ]
+gnucap> (use the models)
+gnucap> end
+
+here "use the models" means that you can use the components from the .va files
+in your netlists.
+
+expect this to work for *some* models only, but you get the idea.
+
 installation prerequisites:
  - current adms [1] should work.
  - gnucap-uf or gnucap/unstable
@@ -42,6 +58,8 @@ remarks:
  - some details don't work with gnucap 0.36, cf. examples
  - indentation in gnucap.xml (two spaces) has been taken over from "adms-mot",
    the generated code should be approximately BSD KNF style.
+ - there are no optimizations yet. hence bigger components will be slow.
+   everything is prepared to move forward to modelgen style evaluation...
 
 ==== note on split.py ====
 The script gnucap.xml will be modified, before can be used by admsXml:
