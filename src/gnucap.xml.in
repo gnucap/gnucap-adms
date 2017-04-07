@@ -2707,11 +2707,6 @@ bool $(DEV_NAME)::tr_needs_eval()const
 	  || _sim->is_advance_or_first_iteration() ) { itested();
 		return true;
 	}
-  <admst:if test="[$sckt_size!=0]">
-	if( subckt()->tr_needs_eval()){
-		// return true; no (not slave)
-	}
-  </admst:if>
 
 	if (_time[1] == 0){
 		trace0(&quot;tr_needs_eval: //BUG// needed?? for ngspice jfet, but not for spice3f5 jfet&quot;);
