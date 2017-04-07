@@ -68,6 +68,8 @@ UFCHECKLIB = \
     ager.la \
     ager.sub.la \
     aging_mos.la \
+	 d_ageQ_18.la \
+	 mos1_a7.la \
     mos.1.la
 else
 	UFCHECKLIB =
@@ -224,11 +226,12 @@ GCUF_TESTS = \
     bvs.gc \
     ager.gc \
     ager.sub.gc \
-	 aging_mos.gc \
+    aging_mos.gc \
     rc_uic.gc \
     ddc_rc.gc \
     ddc.2.gc \
-	 mos.1.gc \
+    mos.1.gc \
+    mos_tt.gc \
     ttint.gc
 endif
 

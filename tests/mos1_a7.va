@@ -1,0 +1,301 @@
+`include "discipline.h"
+`include "constants.h"
+`include "gnucap-adms.h"
+
+// level1 mosfet with distributed bti effect
+
+`define pN 1
+`define pP 0
+
+`define EPS0   8.8541879239442001396789635e-12
+`define EPS_OX 3.9*`EPS0/100.0
+
+`ifdef insideADMS
+ `define P(p) (*p*)
+`else
+ `define
+`endif
+
+
+
+//--------------------
+// mos_level1
+//
+// -  A basic, level 1, Schichmann-Hodges style model of a MOSFET transistor
+//
+// INSTANCE parameters
+//    width  = [m]
+//    length = [m]
+//    vto    = threshold voltage [V]
+//    gamma  = bulk threshold []
+//    phi    = bulk junction potential [V]
+//    lambda = channel length modulation []
+//    tox    = oxide thickness []
+//    u0     = transconductance factor []
+//    xj     = metallurgical junction depth []
+//    is     = saturation current []
+//    cj     = bulk junction capacitance [F]
+//    vj     = bulk junction voltage [V]
+//    mj     = bulk grading coefficient []
+//    fc     = forward bias capacitance factor []
+//    tau    = parasitic diode factor []
+//    cgbo   = gate-bulk overlap capacitance [F]
+//    cgso   = gate-source overlap capacitance [F]
+//    cgdo   = gate-drain overlap capacitance [F]
+//    dev_type   = the type of mosfet used []
+//
+`define AGE
+module ageQ(p, n, d);
+	parameter real dummy=0. `P(type="instance");  // BUG.
+	electrical p,n;
+	degradational d;
+endmodule
+
+// currently: pmos only.
+// only forward polarity...
+module mos_level1(drain, gate, source, bulk);
+	inout drain, gate, source, bulk;
+	electrical drain, gate, source, bulk;
+
+	// channel model
+	electrical mid1, mid2, mid3, mid4, mid5;
+
+`ifdef AGE
+	degradational deg0, deg1, deg2, deg3, deg4, deg5, deg6;
+`endif
+
+	parameter real width = 1u    from (0:inf);
+	parameter real length = 1u   from (0:inf);
+	parameter real vto = 1       from (0:inf);
+	parameter real gamma = 0     from [0:inf);
+	parameter real phi = 0.6     from (0:inf);
+	parameter real lambda = 0.05 from [0:inf);
+	parameter real tox = 1e-7    from (0:inf);
+	parameter real u0 = 600      from (0:inf);
+	parameter real xj = 0        from [0:inf);
+	parameter real is = 1e-14    from (0:inf);
+	parameter real cj=0          from [0:inf);
+	parameter real vj=0.75       exclude 0;
+	parameter real mj=0.5        from [0:1);
+	parameter real fc=0.5        from [0:1);
+	parameter real tau = 0       from [0:inf);
+	parameter real cgbo = 0      from [0:inf);
+	parameter real cgso = 0      from [0:inf);
+	parameter real cgdo = 0      from [0:inf);
+	parameter integer dev_type = `pN;
+
+`define F1(m, f, v)     ((v/(1 - m))*(1 - pow((1 - f), m)))
+`define F2(m, f)        (pow((1 - f), (1 + m)))
+`define F3(m, f)        (1 - f*(1 + m))
+
+	real vgs,
+	     vbs,
+	     vbd,
+	     vgb,
+	     vgd,
+	     id,
+	     ibs,
+	     ibd,
+	     qgb,
+	     qgs,
+	     qgd,
+	     qbd,
+	     qbs;
+	real dvth_d (* ask="yes" *);
+	real dvth_s (* ask="yes" *);
+	real dvth_eff (* ask="yes" *);
+	real dvth_avg (* ask="yes" *);
+	real vth (* ask="yes" *);
+	real vds (* ask="yes" *);
+	real ids (* ask="yes" *);
+	real gmf (* ask="yes" *);
+
+
+`ifdef AGE
+	real c0 (* ask="yes" *);
+	real c1 (* ask="yes" *);
+	real c2 (* ask="yes" *);
+	real c3 (* ask="yes" *);
+	real c4 (* ask="yes" *);
+	real c5 (* ask="yes" *);
+	real c6 (* ask="yes" *);
+
+	real dvth0 (* ask="yes" *);
+	real dvth1 (* ask="yes" *);
+	real dvth2 (* ask="yes" *);
+	real dvth3 (* ask="yes" *);
+	real dvth4 (* ask="yes" *);
+	real dvth5 (* ask="yes" *);
+	real dvth6 (* ask="yes" *);
+`endif
+
+	real kp (* ask="yes" *);
+	real cox (* ask="yes" *);
+	real beta (* ask="yes" *);
+	real leff (* ask="yes" *);
+	real gd (* ask="yes" *);
+	real fc1, fc2, fc3, fpb;
+
+	integer dev_type_sign;
+
+
+	analog function real carriers;
+		input vgs;
+		input vgd;
+		input vth;
+		begin
+//			real vds; BUG
+//			vds = vgs - vgd;
+			if (vgs <= vth) begin
+				carriers = 0.;
+			end else if (vgd > vth ) begin
+				//
+				// linear region.
+				//
+				carriers = (vgs - vth - (vgs-vgd)/2);
+			//id = beta*(vgs - vth - vds/2)*vds*(1 + lambda*vds);
+			// (vgs - vth - vds/2)
+			end else begin
+				//
+				// saturation region.
+				//
+// sat:  ids = beta*0.5*(vgs - vth)*(vgs - vth)*(1 + lambda*vds);
+// 0.5*(vgs - vth)*(vgs - vth) / vds
+
+				carriers = 0.5*(vgs - vth)*(vgs - vth) / (vgs-vgd);
+//				carriers = 0.5*(vgs - vth)*(vgs - vth) / (vds);
+			end
+		end
+	endfunction
+
+`ifdef AGE
+	ageQ #(.dummy(0)) myQ0(source,gate,deg0);
+	ageQ #(.dummy(0)) myQ1(mid1,  gate,deg1);
+	ageQ #(.dummy(0)) myQ2(mid2,  gate,deg2);
+	ageQ #(.dummy(0)) myQ3(mid3,  gate,deg3);
+	ageQ #(.dummy(0)) myQ4(mid4,  gate,deg4);
+	ageQ #(.dummy(0)) myQ5(mid5,  gate,deg5);
+	ageQ #(.dummy(0)) myQ6(drain, gate,deg6);
+`endif
+
+	analog begin
+		// initial_model?!
+		@ ( initial_step ) begin
+			leff = length - 2*xj;
+			cox =`EPS_OX/tox;
+			kp = u0*cox;
+			fc1 = `F1(mj, fc, vj);
+			fc2 = `F2(mj, fc);
+			fc3 = `F3(mj, fc);
+			fpb = fc*mj;
+			dvth_eff = 0.;
+
+			if( dev_type == `pN )
+				dev_type_sign = 1;
+			else
+				dev_type_sign = -1;
+		end
+
+		vds = dev_type_sign*V(drain, source);
+		vgs = dev_type_sign*V(gate, source);
+		vgb = dev_type_sign*V(gate, bulk);
+		vgd = dev_type_sign*V(gate, drain);
+		vbs = dev_type_sign*V(bulk, source);
+		vbd = dev_type_sign*V(bulk, drain);
+
+		// if (vds < 0) begin
+		// 	reversed = !reversed;
+		// 	vgs -= vds;
+		// 	vbs -= vds;
+		// 	vds = -vds;
+		// end
+
+		V(mid1) <+ (   V(drain) + 5.*V(source)) / 6.;
+		V(mid2) <+ (2.*V(drain) + 4.*V(source)) / 6.;
+		V(mid3) <+ (3.*V(drain) + 3.*V(source)) / 6.;
+		V(mid4) <+ (4.*V(drain) + 2.*V(source)) / 6.;
+		V(mid5) <+ (5.*V(drain) + 1.*V(source)) / 6.;
+
+		if (vbs > 2*phi) begin
+			vth = vto + gamma*sqrt(2*phi);
+		end else begin
+			vth = vto + gamma*(sqrt(2*phi) - sqrt(2*phi - vbs));
+		end
+
+// --------------------------
+
+		//
+		// parasitic diodes...
+		//
+		ibd = is*(exp(vbd/$vt) - 1);
+		ibs = is*(exp(vbs/$vt) - 1);
+
+		if (vbd <= fpb) begin
+			qbd = tau*ibd + cj*vj*(1 - pow((1 - vbd/vj), (1 - mj)))/(1 - mj);
+		end else begin
+			qbd = tau*ibd + cj*(fc1 + (1/fc2)*(fc3*(vbd - fpb) +
+			      (0.5*mj/vj)*(vbd*vbd - fpb*fpb)));
+		end
+
+		if (vbs <= fpb) begin
+			qbs = tau*ibs + cj*vj*(1 - pow((1 - vbs/vj), (1 - mj)))/(1 - mj);
+		end else begin
+			qbs = tau*ibs + cj*(fc1 + (1/fc2)*(fc3*(vbs - fpb) +
+			      (0.5*mj/vj)*(vbs*vbs - fpb*fpb)));
+		end
+
+		//
+		// channel component of drain current. (channel charge ignored)...
+		//
+		real gd_raw; gd_raw = 0;
+		beta = kp*width/leff;
+		vgd = vgs - vds;
+
+`ifdef AGE
+		dvth0 = State(deg0);
+		dvth1 = State(deg1);
+		dvth2 = State(deg2);
+		dvth3 = State(deg3);
+		dvth4 = State(deg4);
+		dvth5 = State(deg5);
+		dvth6 = State(deg6);
+
+		real vg0; vg0 = vgs;
+		real vg1; vg1 = (6.*vgs +    vgd)/7.;
+		real vg2; vg2 = (5.*vgs + 2.*vgd)/7.;
+		real vg3; vg3 = (4.*vgs + 3.*vgd)/7.;
+		real vg4; vg4 = (3.*vgs + 4.*vgd)/7.;
+		real vg5; vg5 = (2.*vgs + 5.*vgd)/7.;
+		real vg6; vg6 = (1.*vgs + 6.*vgd)/7.;
+		real vg7; vg7 = vgd;
+
+		c0 = carriers(vg0, vg1, vth+dvth0) / 7.;
+		c1 = carriers(vg1, vg2, vth+dvth1) / 7.;
+		c2 = carriers(vg2, vg3, vth+dvth2) / 7.;
+		c3 = carriers(vg3, vg4, vth+dvth3) / 7.;
+		c4 = carriers(vg4, vg5, vth+dvth4) / 7.;
+		c5 = carriers(vg5, vg6, vth+dvth5) / 7.;
+		c6 = carriers(vg6, vg7, vth+dvth6) / 7.;
+
+		gd_raw = c0 + c1 + c2 + c3 + c4;
+`else
+		gd_raw = gd_raw + carriers(vgs, vgd, vth);
+`endif
+
+		gd = gd_raw * beta * (1 + lambda*vds);
+
+      gmf  = beta * vds * (1. + lambda * vds);
+
+		qgb = cgbo * vgb;
+		qgs = cgso * vgs;
+		qgd = cgdo * vgd;
+
+		ids = dev_type_sign * gd * vds;
+		I(drain, source) <+ dev_type_sign * gd * vds;
+		I(bulk, drain)   <+ dev_type_sign * (ibd + ddt(qbd));
+		I(bulk, source)  <+ dev_type_sign * (ibs + ddt(qbs));
+		I(gate, bulk)    <+ dev_type_sign *  ddt(qgb);
+		I(gate, source)  <+ dev_type_sign *  ddt(qgs);
+		I(gate, drain)   <+ dev_type_sign *  ddt(qgd);
+	end
+endmodule
