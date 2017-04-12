@@ -344,6 +344,7 @@ SENSOR_SO = op.so ldo.so vbg.so sensor.so
 
 res2.log: res.so
 rc1.log: rc.so
+hyst1.log: mul.so
 
 LT = <
 
