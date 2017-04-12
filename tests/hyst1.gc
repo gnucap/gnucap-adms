@@ -1,0 +1,20 @@
+options trtol 3
+load ./hyst1.so
+load ./mul.so
+verilog
+
+mul p1 (p, f2, f1);
+hyst1 h1(p, top, 0, dir, pol, drv);
+spice
+
+g1 4 0 2 0 t1
+
+v1 f1 0 sin freq=5 amplitude=6 offset=1.5
+v2 f2 0 t1
+.model t1 table 0,0 10,10 order=1
+
+r1 top 0 .1
+
+.print tran v(p) v(pol) c_(h1)
+.tran 0 1 > hyst1_tr.out echo
+.end

@@ -1,5 +1,5 @@
 // Copyright 2013 Felix
-// voltage source
+// capacitor
 
 `include "discipline.h"
 `include "constants.h"

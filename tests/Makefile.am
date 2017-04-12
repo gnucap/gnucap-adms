@@ -54,6 +54,7 @@ check_LTLIBRARIES = \
     int.la pid.la \
 	 vcvs.la \
     diff.la \
+    hyst1.la \
     meas.la \
     mul.la \
     rc.la \
@@ -156,6 +157,7 @@ SO_TESTS = \
     res.gc \
     op.gc \
     sensor.gc \
+    hyst1.gc \
     lamp.gc \
     mid.gc \
     vbg.gc \
