@@ -36,6 +36,7 @@ check_LTLIBRARIES = \
     vs2.la \
     cap.la \
     cap_rescale.la \
+    chemical.la \
     cs.la \
     coil.la \
     ccvs.la \

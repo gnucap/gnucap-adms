@@ -1,0 +1,36 @@
+`include "discipline.h"
+`include "constants.h"
+`include "gnucap-adms.h"
+
+`define attr(txt) (*txt*)
+
+module reaction(nout, nin);
+
+	electrical nout;
+	electrical nin;
+
+	chemical c1;
+	chemical c2;
+
+	parameter real vK = -84e-3   from (-inf:inf) `attr(ask="yes" type="instance");
+
+	vsource #(.dc(vK)) vkalium(nin, nout);
+
+	analog begin
+
+		real VV;
+
+		VV = V(nin, nout);
+
+		I(nin, nout) <+ V(nin, nout);
+
+		R(c1, c2) <+ ddt(C(c1, c2));
+		C(c2) <+ 1.+tanh(VV);
+
+	end
+endmodule
+
+
+
+
+
