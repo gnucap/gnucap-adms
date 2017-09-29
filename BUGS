@@ -3,3 +3,6 @@
 - cannot reuse existing device names
 - V(..)<+ is experimental
 - subcoil test complains about double load...
+- model parameters not precalc'd after immediate instanciation
+- ask does not work on instance parameters
+- (negative parapeter defaults?)

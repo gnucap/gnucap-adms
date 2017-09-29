@@ -36,6 +36,7 @@ check_LTLIBRARIES = \
     vs2.la \
     cap.la \
     cap_rescale.la \
+    chemical.la \
     cs.la \
     coil.la \
     ccvs.la \
@@ -54,6 +55,7 @@ check_LTLIBRARIES = \
     int.la pid.la \
 	 vcvs.la \
     diff.la \
+    hyst1.la \
     meas.la \
     mul.la \
     rc.la \
@@ -68,6 +70,8 @@ UFCHECKLIB = \
     ager.la \
     ager.sub.la \
     aging_mos.la \
+	 d_ageQ_18.la \
+	 mos1_a7.la \
     mos.1.la
 else
 	UFCHECKLIB =
@@ -154,6 +158,7 @@ SO_TESTS = \
     res.gc \
     op.gc \
     sensor.gc \
+    hyst1.gc \
     lamp.gc \
     mid.gc \
     vbg.gc \
@@ -224,11 +229,12 @@ GCUF_TESTS = \
     bvs.gc \
     ager.gc \
     ager.sub.gc \
-	 aging_mos.gc \
+    aging_mos.gc \
     rc_uic.gc \
     ddc_rc.gc \
     ddc.2.gc \
-	 mos.1.gc \
+    mos.1.gc \
+    mos_tt.gc \
     ttint.gc
 endif
 
@@ -339,6 +345,7 @@ SENSOR_SO = op.so ldo.so vbg.so sensor.so
 
 res2.log: res.so
 rc1.log: rc.so
+hyst1.log: mul.so
 
 LT = <
 

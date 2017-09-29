@@ -2,6 +2,18 @@
 // not be implemented
 `include "discipline.h"
 
+module vsource(p,n);
+   inout p,n;
+   electrical p,n;
+   parameter real dc=0. from [0:inf);
+endmodule
+
+module capacitor(p,n);
+   inout p,n;
+   electrical p,n;
+   parameter real c=0. from [0:inf);
+endmodule
+
 module R(p,n);
    inout p,n;
 	electrical p,n;

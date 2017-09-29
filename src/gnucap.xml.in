@@ -429,6 +429,7 @@
 <admst:for-each select="discipline">
 #define abstol_potential_%(./name) %(potential/abstol)
 #define abstol_flow_%(./name) %(flow/abstol)
+  <admst:message format="found discipline %(./name)\n"/>
   <admst:push into="$(mydisciplines)" select="." onduplicate="ignore"/>
 </admst:for-each>
 
@@ -855,21 +856,24 @@ inline double _BR(int p, int n) {
 }
 
 // discipline wrapped value
+
+<admst:for-each select="$mydisciplines[.!=''
+	and ./name!='electrical'
+	and ./name!='thermal'
+	and ./name!='degradational']">
+	// WRAP %(./name)
+inline double _NP(Node_%(./name) p)
+{ untested();
+	assert(is_number(_n[p].v0()));
+	return _n[p].v0();
+}
+</admst:for-each>
+
 // TODO: move to header/expand as required?
 #define NP(p) _NP($(node_prefix) ## p)
 inline voltage_t _NP(Node_electrical p)
 { itested();
 	return std::min(1000., std::max(-1000., _n[p].v0()) );
-}
-inline double _NP(Node_magnetic p)
-{ untested();
-	assert(is_number(_n[p].v0()));
-	return _n[p].v0();
-}
-inline double _NP(Node_rotational_omega p)
-{ untested();
-	assert(is_number(_n[p].v0()));
-	return _n[p].v0();
 }
 inline double _NP(Node_thermal p)
 { untested();
@@ -889,7 +893,14 @@ inline double _NP(Node_degradational p)
 }
 </admst:if>
 #define BP(p,n) _BP($(node_prefix) ## p, $(node_prefix) ## n)
-inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limited(_n[p],_n[n]);}
+
+
+<admst:for-each select="$mydisciplines[.!=''
+                     and ./name!='degradational'
+                     and ./name!='logic'
+                     and ./name!='thermal']">
+inline voltage_t _BP(Node_%(./name) p, Node_%(./name) n) { return volts_limited(_n[p],_n[n]);}
+</admst:for-each>
 
 #define _N(n) _n[$(node_prefix) ## n]
 
@@ -1082,19 +1093,22 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
 		bool uic_now(unsigned stateno=-1)const;
 	</admst:if>
 	private: // discipline stuff
+
 		// absolute checks FIXME: this is not the way gnucap does checks
+  <admst:for-each
+     select="$mydisciplines[.!=''
+                            and ./name!='electrical'
+                            and ./name!='logic'
+                            and ./name!='degradational']">
+		// AUTO %(./name)
+		bool conchk( Node_%(./name) a, double reltol=OPT::reltol ) const {
+			return ::conchk(CKT_BASE::_sim->_vt1[_n[a].m_()], _n[a].v0(), abstol_flow_%(./name), reltol);
+		}
+  </admst:for-each>
+
 		bool conchk( Node_electrical a, double reltol=OPT::reltol ) const {
 			/// hmm really OPT::abstol?
 			return ::conchk(CKT_BASE::_sim->_vt1[_n[a].m_()], _n[a].v0(), OPT::abstol, reltol);
-		}
-		bool conchk( Node_magnetic a, double reltol=OPT::reltol ) const {
-			return ::conchk(CKT_BASE::_sim->_vt1[_n[a].m_()], _n[a].v0(), abstol_flow_magnetic, reltol);
-		}
-		bool conchk( Node_rotational_omega a, double reltol=OPT::reltol ) const {
-			return ::conchk(CKT_BASE::_sim->_vt1[_n[a].m_()], _n[a].v0(), abstol_flow_rotational_omega, reltol);
-		}
-		bool conchk( Node_thermal a, double reltol=OPT::reltol ) const {
-			return ::conchk(CKT_BASE::_sim->_vt1[_n[a].m_()], _n[a].v0(), abstol_flow_thermal, reltol);
 		}
   <admst:for-each select="$mydisciplines[.!='' and ./name='degradational']">
 		bool conchk( Node_degradational a, double reltol=OPT::reltol ) const {
@@ -1109,10 +1123,16 @@ inline voltage_t _BP(Node_electrical p, Node_electrical n) { return volts_limite
 			return ::conchk(CKT_BASE::_sim->_vt1[_n[a].m_()] - CKT_BASE::_sim->_vt1[_n[b].m_()],
 			    _n[a].v0() - _n[b].v0(), OPT::abstol, reltol);
 		}
-		bool conchk( Node_thermal a, Node_thermal b, double reltol=OPT::reltol ) const {
+  <admst:for-each select="$mydisciplines[.!=''
+                     and ./name!='degradational'
+                     and ./name!='logic'
+                     and ./name!='electrical']">
+// AUTO
+		bool conchk( Node_%(./name) a, Node_%(./name) b, double reltol=OPT::reltol ) const {
 			return ::conchk(CKT_BASE::_sim->_vt1[_n[a].m_()] - CKT_BASE::_sim->_vt1[_n[b].m_()],
-			    _n[a].v0() - _n[b].v0(), abstol_flow_thermal, reltol);
+			    _n[a].v0() - _n[b].v0(), abstol_flow_%(./name), reltol);
 		}
+  </admst:for-each>
 		// these are never inputs.
   <admst:for-each select="$mydisciplines[.!='' and ./name!='electrical']">
 		bool conchk( Node_electrical, Node_%(name), double=0 ) const {
@@ -2185,6 +2205,7 @@ void $(DEV_NAME)::expand()
 	const $(MODEL_NAME)* m = prechecked_cast&lt;const $(MODEL_NAME)*&gt;(c-&gt;model());
 	USE(m);
 	trace2(&quot;$(DEV_NAME)::expand&quot;, c-&gt;modelname() ,OPT::_keep_time_steps);
+	$(DEV_NAME) const*const d=this;
 
 	if (!subckt()) {
 		new_subckt();
@@ -2319,7 +2340,6 @@ void $(DEV_NAME)::expand()
 		}
 </admst:for-each>
 
-		// contributions, setup
 <admst:for-each select="$(module_source_branches)">
   <admst:variable name="B" select="%(.)"/>
   // B %(.), %(./pnode), %(./pnode/discipline) %(discipline)
@@ -2333,7 +2353,7 @@ void $(DEV_NAME)::expand()
   // I %(.)
     </admst:for-each>
 
-		{ // %(.)
+		{ // contribution setup %(.)
 			unsigned c = %(count($uniqueVprobes));
 			unsigned f = %(count($uniqueIprobes));
 			node_t nodes[] = {
@@ -2707,11 +2727,6 @@ bool $(DEV_NAME)::tr_needs_eval()const
 	  || _sim->is_advance_or_first_iteration() ) { itested();
 		return true;
 	}
-  <admst:if test="[$sckt_size!=0]">
-	if( subckt()->tr_needs_eval()){
-		// return true; no (not slave)
-	}
-  </admst:if>
 
 	if (_time[1] == 0){
 		trace0(&quot;tr_needs_eval: //BUG// needed?? for ngspice jfet, but not for spice3f5 jfet&quot;);

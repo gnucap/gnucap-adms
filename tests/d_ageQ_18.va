@@ -1,0 +1,49 @@
+
+`include "discipline.h"
+`include "constants.h"
+`include "gnucap-adms.h"
+
+`ifdef insideADMS
+ `define P(p) (*p*)
+`else
+ `define
+`endif
+
+module ageQ(p, n, d);
+   parameter real dummy=0. `P(type="instance");  // ADMS BUG. fixed in development?
+   electrical p,n;
+	real s `P(ask="yes");
+	real a `P(ask="yes");
+	real b `P(ask="yes");
+	real q `P(ask="yes");
+	degradational d;
+	degradational n1, n2;
+   degradational n3, n4, n5, n6, n7, n8, n9, n10;
+	degradational n11, n12, n13, n14;
+	degradational n15, n16, n17, n18;
+	rcd_exp #(.weight(1.0),.rc1( -2.95489447401 ),.rc0( -1.69543153423 ),.re1( 2.13666624932 ),.re0( 3.31251682583 )) rcd1(p,n,n1);
+	rcd_exp #(.weight(1.0),.rc1( -4.12767011847 ),.rc0( 2.17997169234 ),.re1( 0.0 ),.re0( 14.9986357191 )) rcd2(p,n,n2);
+	rcd_exp #(.weight(1.0),.rc1( -4.83614509384 ),.rc0( -8.11620187861 ),.re1( 4.04169594934 ),.re0( 9.77047786731 )) rcd3(p,n,n3);
+	rcd_exp #(.weight(1.0),.rc1( -2.93208386546 ),.rc0( 10.3283206836 ),.re1( 0.0 ),.re0( 13.9918898657 )) rcd4(p,n,n4);
+	rcd_exp #(.weight(1.0),.rc1( -6.38026519698 ),.rc0( -0.379802092787 ),.re1( 10.0630995339 ),.re0( 2.03892449528 )) rcd5(p,n,n5);
+	rcd_exp #(.weight(1.0),.rc1( -2.4365787966 ),.rc0( 11.3999697088 ),.re1( 6.88101452775 ),.re0( 0.296236333362 )) rcd6(p,n,n6);
+	rcd_exp #(.weight(1.0),.rc1( -11.5266202223 ),.rc0( 1.96734713245 ),.re1( 11.37135207 ),.re0( 9.94686382805 )) rcd7(p,n,n7);
+	rcd_exp #(.weight(1.0),.rc1( -11.7136922378 ),.rc0( 11.6372519273 ),.re1( 2.97101588348 ),.re0( 3.74359646029 )) rcd8(p,n,n8);
+	rcd_exp #(.weight(1.0),.rc1( -2.21624399858 ),.rc0( 13.7594108413 ),.re1( 0.42403577887 ),.re0( 14.7363812899 )) rcd9(p,n,n9);
+	rcd_exp #(.weight(1.0),.rc1( -3.11183664998 ),.rc0( 6.18808328178 ),.re1( 0.0122264123243 ),.re0( 11.5056254093 )) rcd10(p,n,n10);
+	rcd_exp #(.weight(1.0),.rc1( -6.8747861452 ),.rc0( 13.2521771164 ),.re1( 5.69187074615 ),.re0( -13.9110457282 )) rcd11(p,n,n11);
+	rcd_exp #(.weight(1.0),.rc1( -4.20850419455 ),.rc0( -13.9665809935 ),.re1( 11.046550018 ),.re0( 14.7376404547 )) rcd12(p,n,n12);
+	rcd_exp #(.weight(1.0),.rc1( -11.2390939487 ),.rc0( -11.7639361833 ),.re1( 5.48106872997 ),.re0( -1.17712558367 )) rcd13(p,n,n13);
+	rcd_exp #(.weight(1.0),.rc1( -7.68126370758 ),.rc0( 2.18130037621 ),.re1( 3.64461364163 ),.re0( -8.81395894351 )) rcd14(p,n,n14);
+
+	analog begin
+		@ ( initial_step ) begin
+			State(d) <+ 0;
+		end
+		s = V(p) - V(n);
+
+		q = 0.153665241073 * State(n1 )+ 931.542000504 * State(n2 )+ 9358.12537952 * State(n3 )+ 1.32292183994 * State(n4 )+ 0.000586806835979 * State(n5 )+ 0.022843040183 * State(n6 )+ 0.945701131204 * State(n7 )+ 9.45504800311e-11 * State(n8 )+ 0.4965309944 * State(n9 )+ 2.47533108405 * State(n10 )+ 0.0129870042451 * State(n11 )+ 521.203734372 * State(n12 )+ 199.400487167 * State(n13 )+ 5.28451556847e-10 * State(n14 )+ 4.16946105493e-07 * State(n15 )+ 16.7029042507 * State(n16 )+ 0.00740793358568 * State(n17 )+ 0.00318771449168 * State(n18 );
+
+		State(d) <+ q;
+	end
+endmodule

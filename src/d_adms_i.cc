@@ -1,6 +1,7 @@
-/*$Id: d_poly_g.cc,v 26.137 2010/04/10 02:37:05 al Exp $ -*- C++ -*-
- * Copyright (C) 2001 Albert Davis
- * Author: Albert Davis <aldavis@gnu.org>
+/*
+ * Copyright (C) 2015-2017 Felix Salfelder
+ *               2001 Albert Davis
+ * Author: Felix Salfelder <felix@salfelder.org>
  *
  * This file is part of "Gnucap", the Gnu Circuit Analysis Package
  *

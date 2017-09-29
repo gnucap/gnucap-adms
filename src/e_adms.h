@@ -84,7 +84,7 @@ void map_nodes()
   assert(net_nodes() <= max_nodes());
   //assert(ext_nodes() + int_nodes() == matrix_nodes());
 
-  for (int ii = 0; ii < ext_nodes()+int_nodes(); ++ii) { untested();
+  for (unsigned ii=0; ii < unsigned(ext_nodes()+int_nodes()); ++ii) { itested();
     _n[ii].map();
   }
 

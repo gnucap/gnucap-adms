@@ -71,12 +71,12 @@ discipline electrical
   flow Current;
 enddiscipline
 // Signal flow disciplines
-discipline voltage
-  potential Voltage;
-enddiscipline
-discipline current
-  potential Current;
-enddiscipline
+// discipline voltage
+//   potential Voltage;
+// enddiscipline
+// discipline current
+//   potential Current;
+// enddiscipline
 // Magnetic
 // Magnetomotive force in Ampere-Turns.
 nature Magneto_Motive_Force
@@ -254,4 +254,20 @@ discipline degradational
   potential Damage;
   flow Stress;
 enddiscipline
+
+nature concentration
+  access = C;
+  units = "%"; // percentage
+  abstol = 1.e-5;
+endnature
+nature reaction
+  access = R;
+  units = "W"; // whatever
+  abstol = 1e-8;
+endnature
+discipline chemical
+  potential concentration;
+  flow reaction;
+enddiscipline
+
 `endif
