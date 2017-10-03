@@ -15,9 +15,11 @@ AM_CONDITIONAL([VPATH_BUILD], [test ! x$srcdir = "x."])
 dnl ------------------- gnucap-uf? -------------------
 
 AC_MSG_CHECKING([gnucap-uf availibility])
-echo | gnucap$_program_suffix -a "lazy models-uf.so" -b /dev/stdin > /dev/null 2>/dev/null
-MODELS_UF=${PIPESTATUS[[1]]}
-AS_IF([ test $MODELS_UF -eq 0 ],[
+dnl should check for banner actually...
+echo -e "load lazy models-uf.so\nunload models-uf.so\nend" | \
+	gnucap$_program_suffix 2>/dev/null | grep plugin\ not\ attached
+NO_MODELS_UF=$?
+AS_IF([ test $NO_MODELS_UF -eq 1 ],[
 	GNUCAP_UF=yes
 		 ],[
 	GNUCAP_UF=no
