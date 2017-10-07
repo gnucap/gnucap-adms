@@ -12,7 +12,7 @@ synopsis:
 
 gnucap session example, FTR:
 
-current status is, with gnucap/unstable + gnucap-make + gnucap-adms, you can do
+current status is, with gnucap/master + gnucap-make + gnucap-adms, you can do
 
 $ gnucap -a lang_adms.so -a d_adms_vbr.so -a d_adms_i.so -a c_make_attach.so
 [..]
@@ -27,14 +27,14 @@ in your netlists.
 expect this to work for *some* models only, but you get the idea.
 
 installation prerequisites:
- - current adms [1] should work.
- - gnucap-uf or gnucap/unstable
+ - current adms [1]
+ - gnucap (of gnucap-uf)
 
 [1] git://github.com/QUCS/adms
 
 configuration:
- --enable-local install plugins to $HOME/.gnucap/lib (in case you have no write
-                access to gnucap_libdir)
+ --enable-local (experimental) install plugins to $HOME/.gnucap/lib,
+                in case you have no write access to gnucap_libdir
                 you then will have to invoke gnucap like
                 LD_LIBRARY_PATH=$HOME/.gnucap/lib
                 in order to load the plugins
@@ -43,23 +43,27 @@ configuration:
                 set program suffix. should be the same as used for gnucap.
 
 features:
- - simple user interface
- - works with gnucap-uf and almost with gnucap
- - sparse matrix allocation
- - initial conditions (experimental)
- - disciplines from discipline.h (experimental)
+ - (controlled) sources for potential and flow
+ - disciplines from discipline.h (partially working)
  - subdevices (incomplete, but works)
+ - see tests and examples
  - under active development
+
+missing:
+ - reference args in analogfunctions
+ - events
+ - everything that adms cannot do
 
 bugs:
  see BUGS
 
 remarks:
- - some details don't work with gnucap 0.36, cf. examples
  - indentation in gnucap.xml (two spaces) has been taken over from "adms-mot",
    the generated code should be approximately BSD KNF style.
  - there are no optimizations yet. hence bigger components will be slow.
    everything is prepared to move forward to modelgen style evaluation...
+ - approach essentially obsolete; however some parts will seamlessly
+   transition to any future project
 
 ==== note on split.py ====
 The script gnucap.xml will be modified, before can be used by admsXml:
