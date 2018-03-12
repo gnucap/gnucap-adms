@@ -28,7 +28,7 @@ expect this to work for *some* models only, but you get the idea.
 
 installation prerequisites:
  - current adms [1]
- - gnucap (of gnucap-uf)
+ - gnucap (or gnucap-uf)
 
 [1] git://github.com/QUCS/adms
 
