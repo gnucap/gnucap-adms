@@ -29,12 +29,18 @@ AC_MSG_RESULT([$GNUCAP_UF])
 dnl this is required for testing.
 AM_CONDITIONAL([GNUCAP_UF], [test x"$GNUCAP_UF" != xno])
 
+echo end | gnucap$_program_suffix -a "lazy c_make_attach.so" | tail -n 1 | grep "not found"
+C_MAKE_ATTACH=$?
+AS_IF([ test $C_MAKE_ATTACH -eq 0 ],[
+	AC_MSG_ERROR([please install gnucap-make])
+])
+
 dnl ------------------- debug? -------------------
 
 AC_MSG_CHECKING([gnucap debug plugin availibility])
-echo | gnucap$_program_suffix -a "lazy c_debug.so" -b /dev/stdin > /dev/null 2>/dev/null
-C_DEBUG=${PIPESTATUS[[1]]}
-AS_IF([ test $C_DEBUG -eq 0 ],[
+echo end | gnucap$_program_suffix -a "lazy c_debug.so" | tail -n 1 | grep "not found"
+C_DEBUG=$?
+AS_IF([ test $C_DEBUG -eq 1 ],[
 	C_DEBUG=yes
 		 ],[
 	C_DEBUG=no
@@ -182,7 +188,6 @@ AC_MSG_RESULT([
 
    prefix:     $prefix
    CPPFLAGS:   $CPPFLAGS
-   plugindir:  $gnucap_libdir
    pkglibdir:  $pkglibdir
    uf:         $GNUCAP_UF
    qucs:       $enable_qucs
