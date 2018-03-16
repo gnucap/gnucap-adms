@@ -174,6 +174,7 @@ void map_nodes()
 				vfprintf(stdout,fmt,arg_ptr);
 				va_end(arg_ptr);
 				printf("\n");
+			}else{ untested();
 			}
 		}
 		void do_warning(const char* fmt, ... )
@@ -184,6 +185,7 @@ void map_nodes()
 				vfprintf(stderr,fmt,arg_ptr);
 				va_end(arg_ptr);
 				fprintf(stderr,"\n");
+			}else{ untested();
 			}
 		}
 		void do_error(const char* fmt, ... )

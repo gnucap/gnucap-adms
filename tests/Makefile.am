@@ -49,6 +49,8 @@ check_LTLIBRARIES = \
     collapse.la \
     vccs.la \
     af.0.la \
+    af.1.la \
+    af.2.la \
     afbuf.la \
     afsquare.la \
     square.la \
@@ -209,6 +211,8 @@ GC_TESTS = \
     cap_rescale.gc \
     cs.gc \
     af.0.gc \
+    af.1.gc \
+    af.2.gc \
     afbuf.gc \
     afsquare.gc \
     square.gc \

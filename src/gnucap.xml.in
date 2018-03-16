@@ -57,9 +57,11 @@
 <admst:variable name="tr_begin"/>
 
 <admst:variable name="requiredderivateforddx" select="no"/>
+
+<!-- whjat is this?! -->
 <admst:variable name="SkipFVariable" select="n"/>
+
 <admst:variable name="ddxinsidederivate" select="no"/>
-<admst:variable name="SkipFVariable" select="n"/>
 <admst:variable name="pprobe"/>
 <admst:variable name="qprobe"/>
 <admst:variable name="e"/>
@@ -492,6 +494,7 @@ class $(MODEL_NAME) : public MODEL_CARD {
 	public: // override virtual
 		MODEL_CARD* clone()const {return new $(MODEL_NAME)(*this);}
 	public: // analog functions from va
+
 	<admst:apply-templates select="." match="analogfunctionH"/>
 
 	public:
@@ -631,7 +634,7 @@ class $(DEV_NAME) : public ADMS_BASE
 	public:
 		explicit $(DEV_NAME)();
 		~$(DEV_NAME)();
-	private:
+	private: // af proxy. should redirect to common. needs work
 	<admst:apply-templates select="." match="analogfunctionPROXY"/>
 	public: // global_instance input
 
@@ -6149,7 +6152,7 @@ EXIT_IF_ISNAN(__%s_%s); // B
               <admst:variable name="index" select="%(index(../arguments,.))"/>
               <admst:variable name="darg" select="$darg,($(arg$(index)_$name))"/>
             </admst:for-each>
-            <admst:return name="dx.$name" string="$(module)_d_$function($args$darg)"/>
+				<admst:return name="dx.$name" string=" /*_*/ $(module)_d_$function($args$darg)"/>
           </admst:for-each>
         </admst:otherwise>
       </admst:choose>
@@ -6337,32 +6340,83 @@ EXIT_IF_ISNAN(__%s_%s); // B
   </admst:choose>
 </admst:template>
 
+<admst:template match="af_functionargs">
+    <admst:variable name="function" select="%(name)"/>
+	 <admst:join select="variable[$function!=name and (input='yes' or output='yes')]"
+		          separator=",\n\t\t   ">
+		 <admst:apply-templates select="." match="v2c:converttype"/>
+		 <admst:text test="[output='yes']" format="&"/> %(name)
+    </admst:join>
+/* endargs */
+</admst:template> <!-- af functionargs -->
+
+<!-- args should be "input" "inout" "nonFoutput" "dargs" -->
+<!-- or : justastheyare + dargs. -->
+<admst:template match="af_d_functionargs">
+    <admst:variable name="function" select="%(name)"/>
+    <admst:join select="variable[name!=$function and (input='yes' or output='yes')]" separator=", ">
+      <admst:apply-templates select="." match="v2c:converttype"/>
+      <admst:text format=" "/>
+      <admst:text test="[output='yes']" format="IGN_"/>%(name)
+    </admst:join>
+    <admst:for-each select="variable[name!=$function and (input='yes' or output='yes')]">, 
+		<admst:apply-templates select="." match="v2c:converttype"/>
+      <admst:text format=" "/>
+      <admst:text test="[output='yes']" format="IGN_"/>d_%(name)
+    </admst:for-each>
+/* extra output 
+    <admst:for-each select="variable[output='yes' and name!=$function]">
+		 , <admst:apply-templates select="." match="v2c:converttype"/> &_o_%(name)
+	 </admst:for-each> */
+</admst:template> <!-- af_d_functionargs -->
+
+<admst:template match="af_d_functioncallargs">
+    <admst:variable name="function" select="%(name)"/>
+    <admst:join select="variable[name!=$function and (input='yes' or output='yes')]" separator=", ">
+      <admst:text format=" "/>
+      <admst:text test="[output='yes']" format="IGN_"/>%(name)
+	 </admst:join>
+	 /*dargs*/
+    <admst:for-each select="variable[name!=$function and (input='yes' or output='yes')]">,
+      <admst:text format=" "/>
+      <admst:text test="[output='yes']" format="IGN_"/>d_%(name)
+    </admst:for-each>
+/* extra output
+    <admst:for-each select="variable[output='yes' and name!=$function]">
+      , _o_%(name)
+	</admst:for-each> */
+</admst:template> <!-- af functionargs -->
+
+<admst:template match="af_functioncallargs">
+    <admst:variable name="function" select="%(name)"/>
+    <admst:join select="variable[$function!=name and (input='yes' or output='yes')]" separator=", ">
+		 %(name)
+    </admst:join>
+/* endargs */
+</admst:template> <!-- af functioncallargs -->
+
 <admst:template match="analogfunctionPROXY">
   <admst:for-each select="/module/analogfunction">
     <admst:variable name="function" select="%(name)"/>
 \t\t
+	 <admst:variable name="argcnt" select="%(count(variable[output='yes']))"/>
     <admst:apply-templates select="." match="v2c:converttype"/> $(af_prefix)$(function) (
-    <admst:join select="variable[input='yes']" separator=", ">
-      <admst:apply-templates select="." match="v2c:converttype"/> %(name)
-    </admst:join>) const {
+<admst:apply-templates select="." match="af_functionargs"/>) const {
 			assert(common());
 			$(MODEL_NAME) const* m = prechecked_cast&lt;$(MODEL_NAME) const* >(common()->model());
 			assert(m);
 			return <admst:variable name="function" select="%(name)"/> m->$(af_prefix)$(function) (
-    <admst:join select="variable[input='yes']" separator=", "> %(name) </admst:join>);
+<admst:apply-templates select="." match="af_functioncallargs"/>);
 		}
-    <admst:apply-templates select="." match="v2c:converttype"/> d_$(af_prefix)$(function) (
-    <admst:join select="variable[input='yes']" separator=", ">
-      <admst:apply-templates select="." match="v2c:converttype"/> %(name)
-    </admst:join>, <admst:join select="variable[input='yes']" separator=", ">
-      <admst:apply-templates select="." match="v2c:converttype"/> d_%(name)
-    </admst:join>) const {
+    <admst:text format="\n\t\t"/>
+	 <admst:variable name="argcnt" select="%(count(variable[output='yes']))"/>
+	 std::array&lt;double, $argcnt> d_$(af_prefix)$(function) (
+	 <admst:apply-templates select="." match="af_d_functionargs"/>) const {
 			assert(common());
 			$(MODEL_NAME) const* m = prechecked_cast&lt;$(MODEL_NAME) const* >(common()->model());
 			assert(m);
 			return <admst:variable name="function" select="%(name)"/> m->d_$(af_prefix)$(function) (
-    <admst:join select="variable[input='yes']" separator=", "> %(name) </admst:join>,
-	 <admst:join select="variable[input='yes']" separator=", "> d_%(name) </admst:join>);
+<admst:apply-templates select="." match="af_d_functioncallargs"/>);
 		}
   </admst:for-each>
 </admst:template>
@@ -6370,77 +6424,98 @@ EXIT_IF_ISNAN(__%s_%s); // B
 <admst:template match="analogfunctionH">
   <admst:for-each select="/module/analogfunction">
     <admst:variable name="function" select="%(name)"/>
-\t\t
-    <admst:apply-templates select="." match="v2c:converttype"/> $(af_prefix)$(function) (
-    <admst:join select="variable[input='yes']" separator=", ">
-      <admst:apply-templates select="." match="v2c:converttype"/> %(name)
-    </admst:join>) const;
-\t\t
-    <admst:apply-templates select="." match="v2c:converttype"/> d_$(af_prefix)$(function) (
-    <admst:join select="variable[input='yes']" separator=", ">
-      <admst:apply-templates select="." match="v2c:converttype"/> %(name)
-    </admst:join>, <admst:join select="variable[input='yes']" separator=", ">
-      <admst:apply-templates select="." match="v2c:converttype"/> d_%(name)
-    </admst:join>) const;
-  </admst:for-each>
-</admst:template>
 
+	  <admst:apply-templates select="." match="v2c:converttype"/> $(af_prefix)$(function) (
+       <admst:apply-templates select="." match="af_functionargs"/>
+    ) const;
+\t\t
+    <admst:variable name="argcnt" select="%(count(variable[output='yes']))"/>
+	 std::array&lt;double, $argcnt> d_$(af_prefix)$(function) (
+       <admst:apply-templates select="." match="af_d_functionargs"/>
+	 ) const;
+  </admst:for-each>
+</admst:template> <!-- af H -->
+
+
+<!-- expands all afs for /module -->
 <admst:template match="analogfunctionC">
   <admst:for-each select="/module/analogfunction">
     <admst:variable name="globalanalogfunction" select="%(.)"/>
     <admst:variable name="function" select="%(name)"/>
+
+/* -------------------------------------------------------------------------- */
     <admst:apply-templates select="." match="v2c:converttype"/> \
 $(MODEL_NAME)::$(af_prefix)$function(
-    <admst:join select="variable[input='yes']" separator=", ">
-      <admst:apply-templates select="." match="v2c:converttype"/> %(name)
-    </admst:join>) const
+<admst:apply-templates select="." match="af_functionargs"/>
+) const
 {
-    <admst:text format="\tdouble $function; "/>
-    <admst:for-each select="variable[input='no' and output='no']">
+    <admst:apply-templates select="." match="v2c:converttype"/> %(name);
+	 <admst:for-each select="variable[$function!=name and input='no' and output='yes']">
+		 %(name) = 0; // initialise output variable. TODO: inout
+	 </admst:for-each>
+
+    <admst:text format="//\tdouble $function;\n"/>
+	 <admst:for-each select="variable[input='no' and output='no']">
+		 // a variable d_%(name)
+
+      <admst:apply-templates select="." match="v2c:converttype"/> %(name);
       <admst:apply-templates select="." match="v2c:converttype"/> d_%(name);
     </admst:for-each>
     <admst:apply-templates select="tree" match="af:print">
       <admst:text format="%(returned('x')/value)"/>
     </admst:apply-templates>
 return $function;
-}
-double $(MODEL_NAME)::d_$(af_prefix)$(function) (
-    <admst:join select="variable[input='yes']" separator=", ">
+} // end $(af_prefix)$function
 
-    <admst:apply-templates select="." match="v2c:converttype"/>
-    <admst:text format=" %(name)"/>
-    </admst:join>,
-    <admst:join select="variable[input='yes']" separator=", ">
-      <admst:apply-templates select="." match="v2c:converttype"/> d_%(name)
-    </admst:join>) const
+/* -------------------------------------------------------------------------- */
+
+    <admst:variable name="argcnt" select="%(count(variable[output='yes']))"/>
+	 std::array&lt;double, $argcnt> $(MODEL_NAME)::d_$(af_prefix)$(function) (
+    <admst:apply-templates select="." match="af_d_functionargs"/>) const
 {
-    <admst:text format="double $function"/>
+
+//    <admst:text format="double $function"/>;
+	 <admst:for-each select="variable[input='no' and output='yes']">
+		 // a variable d_%(name)
+
+\t//<admst:apply-templates select="." match="v2c:converttype"/> %(name);
+
+\t//<admst:apply-templates select="." match="v2c:converttype"/> d_%(name);
+
+    </admst:for-each>
     <admst:for-each select="$globalanalogfunction/variable[input='yes']">
       <admst:variable name="ddx" select="%(name)"/>
-      <admst:text format="; double $(function)_$(ddx)"/>
+		// <admst:text format="; double $(function)_$(ddx);\n"/>
     </admst:for-each>
-    <admst:for-each select="variable[input='no' and output='no']">
+    <!-- KLUDGE: output variables are args (unnecessarily) -->
+    <admst:for-each select="variable[input='no']">
       <admst:variable name="name" select="%(name)"/>
-      <admst:text format="; "/>
+      <admst:text format="\t"/>
       <admst:apply-templates select="." match="v2c:converttype"/>
-      <admst:text format=" $(name)"/>
+      <admst:text format=" $(name);\n"/>
       <admst:for-each select="$globalanalogfunction/variable[input='yes']">
         <admst:variable name="ddx" select="%(name)"/>
-        <admst:text format="; "/>
-        <admst:apply-templates select="." match="v2c:converttype"/><admst:text format=" $(name)_$(ddx)"/>
+        <admst:text format="\t"/>
+		  <admst:apply-templates select="." match="v2c:converttype"/><admst:text format=" $(name)_$(ddx) /* ... */ ;\n"/>
       </admst:for-each>
     </admst:for-each>;
     <admst:apply-templates select="tree" match="af:print:derivate">
     <admst:text format="%(returned('x')/value)"/>
     </admst:apply-templates>
-return 
+	{
+		double ret=	
     <admst:join select="$globalanalogfunction/variable[input='yes']" separator="+">
       <admst:text format="$(function)_%(name)*d_%(name)"/>
     </admst:join>;
-}
+	 <admst:variable name="argcnt" select="%(count(variable[output='yes']))"/>
+	 std::array&lt;double, $argcnt> r;
+    r[0]=ret; return r;
+	}
+} // end d_$(af_prefix)$function
+/* -------------------------------------------------------------------------- */
 
   </admst:for-each>
-</admst:template>
+</admst:template> <!-- af C -->
 
 <admst:template match="af:print:derivate">
   <admst:message test="[/dbg_xml='yes']" format="*(af)af:print:derivate*\n"/>
@@ -6455,7 +6530,7 @@ return
       <admst:for-each select="function/arguments">
         <admst:apply-templates select="." match="af:print:expression">
           <admst:variable name="index" select="%(index(../arguments,.))"/>
-          <admst:variable name="args" select="$args,%(returned('x')/value)"/>
+			 <admst:variable name="args" select="/*H*/ $args,%(returned('x')/value)"/>
         </admst:apply-templates>
       </admst:for-each>
       <admst:return name="x" string="fprintf($outputfile$args); fprintf($outputfile,&quot;\\n&quot;);\n"/>
@@ -8364,7 +8439,7 @@ return
 <!-- IMPLEMENTED TWICE. (2) -->
 <admst:template match="function">
   <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)function*\n"/>
-  /*F %(name)*/
+  /*FUNCTION %(name)*/
   <admst:choose>
     <admst:when test="[name='absdelay']">
       <admst:apply-templates select="arguments[1]" match="ddx"/>
@@ -8490,14 +8565,15 @@ return
     <admst:when test="[$SkipFVariable='y']">
       <admst:variable name="fname" select="%(funcname(.)/[name='fname']/value)"/>
       <admst:variable name="args" select=""/>
+      <admst:variable name="oargs" select=""/>
       <admst:for-each select="arguments">
         <admst:if test="[$args!='']">
-          <admst:variable name="args" select="$args,"/>
+          <admst:variable name="args" select="$args, "/>
         </admst:if>
         <admst:apply-templates select="." match="ddx"/>
         <admst:variable name="args" select="$args$e"/>
       </admst:for-each>
-      <admst:variable name="e" select="$(fname)($args)"/>
+      <admst:variable name="e" select="$(fname)(/*fa*/ $args)"/>
     </admst:when>
     <admst:when test="[name='abs' or name='acos' or name='asin' or name='atan'
                     or name='atanh'
@@ -8532,24 +8608,28 @@ return
       <admst:variable name="e" select="d00_$(fname)$index"/>
     </admst:when>
     <admst:otherwise>
+		/* otherwise function */
       <admst:variable name="fname" select="%(funcname(.)/[name='fname']/value)"/>
       <admst:variable name="args" select=""/>
+      <admst:variable name="oargs" select=""/>
       <admst:for-each select="arguments">
         <admst:if test="[$args!='']">
           <admst:variable name="args" select="$args,"/>
         </admst:if>
         <admst:apply-templates select="." match="ddx"/>
-        <admst:variable name="args" select="$args$e"/>
+		  <admst:variable name="args" select="$args $e"/>
       </admst:for-each>
       <admst:variable name="dargs" select=""/>
-      <admst:for-each select="arguments">
+		<admst:for-each select="arguments">
+        <!-- how to tell which are input?! -->
         <admst:if test="[$dargs!='']">
           <admst:variable name="dargs" select="$dargs,"/>
         </admst:if>
         <admst:apply-templates select="." match="ddx"/>
         <admst:variable name="dargs" select="$dargs$ep"/>
       </admst:for-each>
-      <admst:variable name="e" select="$(fname)($args)"/>
+		<admst:variable name="e" select="$(fname)($args) /* xxxx */"/>
+		<admst:variable name="args" select="$args "/>
     </admst:otherwise>
   </admst:choose>
 
@@ -8585,6 +8665,7 @@ return
     <admst:when test="[name='ceil']">
     </admst:when>
     <admst:when test="[$SkipFVariable='y']">
+      <admst:message test="[/dbg_xml='yes']" format="*SkipFVariable?*\n"/>
     </admst:when>
     <admst:when test="[name='ddt']">
       <admst:variable name="ep" select="_CKTag0 * ($xp)"/> <!-- ??? -->
@@ -8625,8 +8706,11 @@ return
         </admst:otherwise>
       </admst:choose>
     </admst:when>
-    <admst:otherwise>
-      <admst:variable name="ep" select="d_$(fname)($args,$dargs)"/>
+	 <admst:otherwise>
+		 <!-- args: all input args. dargs: their derivatives. -->
+		 <!-- oargs: output (only) args -->
+		 <!-- FIXME: [0]? -->
+		 <admst:variable name="ep" select=" /*OW*/ d_$(fname)($args, /*d*/ $dargs /*o $oargs*/)[0]"/>
     </admst:otherwise>
   </admst:choose>
   <admst:if test="$qprobe">
@@ -8704,7 +8788,7 @@ return
     </admst:when>
 	 <admst:otherwise>
 		 /* eq $fname */
-      <admst:variable name="eq" select="d_$(fname)($args,$dargs)"/>
+      <admst:variable name="eq" select="d_$(fname)($args,$dargs)[0 /*incomplete*/ ]"/>
     </admst:otherwise>
   </admst:choose>
 
