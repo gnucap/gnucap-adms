@@ -8702,7 +8702,8 @@ return
         </admst:otherwise>
       </admst:choose>
     </admst:when>
-    <admst:otherwise>
+	 <admst:otherwise>
+		 /* eq $fname */
       <admst:variable name="eq" select="d_$(fname)($args,$dargs)"/>
     </admst:otherwise>
   </admst:choose>

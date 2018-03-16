@@ -48,7 +48,7 @@ check_LTLIBRARIES = \
     short.la \
     collapse.la \
     vccs.la \
-    analogfunction.la \
+    af.0.la \
     afbuf.la \
     afsquare.la \
     square.la \
@@ -208,7 +208,7 @@ GC_TESTS = \
     cap.gc \
     cap_rescale.gc \
     cs.gc \
-    analogfunction.gc \
+    af.0.gc \
     afbuf.gc \
     afsquare.gc \
     square.gc \
