@@ -493,10 +493,6 @@ class $(MODEL_NAME) : public MODEL_CARD {
 		~$(MODEL_NAME)();
 	public: // override virtual
 		MODEL_CARD* clone()const {return new $(MODEL_NAME)(*this);}
-	public: // analog functions from va
-
-	<admst:apply-templates select="." match="analogfunctionH"/>
-
 	public:
 		void precalc_first();
 		void precalc_last();
@@ -621,6 +617,61 @@ class $(MODEL_NAME) : public MODEL_CARD {
 	 </admst:for-each>
   </admst:for-each>
 /* ========================================================= */
+class $(COMMON_NAME) : public COMMON_ADMS
+{
+	friend class $(DEV_NAME);
+  private:
+//    static map&lt;string, PARA_BASE $(COMMON_NAME)::*&gt; _param_dict;
+	public:
+		void expand(const COMPONENT*);
+		void precalc_first(const CARD_LIST*);
+		void precalc_last(const CARD_LIST*);
+	explicit $(COMMON_NAME)(const $(COMMON_NAME)&amp; p);
+	explicit $(COMMON_NAME)(int c=0);
+	~$(COMMON_NAME)();
+	bool operator==(const COMMON_COMPONENT&amp;)const;
+	COMMON_COMPONENT* clone()const {return new $(COMMON_NAME)(*this);}
+	std::string name()const {itested();return &quot;$(module)&quot;;}
+	void set_param_by_name(std::string name, std::string value);
+<!--
+	//void     set_param_by_index(int, std::string&, int);
+	//bool     param_is_printable(int)const;
+	//std::string param_name(int)const;
+	//std::string param_name(int,int)const;
+	//std::string param_value(int)const;
+	//int param_count()const {return (8 + COMMON_COMPONENT::param_count());}
+<!-- -->
+	public: // analog functions from va
+
+	<admst:apply-templates select="." match="analogfunctionH"/>
+
+	public: // initial conditions
+  <admst:for-each select="contribution[is_ic_contribution(.)/[name='x']/value='yes']">
+	  // PARAMETER&lt;double&gt; ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode);
+  </admst:for-each>
+  <admst:for-each select="$(ddts_ic)">
+	  // %(.)
+	  PARAMETER&lt;double&gt; ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode);
+  </admst:for-each>
+
+<admst:if test="[$(_has_states)='true']">
+	public: // storage related
+
+		void set_states(double*x){
+		unsigned i=0; USE(i);
+		<admst:for-each select="$(ddts)">
+			trace1(&quot;$(COMMON_NAME)::set_states ic_state_%(adms/id(.))&quot;, x[i]);
+			ic_state_%(adms/id(.)) = x[i++];
+		</admst:for-each>
+		}
+	
+		// PARAMETER&lt;vector&lt;PARAMETER&lt;double &gt; &gt; &gt; state_ic;
+  <admst:for-each select="$(ddts)">
+		PARAMETER&lt;double&gt; ic_state_%(adms/id(.)); // %(.)
+  </admst:for-each>
+</admst:if>
+
+};
 
 class $(DEV_NAME) : public ADMS_BASE
 {
@@ -1265,57 +1316,6 @@ inline voltage_t _BP(Node_%(./name) p, Node_%(./name) n) { return volts_limited(
 }; // $(DEV_NAME)
 // ------------------------------------------------------------------------ //
 // ------------------------------------------------------------------------ //
-class $(COMMON_NAME) : public COMMON_ADMS
-{
-	friend class $(DEV_NAME);
-  private:
-//    static map&lt;string, PARA_BASE $(COMMON_NAME)::*&gt; _param_dict;
-	public:
-		void expand(const COMPONENT*);
-		void precalc_first(const CARD_LIST*);
-		void precalc_last(const CARD_LIST*);
-	explicit $(COMMON_NAME)(const $(COMMON_NAME)&amp; p);
-	explicit $(COMMON_NAME)(int c=0);
-	~$(COMMON_NAME)();
-	bool operator==(const COMMON_COMPONENT&amp;)const;
-	COMMON_COMPONENT* clone()const {return new $(COMMON_NAME)(*this);}
-	std::string name()const {itested();return &quot;$(module)&quot;;}
-	void set_param_by_name(std::string name, std::string value);
-<!--
-	//void     set_param_by_index(int, std::string&, int);
-	//bool     param_is_printable(int)const;
-	//std::string param_name(int)const;
-	//std::string param_name(int,int)const;
-	//std::string param_value(int)const;
-	//int param_count()const {return (8 + COMMON_COMPONENT::param_count());}
-<!-- -->
-	public: // initial conditions
-  <admst:for-each select="contribution[is_ic_contribution(.)/[name='x']/value='yes']">
-	  // PARAMETER&lt;double&gt; ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode);
-  </admst:for-each>
-  <admst:for-each select="$(ddts_ic)">
-	  // %(.)
-	  PARAMETER&lt;double&gt; ic_%(./lhs/branch/pnode)_%(./lhs/branch/nnode);
-  </admst:for-each>
-
-<admst:if test="[$(_has_states)='true']">
-	public: // storage related
-
-		void set_states(double*x){
-		unsigned i=0; USE(i);
-		<admst:for-each select="$(ddts)">
-			trace1(&quot;$(COMMON_NAME)::set_states ic_state_%(adms/id(.))&quot;, x[i]);
-			ic_state_%(adms/id(.)) = x[i++];
-		</admst:for-each>
-		}
-	
-		// PARAMETER&lt;vector&lt;PARAMETER&lt;double &gt; &gt; &gt; state_ic;
-  <admst:for-each select="$(ddts)">
-		PARAMETER&lt;double&gt; ic_state_%(adms/id(.)); // %(.)
-  </admst:for-each>
-</admst:if>
-
-};
 
 //inline double $(DEV_NAME)::BP2( $(DEV_NAME)::Node_electrical p,  $(DEV_NAME)::Node_electrical n  ) const{
 //	assert(is_number( _n[p].v0() - _n[n].v0() ));
@@ -6403,9 +6403,10 @@ EXIT_IF_ISNAN(__%s_%s); // B
     <admst:apply-templates select="." match="v2c:converttype"/> $(af_prefix)$(function) (
 <admst:apply-templates select="." match="af_functionargs"/>) const {
 			assert(common());
-			$(MODEL_NAME) const* m = prechecked_cast&lt;$(MODEL_NAME) const* >(common()->model());
-			assert(m);
-			return <admst:variable name="function" select="%(name)"/> m->$(af_prefix)$(function) (
+/// BUG: wrap variable names
+			$(COMMON_NAME) const* ccc_ccc = prechecked_cast&lt;$(COMMON_NAME) const* >(common());
+			assert(ccc_ccc);
+			return <admst:variable name="function" select="%(name)"/> ccc_ccc->$(af_prefix)$(function) (
 <admst:apply-templates select="." match="af_functioncallargs"/>);
 		}
     <admst:text format="\n\t\t"/>
@@ -6413,9 +6414,9 @@ EXIT_IF_ISNAN(__%s_%s); // B
 	 std::array&lt;double, $argcnt> d_$(af_prefix)$(function) (
 	 <admst:apply-templates select="." match="af_d_functionargs"/>) const {
 			assert(common());
-			$(MODEL_NAME) const* m = prechecked_cast&lt;$(MODEL_NAME) const* >(common()->model());
-			assert(m);
-			return <admst:variable name="function" select="%(name)"/> m->d_$(af_prefix)$(function) (
+			$(COMMON_NAME) const* ccc_ccc = prechecked_cast&lt;$(COMMON_NAME) const* >(common());
+			assert(ccc_ccc);
+			return <admst:variable name="function" select="%(name)"/> ccc_ccc->d_$(af_prefix)$(function) (
 <admst:apply-templates select="." match="af_d_functioncallargs"/>);
 		}
   </admst:for-each>
@@ -6445,7 +6446,7 @@ EXIT_IF_ISNAN(__%s_%s); // B
 
 /* -------------------------------------------------------------------------- */
     <admst:apply-templates select="." match="v2c:converttype"/> \
-$(MODEL_NAME)::$(af_prefix)$function(
+$(COMMON_NAME)::$(af_prefix)$function(
 <admst:apply-templates select="." match="af_functionargs"/>
 ) const
 {
@@ -6470,7 +6471,7 @@ return $function;
 /* -------------------------------------------------------------------------- */
 
     <admst:variable name="argcnt" select="%(count(variable[output='yes']))"/>
-	 std::array&lt;double, $argcnt> $(MODEL_NAME)::d_$(af_prefix)$(function) (
+	 std::array&lt;double, $argcnt> $(COMMON_NAME)::d_$(af_prefix)$(function) (
     <admst:apply-templates select="." match="af_d_functionargs"/>) const
 {
 
