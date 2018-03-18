@@ -177,8 +177,7 @@ void map_nodes()
 			}else{ untested();
 			}
 		}
-		void do_warning(const char* fmt, ... )
-		{
+		void do_warning(const char* fmt, ... ) {
 			if(::status.control == 1){  // FIXME: if print_now?!
 				va_list arg_ptr;
 				va_start(arg_ptr,fmt);
@@ -188,8 +187,7 @@ void map_nodes()
 			}else{ untested();
 			}
 		}
-		void do_error(const char* fmt, ... )
-		{
+		void do_error(const char* fmt, ... ) {
 			va_list arg_ptr;
 			va_start(arg_ptr,fmt);
 			vfprintf(stderr,fmt,arg_ptr);
@@ -197,14 +195,21 @@ void map_nodes()
 			fprintf(stderr,"\n");
 			throw(Exception("va error"));
 		}
-		void do_stop()
-		{
+		void do_stop() {
 			throw(Exception("va stop"));
 		}
-		void do_finish(int)
-		{
+		void do_finish(int) {
 			incomplete(); // what does the standard say?
 			throw(Exception("va finish"));
+		}
+	protected: // other
+		double simparam(std::string const& a, double b){
+		  if(a=="gmin"){ untested();
+		    return OPT::gmin;
+		  }else{ untested();
+		    incomplete();
+		    return 0;
+		  }
 		}
 	protected:
 		node_t _nGND;

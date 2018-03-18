@@ -830,14 +830,23 @@ class $(DEV_NAME) : public ADMS_BASE
 		};
 		int load(int mode);
 
-	private: // global_instance (ask?)
-<admst:for-each select="variable[input='no' and scope='global_instance']">
-  <admst:choose>
-    <admst:when test="[type='real']"><admst:text format="\n\t\tdouble $(var_prefix)%(.);\n"/></admst:when>
-    <admst:when test="[type='integer']"><admst:text format="\n\t\tint $(var_prefix)%(.);\n"/></admst:when>
-    <admst:otherwise><admst:text format="\n\t\tstd::string $(var_prefix)%(.);\n"/></admst:otherwise>
-  </admst:choose>
-</admst:for-each>
+	private: // noninput, global_instance (ask?)
+  <admst:for-each select="variable[input='no' and scope='global_instance']">
+\t\t<admst:apply-templates select="." match="v2c:converttype"/> $(var_prefix)%(.);
+  </admst:for-each>
+
+	public: // list some variables
+
+  <admst:for-each select="variable">
+	  // %(input) %(scope) %(.)
+
+  </admst:for-each>
+
+	public: // non-input, non-global-instance
+
+  <admst:for-each select="variable[input='no' and scope!='global_instance']">
+\t\t<admst:apply-templates select="." match="v2c:converttype"/> $(var_prefix)%(.);
+  </admst:for-each>
 
 	public: // global_model... hmmm
 
@@ -1810,7 +1819,6 @@ const double NA(NOT_INPUT);
   <admst:variable name="_has_states" select="true" test="[($tmpc!='0')]"/>
 
 static $(DEV_NAME) p_dev_$(module);
-// static DISPATCHER&lt;CARD&gt;::INSTALL d_$(module)_0(&amp;device_dispatcher, "dev_$(module)", &amp;p_dev_$(module));
 
 static $(MODEL_NAME) p_$(module)(&amp;p_dev_$(module));
 static DISPATCHER&lt;MODEL_CARD&gt;::INSTALL d_$(module)_1(&amp;model_dispatcher, "$(module)", &amp;p_$(module));
@@ -3172,9 +3180,11 @@ void $(DEV_NAME)::guesstopology ()
 //	#include "$(filename)_$(module)_top.hxx"
 { /* -------------------- */
     <admst:apply-templates select="variable"
-      match="generate_c:declare_variable"/>
+                           match="generate_c:declare_variable"/>
+  /* --------------------block */
     <admst:apply-templates select="analog/code[datatypename='block']/variable"
-      match="generate_c:declare_variable"/>
+                           match="generate_c:declare_variable"/>
+  /* --------------------item */
 
     <admst:for-each select="analog/code[datatypename='block']/item">
       <admst:if test="[(datatypename!='block') or (datatypename='block'
@@ -4521,9 +4531,9 @@ inline double d_doh(double x)          {return  exp(x)/(exp(x) + 1); }
   </admst:choose>
 </admst:template>
 
-<!-- ----------------------------------------------------------------- -->
+<!-- nonsense ---------------------------------------------------------------- -->
 <admst:template match="function:simparam">
-  <admst:message test="[/dbg_xml='yes']" format="*(ngspvers)function:simparam*\n"/>
+  <admst:message test="[/dbg_xml='yes']" format="*function:simparam*\n"/>
   <admst:value-of select="name"/>
   <admst:variable name="function" select="%s"/>
   <admst:variable name="args" select=""/>
@@ -4587,7 +4597,7 @@ inline double d_doh(double x)          {return  exp(x)/(exp(x) + 1); }
       <admst:value-to select="/simulator/tmp" value="1.0e-12"/>
     </admst:when>
     <admst:otherwise>
-      <admst:error format="$function($args) -- not implemented in ngspice interface\n"/>
+      <admst:error format="$function($arg1) -- not implemented in gnucap-adms\n"/>
     </admst:otherwise>
   </admst:choose>
 </admst:template>
@@ -5654,19 +5664,19 @@ EXIT_IF_ISNAN(__%s_%s); // B
     <admst:value-to select="/simulator/tmp" value=" /*gli*/ $(var_prefix)%s"/>
   </admst:if>
   <admst:if test="[parametertype!='analogfunction' and scope='local']">
-    <admst:value-to select="/simulator/tmp" value="%s"/>
+    <admst:value-to select="/simulator/tmp" value=" /*fallback1*/ %s"/>
   </admst:if>
 </admst:template>
 
 <!-- ----------------------------------------------------------------- -->
-<!-- variable:lhs -->
+<!-- variable:lhs. yet another implementation or variable -->
 <admst:template match="variable:lhs">
-  <admst:message test="[/dbg_xml='yes']" format="*(ngspvers)variable:lhs*\n"/>
+  <admst:message test="[/dbg_xml='yes']" format="*variable:lhs*\n"/>
   <admst:text test="[input='yes' and parametertype='model']" format="/*pm*/m->$(var_prefix)%(name)"/>
   <admst:text test="[input='yes' and parametertype='instance']" format="/*i*/d-&gt;$(var_prefix)%(name)"/>
   <admst:text test="[input='no' and scope='global_model']" format="/*glm*/m->$(var_prefix)%(name)"/>
   <admst:text test="[input='no' and scope='global_instance']" format=" /*gli*/ $(var_prefix)%(name)"/>
-  <admst:text test="[scope='local']" format="%(name)"/>
+  <admst:text test="[scope='local']" format="$(var_prefix)%(name)"/>
 </admst:template>
 
 <!-- ----------------------------------------------------------------- -->
@@ -6144,7 +6154,7 @@ EXIT_IF_ISNAN(__%s_%s); // B
           </admst:for-each>
         </admst:when>
         <admst:otherwise>
-          <admst:return name="x" string="$(module)_$function($args)"/>
+          <admst:return name="x" string="$function($args)"/>
           <admst:for-each select="$globalanalogfunction/variable[input='yes']">
             <admst:variable name="name" path="name"/>
             <admst:variable name="darg" select=""/>
@@ -6152,7 +6162,7 @@ EXIT_IF_ISNAN(__%s_%s); // B
               <admst:variable name="index" select="%(index(../arguments,.))"/>
               <admst:variable name="darg" select="$darg,($(arg$(index)_$name))"/>
             </admst:for-each>
-				<admst:return name="dx.$name" string=" /*_*/ $(module)_d_$function($args$darg)"/>
+				<admst:return name="dx.$name" string=" /*_*/ d_$function($args$darg)[0]"/>
           </admst:for-each>
         </admst:otherwise>
       </admst:choose>
@@ -7677,11 +7687,14 @@ return $function;
     <admst:when test="[input='no' and scope='global_model']">
       <admst:variable name="e" select="$(modelvar)$(var_prefix)%(name)"/>
     </admst:when>
+    <admst:when test="[input='no' and scope='local']">
+      <admst:variable name="e" select=" /*local*/ $(var_prefix)%(name)"/>
+    </admst:when>
     <admst:when test="[input='no' and scope='global_instance']">
       <admst:variable name="e" select="$(var_prefix)%(name)"/>
     </admst:when>
     <admst:otherwise>
-      <admst:variable name="e" select="%(name)"/>
+      <admst:variable name="e" select=" /*fallback2 %(scope) %(input) */ %(name)"/>
     </admst:otherwise>
   </admst:choose>
 
@@ -8532,6 +8545,20 @@ return $function;
         </admst:when>
       </admst:choose>
     </admst:when>
+	 <admst:when test="[name='\$simparam']">
+
+      <admst:variable name="args" select=""/>
+      <admst:for-each select="arguments">
+        <admst:if test="[$args!='']">
+          <admst:variable name="args" select="$args, "/>
+        </admst:if>
+        <admst:apply-templates select="." match="ddx"/>
+        <admst:variable name="args" select="$args$e"/>
+      </admst:for-each>
+
+      <admst:variable name="e" select="simparam( $args )"/>
+		<!-- <admst:apply-templates select="." match="function:simparam"/> -->
+    </admst:when>
     <admst:when test="[name='\$scale']">
       <admst:assert test="[nilled(arguments)]" format="%(name): should not have arguments\n"/>
       <admst:variable name="e" select="_scale"/>
@@ -8566,7 +8593,6 @@ return $function;
     <admst:when test="[$SkipFVariable='y']">
       <admst:variable name="fname" select="%(funcname(.)/[name='fname']/value)"/>
       <admst:variable name="args" select=""/>
-      <admst:variable name="oargs" select=""/>
       <admst:for-each select="arguments">
         <admst:if test="[$args!='']">
           <admst:variable name="args" select="$args, "/>
@@ -8612,7 +8638,6 @@ return $function;
 		/* otherwise function */
       <admst:variable name="fname" select="%(funcname(.)/[name='fname']/value)"/>
       <admst:variable name="args" select=""/>
-      <admst:variable name="oargs" select=""/>
       <admst:for-each select="arguments">
         <admst:if test="[$args!='']">
           <admst:variable name="args" select="$args,"/>
@@ -8711,7 +8736,7 @@ return $function;
 		 <!-- args: all input args. dargs: their derivatives. -->
 		 <!-- oargs: output (only) args -->
 		 <!-- FIXME: [0]? -->
-		 <admst:variable name="ep" select=" /*OW*/ d_$(fname)($args, /*d*/ $dargs /*o $oargs*/)[0]"/>
+		 <admst:variable name="ep" select=" /*OW*/ d_$(fname)($args, /*d*/ $dargs )[0]"/>
     </admst:otherwise>
   </admst:choose>
   <admst:if test="$qprobe">
@@ -8865,7 +8890,7 @@ return $function;
   <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)blockvariable*\n"/>
   <admst:text format="// { //blockvariable %(.)\n"/>
   <admst:for-each select="variable">
-    <admst:text format="%(vtype(.)) %(name);\n"/>
+    <admst:text format="%(vtype(.)) $(var_prefix)%(name);\n"/>
   </admst:for-each>
 
   <!-- one of the variable here controls a source -->
@@ -8951,7 +8976,7 @@ return $function;
 <!-- ------ analog//function precomp ---- -->
 <admst:template match="function:precomputation">
   <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)function:precomputation*\n"/>
-  <admst:text format="//prec \n"/>
+  <admst:text format="//prec name: %(name) %(.) \n"/>
   <admst:variable name="index" select="%(index(../function[class='builtin'],.))"/>
   <admst:variable name="fname" select="%(funcname(.)/[name='fname']/value)"/>
   <admst:choose>
@@ -8961,6 +8986,9 @@ return $function;
     <admst:when test="[name='div']">
       <admst:text format="m00_div(d00_div$index,d10_$(fname)$index"/>
     </admst:when>
+	 <admst:when test="[name='\$simparam']">
+		 <!-- why am i getting here?! -->
+    </admst:when>
     <admst:when test="[name='mult']">
       <admst:text format="m00_mult(d00_mult$index,d10_mult$index,d11_mult$index"/>
     </admst:when>
@@ -8968,18 +8996,28 @@ return $function;
       <admst:text format="double m00_$(fname)(d00_$(fname)$index"/>
     </admst:otherwise>
   </admst:choose>
-  <admst:text select="arguments" format=",%(e(.))"/>
-  <admst:text format=");\n"/>
+  <admst:choose>
+	 <admst:when test="[name='\$simparam']">
+		 <!-- why am i getting here?! -->
+    </admst:when>
+    <admst:otherwise>
+      <admst:text select="arguments" format=",%(e(.))"/>
+      <admst:text format=");\n"/>
+    </admst:otherwise>
+  </admst:choose>
 </admst:template>
 <!-- ------ analog//function: ddx handling ---- -->
 <admst:template match="function:derivate:precomputationyes">
-<admst:message test="[/dbg_xml='yes']" format="*(tr_eval)function:derivate:precomputationyes*\n"/>
+  <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)function:derivate:precomputationyes*\n"/>
   <admst:if test="[hasVoltageDependentFunction='yes']">
+    <admst:text format=" /* vdf %(.) */ "/>
     <admst:if test="[($ddxinsidederivate='yes' and $_DERIVATEFORDDX='yes'  )
                   or ($ddxinsidederivate='no'  and $_DERIVATE='yes' )]">
       <admst:for-each select="function[class='builtin']">
         <admst:variable name="index" select="%(index(../function[class='builtin'],.))"/>
         <admst:variable name="fname" select="%(funcname(.)/[name='fname']/value)"/>
+		  <admst:text format=" /* pcy %(.) */ "/>
+
         <admst:choose>
           <admst:when test="[name='exp']">
           </admst:when>
@@ -9011,7 +9049,11 @@ return $function;
 <!-- ------------ -->
 <admst:template match="function:derivate:precomputation">
   <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)function:derivate:precomputation*\n"/>
-  <admst:apply-templates select="function[class='builtin']" match="function:precomputation"/>
+  <admst:text format="// 9019 %(.) dynamic: %(dynamic)\n"/>
+  <admst:apply-templates test="[1=1 or dynamic='yes']"
+	                      select="function[class='builtin']"
+	                      match="function:precomputation"/>
+  <admst:text format="// 9022 \n"/>
 
   <admst:if test="[hasVoltageDependentFunction='yes']">
     <!--  <admst:choose>
@@ -9111,24 +9153,29 @@ return $function;
   <admst:variable name="rhs" select="%(rhs)"/>
   <admst:variable name="lhs" select="%(lhs)"/>
   <admst:if test="[$_DYNAMIC='yes']" >
-    <admst:text test="rhs/function[class='builtin']" format="{ // rhs function \n"/>
+    <admst:text test="rhs/function[class='builtin']" format="{ // rhs builtin function %(.)\n"/>
     <admst:for-each select="$lhsprobe">
       <admst:variable name="pprobe" select="%(.)"/>
-      <admst:if test="$lhsddxprobe/branch/pnode[name!='GND' and (.=$pprobe/branch/pnode or .=$pprobe/branch/nnode)]">
+      <admst:if test="$lhsddxprobe/branch/pnode[name!='GND'
+                        and (.=$pprobe/branch/pnode or .=$pprobe/branch/nnode)]">
         <admst:variable name="ddxinsidederivate" select="yes"/>
       </admst:if>
-      <admst:if test="$lhsddxprobe/branch/nnode[name!='GND' and (.=$pprobe/branch/pnode or .=$pprobe/branch/nnode)]">
+      <admst:if test="$lhsddxprobe/branch/nnode[name!='GND'
+                        and (.=$pprobe/branch/pnode or .=$pprobe/branch/nnode)]">
         <admst:variable name="ddxinsidederivate" select="yes"/>
       </admst:if>
     </admst:for-each>
     <admst:if test="[$lhsinsource='no']">
+      <admst:text format="/// rhsf no lhssource  %(rhs/function)\n"/>
       <admst:apply-templates select="rhs/function[class='builtin']" match="function:precomputation"/>
     </admst:if>
-    <admst:text format="/// rhsf %(rhs/function)\n"/>
     <admst:if test="[$lhsinsource='yes']">
-      <admst:text format="// fixme: 7581 dprec %(rhs[not(nilled(function))])\n"/>
-      <admst:apply-templates select="rhs[not(nilled(function))]" match="function:derivate:precomputation"/>
+      <admst:text format="/// rhsf lhssource  %(rhs/function)\n"/>
+      <admst:text format="/* fixme: 7581 dprec %(rhs[not(nilled(function))]) -- %(.) */ \n"/>
+      <admst:apply-templates select="rhs[not(nilled(function))]"
+                             match="function:derivate:precomputation"/>
     </admst:if>
+    <admst:text format="// ... \n"/>
     <admst:choose>
       <admst:when test="rhs/tree/adms[datatypename='function']/..[name='ddx']">
         <admst:text format="// found ddx ... \n"/>
@@ -9671,6 +9718,9 @@ return $function;
   <admst:message test="[/dbg_xml='yes']" format="*(tr_eval)callfunction*\n"/>
   <admst:choose>
     <admst:when test="function[name='\$strobe']"></admst:when>
+    <admst:when test="function[name='\$simparam']">
+incomplete
+    </admst:when>
     <admst:when test="function[name='\$warning']"></admst:when>
     <admst:when test="function[name='\$error']"></admst:when>
     <admst:when test="function[name='\$finish']"></admst:when>
