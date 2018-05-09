@@ -1,0 +1,23 @@
+/* this file is part of gnucap-adms
+ *
+ * Author: (c) 2018 Felix Salfelder
+ * License: GPLv3+
+ */
+
+// limit
+
+`include "discipline.h"
+`include "constants.h"
+
+module limit(out, in);
+	inout out, in;
+	electrical out, in;
+
+	parameter real thresh = 0 from [0:inf);
+	parameter real gain = 1 from [0:inf);
+
+	analog begin
+      // incomplete: there is no cross event
+		V(out) <+ gain * max(thresh, V(in));
+   end
+endmodule

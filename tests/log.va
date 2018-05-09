@@ -1,0 +1,26 @@
+/* this file is part of gnucap-adms
+ *
+ * Author: (c) 2018 Felix Salfelder
+ * License: GPLv3+
+ */
+
+// log
+
+`include "discipline.h"
+`include "constants.h"
+
+module log_(out, in);
+	inout out, in;
+	electrical out, in;
+
+	parameter real lo = 1 from (-inf:inf);
+	parameter real hi = 100 from (-inf:inf);
+	parameter real gain = 1 from (-inf:inf);
+
+	analog begin
+      // check: does review work?
+		real g;
+		g = gain/log( (hi+lo)/lo );
+		V(out) <+ g * log(( V(in) + lo) / lo );
+   end
+endmodule

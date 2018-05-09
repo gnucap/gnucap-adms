@@ -1,0 +1,24 @@
+spice
+
+.load ./log.so
+
+.verilog
+paramset mylog log_;
+	.gain=2;
+	.hi=100;
+	.lo=1;
+endparamset
+
+mylog p1 (n1, nin);
+spice
+
+.nodelist
+.list
+V1 nin 0 pulse iv=0 pv=100 rise=10
+
+.print dc v(nodes) i(R*)
+.dc
+
+.print tran v(nodes)
+.tran 0 10 .1 basic trace=a
+.end

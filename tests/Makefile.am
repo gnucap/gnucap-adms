@@ -59,9 +59,12 @@ check_LTLIBRARIES = \
     diff.la \
     hyst1.la \
     meas.la \
+    limit.la \
+    log.la \
     mul.la \
     rc.la \
     rc_emb.la \
+    sin.la \
     motor.la \
     vbg.la ldo.la sensor.la callfunctions.la \
     op.la \
@@ -220,11 +223,14 @@ GC_TESTS = \
     ldo.gc \
     pid.gc \
     diff.gc \
+    limit.gc \
+    log.gc \
     meas.gc \
     mul.gc \
     cccs.gc \
     ccvs.gc \
     res2.gc \
+    sin.gc \
     vccs.gc \
     vcvs.gc
 # will only work with -uf

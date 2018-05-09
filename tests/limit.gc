@@ -1,0 +1,22 @@
+spice
+
+.load ./limit.so
+
+.verilog
+paramset mylimit limit;
+	.gain=1;
+endparamset
+
+mylimit p1 (nout, nin);
+spice
+
+.nodelist
+.list
+V1 nin 0 sin amplitude=1 frequency=2 zero peak
+
+.print dc v(nodes) i(R*)
+.dc
+
+.print tran v(nodes)
+.tran 0 1 1 basic trace=a
+.end
