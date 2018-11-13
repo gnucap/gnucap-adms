@@ -1,9 +1,0 @@
-spice
-
-
-.verilog
-branchvs #(0) v1(n1, n2);
-spice
-
-.dc dm
-.end
